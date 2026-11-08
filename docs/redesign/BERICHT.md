@@ -10,7 +10,7 @@ Daten, Anmeldung, Rollen, Speicherschlüssel, Links, Export-Formate und Berechnu
 
 | Prüfung | Vorher (Phase 0) | Nachher |
 |---|---|---|
-| Automatische Tests | 14 / 14 grün | **25 / 25 grün** (11 neue) |
+| Automatische Tests | 14 / 14 grün | **26 / 26 grün** (12 neue) |
 | Schutzbereich (`node tests/protected/fingerprint.mjs`) | Baseline angelegt | **unverändert** (Baseline seit Anlage nicht angefasst) |
 | Konsolenfehler in allen Abläufen | 0 | 0 |
 | WCAG 2 A/AA (axe-core) auf 6 Kernseiten | nicht gemessen | **0 Verstöße** |
@@ -100,6 +100,21 @@ Neu seit Phase 0:
   - PDF-Export der Beurteilung (echte PDF-Datei; Logo und Titel geprüft).
 
 Screenshots: `docs/screenshots/before/` (Ausgangslage) und `docs/screenshots/after/` (gleiche Seiten, gleiche Testdaten).
+
+
+## UX-Prüfliste (design-system.md §7.7)
+
+| Punkt | Stand |
+|---|---|
+| Genau eine gefüllte Primäraktion je Ansicht | ✓ Dashboard, Team-Übersicht, Formulare, Backup. Zusätzliche gefüllte Knöpfe wurden zu Sekundärknöpfen. |
+| Zeilenaktionen in einem `⋯`-Menü | teilweise: Die HR-Tabelle zeigt weiter 5 Icon-Knöpfe je Zeile, alle beschriftet. Ein Menü wäre der nächste Schritt. |
+| Vier Zustände (Lädt · Leer · Fehler · Inhalt) | ✓ Team-Übersicht mit Skelett und Leerzustand, Ladebildschirm, Fehlerseite (ErrorBoundary), Fehler als `role=alert` bzw. Toast |
+| Erklärtext als Tooltip/Empty State statt Dauerzeile | ✓ Guide aufklappbar, Hilfe-Banner entfernt. Kurze Tipps stehen nur noch direkt an Tabellen. |
+| Jede Handlung quittiert | ✓ Toast (Live-Region) bei Speichern, Anlegen, Fehlern |
+| `Esc` schließt, Fokus | ✓ Esc schließt Dialoge und den Assistenten (Test). Eine Fokusfalle in den alten Dialogen gibt es nicht. |
+| Icon-only mit `aria-label` | ✓ automatisch beschriftet; axe meldet 0 Verstöße |
+| Animation mit kürzerem Abgang, reduced-motion still | ✓ n.Org-Keyframes, globale reduced-motion-Regel |
+| Keine neue Hex-Farbe, Schriftgröße, Radius | ✓ einzige Ausnahme `#82241C` aus dem Kit; Deckblatt-Größen der PDF-Vorlage unverändert |
 
 ## Bewusste Abweichungen von n.Org
 

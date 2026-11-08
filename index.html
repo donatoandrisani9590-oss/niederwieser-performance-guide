@@ -803,10 +803,25 @@
               if (btn.title) { btn.setAttribute('aria-label', btn.title); return; }
               const svg = btn.querySelector('svg[class*="lucide-"]');
               const cls = svg ? [...svg.classList].find(c => c.startsWith('lucide-')) : '';
-              const key = cls && Object.keys(L).find(k => cls.includes(k));
+              const icon = cls ? cls.slice(7) : '';
+              const key = icon && Object.keys(L).find(k => icon === k || icon === k + '2' || icon.startsWith(k + '-'));
               if (key) btn.setAttribute('aria-label', L[key]);
             });
           };
+          // Esc schließt den obersten Dialog über dessen eigenen Schließen-/Abbrechen-Knopf (gleiche Logik wie ein Klick)
+          document.addEventListener('keydown', (ev) => {
+            if (ev.key !== 'Escape' || ev.defaultPrevented) return;
+            const overlays = [...document.querySelectorAll('div.fixed.inset-0')].filter(el => el.getClientRects().length > 0);
+            const top = overlays[overlays.length - 1];
+            if (!top) return;
+            const CLOSE = /^(×|✕|schließen|abbrechen|später|close|cancel|later|chiudi|annulla|più tardi)$/i;
+            const buttons = [...top.querySelectorAll('button')];
+            const btn = buttons.find(b => CLOSE.test((b.getAttribute('aria-label') || b.textContent || '').trim()))
+              || buttons.find(b => !(b.textContent || '').trim() && b.querySelector('svg.lucide-x'));
+            ev.preventDefault();
+            if (btn) btn.click();
+            else top.dispatchEvent(new MouseEvent('click', { bubbles: true })); // wie Klick auf den Hintergrund
+          });
           let timer = null;
           const start = () => {
             new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(fix, 120); }).observe(document.body, { childList: true, subtree: true });
@@ -14881,7 +14896,19 @@ Best regards`
               ),
               
               // === MITARBEITER-LISTE (Neu gestaltet) ===
-              teamMembers.length === 0 
+              teamMembers.length === 0 && firestoreLoading
+                ? React.createElement('div', { className: 'space-y-3', role: 'status', 'aria-label': getText(lang, 'Team wird geladen', 'Caricamento team', 'Loading team') },
+                    [0, 1, 2].map(i => React.createElement('div', { key: i, className: 'rounded-card border border-line bg-white p-5' },
+                      React.createElement('div', { className: 'flex items-center gap-3' },
+                        React.createElement('div', { className: 'h-10 w-10 animate-pulse rounded-lg bg-nw-grey-40/70' }),
+                        React.createElement('div', { className: 'flex-1 space-y-2' },
+                          React.createElement('div', { className: 'h-3 w-40 animate-pulse rounded-lg bg-nw-grey-40/70' }),
+                          React.createElement('div', { className: 'h-3 w-24 animate-pulse rounded-lg bg-nw-grey-40/70' }))),
+                      React.createElement('div', { className: 'mt-4 grid grid-cols-3 gap-3' },
+                        [0, 1, 2].map(j => React.createElement('div', { key: j, className: 'h-20 animate-pulse rounded-lg bg-nw-grey-40/70' })))
+                    ))
+                  )
+              : teamMembers.length === 0 
                 ? React.createElement('div', { className: 'bg-panel rounded-card p-12 text-center' },
                     React.createElement('div', { className: 'w-16 h-16 mx-auto mb-4 rounded-card bg-line flex items-center justify-center' },
                       React.createElement(Users, { size: 32, className: 'text-ink-60' })
@@ -15322,7 +15349,7 @@ Best regards`
                                   setActiveView('viewSelfAssessment');
                                   localStorage.setItem('nw_view_self_assessment', JSON.stringify(status.selfDigital));
                                 },
-                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent w-full'
+                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 w-full'
                               }, 
                                 React.createElement(Eye, { size: 14 }),
                                 lang === 'de' ? 'Digital ansehen' : lang === 'it' ? 'Visualizza digitale' : 'View Digital'
@@ -16885,13 +16912,13 @@ Best regards`
                     // Export Backup Button
                     React.createElement('button', {
                       onClick: exportFullBackup,
-                      className: 'px-6 py-3 bg-ok text-white rounded-lg font-medium hover:bg-ok flex items-center gap-2'
+                      className: nwBtnClass('primary', 'lg')
                     },
                       React.createElement(Download, { size: 20 }),
                       getText(lang, 'Vollständiges Backup erstellen', 'Crea backup completo', 'Create Full Backup')
                     ),
                     // Import/Restore Button
-                    React.createElement('label', { className: 'px-6 py-3 bg-warn text-white rounded-lg font-medium hover:bg-warn flex items-center gap-2 cursor-pointer' },
+                    React.createElement('label', { className: nwBtnClass('secondary', 'lg') + ' cursor-pointer' },
                       React.createElement(Upload, { size: 20 }),
                       getText(lang, 'Backup-Datei laden', 'Carica file backup', 'Load Backup File'),
                       React.createElement('input', {
@@ -20507,7 +20534,7 @@ Best regards`
                       link.download = 'HR_Dashboard_Export_' + new Date().toISOString().split('T')[0] + '.csv';
                       link.click();
                     },
-                    className: 'flex items-center gap-2 px-4 py-2 bg-ok hover:bg-ok text-white rounded-lg text-sm font-medium transition-colors'
+                    className: nwBtnClass('secondary', 'md')
                   },
                     React.createElement(Download, { size: 16 }),
                     getText(lang, 'Excel Export', 'Esporta Excel', 'Excel Export') + ' (' + filtered.length + ')'
@@ -20663,7 +20690,7 @@ Best regards`
                 React.createElement('button', {
                   onClick: recalculateAllGPS,
                   disabled: hrRecalculating,
-                  className: 'px-4 py-2 bg-nw-blue text-white rounded-xl hover:bg-nw-blue-90 disabled:opacity-50 text-sm font-medium flex items-center gap-2 transition-colors'
+                  className: nwBtnClass('secondary', 'md')
                 },
                   hrRecalculating 
                     ? React.createElement(Loader2, { size: 16, className: 'animate-spin' })

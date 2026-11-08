@@ -128,3 +128,12 @@ test('Dialoge: Hintergrund bleibt halbtransparent, Inhalt lesbar', async ({ page
   await shot(page, '17-dialog-termin');
   expect(consoleErrors).toEqual([]);
 });
+
+test('Dialoge: Esc schließt den Dialog', async ({ page }) => {
+  await seed();
+  await loginVia(page, USERS.managerA);
+  await page.getByText('Termin festlegen').first().click();
+  await expect(page.locator('div.fixed.inset-0').first()).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('div.fixed.inset-0')).toHaveCount(0);
+});

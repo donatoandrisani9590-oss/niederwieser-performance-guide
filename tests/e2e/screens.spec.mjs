@@ -111,7 +111,7 @@ test('Mitarbeiter-Link: Willkommen und Formular rendern ohne Fehler', async ({ p
   await openApp(page, `?accessCode=${ACCESS_CODE}`);
   await expect(page.getByText(/Clara/).first()).toBeVisible({ timeout: 15000 });
   await shot(page, '31-gast-willkommen');
-  const start = page.getByRole('button', { name: /Starten|Los geht|Beginnen|Start/ }).first();
+  const start = page.getByRole('button', { name: /starten|los geht|beginnen|start/i }).first();
   if (await start.isVisible().catch(() => false)) { await start.click(); await shot(page, '32-gast-formular'); }
   expect(consoleErrors).toEqual([]);
 });

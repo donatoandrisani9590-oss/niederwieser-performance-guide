@@ -9527,7 +9527,7 @@
 
 🟢 **Bolla verde** = Rating 4-5 (Top Performer)
 🔵 **Zona tratteggiata blu** = Solid Backbone (Rating 3)
-🟠 **Bolla arancione** = Rating 2 (Da sviluppare)
+🟠 **Bolla ambra** = Rating 2 (Da sviluppare)
 🔴 **Bolla rossa** = Rating 1 (Azione richiesta)
 
 💡 Dimensione bolla = GPS Score (più grande = più alto)`
@@ -16285,7 +16285,7 @@ Best regards`
               
               // STICKY HEADER
               React.createElement('div', { 
-                className: 'sticky top-0 z-40 bg-white rounded-xl shadow-float border-2 p-4 ' + (budgetStatus === 'over' ? 'border-danger' : budgetStatus === 'warning' ? 'border-warn' : 'border-nw-green/40'),
+                className: 'sticky top-0 z-40 rounded-card border bg-white p-4 shadow-float ' + (budgetStatus === 'over' ? 'border-danger' : budgetStatus === 'warning' ? 'border-warn' : 'border-line'),
                 style: budgetStatus === 'over' ? { animation: 'pulse 2s infinite' } : {}
               },
                 React.createElement('div', { className: 'flex items-center justify-between mb-3' },
@@ -16302,7 +16302,7 @@ Best regards`
                     React.createElement('input', { 
                       type: 'number', value: compBudget, 
                       onChange: (e) => { const newBudget = parseFloat(e.target.value) || 0; setCompBudget(newBudget); triggerAutoSave(newBudget, compEmployees); }, 
-                      className: 'w-28 px-2 py-1 text-right font-semibold border-2 rounded-lg ' + (budgetStatus === 'over' ? 'border-danger' : 'border-line'), 
+                      className: 'w-28 px-2 py-1 text-right font-semibold border rounded-lg focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none ' + (budgetStatus === 'over' ? 'border-danger' : 'border-line'), 
                       min: 0, step: 1000 
                     }),
                     React.createElement('span', { className: 'text-ink-60' }, '€')
@@ -16530,7 +16530,7 @@ Best regards`
                             canEdit ? React.createElement('input', { 
                               type: 'number', value: emp.increasePercent || '', placeholder: rec.label, 
                               onChange: (e) => updateEmployee(emp.id, 'increasePercent', parseFloat(e.target.value) || 0), 
-                              className: 'w-14 px-1 py-1 border-2 border-nw-green rounded-lg text-center text-xs font-semibold', 
+                              className: 'w-14 px-1 py-1 border border-nw-blue-25 bg-white rounded-lg text-center text-xs font-semibold focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none', 
                               title: getText(lang, 'Empfohlen: ', 'Raccomandato: ', 'Recommended: ') + rec.label, step: 0.5, min: 0, max: 30 
                             }) : React.createElement('span', { className: 'font-semibold text-xs' }, (emp.increasePercent || 0) + '%')
                           ),
@@ -16542,7 +16542,7 @@ Best regards`
                             canEdit ? React.createElement('input', { 
                               type: 'number', value: emp.newBonus !== undefined ? emp.newBonus : (emp.currentBonus || ''), 
                               onChange: (e) => updateEmployee(emp.id, 'newBonus', parseFloat(e.target.value) || 0), 
-                              className: 'w-20 px-2 py-1 border-2 border-nw-green rounded-lg text-right text-xs', 
+                              className: 'w-20 px-2 py-1 border border-nw-blue-25 bg-white rounded-lg text-right text-xs focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none', 
                               placeholder: String(emp.currentBonus || 0), min: 0 
                             }) : React.createElement('span', { className: 'text-xs' }, formatEUR(calc.newBonusAmount))
                           ),
@@ -23795,10 +23795,10 @@ const renderDashboard = () => {
                 ),
                 React.createElement('p', { className: 'text-ink-60 text-sm leading-relaxed' },
                   lang === 'de' 
-                    ? 'Für Mitarbeiter in Produktion & Logistik gilt ein angepasster Prozess: Die Selbstreflexion wird NICHT vorab digital versendet, sondern die Selbsteinschätzung wird direkt im Gespräch mündlich abgefragt. Achten Sie bei den folgenden Schritten auf die orangefarbenen Hinweise.'
+                    ? 'Für Mitarbeiter in Produktion & Logistik gilt ein angepasster Prozess: Die Selbstreflexion wird NICHT vorab digital versendet, sondern die Selbsteinschätzung wird direkt im Gespräch mündlich abgefragt. Achten Sie bei den folgenden Schritten auf die gelb hinterlegten Hinweise.'
                     : lang === 'it'
-                    ? 'Per i collaboratori in Produzione & Logistica si applica un processo adattato: L\'autovalutazione NON viene inviata digitalmente in anticipo, ma viene richiesta verbalmente durante il colloquio. Nei passi seguenti, prestare attenzione alle note in arancione.'
-                    : 'For employees in Production & Logistics, an adapted process applies: Self-reflection is NOT sent digitally in advance, but self-assessment is requested verbally during the meeting. In the following steps, pay attention to the orange notes.'
+                    ? 'Per i collaboratori in Produzione & Logistica si applica un processo adattato: L\'autovalutazione NON viene inviata digitalmente in anticipo, ma viene richiesta verbalmente durante il colloquio. Nei passi seguenti, prestare attenzione alle note evidenziate in giallo.'
+                    : 'For employees in Production & Logistics, an adapted process applies: Self-reflection is NOT sent digitally in advance, but self-assessment is requested verbally during the meeting. In the following steps, pay attention to the yellow-highlighted notes.'
                 )
               ),
               React.createElement('div', { className: 'space-y-4' },
@@ -23837,12 +23837,12 @@ const renderDashboard = () => {
                   )
                 ))
               ),
-              React.createElement('div', { className: 'bg-nw-blue rounded-xl p-5 text-white' },
-                React.createElement('h3', { className: 'font-semibold mb-3' }, '💡 Quick Tips'),
+              React.createElement('div', { className: 'rounded-card border border-line bg-white p-5 shadow-card' },
+                React.createElement('h3', { className: 'mb-3 text-base font-semibold text-nw-blue' }, '💡 Quick Tips'),
                 React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-2' },
                   tips.map((tip, i) =>
-                    React.createElement('div', { key: i, className: 'flex items-center gap-2 bg-white/20 rounded-lg px-3 py-2 text-sm' },
-                      React.createElement(CheckCircle2, { size: 14 }), tip
+                    React.createElement('div', { key: i, className: 'flex items-center gap-2 rounded-lg bg-nw-blue-06 px-3 py-2 text-sm text-ink' },
+                      React.createElement(CheckCircle2, { size: 14, className: 'shrink-0 text-ok', 'aria-hidden': true }), tip
                     )
                   )
                 )

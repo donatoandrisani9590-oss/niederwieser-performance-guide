@@ -905,7 +905,7 @@
                 icon && React.createElement(icon, { size: 22, 'aria-hidden': true, className: 'shrink-0' }), title),
               meta && React.createElement('div', { className: 'mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-ink-60' }, meta)
             ),
-            actions && React.createElement('div', { className: 'flex shrink-0 flex-wrap items-center justify-end gap-2 pt-0.5' }, actions)
+            actions && React.createElement('div', { className: 'flex max-w-full flex-wrap items-center justify-start gap-2 pt-0.5 sm:justify-end' }, actions)
           );
         const NwPane = ({ className, children, ...rest }) =>
           React.createElement('section', { className: 'rounded-card border border-line bg-white shadow-card ' + (className ? ' ' + className : ''), ...rest }, children);
@@ -978,6 +978,16 @@
               }
             }, children)
           );
+        };
+        // Jahr einer Unterlage (nur Anzeige/Filter, ändert keine Daten): gespeichertes Jahr,
+        // bei älteren Unterlagen ohne Jahresangabe das Jahr des Erstell-/Einreichdatums.
+        const nwDocYear = (a) => {
+          const p = String((a && a.period) || '').trim();
+          const m = p.match(/(\d{4})/);
+          if (m) return m[1];
+          const d = a && (a.submittedAt || a.createdAt || a.updatedAt);
+          const y = d ? new Date(d).getFullYear() : NaN;
+          return Number.isFinite(y) ? String(y) : String(new Date().getFullYear());
         };
         // Segmented: Pillen-Auswahl (z. B. Sprache, Ansicht)
         const NwSegmented = ({ options, value, onChange, size = 'md', ariaLabel, className }) =>
@@ -6279,6 +6289,10 @@
             
             // === LINKED SELF ASSESSMENT (Selbstreflexion des Mitarbeiters) ===
             const [linkedSelfAssessment, setLinkedSelfAssessment] = useState(null);
+            // Zielvereinbarung desselben Jahres (nur gelesen; Übernahme erst beim Speichern durch die Führungskraft)
+            const [linkedGoalAgreement, setLinkedGoalAgreement] = useState(null);
+            const [goalsFromAgreement, setGoalsFromAgreement] = useState(false);
+            const goalAutoAppliedRef = useRef(false);
             const [showSelfAssessmentHint, setShowSelfAssessmentHint] = useState(true);
             const [isRefreshingSelf, setIsRefreshingSelf] = useState(false);
             
@@ -6450,6 +6464,15 @@
                   return;
                 }
                 
+                // Zielvereinbarung desselben Jahres (digital, nicht PDF) für die Ziel-Übernahme merken
+                const reviewYear = nwDocYear({ period: initialContext?.period });
+                const goalDocs = docs
+                  .map(doc => ({ id: doc.id, ...doc.data() }))
+                  .filter(a => (a.type === 'goals' || a.type === 'goal') && !a.isPdfUpload && nwDocYear(a) === reviewYear
+                    && Array.isArray(a.goals) && a.goals.some(g => (g?.name || '').trim()))
+                  .sort((a, b) => String(b.updatedAt || b.createdAt || '').localeCompare(String(a.updatedAt || a.createdAt || '')));
+                setLinkedGoalAgreement(goalDocs[0] || null);
+                
                 // Filtere nach Selbstreflexionen (nicht PDF)
                 const selfDocs = docs
                   .map(doc => ({ id: doc.id, ...doc.data() }))
@@ -6526,6 +6549,45 @@
                 unsubscribers.forEach(unsub => unsub());
               };
             }, [db, initialContext?.employee?.id, initialContext?.employee?.email]);
+            
+            // === ZIELE AUS DER ZIELVEREINBARUNG (gleiches Jahr) ===
+            // Vereinbarte Ziele werden als Zeilen übernommen; zu bewerten bleibt die Erreichung.
+            // Bereits eingetragene Erreichung/Begründung bleibt bei gleichnamigen Zielen erhalten.
+            const agreementGoalsAsRows = (agreement) => {
+              const byName = new Map(goals.filter(g => (g.name || '').trim()).map(g => [g.name.trim().toLowerCase(), g]));
+              return (agreement?.goals || []).filter(g => (g?.name || '').trim()).map((g, idx) => {
+                const prev = byName.get(g.name.trim().toLowerCase());
+                return {
+                  id: Date.now() + idx,
+                  name: g.name,
+                  weight: Number(g.weight) || 0,
+                  achievement: prev ? (prev.achievement || 0) : 0,
+                  comment: prev ? (prev.comment || '') : ''
+                };
+              });
+            };
+            const applyAgreementGoals = () => {
+              if (!linkedGoalAgreement) return;
+              const hasExisting = goals.some(g => (g.name || '').trim());
+              if (hasExisting && !confirm(getText(lang,
+                'Die Ziele dieser Beurteilung werden durch die Ziele aus der Zielvereinbarung ersetzt. Bereits bewertete gleichnamige Ziele behalten ihre Erreichung. Fortfahren?',
+                'Gli obiettivi di questa valutazione saranno sostituiti da quelli dell\'accordo. Gli obiettivi con lo stesso nome mantengono il raggiungimento. Continuare?',
+                'The goals of this review will be replaced by the goals from the goal agreement. Goals with the same name keep their achievement. Continue?'))) return;
+              const rows = agreementGoalsAsRows(linkedGoalAgreement);
+              hasUnsavedChanges.current = true;
+              setGoals(rows);
+              setGoalsFromAgreement(true);
+              showToast(getText(lang, `${rows.length} Ziele aus der Zielvereinbarung übernommen`, `${rows.length} obiettivi importati dall'accordo`, `${rows.length} goals imported from the goal agreement`), 'success');
+            };
+            // Neue Beurteilung ohne Ziele: vereinbarte Ziele automatisch einsetzen (einmalig, nichts wird gespeichert)
+            useEffect(() => {
+              if (!linkedGoalAgreement || goalAutoAppliedRef.current) return;
+              if (initialContext?.existingData) return; // bestehende Entwürfe nie automatisch verändern
+              if (goals.some(g => (g.name || '').trim())) return;
+              goalAutoAppliedRef.current = true;
+              setGoals(agreementGoalsAsRows(linkedGoalAgreement));
+              setGoalsFromAgreement(true);
+            }, [linkedGoalAgreement]);
             
             // === TEAM SAVE HANDLER ===
             const handleSaveTeamAppraisal = async (status) => {
@@ -8411,8 +8473,8 @@
                             goals.length > 0 ? `Score: ${wasScore.toFixed(2)}` : (lang === 'de' ? 'Keine Ziele (nur WIE)' : lang === 'it' ? 'Nessun obiettivo (solo COME)' : 'No goals (HOW only)')
                         )
                     ),
-                    // NEUER HINWEIS: Keine Ziele vorhanden
-                    e('div', { className: "no-print mb-4 p-4 rounded-lg bg-warn-bg border border-warn/30" },
+                    // NEUER HINWEIS: Keine Ziele vorhanden (entfällt, wenn eine Zielvereinbarung des Jahres vorliegt)
+                    !linkedGoalAgreement && e('div', { className: "no-print mb-4 p-4 rounded-lg bg-warn-bg border border-warn/30" },
                         e('div', { className: "flex items-start gap-3" },
                             e(Info, { size: 20, className: "text-warn mt-0.5 flex-shrink-0" }),
                             e('div', null,
@@ -8426,6 +8488,28 @@
                                 )
                             )
                         )
+                    ),
+                    
+                    // === ZIELE AUS DER ZIELVEREINBARUNG DESSELBEN JAHRES ===
+                    linkedGoalAgreement && e('div', {
+                      className: `no-print mb-4 flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between ${goalsFromAgreement ? 'border-nw-green/40 bg-nw-green-15' : 'border-nw-blue-25 bg-nw-blue-06'}`,
+                      'data-no-print': 'true', 'data-testid': 'goal-agreement-banner'
+                    },
+                      e('div', { className: 'flex items-start gap-3' },
+                        e('div', { className: `flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ${goalsFromAgreement ? 'bg-ok' : 'bg-nw-blue'}` },
+                          e(goalsFromAgreement ? CheckCircle2 : Target, { size: 16, className: 'text-white' })),
+                        e('div', null,
+                          e('p', { className: 'text-sm font-semibold text-nw-blue' }, goalsFromAgreement
+                            ? getText(lang, `Ziele aus der Zielvereinbarung ${nwDocYear(linkedGoalAgreement)} übernommen`, `Obiettivi importati dall'accordo ${nwDocYear(linkedGoalAgreement)}`, `Goals taken from the ${nwDocYear(linkedGoalAgreement)} goal agreement`)
+                            : getText(lang, `Zielvereinbarung ${nwDocYear(linkedGoalAgreement)} vorhanden`, `Accordo obiettivi ${nwDocYear(linkedGoalAgreement)} disponibile`, `${nwDocYear(linkedGoalAgreement)} goal agreement available`)),
+                          e('p', { className: 'text-xs text-ink-60' }, goalsFromAgreement
+                            ? getText(lang, 'Bewerten Sie jetzt für jedes Ziel die Erreichung in Prozent. Gespeichert wird erst mit „Entwurf speichern“.', 'Valutate ora il raggiungimento di ogni obiettivo. Il salvataggio avviene solo con „Salva bozza“.', 'Now rate the achievement of each goal. Nothing is saved until you click “Save draft”.')
+                            : getText(lang, `${linkedGoalAgreement.goals.filter(g => (g?.name || '').trim()).length} vereinbarte Ziele können als Grundlage für diese Beurteilung übernommen werden.`, `${linkedGoalAgreement.goals.filter(g => (g?.name || '').trim()).length} obiettivi concordati possono essere importati.`, `${linkedGoalAgreement.goals.filter(g => (g?.name || '').trim()).length} agreed goals can be used as the basis for this review.`)))
+                      ),
+                      !goalsFromAgreement && e('button', {
+                        type: 'button', onClick: applyAgreementGoals,
+                        className: nwBtnClass('primary', 'sm') + ' flex-shrink-0'
+                      }, e(Copy, { size: 14 }), getText(lang, 'Ziele übernehmen', 'Importa obiettivi', 'Import goals'))
                     ),
                     
                     // === NEU: ZIEL-ÜBERNAHME AUS SELBSTREFLEXION (IDIOTENSICHER) ===
@@ -10443,7 +10527,9 @@ Goal 3: 20% weight, 80% achieved → 16 points
         function PerformanceApp() {
           const [activeView, setActiveView] = useState('dashboard');
           const [mobileNavOpen, setMobileNavOpen] = useState(false); // n.Org Shell: Menü auf schmalen Bildschirmen
-          const [teamViewMode, setTeamViewMode] = useState('cards'); // 'cards' oder 'list'
+          const [teamViewMode, setTeamViewMode] = useState('list'); // 'list' (Status-Matrix, Standard) oder 'cards'
+          const [teamYear, setTeamYear] = useState(String(new Date().getFullYear())); // Jahr der Team-Übersicht
+          const [showAddMember, setShowAddMember] = useState(false); // Formular „Mitarbeiter hinzufügen“
           const [goalsDashboardSelectedId, setGoalsDashboardSelectedId] = useState(null); // Ausgewählter Mitarbeiter im Goals Dashboard
           const [competencyArea, setCompetencyArea] = useState(null); // null = Auswahl, 'admin' oder 'production'
           const [detailAreaContext, setDetailAreaContext] = useState('admin'); // Für Detailansicht
@@ -14133,7 +14219,7 @@ Best regards`
               }
               
               try {
-                const currentPeriod = new Date().getFullYear().toString();
+                const currentPeriod = teamYear; // gewähltes Jahr der Team-Übersicht
                 const pdfType = `${docType}_pdf`; // 'self_pdf', 'review_pdf', 'goals_pdf'
                 
                 // Prüfe ob bereits eine PDF existiert
@@ -14298,7 +14384,7 @@ Best regards`
               if (!confirmed) return;
               
               try {
-                const currentPeriod = new Date().getFullYear().toString();
+                const currentPeriod = teamYear; // gewähltes Jahr der Team-Übersicht
                 const pdfType = `${docType}_pdf`;
                 
                 devLog(`🗑️ Lösche ${pdfType}`);
@@ -14786,8 +14872,38 @@ Best regards`
             };
             
             // Status berechnen
+            // Digitale Selbstreflexion ansehen (Karten und Matrix; Schlüssel und Inhalt wie bisher)
+            const openSelfAssessment = (selfDoc) => {
+              setActiveView('viewSelfAssessment');
+              localStorage.setItem('nw_view_self_assessment', JSON.stringify(selfDoc));
+            };
+            
+            // Entfernen: eigener Mitarbeiter = löschen, geteilter = nur aus der eigenen Ansicht (aus der Karte verschoben, unverändert)
+            const removeMemberFromView = async (member, isOwner) => { 
+                                if (isOwner) {
+                                  // Eigener MA: Komplett löschen
+                                  if (confirm(`"${member.name}" ${lang === 'de' ? 'entfernen' : 'remove'}?`)) {
+                                    deleteTeamMember(member.id);
+                                  }
+                                } else {
+                                  // Geteilter MA: Nur Verknüpfung entfernen (aus sharedWith Array)
+                                  if (confirm(`${lang === 'de' ? 'Geteilten Mitarbeiter aus Ihrer Ansicht entfernen' : 'Remove shared employee from your view'}?`)) {
+                                    try {
+                                      const currentShared = member.sharedWith || [];
+                                      const newShared = currentShared.filter(email => email.toLowerCase() !== user?.email?.toLowerCase());
+                                      await db.collection('teamMembers').doc(member.id).update({ sharedWith: newShared });
+                                      devLog('Geteilten MA entfernt');
+                                    } catch (err) {
+                                      console.error('Fehler:', err);
+                                      showToast(getText(lang, 'Ein Fehler ist aufgetreten', 'Si è verificato un errore', 'An error occurred'), 'error');
+                                    }
+                                  }
+                                }
+};
+            
             const getStatus = (member) => {
-              const appraisals = teamAppraisals.filter(a => a.employeeId === member.id);
+              // Nur Unterlagen des gewählten Jahres (vorher wurden alle Jahre vermischt)
+              const appraisals = teamAppraisals.filter(a => a.employeeId === member.id && nwDocYear(a) === teamYear);
               
               // Finde digitale Selbstreflexion (ohne PDF)
               const digitalSelf = appraisals.find(a => 
@@ -14892,21 +15008,37 @@ Best regards`
                 title: lang === 'de' ? 'Team-Übersicht' : lang === 'it' ? 'Panoramica team' : 'Team Overview',
                 meta: [
                   React.createElement('span', { key: 'n' }, `${teamMembers.length} ${lang === 'de' ? 'Mitarbeiter' : 'employees'}`),
+                  React.createElement('span', { key: 'y', className: 'text-ink-60', 'aria-hidden': true }, '·'),
+                  React.createElement('span', { key: 'yy' }, getText(lang, `Jahr ${teamYear}`, `Anno ${teamYear}`, `Year ${teamYear}`)),
                   teamMembers.length > 0 && React.createElement('span', { key: 'sep', className: 'text-ink-60', 'aria-hidden': true }, '·'),
                   teamMembers.length > 0 && React.createElement('span', { key: 'p', className: 'inline-flex items-center gap-2' },
                     React.createElement('span', { className: 'inline-block h-1.5 w-24 overflow-hidden rounded-full bg-nw-blue-12', role: 'progressbar', 'aria-label': getText(lang, 'Fortschritt des Teams', 'Avanzamento del team', 'Team progress'), 'aria-valuenow': progress, 'aria-valuemin': 0, 'aria-valuemax': 100 },
                       React.createElement('span', { className: 'block h-full rounded-full bg-nw-green transition-[width] duration-300', style: { width: `${progress}%` } })),
                     React.createElement('span', { className: 'tnum font-medium text-ink' }, `${progress}%`))
                 ],
-                actions: teamMembers.length > 0 && React.createElement(NwSegmented, {
-                  ariaLabel: getText(lang, 'Ansicht', 'Vista', 'View'),
-                  value: teamViewMode,
-                  onChange: (v) => setTeamViewMode(v),
-                  options: [
-                    { value: 'cards', label: lang === 'de' ? 'Karten' : 'Cards', icon: LayoutGrid },
-                    { value: 'list', label: lang === 'de' ? 'Liste' : 'List', icon: List }
-                  ]
-                })
+                actions: [
+                  // Jahr: Status, Kennzahlen und Aktionen gelten für das gewählte Jahr
+                  (() => {
+                    const thisYear = new Date().getFullYear();
+                    const ys = new Set([String(thisYear), String(thisYear + 1)]);
+                    teamAppraisals.forEach(ap => ys.add(nwDocYear(ap)));
+                    const years = [...ys].sort((x, y) => y.localeCompare(x));
+                    return years.length <= 5
+                      ? React.createElement('div', { key: 'year', className: 'inline-flex items-center gap-2' }, React.createElement('span', { className: 'eyebrow', 'aria-hidden': true }, getText(lang, 'Jahr', 'Anno', 'Year')), React.createElement(NwSegmented, { ariaLabel: getText(lang, 'Jahr', 'Anno', 'Year'), value: teamYear, onChange: (v) => setTeamYear(v), options: years.map(y => ({ value: y, label: y })) }))
+                      : React.createElement('select', { key: 'year', 'aria-label': getText(lang, 'Jahr', 'Anno', 'Year'), value: teamYear, onChange: (ev) => setTeamYear(ev.target.value), className: 'h-8 rounded-lg border border-line bg-white px-2 text-sm font-medium text-nw-blue focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none' }, years.map(y => React.createElement('option', { key: y, value: y }, y)));
+                  })(),
+                  teamMembers.length > 0 && React.createElement(NwSegmented, {
+                    key: 'view',
+                    ariaLabel: getText(lang, 'Ansicht', 'Vista', 'View'),
+                    value: teamViewMode,
+                    onChange: (v) => setTeamViewMode(v),
+                    options: [
+                      { value: 'list', label: lang === 'de' ? 'Liste' : 'List', icon: List },
+                      { value: 'cards', label: lang === 'de' ? 'Karten' : 'Cards', icon: LayoutGrid }
+                    ]
+                  }),
+                  teamMembers.length > 0 && React.createElement(NwButton, { key: 'add', variant: 'primary', icon: UserPlus, onClick: () => setShowAddMember(v => !v), 'aria-expanded': showAddMember }, getText(lang, 'Mitarbeiter hinzufügen', 'Aggiungi collaboratore', 'Add employee'))
+                ]
               }),
               
               // === KENNZAHLEN ===
@@ -14922,8 +15054,8 @@ Best regards`
               
               // (Hilfe-Hinweis entfällt: HR-Copilot steht dauerhaft in der Seitenleiste und unten rechts – n.Org: erklären, wenn gefragt)
               
-              // === MITARBEITER HINZUFÜGEN (Apple Style) ===
-              React.createElement('div', { className: 'rounded-card border border-line bg-white shadow-card' },
+              // === MITARBEITER HINZUFÜGEN (einklappbar; bei leerem Team immer sichtbar) ===
+              (showAddMember || teamMembers.length === 0) && React.createElement('div', { className: 'rounded-card border border-line bg-white shadow-card animate-pop-in' },
                 React.createElement('div', { className: 'flex min-h-[46px] items-center gap-2.5 border-b border-line-2 px-4 py-2' },
                   React.createElement(UserPlus, { size: 16, className: 'text-nw-blue', 'aria-hidden': true }),
                   React.createElement('h2', { className: 'text-base font-semibold text-nw-blue' }, 
@@ -14990,114 +15122,112 @@ Best regards`
                       lang === 'de' ? 'Fügen Sie oben Ihre Teammitglieder hinzu.' : 'Add your team members above.'
                     )
                   )
-                // === LISTENANSICHT (Kompakt mit deutlichem Status) ===
-                : teamViewMode === 'list' 
-                ? React.createElement('div', { className: 'bg-white rounded-card shadow-card border border-line overflow-hidden' },
-                    // Table Header
-                    React.createElement('div', { className: 'grid grid-cols-12 gap-2 px-4 py-3 bg-nw-grey-40 border-b border-line text-xs font-semibold text-ink-60 uppercase tracking-wide' },
-                      React.createElement('div', { className: 'col-span-3' }, lang === 'de' ? 'Mitarbeiter' : 'Employee'),
-                      React.createElement('div', { className: 'col-span-3 text-center' }, lang === 'de' ? 'Offene Schritte' : 'Open Steps'),
-                      React.createElement('div', { className: 'col-span-1 text-center' }, 'GPS'),
-                      React.createElement('div', { className: 'col-span-2 text-center' }, lang === 'de' ? 'Termin' : 'Meeting'),
-                      React.createElement('div', { className: 'col-span-3 text-center' }, lang === 'de' ? 'Aktionen' : 'Actions')
-                    ),
-                    // Table Body
-                    teamMembers.map((member, idx) => {
-                      const status = getStatus(member);
-                      const gps = status.review?.gpsScore;
-                      const scheduledDate = member.scheduledAt ? new Date(member.scheduledAt) : null;
-                      const meetingDone = member.meetingDone === true;
-                      const goalMeetingDone = member.goalMeetingDone === true;
-                      const isOverdue = scheduledDate && scheduledDate < now && !meetingDone;
-                      const selfLink = getSelfLink(member);
-                      
-                      // Offene Schritte berechnen
-                      const openSteps = [];
-                      if (!status.self) openSteps.push({ key: 'self', label: lang === 'de' ? 'Selbstreflexion' : 'Self-Reflection', color: 'bg-white border border-warn/30 text-warn border-warn/30' });
-                      if (!status.review) openSteps.push({ key: 'review', label: lang === 'de' ? 'Beurteilung' : 'Review', color: 'bg-nw-blue-12 text-nw-blue border-nw-blue-25' });
-                      if (!status.goals) openSteps.push({ key: 'goals', label: lang === 'de' ? 'Ziele' : 'Goals', color: 'bg-nw-blue-12 text-nw-blue border-nw-blue-25' });
-                      if (!meetingDone) openSteps.push({ key: 'meeting', label: lang === 'de' ? 'Gespräch' : 'Meeting', color: 'bg-nw-green-15 text-ok border-nw-green' });
-                      
-                      const isComplete = openSteps.length === 0;
-                      
-                      return React.createElement('div', { 
-                        key: member.id,
-                        className: `grid grid-cols-12 gap-2 px-4 py-3 items-center border-b border-line-2 hover:bg-panel transition-colors ${
-                          isComplete ? 'bg-nw-green-15' : isOverdue ? 'bg-danger-bg' : idx % 2 === 0 ? 'bg-white' : 'bg-panel/50'
-                        }`
-                      },
-                        // Name & Position
-                        React.createElement('div', { className: 'col-span-3 min-w-0' },
-                          React.createElement('div', { className: 'font-semibold text-ink truncate' }, member.name),
-                          React.createElement('div', { className: 'text-xs text-ink-60 truncate' }, member.position || '–')
+                // === STATUS-MATRIX: das ganze Team auf einen Blick (je gewähltem Jahr) ===
+                : teamViewMode === 'list'
+                ? (() => {
+                    const T = (de, it, en) => getText(lang, de, it, en);
+                    const locale = lang === 'it' ? 'it-IT' : lang === 'en' ? 'en-GB' : 'de-DE';
+                    const fmt = (iso) => { try { return new Date(iso).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: '2-digit' }); } catch (e) { return ''; } };
+                    const cell = (chip, action, hint) => React.createElement('div', { className: 'flex flex-col items-start gap-1.5' }, chip, action || null,
+                      hint ? React.createElement('span', { className: 'text-2xs text-ink-60' }, hint) : null);
+                    const act = (label, onClick, icon) => React.createElement(NwButton, { size: 'sm', icon, onClick }, label);
+                    const headers = [
+                      T('Mitarbeiter', 'Collaboratore', 'Employee'),
+                      T(`Selbstreflexion ${teamYear}`, `Autovalutazione ${teamYear}`, `Self-reflection ${teamYear}`),
+                      T(`Zielvereinbarung ${teamYear}`, `Obiettivi ${teamYear}`, `Goals ${teamYear}`),
+                      T(`Beurteilung ${teamYear}`, `Valutazione ${teamYear}`, `Review ${teamYear}`),
+                      T('Gespräch', 'Colloquio', 'Meeting'),
+                      ''
+                    ];
+                    return React.createElement('div', { className: 'relative overflow-x-auto rounded-card border border-line bg-white shadow-card' },
+                      React.createElement('table', { className: 'w-full min-w-[900px] text-sm' },
+                        React.createElement('thead', null,
+                          React.createElement('tr', { className: 'border-b border-line bg-panel text-left' },
+                            headers.map((h, i) => React.createElement('th', { key: i, scope: 'col', className: 'eyebrow px-4 py-2.5' + (i === 5 ? ' w-14' : '') }, h || React.createElement('span', { className: 'sr-only' }, T('Aktionen', 'Azioni', 'Actions'))))
+                          )
                         ),
-                        // Offene Schritte (DEUTLICH)
-                        React.createElement('div', { className: 'col-span-3 flex flex-wrap gap-1 justify-center' },
-                          isComplete 
-                            ? React.createElement('span', { className: 'text-xs font-semibold px-2 py-1 rounded-full bg-ok text-white' }, '✓ Komplett')
-                            : openSteps.map(step => 
-                                React.createElement('span', { 
-                                  key: step.key, 
-                                  className: `text-xs font-medium px-2 py-0.5 rounded-full border ${step.color}`
-                                }, step.label)
+                        React.createElement('tbody', null,
+                          teamMembers.map(member => {
+                            const status = getStatus(member);
+                            const isOwner = member._isOwner !== false;
+                            const selfLink = getSelfLink(member);
+                            const scheduled = member.scheduledAt ? new Date(member.scheduledAt) : null;
+                            const meetingDone = member.meetingDone === true;
+                            const goalMeetingDone = member.goalMeetingDone === true;
+                            const overdue = scheduled && scheduled < now && !meetingDone;
+                            const rv = status.reviewDigital;
+                            const gl = status.goalsDigital;
+                            const agreedGoals = gl ? (gl.goals || []).filter(g => g && g.name && String(g.name).trim()).length : 0;
+
+                            const selfCell = status.selfDigital
+                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: CheckCircle2 }, T('Eingegangen', 'Ricevuta', 'Received') + ((status.selfDigital.submittedAt || status.selfDigital.createdAt) ? ' · ' + fmt(status.selfDigital.submittedAt || status.selfDigital.createdAt) : '')),
+                                  act(T('Ansehen', 'Visualizza', 'View'), () => openSelfAssessment(status.selfDigital), Eye))
+                              : status.selfPdf
+                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: FileText }, T('Als PDF', 'Come PDF', 'As PDF')))
+                              : cell(React.createElement(NwChip, { tone: 'warn', icon: Clock }, T('Ausstehend', 'In attesa', 'Pending')),
+                                  selfLink ? act(T('Link senden', 'Invia link', 'Send link'), () => sendEmail(member), Send) : null);
+
+                            const goalsCell = gl
+                              ? cell(React.createElement(NwChip, { tone: gl.status === 'draft' ? 'warn' : 'ok', icon: gl.status === 'draft' ? Edit3 : CheckCircle2 },
+                                    gl.status === 'draft' ? T('Entwurf', 'Bozza', 'Draft') : `${T('Vereinbart', 'Concordati', 'Agreed')} · ${agreedGoals} ${T('Ziele', 'obiettivi', 'goals')}`),
+                                  act(gl.status === 'draft' ? T('Fortsetzen', 'Continua', 'Continue') : T('Öffnen', 'Apri', 'Open'), () => startTeamGoalSetting(member.id, teamYear, gl), Target))
+                              : status.goalsPdf
+                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: FileText }, T('Als PDF', 'Come PDF', 'As PDF')))
+                              : cell(React.createElement(NwChip, { tone: 'neutral' }, T('Offen', 'Aperta', 'Open')),
+                                  act(T('Erstellen', 'Crea', 'Create'), () => startTeamGoalSetting(member.id, teamYear, null), Target));
+
+                            const reviewCell = rv
+                              ? cell(React.createElement(NwChip, { tone: rv.status === 'draft' ? 'warn' : 'ok', icon: rv.status === 'draft' ? Edit3 : CheckCircle2 },
+                                    rv.status === 'draft' ? T('Entwurf', 'Bozza', 'Draft') : T('Abgeschlossen', 'Completata', 'Completed') + (rv.gpsScore ? ' · GPS ' + Number(rv.gpsScore).toFixed(1) : '')),
+                                  act(rv.status === 'draft' ? T('Fortsetzen', 'Continua', 'Continue') : T('Öffnen', 'Apri', 'Open'), () => startTeamAppraisal(member.id, teamYear, rv), ClipboardList))
+                              : status.reviewPdf
+                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: FileText }, T('Als PDF', 'Come PDF', 'As PDF')))
+                              : cell(React.createElement(NwChip, { tone: 'neutral' }, T('Offen', 'Aperta', 'Open')),
+                                  act(T('Starten', 'Avvia', 'Start'), () => startTeamAppraisal(member.id, teamYear, null), ClipboardList),
+                                  agreedGoals > 0 ? T(`${agreedGoals} Ziele aus der Zielvereinbarung werden übernommen`, `${agreedGoals} obiettivi verranno ripresi`, `${agreedGoals} agreed goals will be carried over`) : null);
+
+                            const meetingCell = meetingDone
+                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: CheckCircle2 }, T('Geführt', 'Svolto', 'Held') + (member.meetingDoneAt ? ' · ' + fmt(member.meetingDoneAt) : '')))
+                              : scheduled
+                              ? cell(React.createElement(NwChip, { tone: overdue ? 'danger' : 'brand', icon: Calendar }, (overdue ? T('Überfällig', 'Scaduto', 'Overdue') + ' · ' : '') + fmt(member.scheduledAt)),
+                                  act(T('Ändern', 'Modifica', 'Change'), () => scheduleDate(member), Calendar))
+                              : cell(React.createElement(NwChip, { tone: 'neutral' }, T('Kein Termin', 'Nessun appuntamento', 'No date')),
+                                  act(T('Termin', 'Appuntamento', 'Schedule'), () => scheduleDate(member), Calendar));
+
+                            return React.createElement('tr', { key: member.id, className: 'border-b border-line-2 align-top last:border-0 hover:bg-panel/60' },
+                              React.createElement('td', { className: 'px-4 py-3' },
+                                React.createElement('div', { className: 'flex items-center gap-3' },
+                                  React.createElement('div', { className: 'grid h-9 w-9 shrink-0 place-items-center rounded-full bg-nw-blue-06 text-xs font-semibold text-nw-blue', 'aria-hidden': true },
+                                    member.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()),
+                                  React.createElement('div', { className: 'min-w-0' },
+                                    React.createElement('div', { className: 'truncate font-semibold text-ink' }, member.name),
+                                    React.createElement('div', { className: 'truncate text-xs text-ink-60' }, member.position || '–'),
+                                    !isOwner && React.createElement(NwTag, { tone: 'brand', className: 'mt-1' }, T('Geteilt', 'Condiviso', 'Shared'))
+                                  )
+                                )
+                              ),
+                              React.createElement('td', { className: 'px-4 py-3' }, selfCell),
+                              React.createElement('td', { className: 'px-4 py-3' }, goalsCell),
+                              React.createElement('td', { className: 'px-4 py-3' }, reviewCell),
+                              React.createElement('td', { className: 'px-4 py-3' }, meetingCell),
+                              React.createElement('td', { className: 'px-2 py-3 text-right' },
+                                React.createElement(NwRowMenu, { label: T(`Weitere Aktionen für ${member.name}`, `Altre azioni per ${member.name}`, `More actions for ${member.name}`) },
+                                  selfLink && React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => copyLink(member) }, React.createElement(Copy, { size: 14, 'aria-hidden': true }), T('Selbstreflexion-Link kopieren', 'Copia link autovalutazione', 'Copy self-reflection link')),
+                                  selfLink && React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => sendEmail(member) }, React.createElement(Mail, { size: 14, 'aria-hidden': true }), T('Link per E-Mail senden', 'Invia link via e-mail', 'Send link via email')),
+                                  React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => scheduleDate(member) }, React.createElement(Calendar, { size: 14, 'aria-hidden': true }), T('Termin festlegen', 'Fissa appuntamento', 'Set date')),
+                                  React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => toggleMeetingDone(member) }, React.createElement(CheckCircle2, { size: 14, 'aria-hidden': true }), meetingDone ? T('Beurteilungsgespräch: zurücksetzen', 'Colloquio valutazione: annulla', 'Review meeting: reset') : T('Beurteilungsgespräch geführt', 'Colloquio valutazione svolto', 'Review meeting held')),
+                                  React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => toggleGoalMeetingDone(member) }, React.createElement(Target, { size: 14, 'aria-hidden': true }), goalMeetingDone ? T('Zielgespräch: zurücksetzen', 'Colloquio obiettivi: annulla', 'Goal meeting: reset') : T('Zielgespräch geführt', 'Colloquio obiettivi svolto', 'Goal meeting held')),
+                                  isOwner && React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => shareMember(member) }, React.createElement(Share2, { size: 14, 'aria-hidden': true }), T('Mit Führungskraft teilen', 'Condividi con responsabile', 'Share with manager')),
+                                  React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => { setTeamViewMode('cards'); setTimeout(() => { const el = document.getElementById('member-card-' + member.id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); } }, React.createElement(LayoutGrid, { size: 14, 'aria-hidden': true }), T('Details & PDF-Upload', 'Dettagli e caricamento PDF', 'Details & PDF upload')),
+                                  React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM + ' text-danger hover:bg-danger-bg', onClick: () => removeMemberFromView(member, isOwner) }, React.createElement(Trash2, { size: 14, 'aria-hidden': true }), isOwner ? T('Entfernen', 'Rimuovi', 'Remove') : T('Aus meiner Ansicht entfernen', 'Rimuovi dalla mia vista', 'Remove from my view'))
+                                )
                               )
-                        ),
-                        // GPS
-                        React.createElement('div', { className: 'col-span-1 text-center' },
-                          gps 
-                            ? React.createElement('span', { 
-                                className: `text-xs font-semibold px-2 py-1 rounded-full ${gps >= 3 ? 'bg-nw-green-15 text-ok' : 'bg-white border border-warn/30 text-warn'}`
-                              }, gps.toFixed(1))
-                            : React.createElement('span', { className: 'text-xs text-ink-60' }, '–')
-                        ),
-                        // Termin
-                        React.createElement('div', { className: 'col-span-2 text-center text-xs' },
-                          scheduledDate 
-                            ? React.createElement('span', { 
-                                className: `font-medium px-2 py-1 rounded-lg ${
-                                  meetingDone ? 'bg-nw-green-15 text-ok' :
-                                  isOverdue ? 'bg-danger-bg text-danger font-semibold' : 
-                                  'text-ink-60'
-                                }`
-                              }, scheduledDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }))
-                            : React.createElement('span', { className: 'text-ink-60' }, '–')
-                        ),
-                        // Aktionen (kompakt)
-                        React.createElement('div', { className: 'col-span-3 flex gap-1 justify-center flex-wrap' },
-                          // Link senden
-                          !status.self && React.createElement('button', {
-                            onClick: () => { setShareModalMember(member); setShareModalOpen(true); setShareModalStep(1); setShareModalEmail(''); },
-                            className: 'px-2 py-1 text-xs bg-ok text-white rounded-lg hover:bg-ok',
-                            title: lang === 'de' ? 'Link senden' : 'Send link'
-                          }, '📧'),
-                          // Beurteilung
-                          React.createElement('button', {
-                            onClick: () => openAppraisal(member),
-                            className: 'px-2 py-1 text-xs bg-nw-blue text-white rounded-lg hover:bg-nw-blue',
-                            title: lang === 'de' ? 'Beurteilung' : 'Review'
-                          }, '📝'),
-                          // Ziele
-                          React.createElement('button', {
-                            onClick: () => openGoals(member),
-                            className: 'px-2 py-1 text-xs bg-nw-blue text-white rounded-lg hover:bg-nw-blue',
-                            title: lang === 'de' ? 'Ziele' : 'Goals'
-                          }, '🎯'),
-                          // Termin
-                          React.createElement('button', {
-                            onClick: () => { setScheduleModalOpen(true); setScheduleModalMember(member); setScheduleModalDate(member.scheduledAt?.split('T')[0] || ''); },
-                            className: 'px-2 py-1 text-xs bg-warn text-white rounded-lg hover:bg-warn',
-                            title: lang === 'de' ? 'Termin' : 'Schedule'
-                          }, '📅'),
-                          // Löschen
-                          React.createElement('button', {
-                            onClick: () => { setConfirmDelete(member); },
-                            className: 'px-2 py-1 text-xs bg-danger-bg text-danger rounded-lg hover:bg-danger-bg',
-                            title: lang === 'de' ? 'Löschen' : 'Delete'
-                          }, '🗑️')
+                            );
+                          })
                         )
-                      );
-                    })
-                  )
+                      )
+                    );
+                  })()
 
                 // === KARTENANSICHT (Detail) ===
                 : React.createElement('div', { className: 'space-y-4' },
@@ -15118,6 +15248,7 @@ Best regards`
                       
                       return React.createElement('div', { 
                         key: member.id,
+                        id: 'member-card-' + member.id,
                         className: `bg-white rounded-card shadow-card border-2 overflow-hidden transition-all hover:shadow-float ${
                           done === 3 ? 'border-nw-green' : 
                           isOverdue ? 'border-danger/30' :
@@ -15223,27 +15354,7 @@ Best regards`
                             }, React.createElement(Share2, { size: 14 })),
                             // Entfernen-Button: Für eigene MA = Löschen, für geteilte MA = Verknüpfung entfernen
                             React.createElement('button', {
-                              onClick: async () => { 
-                                if (isOwner) {
-                                  // Eigener MA: Komplett löschen
-                                  if (confirm(`"${member.name}" ${lang === 'de' ? 'entfernen' : 'remove'}?`)) {
-                                    deleteTeamMember(member.id);
-                                  }
-                                } else {
-                                  // Geteilter MA: Nur Verknüpfung entfernen (aus sharedWith Array)
-                                  if (confirm(`${lang === 'de' ? 'Geteilten Mitarbeiter aus Ihrer Ansicht entfernen' : 'Remove shared employee from your view'}?`)) {
-                                    try {
-                                      const currentShared = member.sharedWith || [];
-                                      const newShared = currentShared.filter(email => email.toLowerCase() !== user?.email?.toLowerCase());
-                                      await db.collection('teamMembers').doc(member.id).update({ sharedWith: newShared });
-                                      devLog('Geteilten MA entfernt');
-                                    } catch (err) {
-                                      console.error('Fehler:', err);
-                                      showToast(getText(lang, 'Ein Fehler ist aufgetreten', 'Si è verificato un errore', 'An error occurred'), 'error');
-                                    }
-                                  }
-                                }
-                              },
+                              onClick: () => removeMemberFromView(member, isOwner),
                               className: 'w-8 h-8 rounded-lg flex items-center justify-center bg-nw-grey-40 text-ink-60 hover:bg-danger-bg hover:text-danger transition-all',
                               title: isOwner 
                                 ? (lang === 'de' ? 'Entfernen' : 'Remove')
@@ -15416,8 +15527,7 @@ Best regards`
                               status.selfDigital && React.createElement('button', {
                                 onClick: (e) => {
                                   e.stopPropagation();
-                                  setActiveView('viewSelfAssessment');
-                                  localStorage.setItem('nw_view_self_assessment', JSON.stringify(status.selfDigital));
+                                  openSelfAssessment(status.selfDigital);
                                 },
                                 className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 w-full'
                               }, 
@@ -15555,7 +15665,7 @@ Best regards`
                           },
                             // Klickbarer Header-Bereich für Navigation
                             React.createElement('div', { 
-                              onClick: () => startTeamAppraisal(member.id, new Date().getFullYear().toString(), status.review || null),
+                              onClick: () => startTeamAppraisal(member.id, teamYear, status.review || null),
                               className: 'cursor-pointer'
                             },
                               React.createElement('div', { className: 'flex items-center gap-3 mb-2' },
@@ -15653,7 +15763,7 @@ Best regards`
                           },
                             // Klickbarer Header-Bereich für Navigation
                             React.createElement('div', { 
-                              onClick: () => startTeamGoalSetting(member.id, new Date().getFullYear().toString(), status.goals || null),
+                              onClick: () => startTeamGoalSetting(member.id, teamYear, status.goals || null),
                               className: 'cursor-pointer'
                             },
                               React.createElement('div', { className: 'flex items-center gap-3 mb-2' },
@@ -15842,8 +15952,8 @@ Best regards`
                 )
               ),
               
-              // === LEGENDE ===
-              teamMembers.length > 0 && React.createElement('div', { className: 'flex flex-wrap gap-4 text-xs text-ink-60 justify-center' },
+              // === LEGENDE (nur Kartenansicht; die Matrix beschriftet ihre Spalten selbst) ===
+              teamMembers.length > 0 && teamViewMode === 'cards' && React.createElement('div', { className: 'flex flex-wrap gap-4 text-xs text-ink-60 justify-center' },
                 React.createElement('span', { className: 'flex items-center gap-1' },
                   React.createElement('span', { className: 'w-3 h-3 rounded-lg bg-nw-green-15 border border-nw-green' }), getText(lang, 'Selbstreflexion', 'Autovalutazione', 'Self-Reflection')),
                 React.createElement('span', { className: 'flex items-center gap-1' },
@@ -23269,10 +23379,12 @@ const renderDashboard = () => {
                 const loggedIn = !!(user && !user.isAnonymous);
                 const isReview = (a) => a.type === 'review' || !a.type;
                 const isSelf = (a) => a.isSelfAssessment || String(a.type || '').startsWith('self');
-                const reviewsDone = teamMembers.filter(m => teamAppraisals.some(a => a.employeeId === m.id && isReview(a) && a.status === 'completed')).length;
+                const yr = String(new Date().getFullYear()); // Kennzahlen für das laufende Jahr (wie die Team-Übersicht)
+                const inYear = (a) => nwDocYear(a) === yr;
+                const reviewsDone = teamMembers.filter(m => teamAppraisals.some(a => a.employeeId === m.id && inYear(a) && isReview(a) && a.status === 'completed')).length;
                 const reviewsOpen = Math.max(0, teamMembers.length - reviewsDone);
-                const selfMissing = teamMembers.filter(m => !teamAppraisals.some(a => a.employeeId === m.id && isSelf(a))).length;
-                const goTeam = () => { setActiveView('teamoverview'); setActiveScore(3); };
+                const selfMissing = teamMembers.filter(m => !teamAppraisals.some(a => a.employeeId === m.id && inYear(a) && isSelf(a))).length;
+                const goTeam = () => { setTeamYear(yr); setActiveView('teamoverview'); setActiveScore(3); };
                 const firstName = loggedIn ? (getUserDisplayName(user) || '').split(' ')[0] : '';
                 let step;
                 if (!loggedIn) {
@@ -23305,7 +23417,7 @@ const renderDashboard = () => {
                   React.createElement(NwPageHeader, {
                     eyebrow: t.title,
                     title: loggedIn && firstName ? getText(lang, `Guten Tag, ${firstName}`, `Buongiorno, ${firstName}`, `Hello, ${firstName}`) : t.dashboard,
-                    meta: loggedIn && teamMembers.length > 0 ? React.createElement('span', null, `${teamMembers.length} ${getText(lang, 'Mitarbeiter im Team', 'collaboratori nel team', 'employees in your team')}`) : null
+                    meta: loggedIn && teamMembers.length > 0 ? React.createElement('span', null, `${teamMembers.length} ${getText(lang, 'Mitarbeiter im Team', 'collaboratori nel team', 'employees in your team')} · ${getText(lang, 'Jahr', 'Anno', 'Year')} ${yr}`) : null
                   }),
                   React.createElement(NwPane, { className: 'p-5' },
                     React.createElement('div', { className: 'flex flex-wrap items-center gap-4' },
@@ -28734,18 +28846,12 @@ const renderDashboard = () => {
                     React.createElement('div', { className: 'space-y-0.5' }, ...items)
                   );
                   return React.createElement('nav', { className: "flex-1 overflow-y-auto px-3 pb-3", 'aria-label': getText(lang, 'Hauptnavigation', 'Navigazione principale', 'Main navigation') },
-                    section(getText(lang, 'Menü', 'Menu', 'Menu'),
-                      navItem(t.dashboard, LayoutGrid, activeView === 'dashboard', () => { setActiveView('dashboard'); setActiveScore(3); }),
-                      navItem(lang === 'de' ? 'Anleitung' : lang === 'it' ? 'Guida' : 'Guide', BookOpen, activeView === 'guide', () => { setActiveView('guide'); }),
-                      navItem(t.competencies, Award, activeView === 'list' || activeView === 'detail', () => { setActiveView('list'); setActiveScore(3); }),
-                      navItem(t.gpsExplainer, Calculator, activeView === 'gpsexplainer', () => { setActiveView('gpsexplainer'); setActiveScore(3); })
-                    ),
-                    // === SECTION: FÜR MICH ===
-                    section(getText(lang, 'Für mich', 'Per me', 'For me'),
-                      navItem(getText(lang, 'Meine Selbstreflexion', 'La mia autovalutazione', 'My Self-Reflection'), User, activeView === 'mySelfReflection', () => { setActiveView('mySelfReflection'); })
+                    // Arbeitsbereich zuerst: Dashboard und das eigene Team (tägliche Arbeit der Führungskraft)
+                    section(getText(lang, 'Arbeitsbereich', 'Area di lavoro', 'Workspace'),
+                      navItem(t.dashboard, LayoutGrid, activeView === 'dashboard', () => { setActiveView('dashboard'); setActiveScore(3); })
                     ),
                     // === SECTION: TEAM ===
-                    section(getText(lang, 'Team', 'Team', 'Team'),
+                    section(getText(lang, 'Mein Team', 'Il mio team', 'My team'),
                       navItem(getText(lang, 'Team-Übersicht', 'Panoramica team', 'Team Overview'), Users, activeView === 'teamoverview', () => { setActiveView('teamoverview'); setActiveScore(3); }),
                       // Team-Kalibrierung (nur wenn Team vorhanden)
                       teamMembers.length > 0 && navItem(getText(lang, 'Kalibrierung', 'Calibrazione', 'Calibration'), Scale, activeView === 'teamcalibration', () => { setActiveView('teamcalibration'); setActiveScore(3); })
@@ -28761,6 +28867,16 @@ const renderDashboard = () => {
                       (isHRAdmin || salaryReviewUserRole?.accessSalary) && navItem('Salary Review', TrendingUp, activeView === 'salaryreview', () => { setActiveView('salaryreview'); }),
                       // Goals Dashboard Button - nur wenn accessGoals true
                       (isHRAdmin || salaryReviewUserRole?.accessGoals) && navItem(lang === 'de' ? 'Ziel-Dashboard' : lang === 'it' ? 'Dashboard Obiettivi' : 'Goals Dashboard', Target, activeView === 'goalsdashboard', () => { setActiveView('goalsdashboard'); })
+                    ),
+                    // === SECTION: FÜR MICH ===
+                    section(getText(lang, 'Für mich', 'Per me', 'For me'),
+                      navItem(getText(lang, 'Meine Selbstreflexion', 'La mia autovalutazione', 'My Self-Reflection'), User, activeView === 'mySelfReflection', () => { setActiveView('mySelfReflection'); })
+                    ),
+                    // Wissen & Hilfe: Nachschlagen statt Arbeiten
+                    section(getText(lang, 'Wissen & Hilfe', 'Conoscenze e aiuto', 'Knowledge & help'),
+                      navItem(lang === 'de' ? 'Anleitung' : lang === 'it' ? 'Guida' : 'Guide', BookOpen, activeView === 'guide', () => { setActiveView('guide'); }),
+                      navItem(t.competencies, Award, activeView === 'list' || activeView === 'detail', () => { setActiveView('list'); setActiveScore(3); }),
+                      navItem(t.gpsExplainer, Calculator, activeView === 'gpsexplainer', () => { setActiveView('gpsexplainer'); setActiveScore(3); })
                     )
                   );
                 })(),

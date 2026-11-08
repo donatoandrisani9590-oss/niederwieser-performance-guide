@@ -11031,14 +11031,14 @@ Goal 3: 20% weight, 80% achieved → 16 points
                       }
                     },
                     className: 'px-2 py-1 bg-nw-blue hover:bg-nw-blue-90 rounded-lg text-xs'
-                  }, '🔄 Test Firebase'),
+                  }, 'Test Firebase'),
                   React.createElement('button', {
                     onClick: () => {
                       setDebugLogs([]);
                       addDebugLog('info', 'Logs gelöscht');
                     },
                     className: 'px-2 py-1 bg-ink hover:bg-ink-60 rounded-lg text-xs'
-                  }, '🗑️ Logs löschen'),
+                  }, 'Logs löschen'),
                   React.createElement('button', {
                     onClick: () => {
                       const debugInfo = {
@@ -11051,7 +11051,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
                       addDebugLog('success', 'Debug-Info kopiert!');
                     },
                     className: 'px-2 py-1 bg-ink hover:bg-ink-60 rounded-lg text-xs'
-                  }, '📋 Kopieren')
+                  }, 'Kopieren')
                 )
               )
             );
@@ -16902,7 +16902,7 @@ Best regards`
                       className: 'px-6 py-3 bg-ok text-white rounded-lg font-medium hover:bg-ok flex items-center gap-2'
                     },
                       React.createElement(Download, { size: 20 }),
-                      getText(lang, '📦 Vollständiges Backup erstellen', '📦 Crea backup completo', '📦 Create Full Backup')
+                      getText(lang, 'Vollständiges Backup erstellen', 'Crea backup completo', 'Create Full Backup')
                     ),
                     // Import/Restore Button
                     React.createElement('label', { className: 'px-6 py-3 bg-warn text-white rounded-lg font-medium hover:bg-warn flex items-center gap-2 cursor-pointer' },
@@ -17027,7 +17027,7 @@ Best regards`
                       onClick: initializeVersionHistoryForAll,
                       className: 'px-6 py-3 bg-nw-blue text-white rounded-lg font-medium hover:bg-nw-blue-90 flex items-center gap-2'
                     },
-                      '📚 Versionshistorie für alle initialisieren'
+                      'Versionshistorie für alle initialisieren'
                     ),
                     React.createElement('div', { className: 'text-sm text-nw-blue' },
                       '(' + allCompanyAppraisals.filter(a => !a.versionHistory || a.versionHistory.length === 0).length + ' von ' + allCompanyAppraisals.length + ' ohne Versionshistorie)'
@@ -17062,7 +17062,7 @@ Best regards`
                       onClick: repairManagerIds,
                       className: 'px-6 py-3 bg-ok text-white rounded-lg font-medium hover:bg-ok flex items-center gap-2'
                     },
-                      '📊 Analyse & Bericht anzeigen'
+                      'Analyse & Bericht anzeigen'
                     ),
                     React.createElement('div', { className: 'text-sm text-ok' },
                       '(' + allCompanyAppraisals.filter(a => {
@@ -17131,7 +17131,7 @@ Best regards`
                       },
                       className: 'px-6 py-3 bg-nw-blue text-white rounded-lg font-medium hover:bg-nw-blue-90 flex items-center gap-2'
                     },
-                      '🔍 Legacy "appraisals" Collection durchsuchen'
+                      'Legacy "appraisals" Collection durchsuchen'
                     )
                   )
                 )

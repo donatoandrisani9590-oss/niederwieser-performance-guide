@@ -114,7 +114,7 @@ Screenshots: `docs/screenshots/before/` (Ausgangslage) und `docs/screenshots/aft
 3. **Pull Request #1** benennt `index.html` in `Index.html` um. Das würde Mitarbeiter-Links und Lesezeichen brechen.
 4. **Tailwind läuft im Browser (Play CDN).** Das ist so gewollt (kein Build), aber langsamer als vorkompiliertes CSS.
    Ein Build-Schritt wäre eine eigene Entscheidung.
-5. **Emojis im Fließtext und in Knöpfen** (z. B. „💾 Als Entwurf“) sind noch da; aus Überschriften sind sie entfernt.
+5. **Emojis**: aus Überschriften (41) und Knopftexten (7) entfernt. Im Fließtext und in Hinweisen stehen sie noch, weil sie dort Teil des Inhalts sind.
 6. **Live-Abnahme mit echten Konten** fehlt noch. Deine Regel lautet, nie gegen Produktivdaten zu arbeiten. Deshalb ist alles nur
    gegen den Emulator mit Testdaten geprüft. Empfehlung: vor dem Zusammenführen eine Testperson mit eigenem Konto
    das Erst-Login durchspielen lassen und die Checkliste in `NOTFALL-BACKUP.md` §3 abarbeiten.

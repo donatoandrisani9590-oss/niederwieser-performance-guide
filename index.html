@@ -8564,16 +8564,12 @@
                             
                             // Erfolgsmeldung
                             const successMsg = lang === 'de' 
-                              ? `✅ ${selfGoals.length} Ziele aus Selbstreflexion übernommen`
+                              ? `${selfGoals.length} Ziele aus Selbstreflexion übernommen`
                               : lang === 'it'
-                              ? `✅ ${selfGoals.length} obiettivi importati dall'autovalutazione`
-                              : `✅ ${selfGoals.length} goals imported from self-reflection`;
+                              ? `${selfGoals.length} obiettivi importati dall'autovalutazione`
+                              : `${selfGoals.length} goals imported from self-reflection`;
                             
-                            const toast = document.createElement('div');
-                            toast.textContent = successMsg;
-                            toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#243186;color:white;padding:12px 24px;border-radius:8px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(36, 49, 134,0.4);';
-                            document.body.appendChild(toast);
-                            setTimeout(() => toast.remove(), 2500);
+                            showToast(successMsg, 'success'); // Kit-Toast (Live-Region) statt Ad-hoc-Element
                             
                             devLog('✅ Ziele aus Selbstreflexion ERSETZT:', selfGoals.length);
                           }
@@ -12987,13 +12983,8 @@ Goal 3: 20% weight, 80% achieved → 16 points
                 lastModifiedAt: new Date().toISOString()
               });
               
-              devLog('✅ Salary Review Daten gespeichert:', sanitizedEmployees?.length || 0, 'Mitarbeiter');
-              // Toast-Nachricht
-              const toast = document.createElement('div');
-              toast.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #2F7A48; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 500; z-index: 9999; animation: slideUp 0.3s ease-out;';
-              toast.textContent = '✅ Änderungen gespeichert';
-              document.body.appendChild(toast);
-              setTimeout(() => toast.remove(), 3000);
+              devLog('Salary Review Daten gespeichert:', sanitizedEmployees?.length || 0, 'Mitarbeiter');
+              showToast('Änderungen gespeichert', 'success'); // Kit-Toast (Live-Region) statt Ad-hoc-Element
               
             } catch (err) {
               console.error('Fehler beim Speichern:', err);
@@ -13545,35 +13536,12 @@ Goal 3: 20% weight, 80% achieved → 16 points
               
               // SUCCESS FEEDBACK: Toast anzeigen
               const feedbackMsg = lang === 'de' 
-                ? `✅ ${data.name} erfolgreich hinzugefügt!` 
+                ? `${data.name} erfolgreich hinzugefügt!` 
                 : lang === 'it' 
-                ? `✅ ${data.name} aggiunto con successo!` 
-                : `✅ ${data.name} added successfully!`;
+                ? `${data.name} aggiunto con successo!` 
+                : `${data.name} added successfully!`;
               
-              const toast = document.createElement('div');
-              toast.textContent = feedbackMsg;
-              toast.style.cssText = `
-                position: fixed;
-                bottom: 100px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: #2F7A48;
-                color: white;
-                padding: 16px 32px;
-                border-radius: 12px;
-                font-weight: 600;
-                font-size: 16px;
-                box-shadow: 0 10px 40px rgba(47, 122, 72, 0.4);
-                z-index: 99999;
-                animation: slideUp 0.3s ease-out;
-              `;
-              document.body.appendChild(toast);
-              setTimeout(() => {
-                toast.style.transition = 'opacity 0.3s, transform 0.3s';
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(-50%) translateY(20px)';
-                setTimeout(() => toast.remove(), 300);
-              }, 2500);
+              showToast(feedbackMsg, 'success'); // Kit-Toast (Live-Region) statt Ad-hoc-Element
               
               // Info: Selbstreflexions-Link muss manuell versendet werden
               // (Firebase Trigger Email Extension nicht konfiguriert)
@@ -14787,35 +14755,12 @@ Best regards`
                 
                 // SUCCESS FEEDBACK
                 const feedbackMsg = lang === 'de' 
-                  ? `✅ Termin für ${scheduleModalMember.name} gespeichert!` 
+                  ? `Termin für ${scheduleModalMember.name} gespeichert!` 
                   : lang === 'it' 
-                  ? `✅ Appuntamento per ${scheduleModalMember.name} salvato!` 
-                  : `✅ Appointment for ${scheduleModalMember.name} saved!`;
+                  ? `Appuntamento per ${scheduleModalMember.name} salvato!` 
+                  : `Appointment for ${scheduleModalMember.name} saved!`;
                 
-                const toast = document.createElement('div');
-                toast.textContent = feedbackMsg;
-                toast.style.cssText = `
-                  position: fixed;
-                  bottom: 100px;
-                  left: 50%;
-                  transform: translateX(-50%);
-                  background: #2F7A48;
-                  color: white;
-                  padding: 16px 32px;
-                  border-radius: 12px;
-                  font-weight: 600;
-                  font-size: 16px;
-                  box-shadow: 0 10px 40px rgba(47, 122, 72, 0.4);
-                  z-index: 99999;
-                  animation: slideUp 0.3s ease-out;
-                `;
-                document.body.appendChild(toast);
-                setTimeout(() => {
-                  toast.style.transition = 'opacity 0.3s, transform 0.3s';
-                  toast.style.opacity = '0';
-                  toast.style.transform = 'translateX(-50%) translateY(20px)';
-                  setTimeout(() => toast.remove(), 300);
-                }, 2500);
+                showToast(feedbackMsg, 'success'); // Kit-Toast (Live-Region) statt Ad-hoc-Element
                 
                 setScheduleModalOpen(false);
                 setScheduleModalMember(null);
@@ -25248,38 +25193,12 @@ const renderDashboard = () => {
                   if (status === 'draft') {
                     // Für Entwurf: Kurze, nicht-blockierende Meldung
                     const feedbackMsg = lang === 'de' 
-                      ? '✅ Entwurf erfolgreich gespeichert!' 
+                      ? 'Entwurf erfolgreich gespeichert!' 
                       : lang === 'it' 
-                      ? '✅ Bozza salvata con successo!' 
-                      : '✅ Draft saved successfully!';
+                      ? 'Bozza salvata con successo!' 
+                      : 'Draft saved successfully!';
                     
-                    // Temporäres Toast-Element erstellen
-                    const toast = document.createElement('div');
-                    toast.textContent = feedbackMsg;
-                    toast.style.cssText = `
-                      position: fixed;
-                      bottom: 100px;
-                      left: 50%;
-                      transform: translateX(-50%);
-                      background: #2F7A48;
-                      color: white;
-                      padding: 16px 32px;
-                      border-radius: 12px;
-                      font-weight: 600;
-                      font-size: 16px;
-                      box-shadow: 0 10px 40px rgba(47, 122, 72, 0.4);
-                      z-index: 99999;
-                      animation: slideUp 0.3s ease-out;
-                    `;
-                    document.body.appendChild(toast);
-                    
-                    // Nach 2.5 Sekunden ausblenden
-                    setTimeout(() => {
-                      toast.style.transition = 'opacity 0.3s, transform 0.3s';
-                      toast.style.opacity = '0';
-                      toast.style.transform = 'translateX(-50%) translateY(20px)';
-                      setTimeout(() => toast.remove(), 300);
-                    }, 2500);
+                    showToast(feedbackMsg, 'success'); // Kit-Toast (Live-Region) statt Ad-hoc-Element
                   } else if (status === 'completed') {
                     // Für Abschließen: Bestätigungsmeldung
                     const completeMsg = lang === 'de'

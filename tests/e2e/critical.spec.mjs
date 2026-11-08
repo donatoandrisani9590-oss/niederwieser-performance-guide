@@ -1,7 +1,7 @@
 // Kritische Wege: Anmeldung, Daten laden, Datensatz anlegen/ändern/speichern, nach Neuladen wiederfinden.
 // Läuft nur gegen den Firebase-Emulator mit synthetischen Testdaten (siehe fixtures.mjs / seed.mjs).
 import { test, expect, openApp } from './fixtures.mjs';
-import { seed, USERS, ACCESS_CODE, YEAR, PREV_YEAR, listDocs, getDoc } from './seed.mjs';
+import { seed, USERS, ACCESS_CODE, YEAR, PREV_YEAR, listDocs, getDoc, setDoc } from './seed.mjs';
 
 const field = (doc, name) => {
   const v = doc.fields?.[name];
@@ -290,4 +290,25 @@ test('Kalibrierung: nur das gewählte Jahr, jeder Mitarbeiter einmal gezählt', 
   await expect(page.getByRole('row').filter({ hasText: 'Clara Beispiel' })).toContainText('3.2');
   await page.getByText('Team-Übersicht', { exact: true }).first().click();
   await expect(page.getByRole('columnheader', { name: `Beurteilung ${PREV_YEAR}` })).toBeVisible();
+});
+
+test('Ziel-Dashboard: Jahresfilter optional, Standard „Alle Jahre“ wie bisher', async ({ page }) => {
+  await setDoc('teamAppraisals/ap-david-goals-prev', {
+    id: 'ap-david-goals-prev', type: 'goals', status: 'completed', period: PREV_YEAR, employeeId: 'tm-david', employeeName: 'David Muster',
+    userId: ids.uidA, managerId: ids.uidA, createdAt: new Date(`${PREV_YEAR}-02-01`).toISOString(), updatedAt: new Date(`${PREV_YEAR}-02-01`).toISOString(),
+    goals: [{ id: 1, name: 'Altziel Vorjahr', weight: 100 }],
+  });
+  const before = JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields));
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  await page.getByText('Ziel-Dashboard', { exact: true }).first().click();
+  const picker = page.getByRole('radiogroup', { name: 'Jahr' });
+  await expect(picker.getByRole('radio', { name: 'Alle Jahre' })).toHaveAttribute('aria-checked', 'true');
+  const kpi = page.locator('.text-2xl.font-semibold.text-nw-blue').first();
+  const all = Number(await kpi.textContent());
+  await picker.getByRole('radio', { name: PREV_YEAR }).click();
+  await expect.poll(async () => Number(await kpi.textContent())).toBeLessThan(all);
+  await picker.getByRole('radio', { name: 'Alle Jahre' }).click();
+  await expect.poll(async () => Number(await kpi.textContent())).toBe(all);
+  expect(JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields))).toBe(before);
 });

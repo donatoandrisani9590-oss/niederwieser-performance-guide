@@ -10526,6 +10526,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
           const [teamViewMode, setTeamViewMode] = useState('list'); // 'list' (Status-Matrix, Standard) oder 'cards'
           const [teamYear, setTeamYear] = useState(String(new Date().getFullYear())); // Jahr der Team-Übersicht
           const [showAddMember, setShowAddMember] = useState(false); // Formular „Mitarbeiter hinzufügen“
+          const [goalsDashYear, setGoalsDashYear] = useState('all'); // Ziel-Dashboard: Anzeigefilter Jahr ('all' = wie bisher, synchron mit HR-Dashboard)
           const [goalsDashboardSelectedId, setGoalsDashboardSelectedId] = useState(null); // Ausgewählter Mitarbeiter im Goals Dashboard
           const [competencyArea, setCompetencyArea] = useState(null); // null = Auswahl, 'admin' oder 'production'
           const [detailAreaContext, setDetailAreaContext] = useState('admin'); // Für Detailansicht
@@ -15952,6 +15953,10 @@ Best regards`
               );
             }
             
+            // Optionaler Jahresfilter (nur Anzeige). Standard 'all' = unverändert wie HR-Dashboard.
+            const goalsDashYears = [...new Set(dataSource.filter(a => a.type === 'goals').map(a => nwDocYear(a)))].sort((x, y) => y.localeCompare(x));
+            if (goalsDashYear !== 'all') dataSource = dataSource.filter(a => nwDocYear(a) === goalsDashYear);
+            
             // ============================================================
             // WICHTIG: EXAKT GLEICHE LOGIK WIE HR DASHBOARD
             // Nur Dokumente mit type === 'goals' (streng!)
@@ -16133,8 +16138,14 @@ Best regards`
             return React.createElement('div', { className: 'space-y-6' },
               // Header
               React.createElement('div', { className: 'bg-white border border-line shadow-card rounded-xl p-6 text-ink' },
+                React.createElement('div', { className: 'flex flex-wrap items-start justify-between gap-3' },
                 React.createElement('h1', { className: 'text-xl tracking-[-.014em] font-semibold mb-2 text-nw-blue' },
                   lang === 'de' ? 'Ziel-Dashboard (MBO)' : lang === 'it' ? 'Dashboard Obiettivi (MBO)' : 'Goals Dashboard (MBO)'
+                ),
+                goalsDashYears.length > 1 && React.createElement('div', { className: 'inline-flex max-w-full flex-wrap items-center gap-2' },
+                  React.createElement('span', { className: 'eyebrow', 'aria-hidden': true }, getText(lang, 'Jahr', 'Anno', 'Year')),
+                  React.createElement(NwSegmented, { ariaLabel: getText(lang, 'Jahr', 'Anno', 'Year'), value: goalsDashYear, onChange: (v) => setGoalsDashYear(v),
+                    options: [{ value: 'all', label: getText(lang, 'Alle Jahre', 'Tutti gli anni', 'All years') }].concat(goalsDashYears.slice(0, 4).map(y => ({ value: y, label: y }))) }))
                 ),
                 React.createElement('p', { className: 'text-ink-60' },
                   lang === 'de' ? 'Unternehmensweite Übersicht aller Zielvereinbarungen' : 

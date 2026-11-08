@@ -43,8 +43,8 @@ Stand: 2026-11-08, Branch `redesign/n-org`, App v93 unverändert (`index.html` =
 - Laufen ausschließlich gegen den lokalen **Firebase-Emulator** mit **synthetischen Testdaten** (`tests/e2e/seed.mjs`).
 - Jede Anfrage an echte Google-/Firebase-Server wird im Browser blockiert; ein Test, der es versucht, schlägt fehl.
 - Die CDNs der App sind in der Testumgebung nicht erreichbar. `tests/vendor/build.mjs` baut dieselben Versionen aus npm
-  und liefert sie im Test aus. Tailwind wird dafür einmal mit Version 3.4.17 kompiliert statt im Browser (Play CDN);
-  minimale Darstellungsunterschiede gegenüber dem Live-Betrieb sind dadurch möglich.
+  und liefert sie im Test aus. Tailwind läuft wie live als Play-CDN-Laufzeit im Browser (npm-Spiegel `tailwindcss-cdn`,
+  Version 3.4.10 statt 3.4.17, die näheste verfügbare Fassung).
 
 ## Screenshots
 

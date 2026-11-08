@@ -2,11 +2,10 @@
 // Nur für die Tests: Die Testumgebung hat keinen Zugriff auf die CDNs. index.html bleibt unverändert
 // und lädt im Betrieb weiterhin von den CDNs.
 import { build } from 'esbuild';
-import { mkdirSync, writeFileSync, copyFileSync, readFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, copyFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execFileSync } from 'node:child_process';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const tests = join(here, '..');
@@ -58,17 +57,9 @@ for (const f of ['firebase-app-compat.js', 'firebase-auth-compat.js', 'firebase-
 }
 copyFileSync(join(tests, 'node_modules', 'html2pdf.js', 'dist', 'html2pdf.bundle.min.js'), join(dist, 'html2pdf.bundle.min.js'));
 
-// Tailwind: statt Play-CDN (JIT im Browser) einmal mit derselben Version (3.4.17) über index.html kompilieren.
-// Die Theme-Erweiterung (Animationen) wird aus index.html übernommen.
-const html = readFileSync(join(tests, '..', 'index.html'), 'utf8');
-const cfgMatch = html.match(/tailwind\.config = (\{[\s\S]*?\n {8}\});/);
-writeFileSync(join(dist, 'tailwind.config.cjs'),
-  `module.exports = Object.assign(${cfgMatch ? cfgMatch[1] : '{}'}, { content: [${JSON.stringify(join(tests, '..', 'index.html'))}] });\n`);
-writeFileSync(join(dist, 'tailwind.in.css'), '@tailwind base;\n@tailwind components;\n@tailwind utilities;\n');
-execFileSync(join(tests, 'node_modules', '.bin', 'tailwindcss'),
-  ['-c', join(dist, 'tailwind.config.cjs'), '-i', join(dist, 'tailwind.in.css'), '-o', join(dist, 'tailwind.css')], { stdio: 'pipe' });
-const css = readFileSync(join(dist, 'tailwind.css'), 'utf8');
-writeFileSync(join(dist, 'tailwind-cdn.js'),
-  `window.tailwind = window.tailwind || {};\n(function(){var s=document.createElement('style');s.setAttribute('data-test-tailwind','');s.textContent=${JSON.stringify(css)};(document.head||document.documentElement).appendChild(s);})();\n`);
+// Tailwind: echte Play-CDN-Laufzeit (JIT im Browser) aus dem npm-Spiegel `tailwindcss-cdn`.
+// Gleiche Engine wie cdn.tailwindcss.com, Version 3.4.10 statt 3.4.17 (näheste verfügbare Fassung).
+// Verarbeitet tailwind.config und <style type="text/tailwindcss"> genau wie im Live-Betrieb.
+copyFileSync(join(tests, 'node_modules', 'tailwindcss-cdn', '3.4.10', 'tailwindcss.js'), join(dist, 'tailwind-cdn.js'));
 
 console.log('Vendor-Dateien gebaut in', dist);

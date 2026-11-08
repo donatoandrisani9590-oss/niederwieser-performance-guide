@@ -10,7 +10,7 @@ Daten, Anmeldung, Rollen, Speicherschlüssel, Links, Export-Formate und Berechnu
 
 | Prüfung | Vorher (Phase 0) | Nachher |
 |---|---|---|
-| Automatische Tests | 14 / 14 grün | **22 / 22 grün** (8 neue) |
+| Automatische Tests | 14 / 14 grün | **24 / 24 grün** (10 neue) |
 | Schutzbereich (`node tests/protected/fingerprint.mjs`) | Baseline angelegt | **unverändert** (Baseline seit Anlage nicht angefasst) |
 | Konsolenfehler in allen Abläufen | 0 | 0 |
 | WCAG 2 A/AA (axe-core) auf 6 Kernseiten | nicht gemessen | **0 Verstöße** |
@@ -90,6 +90,10 @@ Neu seit Phase 0:
 - `a11y.spec.mjs`: 4 Tests, WCAG 2 A/AA auf Dashboard, Anmeldung, Team-Übersicht, Beurteilung, HR-Dashboard und Mitarbeiter-Link.
 - `mobile.spec.mjs`: Handy-Menü, Anmeldung und Team ohne horizontalen Überlauf.
 - `screens.spec.mjs`: Dialog-Hintergrund bleibt halbtransparent (Schutz gegen versehentlich weiße Overlays).
+- `first-run.spec.mjs`: **Erststart ohne Anleitung.** Diese Tests folgen ausschließlich den sichtbaren Hauptaktionen:
+  - **Führungskraft:** erster Aufruf → Anmeldung → Registrierung → „Team anlegen“ → erster Mitarbeiter → Beurteilung
+    abgeschlossen → das Dashboard meldet „Alle Beurteilungen abgeschlossen“.
+  - **Mitarbeiter:** Link → starten → absenden. Die Selbstreflexion landet beim richtigen Mitarbeiter und bei der richtigen Führungskraft.
 - `critical.spec.mjs`:
   - Registrierung einer neuen Führungskraft (Erststart: leeres Team, Hinweis, nächster Schritt).
   - PDF-Export der Beurteilung (echte PDF-Datei; Logo und Titel geprüft).

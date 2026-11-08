@@ -758,6 +758,96 @@
         const isUserHRAdmin = (email) => email && HR_ADMIN_EMAILS.includes(email.toLowerCase());
 
         // ============================================
+        // n.Org BAUSTEINE
+        // Vorlage: docs/design-transfer/kit (TSX), hier ohne Build als React.createElement nachgebaut.
+        // Nur Darstellung – keine Daten, keine Logik.
+        // ============================================
+        const NW_LOGO_SRC = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB2aWV3Qm94PSIwIDAgNDUzLjU0MyAxNTAuMjM2Ij4KPHBhdGggZmlsbC1ydWxlPSJub256ZXJvIiBmaWxsPSIjNkVCRDg0IiBmaWxsLW9wYWNpdHk9IjEiIGQ9Ik0gNDAuNDAyMzQ0IDExMC41NTQ2ODggTCA0Mi42NTYyNSAxMTAuNTU0Njg4IEwgNDIuNjU2MjUgMTAzLjU0Njg3NSBMIDQ5Ljg2NzE4OCAxMDMuNTQ2ODc1IEwgNDkuODY3MTg4IDEwMS40Mjk2ODggTCA0Mi42NTYyNSAxMDEuNDI5Njg4IEwgNDIuNjU2MjUgOTYuODk4NDM4IEwgNDkuODY3MTg4IDk2Ljg5ODQzOCBMIDQ5Ljg2NzE4OCA5NC43ODEyNSBMIDQwLjQwMjM0NCA5NC43ODEyNSBaIE0gNTQuMzc1IDExMC41NTQ2ODggTCA2NC4wNDI5NjkgMTEwLjU1NDY4OCBMIDY0LjA0Mjk2OSAxMDguNDM3NSBMIDU2LjYyODkwNiAxMDguNDM3NSBMIDU2LjYyODkwNiA5NC43ODEyNSBMIDU0LjM3NSA5NC43ODEyNSBaIE0gNjcuOTE3OTY5IDExMC41NTQ2ODggTCA3Ny42NTIzNDQgMTEwLjU1NDY4OCBMIDc3LjY1MjM0NCAxMDguNDM3NSBMIDcwLjE3MTg3NSAxMDguNDM3NSBMIDcwLjE3MTg3NSAxMDMuMzIwMzEyIEwgNzcuNjUyMzQ0IDEwMy4zMjAzMTIgTCA3Ny42NTIzNDQgMTAxLjIwMzEyNSBMIDcwLjE3MTg3NSAxMDEuMjAzMTI1IEwgNzAuMTcxODc1IDk2Ljg5ODQzOCBMIDc3LjY1MjM0NCA5Ni44OTg0MzggTCA3Ny42NTIzNDQgOTQuNzgxMjUgTCA2Ny45MTc5NjkgOTQuNzgxMjUgWiBNIDgxLjA1NDY4OCAxMTAuNTU0Njg4IEwgODMuODI4MTI1IDExMC41NTQ2ODggTCA4OC4wNDI5NjkgMTA0LjEwOTM3NSBMIDkyLjI3NzM0NCAxMTAuNTU0Njg4IEwgOTUuMDUwNzgxIDExMC41NTQ2ODggTCA4OS40Mzc1IDEwMi4yODUxNTYgTCA5NC43ODEyNSA5NC43ODEyNSBMIDkxLjk2MDkzOCA5NC43ODEyNSBMIDg4LjA0Mjk2OSAxMDAuNTAzOTA2IEwgODQuMTQwNjI1IDk0Ljc4MTI1IEwgODEuMzI0MjE5IDk0Ljc4MTI1IEwgODYuNjY3OTY5IDEwMi4zMDg1OTQgWiBNIDk4LjgzNTkzOCAxMTAuNTU0Njg4IEwgMTAxLjA4OTg0NCAxMTAuNTU0Njg4IEwgMTAxLjA4OTg0NCA5NC43ODEyNSBMIDk4LjgzNTkzOCA5NC43ODEyNSBaIE0gMTA2LjYzMjgxMiAxMTAuNTU0Njg4IEwgMTEzLjU1MDc4MSAxMTAuNTU0Njg4IEMgMTE2LjU5Mzc1IDExMC41NTQ2ODggMTE4LjM3NSAxMDguNjg3NSAxMTguMzc1IDEwNi4wMDM5MDYgQyAxMTguMzc1IDEwNC4xMzI4MTIgMTE3LjMzNTkzOCAxMDIuNzU3ODEyIDExNS43ODEyNSAxMDIuMTk1MzEyIEMgMTE3LjA2NjQwNiAxMDEuNTY2NDA2IDExNy45MjE4NzUgMTAwLjIzNDM3NSAxMTcuOTIxODc1IDk4LjY3OTY4OCBDIDExNy45MjE4NzUgOTYuMjkyOTY5IDExNi4xMjEwOTQgOTQuNzgxMjUgMTEzLjI1NzgxMiA5NC43ODEyNSBMIDEwNi42MzI4MTIgOTQuNzgxMjUgWiBNIDEwOC44ODY3MTkgMTA4LjQ4NDM3NSBMIDEwOC44ODY3MTkgMTAzLjIzNDM3NSBMIDExMy4yMzQzNzUgMTAzLjIzNDM3NSBDIDExNS4wODU5MzggMTAzLjIzNDM3NSAxMTYuMDc0MjE5IDEwNC4xNTYyNSAxMTYuMDc0MjE5IDEwNS44MjQyMTkgQyAxMTYuMDc0MjE5IDEwNy40OTIxODggMTE1LjAzOTA2MiAxMDguNDg0Mzc1IDExMy4yMzQzNzUgMTA4LjQ4NDM3NSBaIE0gMTA4Ljg4NjcxOSAxMDEuMjkyOTY5IEwgMTA4Ljg4NjcxOSA5Ni44NTU0NjkgTCAxMTIuOTQxNDA2IDk2Ljg1NTQ2OSBDIDExNC42MzI4MTIgOTYuODU1NDY5IDExNS42MjUgOTcuNTk3NjU2IDExNS42MjUgOTkuMDM5MDYyIEMgMTE1LjYyNSAxMDAuNDYwOTM4IDExNC42NTYyNSAxMDEuMjkyOTY5IDExMi45NDE0MDYgMTAxLjI5Mjk2OSBaIE0gMTIzLjI2NTYyNSAxMTAuNTU0Njg4IEwgMTMyLjkzMzU5NCAxMTAuNTU0Njg4IEwgMTMyLjkzMzU5NCAxMDguNDM3NSBMIDEyNS41MTk1MzEgMTA4LjQzNzUgTCAxMjUuNTE5NTMxIDk0Ljc4MTI1IEwgMTIzLjI2NTYyNSA5NC43ODEyNSBaIE0gMTM2LjgwODU5NCAxMTAuNTU0Njg4IEwgMTQ2LjU0Mjk2OSAxMTAuNTU0Njg4IEwgMTQ2LjU0Mjk2OSAxMDguNDM3NSBMIDEzOS4wNjI1IDEwOC40Mzc1IEwgMTM5LjA2MjUgMTAzLjMyMDMxMiBMIDE0Ni41NDI5NjkgMTAzLjMyMDMxMiBMIDE0Ni41NDI5NjkgMTAxLjIwMzEyNSBMIDEzOS4wNjI1IDEwMS4yMDMxMjUgTCAxMzkuMDYyNSA5Ni44OTg0MzggTCAxNDYuNTQyOTY5IDk2Ljg5ODQzOCBMIDE0Ni41NDI5NjkgOTQuNzgxMjUgTCAxMzYuODA4NTk0IDk0Ljc4MTI1IFogTSAxNTguNzgxMjUgMTEwLjU1NDY4OCBMIDE2MS4wMzUxNTYgMTEwLjU1NDY4OCBMIDE2MS4wMzUxNTYgMTAzLjU0Njg3NSBMIDE2OC4yNDYwOTQgMTAzLjU0Njg3NSBMIDE2OC4yNDYwOTQgMTAxLjQyOTY4OCBMIDE2MS4wMzUxNTYgMTAxLjQyOTY4OCBMIDE2MS4wMzUxNTYgOTYuODk4NDM4IEwgMTY4LjI0NjA5NCA5Ni44OTg0MzggTCAxNjguMjQ2MDk0IDk0Ljc4MTI1IEwgMTU4Ljc4MTI1IDk0Ljc4MTI1IFogTSAxNzkuMTc1NzgxIDExMC44NzEwOTQgQyAxODMuMzY3MTg4IDExMC44NzEwOTQgMTg2LjI1IDEwOC4wMTE3MTkgMTg2LjI1IDEwMi42Njc5NjkgQyAxODYuMjUgOTcuMzI4MTI1IDE4My4zNjcxODggOTQuNDY0ODQ0IDE3OS4xNzU3ODEgOTQuNDY0ODQ0IEMgMTc0Ljk2MDkzOCA5NC40NjQ4NDQgMTcyLjA3NDIxOSA5Ny4zMjgxMjUgMTcyLjA3NDIxOSAxMDIuNjY3OTY5IEMgMTcyLjA3NDIxOSAxMDguMDExNzE5IDE3NC45NjA5MzggMTEwLjg3MTA5NCAxNzkuMTc1NzgxIDExMC44NzEwOTQgTSAxNzQuMzk0NTMxIDEwMi42Njc5NjkgQyAxNzQuMzk0NTMxIDk4LjU4OTg0NCAxNzYuMzU1NDY5IDk2LjU2MjUgMTc5LjE3NTc4MSA5Ni41NjI1IEMgMTgxLjk2ODc1IDk2LjU2MjUgMTgzLjkyOTY4OCA5OC41ODk4NDQgMTgzLjkyOTY4OCAxMDIuNjY3OTY5IEMgMTgzLjkyOTY4OCAxMDYuNzQ2MDk0IDE4MS45Njg3NSAxMDguNzc3MzQ0IDE3OS4xNzU3ODEgMTA4Ljc3NzM0NCBDIDE3Ni4zNTU0NjkgMTA4Ljc3NzM0NCAxNzQuMzk0NTMxIDEwNi43NDYwOTQgMTc0LjM5NDUzMSAxMDIuNjY3OTY5IE0gMTk3LjQyNTc4MSAxMTAuODcxMDk0IEMgMjAxLjYxNzE4OCAxMTAuODcxMDk0IDIwNC41MDM5MDYgMTA4LjAxMTcxOSAyMDQuNTAzOTA2IDEwMi42Njc5NjkgQyAyMDQuNTAzOTA2IDk3LjMyODEyNSAyMDEuNjE3MTg4IDk0LjQ2NDg0NCAxOTcuNDI1NzgxIDk0LjQ2NDg0NCBDIDE5My4yMTQ4NDQgOTQuNDY0ODQ0IDE5MC4zMjgxMjUgOTcuMzI4MTI1IDE5MC4zMjgxMjUgMTAyLjY2Nzk2OSBDIDE5MC4zMjgxMjUgMTA4LjAxMTcxOSAxOTMuMjE0ODQ0IDExMC44NzEwOTQgMTk3LjQyNTc4MSAxMTAuODcxMDk0IE0gMTkyLjY0ODQzOCAxMDIuNjY3OTY5IEMgMTkyLjY0ODQzOCA5OC41ODk4NDQgMTk0LjYwOTM3NSA5Ni41NjI1IDE5Ny40MjU3ODEgOTYuNTYyNSBDIDIwMC4yMjI2NTYgOTYuNTYyNSAyMDIuMTgzNTk0IDk4LjU4OTg0NCAyMDIuMTgzNTk0IDEwMi42Njc5NjkgQyAyMDIuMTgzNTk0IDEwNi43NDYwOTQgMjAwLjIyMjY1NiAxMDguNzc3MzQ0IDE5Ny40MjU3ODEgMTA4Ljc3NzM0NCBDIDE5NC42MDkzNzUgMTA4Ljc3NzM0NCAxOTIuNjQ4NDM4IDEwNi43NDYwOTQgMTkyLjY0ODQzOCAxMDIuNjY3OTY5IE0gMjA5LjMwNDY4OCAxMTAuNTU0Njg4IEwgMjE0Ljg0NzY1NiAxMTAuNTU0Njg4IEMgMjE5LjMzMjAzMSAxMTAuNTU0Njg4IDIyMi4xMjUgMTA3LjUxNTYyNSAyMjIuMTI1IDEwMi42Njc5NjkgQyAyMjIuMTI1IDk3LjgwMDc4MSAyMTkuMzA4NTk0IDk0Ljc4MTI1IDIxNC44NDc2NTYgOTQuNzgxMjUgTCAyMDkuMzA0Njg4IDk0Ljc4MTI1IFogTSAyMTEuNTU4NTk0IDEwOC40ODQzNzUgTCAyMTEuNTU4NTk0IDk2Ljg1NTQ2OSBMIDIxNC45NjA5MzggOTYuODU1NDY5IEMgMjE4LjA3MDMxMiA5Ni44NTU0NjkgMjE5LjgwNDY4OCA5OS4xMjg5MDYgMjE5LjgwNDY4OCAxMDIuNjY3OTY5IEMgMjE5LjgwNDY4OCAxMDYuMjA3MDMxIDIxOC4wNzAzMTIgMTA4LjQ4NDM3NSAyMTQuOTYwOTM4IDEwOC40ODQzNzUgWiBNIDIzNC4xMzY3MTkgMTEwLjU1NDY4OCBMIDIzNi4zOTA2MjUgMTEwLjU1NDY4OCBMIDIzNi4zOTA2MjUgMTA0LjEwOTM3NSBMIDI0MC42NzE4NzUgMTA0LjEwOTM3NSBDIDI0My45NjA5MzggMTA0LjEwOTM3NSAyNDUuOTAyMzQ0IDEwMi4zMzIwMzEgMjQ1LjkwMjM0NCA5OS40MjU3ODEgQyAyNDUuOTAyMzQ0IDk2LjUzOTA2MiAyNDMuOTYwOTM4IDk0Ljc4MTI1IDI0MC42NzE4NzUgOTQuNzgxMjUgTCAyMzQuMTM2NzE5IDk0Ljc4MTI1IFogTSAyMzYuMzkwNjI1IDEwMi4wMTU2MjUgTCAyMzYuMzkwNjI1IDk2Ljg5ODQzOCBMIDI0MC41ODIwMzEgOTYuODk4NDM4IEMgMjQyLjUxOTUzMSA5Ni44OTg0MzggMjQzLjYwMTU2MiA5Ny44MjQyMTkgMjQzLjYwMTU2MiA5OS40MjU3ODEgQyAyNDMuNjAxNTYyIDEwMS4wNzAzMTIgMjQyLjUxOTUzMSAxMDIuMDE1NjI1IDI0MC41ODIwMzEgMTAyLjAxNTYyNSBaIE0gMjQ3LjQzMzU5NCAxMTAuNTU0Njg4IEwgMjQ5Ljg5MDYyNSAxMTAuNTU0Njg4IEwgMjUxLjU3ODEyNSAxMDUuOTU3MDMxIEwgMjU4LjMzOTg0NCAxMDUuOTU3MDMxIEwgMjYwLjAzMTI1IDExMC41NTQ2ODggTCAyNjIuNTA3ODEyIDExMC41NTQ2ODggTCAyNTYuNDkyMTg4IDk0Ljc4MTI1IEwgMjUzLjQ0OTIxOSA5NC43ODEyNSBaIE0gMjUyLjMyNDIxOSAxMDMuOTA2MjUgTCAyNTQuOTYwOTM4IDk2Ljc0MjE4OCBMIDI1Ny41OTc2NTYgMTAzLjkwNjI1IFogTSAyNzIuMTc1NzgxIDExMC44NzEwOTQgQyAyNzUuNzM4MjgxIDExMC44NzEwOTQgMjc3LjkwMjM0NCAxMDguNTUwNzgxIDI3OC40NDE0MDYgMTA1LjI4MTI1IEwgMjc2LjA5NzY1NiAxMDUuMjgxMjUgQyAyNzUuNzM4MjgxIDEwNy4zMTI1IDI3NC4zNjMyODEgMTA4Ljc3NzM0NCAyNzIuMTc1NzgxIDEwOC43NzczNDQgQyAyNjkuNDI1NzgxIDEwOC43NzczNDQgMjY3LjQyMTg3NSAxMDYuODE2NDA2IDI2Ny40MjE4NzUgMTAyLjY0ODQzOCBDIDI2Ny40MjE4NzUgOTguNDMzNTk0IDI2OS4zMzU5MzggOTYuNTYyNSAyNzIuMjIyNjU2IDk2LjU2MjUgQyAyNzQuMjAzMTI1IDk2LjU2MjUgMjc1Ljc2MTcxOSA5Ny43NTc4MTIgMjc2LjA5NzY1NiA5OS44MjgxMjUgTCAyNzguNDY0ODQ0IDk5LjgyODEyNSBDIDI3Ny45OTIxODggOTYuNDQ5MjE5IDI3NS42NDg0MzggOTQuNDY0ODQ0IDI3Mi4yMjI2NTYgOTQuNDY0ODQ0IEMgMjY3Ljg3NSA5NC40NjQ4NDQgMjY1LjEwMTU2MiA5Ny4yNjE3MTkgMjY1LjEwMTU2MiAxMDIuNjkxNDA2IEMgMjY1LjEwMTU2MiAxMDguMTIxMDk0IDI2Ny45ODQzNzUgMTEwLjg3MTA5NCAyNzIuMTc1NzgxIDExMC44NzEwOTQgTSAyOTIuNTQ2ODc1IDExMC41NTQ2ODggTCAyOTUuMzY3MTg4IDExMC41NTQ2ODggTCAyODguOTQxNDA2IDEwMi4xOTUzMTIgTCAyOTUuMzY3MTg4IDk0Ljc4MTI1IEwgMjkyLjU0Njg3NSA5NC43ODEyNSBMIDI4Ny4wNTA3ODEgMTAxLjExMzI4MSBMIDI4NS4xNTYyNSAxMDEuMTEzMjgxIEwgMjg1LjE1NjI1IDk0Ljc4MTI1IEwgMjgyLjkwMjM0NCA5NC43ODEyNSBMIDI4Mi45MDIzNDQgMTEwLjU1NDY4OCBMIDI4NS4xNTYyNSAxMTAuNTU0Njg4IEwgMjg1LjE1NjI1IDEwMy40MTQwNjIgTCAyODcuMDc0MjE5IDEwMy40MTQwNjIgWiBNIDI5OC4xMzY3MTkgMTEwLjU1NDY4OCBMIDMwMC41OTM3NSAxMTAuNTU0Njg4IEwgMzAyLjI4NTE1NiAxMDUuOTU3MDMxIEwgMzA5LjA0Mjk2OSAxMDUuOTU3MDMxIEwgMzEwLjczNDM3NSAxMTAuNTU0Njg4IEwgMzEzLjIxNDg0NCAxMTAuNTU0Njg4IEwgMzA3LjE5NTMxMiA5NC43ODEyNSBMIDMwNC4xNTYyNSA5NC43ODEyNSBaIE0gMzAzLjAyNzM0NCAxMDMuOTA2MjUgTCAzMDUuNjY0MDYyIDk2Ljc0MjE4OCBMIDMwOC4zMDA3ODEgMTAzLjkwNjI1IFogTSAzMjIuODU5Mzc1IDExMC44NzEwOTQgQyAzMjQuOTc2NTYyIDExMC44NzEwOTQgMzI2LjYyMTA5NCAxMDkuOTI1NzgxIDMyNy40NTcwMzEgMTA4LjQ2MDkzOCBMIDMyNy40NTcwMzEgMTEwLjU1NDY4OCBMIDMyOS4zNDc2NTYgMTEwLjU1NDY4OCBMIDMyOS4zNDc2NTYgMTAyLjg0NzY1NiBMIDMyMS42NDA2MjUgMTAyLjg0NzY1NiBMIDMyMS42NDA2MjUgMTA0Ljg5ODQzOCBMIDMyNy4xODM1OTQgMTA0Ljg5ODQzOCBDIDMyNi45ODQzNzUgMTA3LjQ0NTMxMiAzMjUuNDI1NzgxIDEwOC43OTY4NzUgMzIzLjE1MjM0NCAxMDguNzk2ODc1IEMgMzIwLjE1MjM0NCAxMDguNzk2ODc1IDMxOC4yMzgyODEgMTA2LjgxNjQwNiAzMTguMjM4MjgxIDEwMi42OTE0MDYgQyAzMTguMjM4MjgxIDk4LjY1NjI1IDMyMC4wNjY0MDYgOTYuNTM5MDYyIDMyMy4wMzkwNjIgOTYuNTM5MDYyIEMgMzI1LjIyMjY1NiA5Ni41MzkwNjIgMzI2LjYyMTA5NCA5Ny43NzczNDQgMzI3LjAwMzkwNiA5OS42MDU0NjkgTCAzMjkuMzQ3NjU2IDk5LjYwNTQ2OSBDIDMyOC44OTg0MzggOTYuNDI1NzgxIDMyNi41NzgxMjUgOTQuNDY0ODQ0IDMyMy4wMzkwNjIgOTQuNDY0ODQ0IEMgMzE4LjY5MTQwNiA5NC40NjQ4NDQgMzE1LjkxNzk2OSA5Ny40NjQ4NDQgMzE1LjkxNzk2OSAxMDIuNjkxNDA2IEMgMzE1LjkxNzk2OSAxMDcuOTQxNDA2IDMxOC43NzczNDQgMTEwLjg3MTA5NCAzMjIuODU5Mzc1IDExMC44NzEwOTQgTSAzMzQuODkwNjI1IDExMC41NTQ2ODggTCAzMzcuMTQ0NTMxIDExMC41NTQ2ODggTCAzMzcuMTQ0NTMxIDk0Ljc4MTI1IEwgMzM0Ljg5MDYyNSA5NC43ODEyNSBaIE0gMzQyLjY5MTQwNiAxMTAuNTU0Njg4IEwgMzQ0Ljk0MTQwNiAxMTAuNTU0Njg4IEwgMzQ0Ljk0MTQwNiA5OC4yNTM5MDYgTCAzNTIuMzEyNSAxMTAuNTU0Njg4IEwgMzU1LjA2MjUgMTEwLjU1NDY4OCBMIDM1NS4wNjI1IDk0Ljc4MTI1IEwgMzUyLjgwODU5NCA5NC43ODEyNSBMIDM1Mi44MDg1OTQgMTA3LjA2MjUgTCAzNDUuNDM3NSA5NC43ODEyNSBMIDM0Mi42OTE0MDYgOTQuNzgxMjUgWiBNIDM2Ni44MDA3ODEgMTEwLjg3MTA5NCBDIDM2OC45MjE4NzUgMTEwLjg3MTA5NCAzNzAuNTY2NDA2IDEwOS45MjU3ODEgMzcxLjM5ODQzOCAxMDguNDYwOTM4IEwgMzcxLjM5ODQzOCAxMTAuNTU0Njg4IEwgMzczLjI5Mjk2OSAxMTAuNTU0Njg4IEwgMzczLjI5Mjk2OSAxMDIuODQ3NjU2IEwgMzY1LjU4NTkzOCAxMDIuODQ3NjU2IEwgMzY1LjU4NTkzOCAxMDQuODk4NDM4IEwgMzcxLjEyODkwNiAxMDQuODk4NDM4IEMgMzcwLjkyNTc4MSAxMDcuNDQ1MzEyIDM2OS4zNzEwOTQgMTA4Ljc5Njg3NSAzNjcuMDkzNzUgMTA4Ljc5Njg3NSBDIDM2NC4wOTc2NTYgMTA4Ljc5Njg3NSAzNjIuMTgzNTk0IDEwNi44MTY0MDYgMzYyLjE4MzU5NCAxMDIuNjkxNDA2IEMgMzYyLjE4MzU5NCA5OC42NTYyNSAzNjQuMDA3ODEyIDk2LjUzOTA2MiAzNjYuOTgwNDY5IDk2LjUzOTA2MiBDIDM2OS4xNjc5NjkgOTYuNTM5MDYyIDM3MC41NjY0MDYgOTcuNzc3MzQ0IDM3MC45NDkyMTkgOTkuNjA1NDY5IEwgMzczLjI5Mjk2OSA5OS42MDU0NjkgQyAzNzIuODM5ODQ0IDk2LjQyNTc4MSAzNzAuNTE5NTMxIDk0LjQ2NDg0NCAzNjYuOTgwNDY5IDk0LjQ2NDg0NCBDIDM2Mi42MzI4MTIgOTQuNDY0ODQ0IDM1OS44NTkzNzUgOTcuNDY0ODQ0IDM1OS44NTkzNzUgMTAyLjY5MTQwNiBDIDM1OS44NTkzNzUgMTA3Ljk0MTQwNiAzNjIuNzIyNjU2IDExMC44NzEwOTQgMzY2LjgwMDc4MSAxMTAuODcxMDk0ICIvPgo8cGF0aCBmaWxsLXJ1bGU9Im5vbnplcm8iIGZpbGw9IiMyNDMxODYiIGZpbGwtb3BhY2l0eT0iMSIgZD0iTSA0MC4zODY3MTkgNzguOTY4NzUgTCA0OC4wODIwMzEgNzguOTY4NzUgTCA0OC4wODIwMzEgNjAuOTI1NzgxIEMgNDguMDgyMDMxIDU2LjM5ODQzOCA1MC44NjMyODEgNTMuNDIxODc1IDU1LjA2NjQwNiA1My40MjE4NzUgQyA1OS4xNDA2MjUgNTMuNDIxODc1IDYxLjQ2ODc1IDU1Ljc1IDYxLjQ2ODc1IDYwLjY2Nzk2OSBMIDYxLjQ2ODc1IDc4Ljk2ODc1IEwgNjkuMTY0MDYyIDc4Ljk2ODc1IEwgNjkuMTY0MDYyIDU5Ljg5MDYyNSBDIDY5LjE2NDA2MiA1MS4zNTU0NjkgNjQuMzc4OTA2IDQ2LjQzNzUgNTYuNjIxMDk0IDQ2LjQzNzUgQyA1Mi42MDkzNzUgNDYuNDM3NSA0OS4wNTQ2ODggNDcuOTkyMTg4IDQ3LjE3NTc4MSA1MS4wOTM3NSBMIDQ3LjE3NTc4MSA0Ny40MTAxNTYgTCA0MC4zODY3MTkgNDcuNDEwMTU2IFogTSA3Ni43OTY4NzUgNzguOTY4NzUgTCA4NC40OTIxODggNzguOTY4NzUgTCA4NC40OTIxODggNDcuNDEwMTU2IEwgNzYuNzk2ODc1IDQ3LjQxMDE1NiBaIE0gMTA2LjYwOTM3NSA3OS45Mzc1IEMgMTE0LjMwNDY4OCA3OS45Mzc1IDExOS4xNTYyNSA3NS45Mjk2ODggMTIxLjA5NzY1NiA2OS43ODUxNTYgTCAxMTMuMjA3MDMxIDY5Ljc4NTE1NiBDIDExMi4xNzE4NzUgNzIuMDQ2ODc1IDEwOS45NzI2NTYgNzMuNDcyNjU2IDEwNi42NzU3ODEgNzMuNDcyNjU2IEMgMTAxLjc2MTcxOSA3My40NzI2NTYgOTguNzE4NzUgNzAuNjI1IDk4LjMzMjAzMSA2NS44Mzk4NDQgTCAxMjEuNDg0Mzc1IDY1LjgzOTg0NCBDIDEyMS42MTMyODEgNjQuNTQ2ODc1IDEyMS42MTMyODEgNjMuNTExNzE5IDEyMS42MTMyODEgNjIuNTQyOTY5IEMgMTIxLjYxMzI4MSA1Mi42NDg0MzggMTE1Ljc5Mjk2OSA0Ni40Mzc1IDEwNi4yMjI2NTYgNDYuNDM3NSBDIDk3LjEwNTQ2OSA0Ni40Mzc1IDkwLjc2NTYyNSA1Mi45MDYyNSA5MC43NjU2MjUgNjIuOTk2MDk0IEMgOTAuNzY1NjI1IDczLjIxMDkzOCA5Ny4wMzkwNjIgNzkuOTM3NSAxMDYuNjA5Mzc1IDc5LjkzNzUgTSA5OC4zMzIwMzEgNTkuODkwNjI1IEMgOTguNTg5ODQ0IDU1LjU1ODU5NCAxMDEuNTY2NDA2IDUyLjY0ODQzOCAxMDYuMjIyNjU2IDUyLjY0ODQzOCBDIDExMS4xMzY3MTkgNTIuNjQ4NDM4IDExMy44NTU0NjkgNTUuNTU4NTk0IDExMy44NTU0NjkgNTkuNjk1MzEyIEwgMTEzLjg1NTQ2OSA1OS44OTA2MjUgWiBNIDE0MC44MjAzMTIgNzkuOTM3NSBDIDE0NS4yODEyNSA3OS45Mzc1IDE0OS4xNjQwNjIgNzguMTkxNDA2IDE1MS4xNjc5NjkgNzUuMjE4NzUgTCAxNTEuMTY3OTY5IDc4Ljk2ODc1IEwgMTU3Ljk1NzAzMSA3OC45Njg3NSBMIDE1Ny45NTcwMzEgMzMuNjk5MjE5IEwgMTUwLjI2MTcxOSAzMy42OTkyMTkgTCAxNTAuMjYxNzE5IDUwLjUxMTcxOSBDIDE0OC4zMjAzMTIgNDcuOTI1NzgxIDE0NC44MjgxMjUgNDYuNDM3NSAxNDAuODIwMzEyIDQ2LjQzNzUgQyAxMzEuNzY1NjI1IDQ2LjQzNzUgMTI1LjY4NzUgNTMuMTY0MDYyIDEyNS42ODc1IDYzLjE4NzUgQyAxMjUuNjg3NSA3My4yMTA5MzggMTMxLjc2NTYyNSA3OS45Mzc1IDE0MC44MjAzMTIgNzkuOTM3NSBNIDEzMy42NDA2MjUgNjMuMTg3NSBDIDEzMy42NDA2MjUgNTcuMzY3MTg4IDEzNy4wMDM5MDYgNTMuNDIxODc1IDE0Mi4wNTA3ODEgNTMuNDIxODc1IEMgMTQ3LjAyNzM0NCA1My40MjE4NzUgMTUwLjM5MDYyNSA1Ny4zNjcxODggMTUwLjM5MDYyNSA2My4xODc1IEMgMTUwLjM5MDYyNSA2OS4wMDc4MTIgMTQ3LjAyNzM0NCA3Mi45NTMxMjUgMTQyLjA1MDc4MSA3Mi45NTMxMjUgQyAxMzcuMDAzOTA2IDcyLjk1MzEyNSAxMzMuNjQwNjI1IDY5LjAwNzgxMiAxMzMuNjQwNjI1IDYzLjE4NzUgTSAxODAuMDExNzE5IDc5LjkzNzUgQyAxODcuNzA3MDMxIDc5LjkzNzUgMTkyLjU1ODU5NCA3NS45Mjk2ODggMTk0LjQ5NjA5NCA2OS43ODUxNTYgTCAxODYuNjA5Mzc1IDY5Ljc4NTE1NiBDIDE4NS41NzQyMTkgNzIuMDQ2ODc1IDE4My4zNzUgNzMuNDcyNjU2IDE4MC4wNzQyMTkgNzMuNDcyNjU2IEMgMTc1LjE2MDE1NiA3My40NzI2NTYgMTcyLjEyMTA5NCA3MC42MjUgMTcxLjczNDM3NSA2NS44Mzk4NDQgTCAxOTQuODg2NzE5IDY1LjgzOTg0NCBDIDE5NS4wMTU2MjUgNjQuNTQ2ODc1IDE5NS4wMTU2MjUgNjMuNTExNzE5IDE5NS4wMTU2MjUgNjIuNTQyOTY5IEMgMTk1LjAxNTYyNSA1Mi42NDg0MzggMTg5LjE5NTMxMiA0Ni40Mzc1IDE3OS42MjUgNDYuNDM3NSBDIDE3MC41MDM5MDYgNDYuNDM3NSAxNjQuMTY3OTY5IDUyLjkwNjI1IDE2NC4xNjc5NjkgNjIuOTk2MDk0IEMgMTY0LjE2Nzk2OSA3My4yMTA5MzggMTcwLjQ0MTQwNiA3OS45Mzc1IDE4MC4wMTE3MTkgNzkuOTM3NSBNIDE3MS43MzQzNzUgNTkuODkwNjI1IEMgMTcxLjk5MjE4OCA1NS41NTg1OTQgMTc0Ljk2NDg0NCA1Mi42NDg0MzggMTc5LjYyNSA1Mi42NDg0MzggQyAxODQuNTM5MDYyIDUyLjY0ODQzOCAxODcuMjUzOTA2IDU1LjU1ODU5NCAxODcuMjUzOTA2IDU5LjY5NTMxMiBMIDE4Ny4yNTM5MDYgNTkuODkwNjI1IFogTSAyMDEuMDI3MzQ0IDc4Ljk2ODc1IEwgMjA4LjcyNjU2MiA3OC45Njg3NSBMIDIwOC43MjY1NjIgNjAuMDg1OTM4IEMgMjA4LjcyNjU2MiA1Ni4xNDA2MjUgMjEwLjQwNjI1IDU0LjE5OTIxOSAyMTQuMTU2MjUgNTQuMTk5MjE5IEwgMjIwLjgyMDMxMiA1NC4xOTkyMTkgTCAyMjAuODIwMzEyIDQ3LjQxMDE1NiBMIDIxNSA0Ny40MTAxNTYgQyAyMTEuMDU0Njg4IDQ3LjQxMDE1NiAyMDguNTk3NjU2IDQ5LjQxNDA2MiAyMDcuODIwMzEyIDUyLjkwNjI1IEwgMjA3LjgyMDMxMiA0Ny40MTAxNTYgTCAyMDEuMDI3MzQ0IDQ3LjQxMDE1NiBaIE0gMjMxLjQyMTg3NSA3OC45Njg3NSBMIDI0MC41NDI5NjkgNzguOTY4NzUgTCAyNDYuNzUgNTYuMDc0MjE5IEwgMjUyLjg5NDUzMSA3OC45Njg3NSBMIDI2Mi4wMTE3MTkgNzguOTY4NzUgTCAyNzEuNDUzMTI1IDQ3LjQxMDE1NiBMIDI2My40Mzc1IDQ3LjQxMDE1NiBMIDI1Ny4yOTI5NjkgNzAuMzY3MTg4IEwgMjUxLjE0ODQzOCA0Ny40MTAxNTYgTCAyNDIuMjg5MDYyIDQ3LjQxMDE1NiBMIDIzNi4xNDQ1MzEgNzAuMzY3MTg4IEwgMjMwIDQ3LjQxMDE1NiBMIDIyMS45ODA0NjkgNDcuNDEwMTU2IFogTSAyNzYuMzcxMDk0IDc4Ljk2ODc1IEwgMjg0LjA2NjQwNiA3OC45Njg3NSBMIDI4NC4wNjY0MDYgNDcuNDEwMTU2IEwgMjc2LjM3MTA5NCA0Ny40MTAxNTYgWiBNIDMwNi4xODM1OTQgNzkuOTM3NSBDIDMxMy44Nzg5MDYgNzkuOTM3NSAzMTguNzMwNDY5IDc1LjkyOTY4OCAzMjAuNjY3OTY5IDY5Ljc4NTE1NiBMIDMxMi43ODEyNSA2OS43ODUxNTYgQyAzMTEuNzQ2MDk0IDcyLjA0Njg3NSAzMDkuNTQ2ODc1IDczLjQ3MjY1NiAzMDYuMjUgNzMuNDcyNjU2IEMgMzAxLjMzMjAzMSA3My40NzI2NTYgMjk4LjI5Mjk2OSA3MC42MjUgMjk3LjkwNjI1IDY1LjgzOTg0NCBMIDMyMS4wNTg1OTQgNjUuODM5ODQ0IEMgMzIxLjE4NzUgNjQuNTQ2ODc1IDMyMS4xODc1IDYzLjUxMTcxOSAzMjEuMTg3NSA2Mi41NDI5NjkgQyAzMjEuMTg3NSA1Mi42NDg0MzggMzE1LjM2NzE4OCA0Ni40Mzc1IDMwNS43OTY4NzUgNDYuNDM3NSBDIDI5Ni42NzU3ODEgNDYuNDM3NSAyOTAuMzM5ODQ0IDUyLjkwNjI1IDI5MC4zMzk4NDQgNjIuOTk2MDk0IEMgMjkwLjMzOTg0NCA3My4yMTA5MzggMjk2LjYxMzI4MSA3OS45Mzc1IDMwNi4xODM1OTQgNzkuOTM3NSBNIDI5Ny45MDYyNSA1OS44OTA2MjUgQyAyOTguMTY0MDYyIDU1LjU1ODU5NCAzMDEuMTQwNjI1IDUyLjY0ODQzOCAzMDUuNzk2ODc1IDUyLjY0ODQzOCBDIDMxMC43MTA5MzggNTIuNjQ4NDM4IDMxMy40MjU3ODEgNTUuNTU4NTk0IDMxMy40MjU3ODEgNTkuNjk1MzEyIEwgMzEzLjQyNTc4MSA1OS44OTA2MjUgWiBNIDMzOS40ODgyODEgNzkuOTM3NSBDIDM0Ny44OTQ1MzEgNzkuOTM3NSAzNTMuMTMyODEyIDc1Ljg2MzI4MSAzNTMuMTMyODEyIDY5LjUyNzM0NCBDIDM1My4xMzI4MTIgNjQuMjg5MDYyIDM0OS43MDcwMzEgNjAuNzk2ODc1IDM0My43NTc4MTIgNjAuMDg1OTM4IEwgMzM4LjY0ODQzOCA1OS41MDM5MDYgQyAzMzUuNDgwNDY5IDU5LjExMzI4MSAzMzMuOTkyMTg4IDU4LjA3ODEyNSAzMzMuOTkyMTg4IDU2LjIwMzEyNSBDIDMzMy45OTIxODggNTQuMDAzOTA2IDMzNi4wNjI1IDUyLjcxMDkzOCAzMzkuMzU5Mzc1IDUyLjcxMDkzOCBDIDM0Mi44NTE1NjIgNTIuNzEwOTM4IDM0NS4wNTA3ODEgNTMuODc1IDM0NS4xNzk2ODggNTYuMzk4NDM4IEwgMzUyLjg3NSA1Ni4zOTg0MzggQyAzNTIuNDg4MjgxIDQ5LjgwMDc4MSAzNDcuNDQ1MzEyIDQ2LjQzNzUgMzM5LjQ4ODI4MSA0Ni40Mzc1IEMgMzMxLjQ2ODc1IDQ2LjQzNzUgMzI2LjQyNTc4MSA1MC4zMjAzMTIgMzI2LjQyNTc4MSA1Ni41OTM3NSBDIDMyNi40MjU3ODEgNjEuOTYwOTM4IDMzMC4xMTMyODEgNjUuNDUzMTI1IDMzNS45OTYwOTQgNjYuMDk3NjU2IEwgMzQxLjA0Mjk2OSA2Ni42MTcxODggQyAzNDMuODIwMzEyIDY2Ljg3NSAzNDUuMzc1IDY3LjkxMDE1NiAzNDUuMzc1IDY5LjkxNDA2MiBDIDM0NS4zNzUgNzIuMjQyMTg4IDM0My4yMzgyODEgNzMuNzMwNDY5IDMzOS43NDYwOTQgNzMuNzMwNDY5IEMgMzM1Ljg2NzE4OCA3My43MzA0NjkgMzMzLjYwNTQ2OSA3Mi40Mzc1IDMzMy4zNDM3NSA2OS43ODUxNTYgTCAzMjUuMzkwNjI1IDY5Ljc4NTE1NiBDIDMyNS43MTQ4NDQgNzYuNDQ1MzEyIDMzMC44ODY3MTkgNzkuOTM3NSAzMzkuNDg4MjgxIDc5LjkzNzUgTSAzNzIuOTg4MjgxIDc5LjkzNzUgQyAzODAuNjgzNTk0IDc5LjkzNzUgMzg1LjUzNTE1NiA3NS45Mjk2ODggMzg3LjQ3MjY1NiA2OS43ODUxNTYgTCAzNzkuNTg1OTM4IDY5Ljc4NTE1NiBDIDM3OC41NTA3ODEgNzIuMDQ2ODc1IDM3Ni4zNTE1NjIgNzMuNDcyNjU2IDM3My4wNTA3ODEgNzMuNDcyNjU2IEMgMzY4LjEzNjcxOSA3My40NzI2NTYgMzY1LjA5NzY1NiA3MC42MjUgMzY0LjcxMDkzOCA2NS44Mzk4NDQgTCAzODcuODYzMjgxIDY1LjgzOTg0NCBDIDM4Ny45OTIxODggNjQuNTQ2ODc1IDM4Ny45OTIxODggNjMuNTExNzE5IDM4Ny45OTIxODggNjIuNTQyOTY5IEMgMzg3Ljk5MjE4OCA1Mi42NDg0MzggMzgyLjE3MTg3NSA0Ni40Mzc1IDM3Mi42MDE1NjIgNDYuNDM3NSBDIDM2My40ODA0NjkgNDYuNDM3NSAzNTcuMTQ0NTMxIDUyLjkwNjI1IDM1Ny4xNDQ1MzEgNjIuOTk2MDk0IEMgMzU3LjE0NDUzMSA3My4yMTA5MzggMzYzLjQxNzk2OSA3OS45Mzc1IDM3Mi45ODgyODEgNzkuOTM3NSBNIDM2NC43MTA5MzggNTkuODkwNjI1IEMgMzY0Ljk2ODc1IDU1LjU1ODU5NCAzNjcuOTQ1MzEyIDUyLjY0ODQzOCAzNzIuNjAxNTYyIDUyLjY0ODQzOCBDIDM3Ny41MTU2MjUgNTIuNjQ4NDM4IDM4MC4yMzA0NjkgNTUuNTU4NTk0IDM4MC4yMzA0NjkgNTkuNjk1MzEyIEwgMzgwLjIzMDQ2OSA1OS44OTA2MjUgWiBNIDM5Mi44Mzk4NDQgNzguOTY4NzUgTCA0MDAuNTM5MDYyIDc4Ljk2ODc1IEwgNDAwLjUzOTA2MiA2MC4wODU5MzggQyA0MDAuNTM5MDYyIDU2LjE0MDYyNSA0MDIuMjE4NzUgNTQuMTk5MjE5IDQwNS45Njg3NSA1NC4xOTkyMTkgTCA0MTIuNjMyODEyIDU0LjE5OTIxOSBMIDQxMi42MzI4MTIgNDcuNDEwMTU2IEwgNDA2LjgxMjUgNDcuNDEwMTU2IEMgNDAyLjg2NzE4OCA0Ny40MTAxNTYgNDAwLjQxMDE1NiA0OS40MTQwNjIgMzk5LjYzMjgxMiA1Mi45MDYyNSBMIDM5OS42MzI4MTIgNDcuNDEwMTU2IEwgMzkyLjgzOTg0NCA0Ny40MTAxNTYgWiBNIDM5Mi44Mzk4NDQgNzguOTY4NzUgIi8+Cjwvc3ZnPgo=';
+        const NW_BTN_VARIANT = {
+          primary: 'bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent',
+          secondary: 'bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06',
+          ghost: 'bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue',
+          danger: 'bg-transparent text-danger border-transparent hover:bg-danger-bg',
+          'danger-primary': 'bg-danger text-white border-transparent hover:bg-[#82241C]'
+        };
+        const NW_BTN_SIZE = { sm: 'h-7 px-2.5 text-xs gap-1.5 rounded-[7px]', md: 'h-8 px-3 text-sm gap-2 rounded-lg', lg: 'h-9 px-3.5 text-base gap-2 rounded-lg' };
+        const NW_BTN_ICON_ONLY = { sm: 'w-7 px-0', md: 'w-8 px-0', lg: 'w-9 px-0' };
+        const nwBtnClass = (variant = 'secondary', size = 'md', iconOnly = false) =>
+          'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 '
+          + NW_BTN_VARIANT[variant] + ' ' + NW_BTN_SIZE[size] + (iconOnly ? ' ' + NW_BTN_ICON_ONLY[size] : '');
+        // Button: { variant, size, icon (Lucide-Komponente), iconOnly, loading, ...buttonProps }
+        const NwButton = ({ variant = 'secondary', size = 'md', icon, iconOnly, loading, className, children, type = 'button', ...rest }) =>
+          React.createElement('button', {
+            type, title: rest.title || (iconOnly ? rest['aria-label'] : undefined), 'aria-busy': loading || undefined,
+            className: nwBtnClass(variant, size, iconOnly) + (loading ? ' pointer-events-none opacity-70' : '') + (className ? ' ' + className : ''),
+            ...rest
+          },
+            loading
+              ? React.createElement('span', { 'aria-hidden': true, className: 'inline-block h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent' })
+              : icon && React.createElement(icon, { size: size === 'sm' ? 14 : 16, 'aria-hidden': true }),
+            !iconOnly && children
+          );
+        const NW_TONE_CHIP = { ok: 'bg-ok-bg text-ok', warn: 'bg-warn-bg text-warn', danger: 'bg-danger-bg text-danger', brand: 'bg-nw-blue-06 text-nw-blue', neutral: 'bg-nw-grey-40 text-ink-60' };
+        const NW_TONE_DOT = { ok: 'bg-nw-green', warn: 'bg-traffic-amber', danger: 'bg-traffic-red', brand: 'bg-nw-blue', neutral: 'bg-nw-grey' };
+        // Chip = Zustand (24 px, rund) · Tag = Klassifizierung (18 px, Versalien) · Dot = Ampel (8 px)
+        const NwChip = ({ tone = 'neutral', icon, className, children }) =>
+          React.createElement('span', { className: 'inline-flex h-6 shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2.5 text-xs font-medium ' + NW_TONE_CHIP[tone] + (className ? ' ' + className : '') },
+            icon && React.createElement(icon, { size: 12, 'aria-hidden': true }), children);
+        const NwTag = ({ tone = 'neutral', className, children }) =>
+          React.createElement('span', { className: 'inline-flex h-[18px] shrink-0 items-center whitespace-nowrap rounded px-1.5 text-2xs font-semibold uppercase leading-none tracking-[.04em] ' + NW_TONE_CHIP[tone] + (className ? ' ' + className : '') }, children);
+        const NwDot = ({ tone = 'neutral', className }) =>
+          React.createElement('span', { 'aria-hidden': true, className: 'inline-block h-2 w-2 shrink-0 rounded-full ' + NW_TONE_DOT[tone] + (className ? ' ' + className : '') });
+        // Seitenkopf: Eyebrow, H1 (NW-Blau), Meta, Aktionen rechts
+        const NwPageHeader = ({ eyebrow, title, icon, meta, actions, className }) =>
+          React.createElement('header', { className: 'mb-5 flex flex-wrap items-start gap-4' + (className ? ' ' + className : '') },
+            React.createElement('div', { className: 'min-w-0 flex-1' },
+              eyebrow && React.createElement('div', { className: 'eyebrow mb-1' }, eyebrow),
+              React.createElement('h1', { className: 'flex items-center gap-2.5 text-xl font-semibold tracking-[-.014em] text-nw-blue' },
+                icon && React.createElement(icon, { size: 22, 'aria-hidden': true, className: 'shrink-0' }), title),
+              meta && React.createElement('div', { className: 'mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-ink-60' }, meta)
+            ),
+            actions && React.createElement('div', { className: 'flex shrink-0 flex-wrap items-center justify-end gap-2 pt-0.5' }, actions)
+          );
+        const NwPane = ({ className, children, ...rest }) =>
+          React.createElement('section', { className: 'rounded-card border border-line bg-white shadow-card' + (className ? ' ' + className : ''), ...rest }, children);
+        const NwPaneHeader = ({ title, meta, actions, icon }) =>
+          React.createElement('div', { className: 'flex min-h-[46px] flex-wrap items-center gap-2.5 border-b border-line-2 px-4 py-2' },
+            icon && React.createElement(icon, { size: 16, 'aria-hidden': true, className: 'text-nw-blue' }),
+            React.createElement('h2', { className: 'text-base font-semibold text-nw-blue' }, title),
+            meta && React.createElement('span', { className: 'text-xs text-ink-40' }, meta),
+            actions && React.createElement('div', { className: 'ml-auto flex flex-wrap items-center gap-2' }, actions)
+          );
+        const NwStatCard = ({ label, value, hint, tone, icon, onClick }) =>
+          React.createElement(onClick ? 'button' : 'div', {
+            onClick, type: onClick ? 'button' : undefined,
+            className: 'rounded-card border border-line bg-white px-4 py-3.5 text-left shadow-card' + (onClick ? ' transition-transform duration-150 hover:-translate-y-0.5' : '')
+          },
+            React.createElement('div', { className: 'flex items-center gap-1.5 eyebrow' },
+              icon && React.createElement(icon, { size: 12, 'aria-hidden': true }), label),
+            React.createElement('div', { className: 'mt-2 flex items-baseline gap-2' },
+              React.createElement('span', { className: 'text-xl font-semibold tracking-[-.02em] tnum ' + (tone === 'warn' ? 'text-warn' : tone === 'danger' ? 'text-danger' : tone === 'ok' ? 'text-ok' : 'text-nw-blue') }, value)),
+            hint && React.createElement('div', { className: 'mt-1 text-xs text-ink-40' }, hint)
+          );
+        const NwEmptyState = ({ icon, title, text, action }) =>
+          React.createElement('div', { className: 'flex flex-col items-center px-4 py-7 text-center' },
+            React.createElement('div', { className: 'mb-2.5 grid h-9 w-9 place-items-center rounded-full border border-line bg-nw-grey-40 text-ink-40' },
+              icon && React.createElement(icon, { size: 16, 'aria-hidden': true })),
+            React.createElement('div', { className: 'text-sm font-semibold text-nw-blue' }, title),
+            text && React.createElement('div', { className: 'mt-0.5 max-w-[52ch] text-xs text-ink-40' }, text),
+            action && React.createElement('div', { className: 'mt-3' }, action)
+          );
+        // Segmented: Pillen-Auswahl (z. B. Sprache, Ansicht)
+        const NwSegmented = ({ options, value, onChange, size = 'md', ariaLabel, className }) =>
+          React.createElement('div', { role: 'radiogroup', 'aria-label': ariaLabel, title: ariaLabel, className: 'inline-flex shrink-0 gap-0.5 rounded-lg bg-nw-blue-12 p-[3px] ' + (size === 'sm' ? 'h-7' : 'h-8') + (className ? ' ' + className : '') },
+            options.map(o => React.createElement('button', {
+              key: o.value, type: 'button', role: 'radio', 'aria-checked': value === o.value, onClick: () => onChange(o.value),
+              className: 'inline-flex flex-1 items-center justify-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-[background-color,color,box-shadow] duration-150 '
+                + (value === o.value ? 'bg-white text-nw-blue shadow-card' : 'text-ink-60 hover:text-nw-blue')
+            }, o.icon && React.createElement(o.icon, { size: 13, 'aria-hidden': true }), o.label))
+          );
+
+
+        // ============================================
         // REACT ERROR BOUNDARY
         // Fängt unbehandelte Fehler in Komponenten ab
         // und zeigt eine benutzerfreundliche Fehlermeldung
@@ -13743,9 +13833,6 @@ Goal 3: 20% weight, 80% achieved → 16 points
             }
             
             // === HELPER FUNCTIONS ===
-            const handleLogout = async () => {
-              try { await auth.signOut(); setActiveView('dashboard'); } catch (e) { console.error(e); }
-            };
             
             // Selbstreflexions-Link generieren
             const getSelfLink = (member) => member.accessCode 
@@ -28311,7 +28398,12 @@ const renderDashboard = () => {
             );
           }
 
-          return React.createElement('div', { className: "min-h-screen bg-nw-grey-40 font-sans text-ink flex flex-col md:flex-row" },
+          // Abmelden (Seitenleiste und Team-Übersicht)
+          const handleLogout = async () => {
+              try { await auth.signOut(); setActiveView('dashboard'); } catch (e) { console.error(e); }
+          };
+
+          return React.createElement('div', { className: "min-h-screen bg-panel font-sans text-base text-ink flex flex-col md:flex-row" },
             
             // === IMPORT SELF-ASSESSMENT MODAL ===
             showImportModal && importData && React.createElement('div', { 
@@ -28530,109 +28622,92 @@ const renderDashboard = () => {
               )
             ),
             
-            React.createElement('aside', { className: "bg-nw-blue text-nw-grey w-full md:w-64 flex-shrink-0 flex flex-col" }, // Sidebar background
-              React.createElement('div', { className: "p-6 border-b border-ink" },
-                React.createElement('h1', { className: "text-white font-semibold text-xl tracking-tight" }, "nıederwıeser"),
-                // Akzentfarbe geändert auf #6EBD84
-                React.createElement('p', { className: "text-xs mt-1 uppercase tracking-widest", style: { color: "#6EBD84" } }, t.title)
-              ),
-              React.createElement('nav', { className: "flex-1 p-4 space-y-2" },
-                React.createElement('div', { className: "mb-6 px-2" },
-                    // Sprachauswahl modern
-                    React.createElement('div', { className: "bg-ink/50 backdrop-blur rounded-xl p-1.5 border border-ink-60/50" },
-                        React.createElement('div', { className: "flex gap-1" },
-                            React.createElement('button', {
-                                onClick: () => setLang('de'),
-                                className: `flex-1 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-300 ${lang === 'de' ? 'bg-nw-green text-white shadow-float shadow-[#6EBD84]/30' : 'text-ink-40 hover:text-white hover:bg-ink/50'}`
-                            }, "DE"),
-                            React.createElement('button', {
-                                onClick: () => setLang('it'),
-                                className: `flex-1 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-300 ${lang === 'it' ? 'bg-nw-green text-white shadow-float shadow-[#6EBD84]/30' : 'text-ink-40 hover:text-white hover:bg-ink/50'}`
-                            }, "IT"),
-                            React.createElement('button', {
-                                onClick: () => setLang('en'),
-                                className: `flex-1 py-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all duration-300 ${lang === 'en' ? 'bg-nw-green text-white shadow-float shadow-[#6EBD84]/30' : 'text-ink-40 hover:text-white hover:bg-ink/50'}`
-                            }, "EN")
-                        )
+            // === n.Org SHELL: schwebende Seitenleiste links, Logo oben links, kein Top-Header ===
+            React.createElement('aside', { className: "w-full md:w-[268px] flex-shrink-0 p-3 md:pr-0 md:sticky md:top-0 md:h-screen z-20" },
+              React.createElement('div', { className: "flex h-full flex-col rounded-xl border border-line bg-white shadow-card" },
+                // 1) Logo (Klick → Start)
+                React.createElement('div', { className: "px-4 pt-4 pb-3" },
+                  React.createElement('button', {
+                    type: 'button',
+                    onClick: () => { setActiveView('dashboard'); setActiveScore(3); },
+                    className: "block rounded-lg text-left",
+                    title: t.dashboard
+                  },
+                    React.createElement('img', { src: NW_LOGO_SRC, alt: 'Niederwieser — Flexible Food Packaging', className: "h-auto w-[196px] max-w-full" })
+                  ),
+                  React.createElement('p', { className: "mt-2 text-xs font-semibold text-nw-blue" }, t.title)
+                ),
+                React.createElement('div', { className: "mx-4 mb-3 border-t border-line-2" }),
+                // 2) App-Sprache
+                React.createElement('div', { className: "px-3 mb-3" },
+                  React.createElement(NwSegmented, {
+                    ariaLabel: 'Select Language',
+                    className: 'w-full',
+                    value: lang,
+                    onChange: (v) => setLang(v),
+                    options: [{ value: 'de', label: 'DE' }, { value: 'it', label: 'IT' }, { value: 'en', label: 'EN' }]
+                  })
+                ),
+                // 3) Navigation mit Eyebrows (scrollt intern)
+                (() => {
+                  const navItem = (label, icon, isActive, onClick) => React.createElement('button', {
+                    type: 'button',
+                    onClick,
+                    'aria-current': isActive ? 'page' : undefined,
+                    className: `flex h-8 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-sm transition-colors duration-150 active:scale-[.98] ${isActive ? 'bg-nw-blue-06 font-semibold text-nw-blue' : 'text-ink-60 hover:bg-nw-grey-40 hover:text-ink'}`
+                  }, React.createElement(icon, { size: 16, 'aria-hidden': true, className: 'shrink-0' }), React.createElement('span', { className: 'truncate' }, label));
+                  const section = (eyebrow, ...items) => React.createElement('div', { className: 'mt-4' },
+                    eyebrow && React.createElement('p', { className: 'eyebrow mb-1 px-2.5' }, eyebrow),
+                    React.createElement('div', { className: 'space-y-0.5' }, ...items)
+                  );
+                  return React.createElement('nav', { className: "flex-1 overflow-y-auto px-3 pb-3", 'aria-label': getText(lang, 'Hauptnavigation', 'Navigazione principale', 'Main navigation') },
+                    section(getText(lang, 'Menü', 'Menu', 'Menu'),
+                      navItem(t.dashboard, LayoutGrid, activeView === 'dashboard', () => { setActiveView('dashboard'); setActiveScore(3); }),
+                      navItem(lang === 'de' ? 'Anleitung' : lang === 'it' ? 'Guida' : 'Guide', BookOpen, activeView === 'guide', () => { setActiveView('guide'); }),
+                      navItem(t.competencies, Award, activeView === 'list' || activeView === 'detail', () => { setActiveView('list'); setActiveScore(3); }),
+                      navItem(t.gpsExplainer, Calculator, activeView === 'gpsexplainer', () => { setActiveView('gpsexplainer'); setActiveScore(3); })
                     ),
-                    React.createElement('p', { className: "text-2xs mt-2 text-center uppercase tracking-widest", style: { color: '#6EBD84' } },
-                        'Select Language'
+                    // === SECTION: FÜR MICH ===
+                    section(getText(lang, 'Für mich', 'Per me', 'For me'),
+                      navItem(getText(lang, 'Meine Selbstreflexion', 'La mia autovalutazione', 'My Self-Reflection'), User, activeView === 'mySelfReflection', () => { setActiveView('mySelfReflection'); })
+                    ),
+                    // === SECTION: TEAM ===
+                    section(getText(lang, 'Team', 'Team', 'Team'),
+                      navItem(getText(lang, 'Team-Übersicht', 'Panoramica team', 'Team Overview'), Users, activeView === 'teamoverview', () => { setActiveView('teamoverview'); setActiveScore(3); }),
+                      // Team-Kalibrierung (nur wenn Team vorhanden)
+                      teamMembers.length > 0 && navItem(getText(lang, 'Kalibrierung', 'Calibrazione', 'Calibration'), Scale, activeView === 'teamcalibration', () => { setActiveView('teamcalibration'); setActiveScore(3); })
+                    ),
+                    // HR ADMIN Menüpunkt (nur für HR-Admins sichtbar)
+                    isHRAdmin && section('HR Admin',
+                      navItem('HR Dashboard', Building2, activeView === 'hrdashboard', () => { setActiveView('hrdashboard'); })
+                    ),
+                    // SALARY REVIEW Menüpunkt (für HR-Admins, Executives und eingeladene Manager mit entsprechendem Zugriff)
+                    (isHRAdmin || (salaryReviewUserRole && (salaryReviewUserRole.accessSalary || salaryReviewUserRole.accessGoals))) && section(
+                      isHRAdmin ? null : (salaryReviewUserRole?.role === 'executive' ? 'Executive Access' : 'Manager Access'),
+                      // Salary Review Button - nur wenn accessSalary true
+                      (isHRAdmin || salaryReviewUserRole?.accessSalary) && navItem('Salary Review', TrendingUp, activeView === 'salaryreview', () => { setActiveView('salaryreview'); }),
+                      // Goals Dashboard Button - nur wenn accessGoals true
+                      (isHRAdmin || salaryReviewUserRole?.accessGoals) && navItem(lang === 'de' ? 'Ziel-Dashboard' : lang === 'it' ? 'Dashboard Obiettivi' : 'Goals Dashboard', Target, activeView === 'goalsdashboard', () => { setActiveView('goalsdashboard'); })
                     )
-                ),
-                // Navigations-Buttons mit Akzentfarbe - OHNE Icons, weiße Schrift
-                React.createElement('button', {
-                  onClick: () => { setActiveView('dashboard'); setActiveScore(3); },
-                  className: `w-full text-left px-4 py-3 rounded-lg transition-colors ${activeView === 'dashboard' ? 'bg-nw-green text-white font-semibold' : 'text-white hover:bg-ink'}`
-                }, t.dashboard),
-                React.createElement('button', {
-                  onClick: () => { setActiveView('guide'); },
-                  className: `w-full text-left px-4 py-3 rounded-lg transition-colors ${activeView === 'guide' ? 'bg-nw-green text-white font-semibold' : 'text-white hover:bg-ink'}`
-                }, lang === 'de' ? 'Anleitung' : lang === 'it' ? 'Guida' : 'Guide'),
-                React.createElement('button', {
-                  onClick: () => { setActiveView('list'); setActiveScore(3); },
-                  className: `w-full text-left px-4 py-3 rounded-lg transition-colors ${activeView === 'list' || activeView === 'detail' ? 'bg-nw-green text-white font-semibold' : 'text-white hover:bg-ink'}`
-                }, t.competencies),
-                React.createElement('button', {
-                  onClick: () => { setActiveView('gpsexplainer'); setActiveScore(3); },
-                  className: `w-full text-left px-4 py-3 rounded-lg transition-colors ${activeView === 'gpsexplainer' ? 'bg-nw-green text-white font-semibold' : 'text-white hover:bg-ink'}`
-                }, t.gpsExplainer),
-                
-                // === SECTION: FÜR MICH ===
-                React.createElement('div', { className: 'mt-4 pt-4 border-t border-ink-60' },
-                  React.createElement('p', { className: 'text-xs px-4 mb-2 uppercase tracking-wider text-ink-40' }, 
-                    getText(lang, 'Für mich', 'Per me', 'For me')
-                  ),
-                  React.createElement('button', {
-                    onClick: () => { setActiveView('mySelfReflection'); },
-                    className: `w-full text-left px-4 py-3 rounded-lg transition-colors ${activeView === 'mySelfReflection' ? 'bg-nw-green text-white font-semibold' : 'text-white hover:bg-ink'}`
-                  }, getText(lang, 'Meine Selbstreflexion', 'La mia autovalutazione', 'My Self-Reflection'))
-                ),
-                
-                // === SECTION: TEAM ===
-                React.createElement('div', { className: 'mt-4 pt-4 border-t border-ink-60' },
-                  React.createElement('p', { className: 'text-xs px-4 mb-2 uppercase tracking-wider text-ink-40' }, 
-                    getText(lang, 'Team', 'Team', 'Team')
-                  ),
-                  React.createElement('button', {
-                    onClick: () => { setActiveView('teamoverview'); setActiveScore(3); },
-                    className: `w-full text-left px-4 py-3 rounded-lg transition-colors ${activeView === 'teamoverview' ? 'bg-nw-green text-white font-semibold' : 'text-white hover:bg-ink'}`
-                  }, getText(lang, 'Team-Übersicht', 'Panoramica team', 'Team Overview')),
-                  // Team-Kalibrierung (nur wenn Team vorhanden)
-                  teamMembers.length > 0 && React.createElement('button', {
-                    onClick: () => { setActiveView('teamcalibration'); setActiveScore(3); },
-                    className: `w-full text-left px-4 py-3 rounded-lg transition-colors ${activeView === 'teamcalibration' ? 'bg-nw-green text-white font-semibold' : 'text-white hover:bg-ink'}`
-                  }, getText(lang, 'Kalibrierung', 'Calibrazione', 'Calibration'))
-                ),
-                
-                // HR ADMIN Menüpunkt (nur für HR-Admins sichtbar)
-                isHRAdmin && React.createElement('div', { className: 'mt-4 pt-4 border-t border-ink-60' },
-                  React.createElement('p', { className: 'text-xs px-4 mb-2 uppercase tracking-wider', style: { color: '#6EBD84' } }, 'HR Admin'),
-                  React.createElement('button', {
-                    onClick: () => { setActiveView('hrdashboard'); },
-                    className: `w-full text-left px-4 py-3 rounded-lg transition-colors ${activeView === 'hrdashboard' ? 'bg-nw-blue text-white font-semibold' : 'text-white hover:bg-ink'}`
-                  }, 'HR Dashboard')
-                ),
-                
-                // SALARY REVIEW Menüpunkt (für HR-Admins, Executives und eingeladene Manager mit entsprechendem Zugriff)
-                (isHRAdmin || (salaryReviewUserRole && (salaryReviewUserRole.accessSalary || salaryReviewUserRole.accessGoals))) && React.createElement('div', { className: isHRAdmin ? '' : 'mt-4 pt-4 border-t border-ink-60' },
-                  !isHRAdmin && React.createElement('p', { className: 'text-xs px-4 mb-2 uppercase tracking-wider', style: { color: '#2F7A48' } }, 
-                    salaryReviewUserRole?.role === 'executive' ? 'Executive Access' : 'Manager Access'
-                  ),
-                  // Salary Review Button - nur wenn accessSalary true
-                  (isHRAdmin || salaryReviewUserRole?.accessSalary) && React.createElement('button', {
-                    onClick: () => { setActiveView('salaryreview'); },
-                    className: `w-full text-left px-4 py-3 rounded-lg transition-colors ${activeView === 'salaryreview' ? 'bg-ok text-white font-semibold' : 'text-white hover:bg-ink'}`
-                  }, 'Salary Review'),
-                  // Goals Dashboard Button - nur wenn accessGoals true
-                  (isHRAdmin || salaryReviewUserRole?.accessGoals) && React.createElement('button', {
-                    onClick: () => { setActiveView('goalsdashboard'); },
-                    className: `w-full text-left px-4 py-3 rounded-lg transition-colors ${activeView === 'goalsdashboard' ? 'bg-nw-blue text-white font-semibold' : 'text-white hover:bg-ink'}`
-                  }, lang === 'de' ? 'Ziel-Dashboard' : lang === 'it' ? 'Dashboard Obiettivi' : 'Goals Dashboard')
+                  );
+                })(),
+                // 4) Nutzerkarte am Fuß (nur angemeldet, nicht im anonymen Gastzugang)
+                user && !user.isAnonymous && React.createElement('div', { className: "border-t border-line-2 p-3" },
+                  React.createElement('div', { className: "flex items-center gap-2.5 rounded-lg px-1 py-1" },
+                    React.createElement('div', { className: "grid h-8 w-8 shrink-0 place-items-center rounded-full bg-nw-blue text-xs font-semibold text-white", 'aria-hidden': true },
+                      (getUserDisplayName(user) || '?').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase()
+                    ),
+                    React.createElement('div', { className: "min-w-0 flex-1" },
+                      React.createElement('div', { className: "truncate text-sm font-semibold text-ink" }, getUserDisplayName(user)),
+                      React.createElement('div', { className: "truncate text-2xs text-ink-40" }, isHRAdmin ? 'HR Admin' : getText(lang, 'Führungskraft', 'Responsabile', 'Manager'))
+                    ),
+                    React.createElement(NwButton, { variant: 'ghost', size: 'sm', icon: LogOut, onClick: handleLogout, title: user.email || '' }, getText(lang, 'Abmelden', 'Esci', 'Logout'))
+                  )
                 )
               )
             ),
-            React.createElement('main', { className: "flex-1 overflow-y-auto h-screen p-4 md:p-6 md:pb-20" },
-              React.createElement('div', { className: (activeView === 'hrdashboard' || activeView === 'salaryreview' || activeView === 'goalsdashboard') ? "w-full" : "max-w-4xl mx-auto" },
+            React.createElement('main', { className: "min-w-0 flex-1 overflow-y-auto md:h-screen px-4 py-5 md:px-8 md:py-6 md:pb-20" },
+              React.createElement('div', { className: (activeView === 'hrdashboard' || activeView === 'salaryreview' || activeView === 'goalsdashboard') ? "w-full" : "max-w-5xl mx-auto" },
                 activeView === 'dashboard' && renderDashboard(),
                 activeView === 'guide' && renderGuide(),
                 activeView === 'list' && renderCompetencyList(),

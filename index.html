@@ -236,9 +236,6 @@
             @apply bg-panel text-ink font-sans antialiased text-base;
             font-feature-settings: 'cv11', 'ss01';
           }
-          h1, h2, h3, h4 {
-            @apply text-nw-blue;
-          }
           :focus-visible {
             outline: 2px solid theme('colors.nw-blue');
             outline-offset: 2px;
@@ -6691,7 +6688,7 @@
                   e('div', { className: 'bg-warn text-white p-6' },
                     e('div', { className: 'flex justify-between items-start' },
                       e('div', null,
-                        e('h2', { className: 'text-lg font-semibold flex items-center gap-3' },
+                        e('h2', { className: 'text-lg font-semibold flex items-center gap-3 text-nw-blue' },
                           e(Clock, { size: 28 }),
                           lang === 'de' ? 'Versions-Vorschau' : 'Version Preview'
                         ),
@@ -14469,7 +14466,7 @@ Best regards`
                       React.createElement('div', { className: 'flex items-center gap-3' },
                         React.createElement(Users, { size: 22 }),
                         React.createElement('div', null,
-                          React.createElement('h3', { className: 'font-semibold text-lg' }, 
+                          React.createElement('h3', { className: 'font-semibold text-lg text-nw-blue' }, 
                             lang === 'de' ? 'Mitarbeiter teilen' : 'Share Employee'
                           ),
                           currentMember && React.createElement('p', { className: 'text-ink-60 text-sm' }, 
@@ -14814,7 +14811,7 @@ Best regards`
                       React.createElement('span', { className: 'block h-full rounded-full bg-nw-green transition-[width] duration-300', style: { width: `${progress}%` } })),
                     React.createElement('span', { className: 'tnum font-medium text-ink' }, `${progress}%`))
                 ],
-                actions: React.createElement(NwSegmented, {
+                actions: teamMembers.length > 0 && React.createElement(NwSegmented, {
                   ariaLabel: getText(lang, 'Ansicht', 'Vista', 'View'),
                   value: teamViewMode,
                   onChange: (v) => setTeamViewMode(v),
@@ -15943,7 +15940,7 @@ Best regards`
                   React.createElement('div', { className: 'bg-white border border-line shadow-card p-6 text-ink flex-shrink-0' },
                     React.createElement('div', { className: 'flex justify-between items-start' },
                       React.createElement('div', null,
-                        React.createElement('h2', { className: 'text-lg font-semibold' }, selectedEmployee.employeeName),
+                        React.createElement('h2', { className: 'text-lg font-semibold text-nw-blue' }, selectedEmployee.employeeName),
                         React.createElement('p', { className: 'text-ink-60 text-sm mt-1' },
                           goals.length + ' ' + getText(lang, 'Ziele definiert', 'obiettivi definiti', 'goals defined')
                         ),
@@ -15997,7 +15994,7 @@ Best regards`
             return React.createElement('div', { className: 'space-y-6' },
               // Header
               React.createElement('div', { className: 'bg-white border border-line shadow-card rounded-xl p-6 text-ink' },
-                React.createElement('h1', { className: 'text-xl tracking-[-.014em] font-semibold mb-2' },
+                React.createElement('h1', { className: 'text-xl tracking-[-.014em] font-semibold mb-2 text-nw-blue' },
                   lang === 'de' ? 'Ziel-Dashboard (MBO)' : lang === 'it' ? 'Dashboard Obiettivi (MBO)' : 'Goals Dashboard (MBO)'
                 ),
                 React.createElement('p', { className: 'text-ink-60' },
@@ -16588,7 +16585,7 @@ Best regards`
               // INVITE MODAL
                             salaryReviewInviteModal && React.createElement('div', { className: 'fixed inset-0 bg-ink/30 flex items-center justify-center z-50 p-4' },
                 React.createElement('div', { className: 'bg-white rounded-xl shadow-float max-w-md w-full p-5' },
-                  React.createElement('h3', { className: 'text-lg font-semibold mb-4 flex items-center gap-2' }, 
+                  React.createElement('h3', { className: 'text-lg font-semibold mb-4 flex items-center gap-2 text-nw-blue' }, 
                     React.createElement(UserPlus, { size: 20, className: 'text-ok' }),
                     lang === 'de' ? 'Benutzer einladen' : 'Invite User'
                   ),
@@ -16787,7 +16784,7 @@ Best regards`
                 className: 'rounded-card p-6 text-ink bg-white border border-line shadow-card',
                 style: { }
               },
-                React.createElement('h1', { className: 'text-xl tracking-[-.014em] font-semibold mb-2 flex items-center gap-3' },
+                React.createElement('h1', { className: 'text-xl tracking-[-.014em] font-semibold mb-2 flex items-center gap-3 text-nw-blue' },
                   React.createElement(Building2, { size: 28 }),
                   '🔐 HR Admin Dashboard'
                 ),
@@ -17328,7 +17325,7 @@ Best regards`
                   className: 'rounded-card p-6 text-white',
                   style: { background: '#F59D24' }
                 },
-                  React.createElement('h2', { className: 'text-lg font-semibold mb-2 flex items-center gap-3' },
+                  React.createElement('h2', { className: 'text-lg font-semibold mb-2 flex items-center gap-3 text-nw-blue' },
                     React.createElement(Clock, { size: 28 }),
                     getText(lang, 'Versionshistorie aller Beurteilungen', 'Storico versioni', 'Version History')
                   ),
@@ -17567,7 +17564,7 @@ Best regards`
                   },
                     React.createElement('div', { className: 'flex items-center justify-between' },
                       React.createElement('div', null,
-                        React.createElement('h2', { className: 'text-lg font-semibold flex items-center gap-2' },
+                        React.createElement('h2', { className: 'text-lg font-semibold flex items-center gap-2 text-nw-blue' },
                           React.createElement(Clock, { size: 24 }),
                           getText(lang, 'Versions-Details', 'Dettagli versione', 'Version Details')
                         ),
@@ -17841,7 +17838,7 @@ Best regards`
                   className: 'rounded-card p-6 text-ink bg-white border border-line shadow-card',
                   style: { }
                 },
-                  React.createElement('h2', { className: 'text-lg font-semibold mb-2 flex items-center gap-3' },
+                  React.createElement('h2', { className: 'text-lg font-semibold mb-2 flex items-center gap-3 text-nw-blue' },
                     React.createElement('span', { className: 'text-2xl' }, '🔔'),
                     getText(lang, 'Kalibrierung: IST vs. SOLL (Normalverteilung)', 'Calibrazione: Effettivo vs. Atteso', 'Calibration: Actual vs. Expected')
                   ),
@@ -18530,7 +18527,7 @@ Best regards`
                   className: 'rounded-card p-6 text-ink bg-white border border-line shadow-card',
                   style: { }
                 },
-                  React.createElement('h2', { className: 'text-lg font-semibold mb-2 flex items-center gap-3' },
+                  React.createElement('h2', { className: 'text-lg font-semibold mb-2 flex items-center gap-3 text-nw-blue' },
                     React.createElement('span', { className: 'text-2xl' }, '⚖️'),
                     getText(lang, 'Rater-Bias-Index: Härte-Milde-Analyse', 'Indice Bias Valutatore', 'Rater Bias Index: Leniency-Strictness Analysis')
                   ),
@@ -19077,7 +19074,7 @@ Best regards`
                   className: 'rounded-card p-6 text-white',
                   style: { background: '#2F7A48' }
                 },
-                  React.createElement('h2', { className: 'text-lg font-semibold mb-2 flex items-center gap-3' },
+                  React.createElement('h2', { className: 'text-lg font-semibold mb-2 flex items-center gap-3 text-nw-blue' },
                     React.createElement('span', { className: 'text-2xl' }, '🕸️'),
                     getText(lang, 'Kompetenz-Radar: Profilvergleich', 'Radar Competenze: Confronto profili', 'Competency Radar: Profile Comparison')
                   ),
@@ -20705,7 +20702,7 @@ Best regards`
                   React.createElement('div', { className: 'bg-white border border-line shadow-card text-ink p-6' },
                     React.createElement('div', { className: 'flex justify-between items-start' },
                       React.createElement('div', null,
-                        React.createElement('h2', { className: 'text-lg font-semibold flex items-center gap-2' },
+                        React.createElement('h2', { className: 'text-lg font-semibold flex items-center gap-2 text-nw-blue' },
                           hrViewAppraisal.type === 'self' || hrViewAppraisal.type === 'self_assessment' || hrViewAppraisal.type === 'self-reflection' || hrViewAppraisal.type === 'self_assessment_standalone' ? '🪞' : '📋',
                           hrViewAppraisal.employeeName || hrViewAppraisal.formData?.employee || 'N/A'
                         ),
@@ -20948,7 +20945,7 @@ Best regards`
                   React.createElement('div', { className: 'bg-warn text-white p-6' },
                     React.createElement('div', { className: 'flex justify-between items-start' },
                       React.createElement('div', null,
-                        React.createElement('h2', { className: 'text-lg font-semibold flex items-center gap-2' },
+                        React.createElement('h2', { className: 'text-lg font-semibold flex items-center gap-2 text-nw-blue' },
                           React.createElement(Edit3, { size: 24 }),
                           getText(lang, 'Beurteilung bearbeiten', 'Modifica valutazione', 'Edit Appraisal')
                         ),
@@ -21370,7 +21367,7 @@ Best regards`
                 // Titel-Zeile
                 React.createElement('div', { className: "flex flex-col md:flex-row md:items-center md:justify-between mb-6" },
                   React.createElement('div', null,
-                    React.createElement('h1', { className: "text-xl tracking-[-.014em] md:text-2xl font-semibold mb-2 flex items-center gap-3" },
+                    React.createElement('h1', { className: "text-xl tracking-[-.014em] md:text-2xl font-semibold mb-2 flex items-center gap-3 text-nw-blue" },
                       React.createElement(Scale, { size: 28 }),
                       lang === 'de' ? `Team-Kalibrierung: ${teamName}` : lang === 'it' ? `Calibrazione Team: ${teamName}` : `Team Calibration: ${teamName}`
                     ),
@@ -23298,7 +23295,7 @@ const renderDashboard = () => {
                   React.createElement('div', { className: 'flex items-center gap-3' },
                     React.createElement(Calendar, { size: 22 }),
                     React.createElement('div', null,
-                      React.createElement('h3', { className: 'font-semibold' }, lang === 'de' ? 'Performance-Jahreszyklus' : lang === 'it' ? 'Ciclo annuale' : 'Annual Cycle'),
+                      React.createElement('h3', { className: 'font-semibold text-nw-blue' }, lang === 'de' ? 'Performance-Jahreszyklus' : lang === 'it' ? 'Ciclo annuale' : 'Annual Cycle'),
                       React.createElement('p', { className: 'text-xs text-ink-60' }, (lang === 'de' ? 'Aktueller Monat: ' : lang === 'it' ? 'Mese corrente: ' : 'Current month: ') + new Date().toLocaleString(lang === 'de' ? 'de-DE' : lang === 'it' ? 'it-IT' : 'en-GB', { month: 'long' }))
                     )
                   )
@@ -23562,7 +23559,7 @@ const renderDashboard = () => {
               // Hintergrundfarbe geändert auf das CI-Dunkelblau: #243186
               React.createElement('div', { className: "bg-white border border-line shadow-card rounded-xl p-6 text-ink " },
                 React.createElement('div', { className: "flex flex-col items-start" },
-                  React.createElement('h3', { className: "text-xl font-semibold mb-2" }, t.barsTitle),
+                  React.createElement('h3', { className: "text-xl font-semibold mb-2 text-nw-blue" }, t.barsTitle),
                   React.createElement('p', { className: "text-ink-60 text-sm mb-4 opacity-90" }, t.barsDesc),
                   React.createElement('button', {
                     onClick: () => setActiveView('list'),
@@ -23784,7 +23781,7 @@ const renderDashboard = () => {
             
             return React.createElement('div', { className: 'space-y-6 pb-12' },
               React.createElement('div', { className: 'rounded-card p-6 text-ink bg-white border border-line shadow-card', style: { } },
-                React.createElement('h1', { className: 'text-xl tracking-[-.014em] font-semibold mb-2 flex items-center gap-3' }, React.createElement(BookOpen, { size: 28 }), title),
+                React.createElement('h1', { className: 'text-xl tracking-[-.014em] font-semibold mb-2 flex items-center gap-3 text-nw-blue' }, React.createElement(BookOpen, { size: 28 }), title),
                 React.createElement('p', { className: 'text-ink-60' }, subtitle)
               ),
               // Bereichshinweis-Box am Anfang
@@ -24155,7 +24152,7 @@ const renderDashboard = () => {
                 className: "text-ink py-10 px-6 md:px-8 rounded-xl mb-8  bg-white border border-line shadow-card",
                 style: { }
               },
-                React.createElement('h2', { className: "text-lg md:text-2xl font-semibold text-center mb-8" }, 
+                React.createElement('h2', { className: "text-lg md:text-2xl font-semibold text-center mb-8 text-nw-blue" }, 
                   lang === 'de' ? 'Die GPS-Formel' : 'La Formula GPS'
                 ),
                 
@@ -27465,7 +27462,7 @@ const renderDashboard = () => {
                         e('p', { className: 'text-ink-60 text-sm' },
                           lang === 'de' ? 'Selbstreflexion von' : lang === 'it' ? 'Autovalutazione di' : 'Self-Reflection from'
                         ),
-                        e('h1', { className: 'text-xl tracking-[-.014em] md:text-2xl font-semibold' },
+                        e('h1', { className: 'text-xl tracking-[-.014em] md:text-2xl font-semibold text-nw-blue' },
                           selfData.employeeName || selfData.formData?.employee || getText(lang, 'Mitarbeiter', 'Collaboratore', 'Employee')
                         )
                       )

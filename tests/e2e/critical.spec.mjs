@@ -147,3 +147,43 @@ test('HR-Admin sieht alle Mitarbeiter und den HR-Bereich', async ({ page }) => {
   await gotoTeamAndLogin(page, USERS.hr);
   await expect(page.getByText(/HR.?Dashboard/).first()).toBeVisible({ timeout: 15000 });
 });
+
+test('Neue Führungskraft registriert sich: Konto mit Namen angelegt, angemeldet, leeres Team mit Hinweis', async ({ page }) => {
+  await openApp(page);
+  await page.getByText('Team-Übersicht', { exact: true }).first().click();
+  await page.getByRole('tab', { name: 'Registrieren' }).click();
+  await page.locator('input[type="email"]').fill('nina.neu@test.local');
+  await page.locator('input[type="text"]').first().fill('Nina Neu');
+  await page.locator('input[type="password"]').nth(0).fill('Test-1234');
+  await page.locator('input[type="password"]').nth(1).fill('Test-1234');
+  await page.locator('form button[type="submit"]').click();
+  await expect(page.getByText('Noch keine Mitarbeiter')).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText('0 Mitarbeiter')).toBeVisible();
+  // Konto im Auth-Emulator angelegt, Name gesetzt (updateProfile) und in der Nutzerkarte sichtbar
+  const all = await (await fetch('http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/projects/demo-nw-test/accounts:query', { method: 'POST', headers: { Authorization: 'Bearer owner', 'Content-Type': 'application/json' }, body: '{}' })).json();
+  const nina = (all.userInfo || []).find((u) => u.email === 'nina.neu@test.local');
+  expect(nina, 'Auth-Konto angelegt').toBeTruthy();
+  expect(nina.displayName).toBe('Nina Neu');
+  await expect(page.locator('aside').getByText('Nina Neu')).toBeVisible();
+  // BEKANNT (vor dem Redesign schon so, Schutzbereich Anmeldung, nicht geändert):
+  // handleSubmit schreibt registeredUsers nur, wenn window.db gesetzt ist – das passiert nirgends.
+  // Daher entsteht hier KEIN registeredUsers-Dokument. Siehe docs/redesign/BERICHT.md.
+  expect((await listDocs('registeredUsers')).filter((d) => field(d, 'email') === 'nina.neu@test.local')).toHaveLength(0);
+  // Dashboard führt als nächsten Schritt zum Anlegen des Teams
+  await page.getByText('Dashboard', { exact: true }).first().click();
+  await expect(page.getByText('Legen Sie Ihr Team an')).toBeVisible();
+});
+
+test('PDF-Export der Beurteilung erzeugt eine PDF-Datei', async ({ page }) => {
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  await page.getByText('→ Bearbeiten').first().click();
+  const pdfBtn = page.getByRole('button', { name: /Als PDF herunterladen|PDF/ }).first();
+  await expect(pdfBtn).toBeVisible();
+  const [download] = await Promise.all([page.waitForEvent('download', { timeout: 45000 }), pdfBtn.click()]);
+  const path = await download.path();
+  if (process.env.PDF_COPY) (await import('node:fs')).copyFileSync(path, process.env.PDF_COPY);
+  const head = (await import('node:fs')).readFileSync(path).subarray(0, 5).toString();
+  expect(head).toBe('%PDF-');
+  expect((await import('node:fs')).statSync(path).size).toBeGreaterThan(10000);
+});

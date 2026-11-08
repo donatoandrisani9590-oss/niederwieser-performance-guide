@@ -266,7 +266,7 @@
             @apply mt-3 block text-xs font-semibold text-ink-60;
           }
           .dlg-input {
-            @apply mt-1 h-8 w-full rounded-lg border border-line bg-white px-3 text-sm text-ink transition-[border-color,box-shadow] duration-150 placeholder:text-ink-40 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none;
+            @apply mt-1 h-8 w-full rounded-lg border border-line bg-white px-3 text-sm text-ink transition-[border-color,box-shadow] duration-150 placeholder:text-ink-60 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none;
           }
           textarea.dlg-input {
             @apply h-auto py-2;
@@ -276,7 +276,8 @@
           }
           /* Overline: Abschnittsbeschriftung 11/600, +7 % Laufweite */
           .eyebrow {
-            @apply text-2xs font-semibold uppercase tracking-[.07em] text-ink-40;
+            /* n.Org: text-ink-60 (3,2:1). Für WCAG AA (4,5:1) hier ink-60 – bewusste Abweichung */
+            @apply text-2xs font-semibold uppercase tracking-[.07em] text-ink-60;
           }
           /* Aufklapp-Quittung (Motion-Runde 31.08.): Chevrons an Menü-/Popover-
              Auslösern drehen bei offenem Panel — Rotation auf dem Icon, nie auf dem
@@ -760,6 +761,62 @@
         const HR_ADMIN_EMAILS = ['d.andrisani@niederwiesergroup.com'];
         const isUserHRAdmin = (email) => email && HR_ADMIN_EMAILS.includes(email.toLowerCase());
 
+        // n.Org Barrierefreiheit: Felder und Icon-Knöpfe ohne zugänglichen Namen automatisch beschriften
+        // (nur aria-label setzen, keine Logik). Sprache aus <html lang>, das die App setzt.
+        (() => {
+          const ICON_LABELS = {
+            de: { trash: 'Entfernen', x: 'Schließen', pencil: 'Bearbeiten', edit: 'Bearbeiten', eye: 'Ansehen', download: 'Herunterladen', share: 'Teilen', copy: 'Kopieren', plus: 'Hinzufügen', refresh: 'Aktualisieren', chevron: 'Auf-/Zuklappen', 'file-text': 'Dokument', upload: 'Hochladen', mail: 'E-Mail', calendar: 'Termin', link: 'Link', send: 'Senden', save: 'Speichern', info: 'Info', 'message-circle': 'HR-Copilot', 'rotate-ccw': 'Zurücksetzen', 'arrow-left': 'Zurück', 'external-link': 'Öffnen' },
+            it: { trash: 'Rimuovi', x: 'Chiudi', pencil: 'Modifica', edit: 'Modifica', eye: 'Visualizza', download: 'Scarica', share: 'Condividi', copy: 'Copia', plus: 'Aggiungi', refresh: 'Aggiorna', chevron: 'Espandi/Comprimi', 'file-text': 'Documento', upload: 'Carica', mail: 'E-mail', calendar: 'Appuntamento', link: 'Link', send: 'Invia', save: 'Salva', info: 'Info', 'message-circle': 'HR-Copilot', 'rotate-ccw': 'Reimposta', 'arrow-left': 'Indietro', 'external-link': 'Apri' },
+            en: { trash: 'Remove', x: 'Close', pencil: 'Edit', edit: 'Edit', eye: 'View', download: 'Download', share: 'Share', copy: 'Copy', plus: 'Add', refresh: 'Refresh', chevron: 'Expand/collapse', 'file-text': 'Document', upload: 'Upload', mail: 'Email', calendar: 'Appointment', link: 'Link', send: 'Send', save: 'Save', info: 'Info', 'message-circle': 'HR Copilot', 'rotate-ccw': 'Reset', 'arrow-left': 'Back', 'external-link': 'Open' }
+          };
+          const nameOfField = (el) => {
+            if (el.id && document.querySelector(`label[for="${CSS.escape(el.id)}"]`)) return null;
+            if (el.closest('label')) return null;
+            let node = el, name = '';
+            for (let depth = 0; depth < 3 && !name && node; depth++) {
+              let sib = node.previousElementSibling;
+              while (sib && !name) {
+                if (sib.tagName === 'LABEL' || sib.tagName === 'P' || sib.tagName === 'SPAN' || sib.tagName === 'H4') name = (sib.textContent || '').trim();
+                sib = sib.previousElementSibling;
+              }
+              node = node.parentElement;
+            }
+            if (!name) {
+              const td = el.closest('td');
+              const table = td && td.closest('table');
+              if (table) {
+                const idx = [...td.parentElement.children].indexOf(td);
+                const th = table.querySelectorAll('thead th')[idx];
+                const rowHead = td.parentElement.querySelector('td');
+                name = [(th && th.textContent || '').trim(), rowHead && rowHead !== td ? (rowHead.textContent || '').trim() : ''].filter(Boolean).join(' – ');
+              }
+            }
+            return (name || el.getAttribute('placeholder') || el.getAttribute('title') || '').slice(0, 120) || null;
+          };
+          const fix = () => {
+            const lang = (document.documentElement.lang || 'de').slice(0, 2);
+            const L = ICON_LABELS[lang] || ICON_LABELS.de;
+            document.querySelectorAll('input:not([type=hidden]):not([aria-label]):not([aria-labelledby]), select:not([aria-label]):not([aria-labelledby]), textarea:not([aria-label]):not([aria-labelledby])').forEach(el => {
+              const n = nameOfField(el);
+              if (n) el.setAttribute('aria-label', n);
+            });
+            document.querySelectorAll('button:not([aria-label]):not([aria-labelledby])').forEach(btn => {
+              if ((btn.textContent || '').trim()) return;
+              if (btn.title) { btn.setAttribute('aria-label', btn.title); return; }
+              const svg = btn.querySelector('svg[class*="lucide-"]');
+              const cls = svg ? [...svg.classList].find(c => c.startsWith('lucide-')) : '';
+              const key = cls && Object.keys(L).find(k => cls.includes(k));
+              if (key) btn.setAttribute('aria-label', L[key]);
+            });
+          };
+          let timer = null;
+          const start = () => {
+            new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(fix, 120); }).observe(document.body, { childList: true, subtree: true });
+            fix();
+          };
+          if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+        })();
+
         // ============================================
         // n.Org BAUSTEINE
         // Vorlage: docs/design-transfer/kit (TSX), hier ohne Build als React.createElement nachgebaut.
@@ -790,7 +847,7 @@
               : icon && React.createElement(icon, { size: size === 'sm' ? 14 : 16, 'aria-hidden': true }),
             !iconOnly && children
           );
-        const NW_TONE_CHIP = { ok: 'bg-ok-bg text-ok', warn: 'bg-warn-bg text-warn', danger: 'bg-danger-bg text-danger', brand: 'bg-nw-blue-06 text-nw-blue', neutral: 'bg-nw-grey-40 text-ink-60' };
+        const NW_TONE_CHIP = { ok: 'bg-ok-bg text-ok', warn: 'bg-white border border-warn/30 text-warn', danger: 'bg-danger-bg text-danger', brand: 'bg-nw-blue-06 text-nw-blue', neutral: 'bg-nw-grey-40 text-ink-60' };
         const NW_TONE_DOT = { ok: 'bg-nw-green', warn: 'bg-traffic-amber', danger: 'bg-traffic-red', brand: 'bg-nw-blue', neutral: 'bg-nw-grey' };
         // Chip = Zustand (24 px, rund) · Tag = Klassifizierung (18 px, Versalien) · Dot = Ampel (8 px)
         const NwChip = ({ tone = 'neutral', icon, className, children }) =>
@@ -817,7 +874,7 @@
           React.createElement('div', { className: 'flex min-h-[46px] flex-wrap items-center gap-2.5 border-b border-line-2 px-4 py-2' },
             icon && React.createElement(icon, { size: 16, 'aria-hidden': true, className: 'text-nw-blue' }),
             React.createElement('h2', { className: 'text-base font-semibold text-nw-blue' }, title),
-            meta && React.createElement('span', { className: 'text-xs text-ink-40' }, meta),
+            meta && React.createElement('span', { className: 'text-xs text-ink-60' }, meta),
             actions && React.createElement('div', { className: 'ml-auto flex flex-wrap items-center gap-2' }, actions)
           );
         const NwStatCard = ({ label, value, hint, tone, icon, onClick }) =>
@@ -829,14 +886,14 @@
               icon && React.createElement(icon, { size: 12, 'aria-hidden': true }), label),
             React.createElement('div', { className: 'mt-2 flex items-baseline gap-2' },
               React.createElement('span', { className: 'text-xl font-semibold tracking-[-.02em] tnum ' + (tone === 'warn' ? 'text-warn' : tone === 'danger' ? 'text-danger' : tone === 'ok' ? 'text-ok' : 'text-nw-blue') }, value)),
-            hint && React.createElement('div', { className: 'mt-1 text-xs text-ink-40' }, hint)
+            hint && React.createElement('div', { className: 'mt-1 text-xs text-ink-60' }, hint)
           );
         const NwEmptyState = ({ icon, title, text, action }) =>
           React.createElement('div', { className: 'flex flex-col items-center px-4 py-7 text-center' },
-            React.createElement('div', { className: 'mb-2.5 grid h-9 w-9 place-items-center rounded-full border border-line bg-nw-grey-40 text-ink-40' },
+            React.createElement('div', { className: 'mb-2.5 grid h-9 w-9 place-items-center rounded-full border border-line bg-nw-grey-40 text-ink-60' },
               icon && React.createElement(icon, { size: 16, 'aria-hidden': true })),
             React.createElement('div', { className: 'text-sm font-semibold text-nw-blue' }, title),
-            text && React.createElement('div', { className: 'mt-0.5 max-w-[52ch] text-xs text-ink-40' }, text),
+            text && React.createElement('div', { className: 'mt-0.5 max-w-[52ch] text-xs text-ink-60' }, text),
             action && React.createElement('div', { className: 'mt-3' }, action)
           );
         // Segmented: Pillen-Auswahl (z. B. Sprache, Ansicht)
@@ -1124,14 +1181,14 @@
                             React.createElement('label', { className: 'mb-1 block text-xs font-semibold text-ink-60' }, txt.email),
                             React.createElement('div', { className: 'relative' },
                                 React.createElement('div', { className: 'absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none' },
-                                    React.createElement(Mail, { size: 16, className: 'text-ink-40', 'aria-hidden': true })
+                                    React.createElement(Mail, { size: 16, className: 'text-ink-60', 'aria-hidden': true })
                                 ),
                                 React.createElement('input', {
                                     type: 'email',
                                     value: email,
                                     onChange: (e) => setEmail(e.target.value),
                                     required: true,
-                                    className: 'h-9 w-full rounded-lg border border-line bg-white pl-9 pr-3 text-sm text-ink placeholder:text-ink-40 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none',
+                                    className: 'h-9 w-full rounded-lg border border-line bg-white pl-9 pr-3 text-sm text-ink placeholder:text-ink-60 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none',
                                     placeholder: 'name@firma.de'
                                 })
                             )
@@ -1142,14 +1199,14 @@
                             React.createElement('label', { className: 'mb-1 block text-xs font-semibold text-ink-60' }, txt.fullName),
                             React.createElement('div', { className: 'relative' },
                                 React.createElement('div', { className: 'absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none' },
-                                    React.createElement(Users, { size: 16, className: 'text-ink-40', 'aria-hidden': true })
+                                    React.createElement(Users, { size: 16, className: 'text-ink-60', 'aria-hidden': true })
                                 ),
                                 React.createElement('input', {
                                     type: 'text',
                                     value: fullName,
                                     onChange: (e) => setFullName(e.target.value),
                                     required: !isLogin,
-                                    className: 'h-9 w-full rounded-lg border border-line bg-white pl-9 pr-3 text-sm text-ink placeholder:text-ink-40 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none',
+                                    className: 'h-9 w-full rounded-lg border border-line bg-white pl-9 pr-3 text-sm text-ink placeholder:text-ink-60 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none',
                                     placeholder: txt.fullNamePlaceholder
                                 })
                             )
@@ -1160,7 +1217,7 @@
                             React.createElement('label', { className: 'mb-1 block text-xs font-semibold text-ink-60' }, txt.password),
                             React.createElement('div', { className: 'relative' },
                                 React.createElement('div', { className: 'absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none' },
-                                    React.createElement(Lock, { size: 16, className: 'text-ink-40', 'aria-hidden': true })
+                                    React.createElement(Lock, { size: 16, className: 'text-ink-60', 'aria-hidden': true })
                                 ),
                                 React.createElement('input', {
                                     type: 'password',
@@ -1168,7 +1225,7 @@
                                     onChange: (e) => setPassword(e.target.value),
                                     required: true,
                                     minLength: 6,
-                                    className: 'h-9 w-full rounded-lg border border-line bg-white pl-9 pr-3 text-sm text-ink placeholder:text-ink-40 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none',
+                                    className: 'h-9 w-full rounded-lg border border-line bg-white pl-9 pr-3 text-sm text-ink placeholder:text-ink-60 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none',
                                     placeholder: '••••••••'
                                 })
                             )
@@ -1179,7 +1236,7 @@
                             React.createElement('label', { className: 'mb-1 block text-xs font-semibold text-ink-60' }, txt.confirmPassword),
                             React.createElement('div', { className: 'relative' },
                                 React.createElement('div', { className: 'absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none' },
-                                    React.createElement(Lock, { size: 16, className: 'text-ink-40', 'aria-hidden': true })
+                                    React.createElement(Lock, { size: 16, className: 'text-ink-60', 'aria-hidden': true })
                                 ),
                                 React.createElement('input', {
                                     type: 'password',
@@ -1187,7 +1244,7 @@
                                     onChange: (e) => setConfirmPassword(e.target.value),
                                     required: true,
                                     minLength: 6,
-                                    className: 'h-9 w-full rounded-lg border border-line bg-white pl-9 pr-3 text-sm text-ink placeholder:text-ink-40 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none',
+                                    className: 'h-9 w-full rounded-lg border border-line bg-white pl-9 pr-3 text-sm text-ink placeholder:text-ink-60 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none',
                                     placeholder: '••••••••'
                                 })
                             )
@@ -5383,7 +5440,7 @@
                         ),
                         e('button', { 
                             onClick: () => removeItem(devPlan, setDevPlan, item.id), 
-                            className: 'text-ink-40 hover:text-danger p-1'
+                            className: 'text-ink-60 hover:text-danger p-1'
                         }, e(Trash2, { size: 16 }))
                     ),
                     e('div', { className: 'space-y-3' },
@@ -5460,7 +5517,7 @@
                             e('p', { className: 'text-sm text-ink-60' }, 
                               (teamContext.employee?.position || teamContext.existingData?.position || '') + (teamContext.employee?.department ? ' • ' + teamContext.employee.department : '')
                             ),
-                            e('p', { className: 'mt-0.5 text-xs text-ink-40' }, 
+                            e('p', { className: 'mt-0.5 text-xs text-ink-60' }, 
                               (lang === 'de' ? 'Bewertungszeitraum: ' : lang === 'it' ? 'Periodo: ' : 'Assessment period: ') + (teamContext.period || new Date().getFullYear())
                             )
                           ),
@@ -5669,7 +5726,7 @@
                                 }),
                                 e('span', { className: "absolute right-3 top-1/2 transform -translate-y-1/2 text-ink-60 font-medium" }, '€')
                             ),
-                            e('span', { className: "text-xs text-ink-40" }, 
+                            e('span', { className: "text-xs text-ink-60" }, 
                                 lang === 'de' ? '(Tausenderpunkte erlaubt: 1.000 = 1000)' : lang === 'it' ? '(Punti per migliaia: 1.000 = 1000)' : '(Thousands separators allowed: 1,000 = 1000)'
                             )
                         )
@@ -5681,17 +5738,17 @@
                     className: "no-print bg-warn-bg p-4 md:p-6 rounded-xl shadow-float border-2 border-warn/30 break-inside-avoid mb-6" 
                 },
                     e('div', { className: 'flex items-center justify-between mb-4' },
-                        e('h3', { className: "text-lg font-semibold text-warn flex items-center gap-2" }, 
+                        e('h3', { className: "text-lg font-semibold text-ink flex items-center gap-2" }, 
                             e('span', { className: 'text-2xl' }, '📋'),
                             lang === 'de' ? 'Entwicklungsmaßnahmen aus letzter Beurteilung (D.2)' 
                             : lang === 'it' ? 'Misure di sviluppo dall\'ultima valutazione (D.2)' 
                             : 'Development Measures from Last Review (D.2)'
                         ),
-                        e('span', { className: 'text-xs text-warn bg-warn-bg px-2 py-1 rounded-full' },
+                        e('span', { className: 'text-xs text-ink-60 bg-white border border-warn/30 px-2 py-1 rounded-full' },
                             new Date(linkedReview.updatedAt || linkedReview.createdAt).toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'it' ? 'it-IT' : 'en-GB')
                         )
                     ),
-                    e('p', { className: 'text-sm text-warn mb-4' },
+                    e('p', { className: 'text-sm text-ink-60 mb-4' },
                         lang === 'de' ? 'Diese Maßnahmen wurden in der letzten Leistungsbeurteilung definiert. Sie können als Entwicklungsziele übernommen werden.'
                         : lang === 'it' ? 'Queste misure sono state definite nell\'ultima valutazione. Possono essere trasferite come obiettivi di sviluppo.'
                         : 'These measures were defined in the last review. They can be transferred as development goals.'
@@ -5702,11 +5759,11 @@
                         e('table', { className: 'w-full text-sm' },
                             e('thead', { className: 'bg-warn-bg' },
                                 e('tr', null,
-                                    e('th', { className: 'p-2 text-left text-warn text-xs font-semibold' }, 
+                                    e('th', { className: 'p-2 text-left text-ink text-xs font-semibold' }, 
                                         lang === 'de' ? 'Maßnahme' : lang === 'it' ? 'Misura' : 'Measure'),
-                                    e('th', { className: 'p-2 text-left text-warn text-xs font-semibold w-32' }, 
+                                    e('th', { className: 'p-2 text-left text-ink text-xs font-semibold w-32' }, 
                                         lang === 'de' ? 'Verantwortlich' : lang === 'it' ? 'Responsabile' : 'Responsible'),
-                                    e('th', { className: 'p-2 text-left text-warn text-xs font-semibold w-28' }, 
+                                    e('th', { className: 'p-2 text-left text-ink text-xs font-semibold w-28' }, 
                                         lang === 'de' ? 'Termin' : lang === 'it' ? 'Scadenza' : 'Deadline')
                                 )
                             ),
@@ -5755,7 +5812,7 @@
                         linkedReview.devPlan?.filter(d => d.measure).map((d, idx) =>
                             e('button', {
                                 key: idx,
-                                className: 'flex items-center gap-1 px-3 py-1.5 bg-white border border-warn/30 text-warn rounded-lg hover:bg-warn-bg transition-colors text-xs',
+                                className: 'flex items-center gap-1 px-3 py-1.5 bg-white border border-warn/30 text-ink-60 rounded-lg hover:bg-warn-bg transition-colors text-xs',
                                 onClick: () => {
                                     const newGoal = {
                                         id: Date.now(),
@@ -5906,7 +5963,7 @@
                                     ),
                                     e('button', { 
                                         onClick: () => setDevGoals(devGoals.filter(g => g.id !== item.id)),
-                                        className: 'text-ink-40 hover:text-danger'
+                                        className: 'text-ink-60 hover:text-danger'
                                     }, e(Trash2, { size: 16 }))
                                 ),
                                 e('div', { className: 'space-y-3' },
@@ -6618,7 +6675,7 @@
               // Hilfsfunktion für Änderungs-Badge
               const ChangeBadge = ({ current, saved }) => {
                 if (current === saved || (!current && !saved)) return null;
-                return e('span', { className: 'ml-2 px-1.5 py-0.5 bg-warn-bg text-warn text-xs rounded-lg font-medium' }, 
+                return e('span', { className: 'ml-2 px-1.5 py-0.5 bg-white border border-warn/30 text-warn text-xs rounded-lg font-medium' }, 
                   '⚡ ' + (lang === 'de' ? 'geändert' : 'changed')
                 );
               };
@@ -6730,7 +6787,7 @@
                                   className: 'px-2 py-1 rounded-lg text-sm font-semibold ' + 
                                     (rating >= 4 ? 'bg-nw-green-15 text-ok' : 
                                      rating >= 3 ? 'bg-nw-blue-12 text-nw-blue' : 
-                                     rating >= 2 ? 'bg-warn-bg text-warn' : 'bg-danger-bg text-danger')
+                                     rating >= 2 ? 'bg-white border border-warn/30 text-warn' : 'bg-danger-bg text-danger')
                                 }, 'Level ' + rating),
                                 hasChanged && e('span', { className: 'text-xs text-warn' }, 
                                   '(aktuell: ' + currentRating + ')'
@@ -6767,7 +6824,7 @@
                                   className: 'px-2 py-1 rounded-lg text-sm font-semibold ' + 
                                     (rating >= 4 ? 'bg-nw-green-15 text-ok' : 
                                      rating >= 3 ? 'bg-nw-blue-12 text-nw-blue' : 
-                                     rating >= 2 ? 'bg-warn-bg text-warn' : 'bg-danger-bg text-danger')
+                                     rating >= 2 ? 'bg-white border border-warn/30 text-warn' : 'bg-danger-bg text-danger')
                                 }, 'Level ' + rating),
                                 hasChanged && e('span', { className: 'text-xs text-warn' }, 
                                   '(aktuell: ' + currentRating + ')'
@@ -6785,10 +6842,10 @@
                       e('div', { className: 'flex items-start gap-3' },
                         e(AlertTriangle, { size: 20, className: 'text-warn flex-shrink-0 mt-0.5' }),
                         e('div', null,
-                          e('p', { className: 'font-semibold text-warn' },
+                          e('p', { className: 'font-semibold text-ink' },
                             lang === 'de' ? 'Was passiert beim Wiederherstellen?' : 'What happens when restoring?'
                           ),
-                          e('ul', { className: 'text-sm text-warn mt-2 space-y-1' },
+                          e('ul', { className: 'text-sm text-ink-60 mt-2 space-y-1' },
                             e('li', null, '• ' + (lang === 'de' ? 'Alle aktuellen Eingaben werden mit dieser Version überschrieben' : 'All current entries will be overwritten with this version')),
                             e('li', null, '• ' + (lang === 'de' ? 'Die Änderungen sind erst nach dem Speichern dauerhaft' : 'Changes are permanent only after saving')),
                             e('li', null, '• ' + (lang === 'de' ? 'Sie können vor dem Speichern noch Anpassungen vornehmen' : 'You can make adjustments before saving'))
@@ -7164,7 +7221,7 @@
                                     </h4>
                                     <table style="width: 100%; border-collapse: collapse; font-size: 9pt;">
                                         <thead>
-                                            <tr style="background: rgba(6, 95, 70, 0.1);">
+                                            <tr style="background: rgba(47, 122, 72, 0.1);">
                                                 <th style="padding: 8px; text-align: left; color: #2F7A48; font-weight: 600;">${lang === 'de' ? 'Ziel' : lang === 'it' ? 'Obiettivo' : 'Goal'}</th>
                                                 <th style="padding: 8px; text-align: center; color: #2F7A48; font-weight: 600; width: 60px;">${lang === 'de' ? 'Gewicht' : lang === 'it' ? 'Peso' : 'Weight'}</th>
                                                 <th style="padding: 8px; text-align: right; color: #2F7A48; font-weight: 600; width: 80px;">${lang === 'de' ? 'Anteil' : lang === 'it' ? 'Quota' : 'Share'}</th>
@@ -7503,7 +7560,7 @@
                                     e('span', { className: "font-medium text-ink" }, translatedName),
                                     // Gap-Warnung als Hinweis unter dem Namen
                                     hasGap && e('div', { 
-                                      className: 'mt-1 text-xs px-2 py-1 rounded-lg bg-warn-bg text-warn border-l-3 border-warn no-print flex items-start gap-1.5'
+                                      className: 'mt-1 text-xs px-2 py-1 rounded-lg bg-white border border-warn/30 text-warn border-l-3 border-warn no-print flex items-start gap-1.5'
                                     },
                                       e('span', { className: 'text-warn flex-shrink-0' }, '⚠️'),
                                       e('span', null,
@@ -7537,7 +7594,7 @@
                                   [1,2,3,4,5].map(n => e('option', {key:n, value:n}, n))),
                               // MA-Selbsteinschätzung Badge (falls vorhanden)
                               selfData && selfData.score && e('div', { 
-                                className: `text-xs px-2 py-0.5 rounded-lg font-medium mt-1 no-print ${hasGap ? 'bg-warn-bg text-warn' : 'bg-nw-green-15 text-ok'}`,
+                                className: `text-xs px-2 py-0.5 rounded-lg font-medium mt-1 no-print ${hasGap ? 'bg-white border border-warn/30 text-warn' : 'bg-nw-green-15 text-ok'}`,
                                 title: lang === 'de' 
                                   ? (hasGap ? `Abweichung: ${Math.abs(gapData.gap)} Stufen - Gesprächsbedarf!` : 'Selbsteinschätzung des Mitarbeiters')
                                   : (hasGap ? `Scostamento: ${Math.abs(gapData.gap)} livelli - da discutere!` : 'Autovalutazione del collaboratore')
@@ -7641,7 +7698,7 @@
                             e('span', { className: `text-lg font-semibold px-2 py-0.5 rounded-lg ${
                                 barsScore >= 4 ? 'bg-nw-green-15 text-ok' :
                                 barsScore >= 3 ? 'bg-nw-blue-12 text-nw-blue' :
-                                barsScore >= 2 ? 'bg-warn-bg text-warn' :
+                                barsScore >= 2 ? 'bg-white border border-warn/30 text-warn' :
                                 'bg-danger-bg text-danger'
                             }` }, barsScore),
                             e('button', { 
@@ -7748,20 +7805,20 @@
                                 className: `text-2xl font-semibold p-2 rounded-lg border-2 outline-none ${
                                     item.rating >= 4 ? 'border-nw-green bg-nw-green-15 text-ok' :
                                     item.rating >= 3 ? 'border-nw-blue-25 bg-nw-blue-06 text-nw-blue' :
-                                    item.rating >= 2 ? 'border-warn/30 bg-warn-bg text-warn' :
+                                    item.rating >= 2 ? 'border-warn/30 bg-white border border-warn/30 text-warn' :
                                     'border-danger/30 bg-danger-bg text-danger'
                                 }`, 
                                 value: item.rating, 
                                 onChange: (ev) => updateItem(list, setList, item.id, 'rating', parseInt(ev.target.value)) 
                             }, [1,2,3,4,5].map(n => e('option', {key:n, value:n}, n))),
                             selfData && selfData.score && e('div', { 
-                                className: `text-xs px-2 py-0.5 rounded-lg font-medium mt-1 ${hasGap ? 'bg-warn-bg text-warn' : 'bg-nw-green-15 text-ok'}`
+                                className: `text-xs px-2 py-0.5 rounded-lg font-medium mt-1 ${hasGap ? 'bg-white border border-warn/30 text-warn' : 'bg-nw-green-15 text-ok'}`
                             }, 'MA: ', selfData.score)
                         )
                     ),
                     
                     // Gap-Warnung
-                    hasGap && e('div', { className: 'mb-3 p-2 bg-warn-bg border-l-4 border-warn rounded-lg text-xs text-warn' },
+                    hasGap && e('div', { className: 'mb-3 p-2 bg-white border border-warn/30 border-l-4 border-warn rounded-lg text-xs text-warn' },
                         '⚠️ ', lang === 'de' 
                             ? `Abweichung: MA sieht sich bei ${gapData.selfScore}, Sie bei ${gapData.fkScore}`
                             : `Gap: MA si vede a ${gapData.selfScore}, Lei a ${gapData.fkScore}`
@@ -7810,7 +7867,7 @@
                         ),
                         e('button', { 
                             onClick: () => removeItem(devPlan, setDevPlan, item.id), 
-                            className: 'text-ink-40 hover:text-danger p-1'
+                            className: 'text-ink-60 hover:text-danger p-1'
                         }, e(Trash2, { size: 16 }))
                     ),
                     e('div', { className: 'space-y-3' },
@@ -7994,10 +8051,10 @@
                             e(AlertCircle, { size: 20, className: 'text-warn' })
                           ),
                           e('div', null,
-                            e('p', { className: 'font-semibold text-warn' },
+                            e('p', { className: 'font-semibold text-ink' },
                               lang === 'de' ? '📋 Keine Selbstreflexion eingereicht' : lang === 'it' ? '📋 Nessuna autovalutazione inviata' : '📋 No Self-Reflection Submitted'
                             ),
-                            e('p', { className: 'text-sm text-warn' },
+                            e('p', { className: 'text-sm text-ink-60' },
                               lang === 'de' 
                                 ? 'Der Mitarbeiter hat noch keine Selbstreflexion ausgefüllt. Sie können den Selbstreflexions-Link über "Team-Übersicht" versenden.'
                                 : lang === 'it' 
@@ -8083,10 +8140,10 @@
                         e(Clock, { size: 18 })
                       ),
                       e('div', null,
-                        e('p', { className: 'font-semibold text-warn' },
+                        e('p', { className: 'font-semibold text-ink' },
                           lang === 'de' ? '📚 Versionshistorie verfügbar' : lang === 'it' ? '📚 Storico versioni disponibile' : '📚 Version History Available'
                         ),
-                        e('p', { className: 'text-xs text-warn' },
+                        e('p', { className: 'text-xs text-ink-60' },
                           versionHistory.length + (lang === 'de' ? ' frühere Version(en) gespeichert' : ' previous version(s) saved')
                         )
                       )
@@ -8104,7 +8161,7 @@
                   
                   // Version List (wenn aufgeklappt)
                   showVersionHistory && e('div', { className: 'mt-4 border-t border-warn/30 pt-4' },
-                    e('p', { className: 'text-sm text-warn mb-3' },
+                    e('p', { className: 'text-sm text-ink-60 mb-3' },
                       '👆 ' + (lang === 'de' ? 'Klicken Sie auf eine Version um die Details anzusehen' : 'Click on a version to see details')
                     ),
                     e('div', { className: 'space-y-2 max-h-64 overflow-y-auto' },
@@ -8116,7 +8173,7 @@
                         },
                           e('div', { className: 'flex items-center gap-4' },
                             e('div', { className: 'text-center bg-warn-bg group-hover:bg-warn-bg rounded-lg p-2 transition-colors' },
-                              e('div', { className: 'text-lg font-semibold text-warn' }, 
+                              e('div', { className: 'text-lg font-semibold text-ink' }, 
                                 new Date(version.savedAt).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
                               ),
                               e('div', { className: 'text-xs text-ink-60' }, 
@@ -8147,7 +8204,7 @@
                         )
                       )
                     ),
-                    e('p', { className: 'text-xs text-warn mt-3 italic' },
+                    e('p', { className: 'text-xs text-ink-60 mt-3 italic' },
                       '💡 ' + (lang === 'de' 
                         ? 'In der Vorschau können Sie alle Details prüfen bevor Sie wiederherstellen.'
                         : 'In the preview you can check all details before restoring.')
@@ -8276,10 +8333,10 @@
                         e('div', { className: "flex items-start gap-3" },
                             e(Info, { size: 20, className: "text-warn mt-0.5 flex-shrink-0" }),
                             e('div', null,
-                                e('p', { className: "text-sm font-semibold text-warn mb-1" }, 
+                                e('p', { className: "text-sm font-semibold text-ink mb-1" }, 
                                     lang === 'de' ? 'Keine Zielvereinbarung vorhanden?' : lang === 'it' ? 'Nessun accordo sugli obiettivi?' : 'No Goal Agreement found?'
                                 ),
-                                e('p', { className: "text-xs text-warn" }, 
+                                e('p', { className: "text-xs text-ink-60" }, 
                                     lang === 'de' 
                                         ? 'Falls für diesen Mitarbeiter keine Ziele vereinbart wurden, löschen Sie bitte alle Zeilen mit dem 🗑️-Button. Der GPS wird dann automatisch nur aus Teil C (Kompetenzen = 100%) berechnet.'
                                         : 'Se non sono stati concordati obiettivi per questo collaboratore, eliminare tutte le righe con il pulsante 🗑️. Il GPS verrà calcolato automaticamente solo dalla Parte C (Competenze = 100%).'
@@ -8347,7 +8404,7 @@
                             
                             const toast = document.createElement('div');
                             toast.textContent = successMsg;
-                            toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#243186;color:white;padding:12px 24px;border-radius:8px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(79,70,229,0.4);';
+                            toast.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#243186;color:white;padding:12px 24px;border-radius:8px;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(36, 49, 134,0.4);';
                             document.body.appendChild(toast);
                             setTimeout(() => toast.remove(), 2500);
                             
@@ -8453,7 +8510,7 @@
                             e('div', { 
                                 className: `font-semibold text-sm ${
                                     goals.length >= 1 && goals.length <= 2 
-                                        ? 'text-warn' 
+                                        ? 'text-ink' 
                                         : goals.length >= 3 && goals.length <= 6 
                                             ? 'text-ok' 
                                             : 'text-danger'
@@ -8468,7 +8525,7 @@
                             e('div', { 
                                 className: `text-xs mt-1 ${
                                     goals.length >= 1 && goals.length <= 2 
-                                        ? 'text-warn' 
+                                        ? 'text-ink-60' 
                                         : goals.length >= 3 && goals.length <= 6 
                                             ? 'text-ok' 
                                             : 'text-danger'
@@ -8526,7 +8583,7 @@
                     goals.length > 0 && totalGoalWeight !== 100 && e('div', { 
                         className: `no-print text-sm p-3 mt-3 rounded-lg ${
                             totalGoalWeight > 100 ? 'bg-danger-bg text-danger border border-danger/30' : 
-                            'bg-warn-bg text-warn border border-warn/30'
+                            'bg-white border border-warn/30 text-warn border border-warn/30'
                         }`
                     }, 
                         `${t.totalWeight}: ${totalGoalWeight}% ${totalGoalWeight !== 100 ? `(${t.shouldBe100})` : ''}`
@@ -8549,7 +8606,7 @@
                                 }),
                                 e('span', { className: "absolute right-3 top-1/2 transform -translate-y-1/2 text-ink-60 font-medium" }, '€')
                             ),
-                            e('span', { className: "text-xs text-ink-40" }, 
+                            e('span', { className: "text-xs text-ink-60" }, 
                                 lang === 'de' ? '(Tausenderpunkte erlaubt)' : lang === 'it' ? '(Punti per migliaia)' : '(Thousands separators allowed)'
                             )
                         ),
@@ -8591,7 +8648,7 @@
                                                 e('span', { 
                                                     className: `px-2 py-0.5 rounded-lg text-xs font-medium ${
                                                         b.achievement >= 100 ? 'bg-nw-green-15 text-ok' :
-                                                        b.achievement >= 70 ? 'bg-warn-bg text-warn' :
+                                                        b.achievement >= 70 ? 'bg-white border border-warn/30 text-warn' :
                                                         'bg-danger-bg text-danger'
                                                     }`
                                                 }, `${b.achievement}%`)
@@ -8644,10 +8701,10 @@
                   e('div', { className: "flex items-start gap-3" },
                     e('div', { className: "text-2xl flex-shrink-0" }, "🎭"),
                     e('div', null,
-                      e('div', { className: "font-semibold text-warn mb-1" }, 
+                      e('div', { className: "font-semibold text-ink mb-1" }, 
                         lang === 'de' ? 'Möglicher Halo-Effekt' : lang === 'it' ? 'Possibile Effetto Halo' : 'Possible Halo Effect'
                       ),
-                      e('div', { className: "text-sm text-warn" },
+                      e('div', { className: "text-sm text-ink-60" },
                         lang === 'de' 
                           ? `Alle 5 Core-Kompetenzen wurden mit Level ${coreRatings[0]} bewertet. Es ist unwahrscheinlich, dass jemand in allen Bereichen exakt gleich stark ist. Wo liegen echte Stärken, wo Entwicklungsfelder?`
                           : lang === 'it'
@@ -8756,7 +8813,7 @@
                                     ? '(WAS 50% + WIE Core 25% + WIE Lead 25%)' 
                                     : '(WAS 50% + WIE Core 50%)')
                         ),
-                        goals.length === 0 && e('div', { className: "mt-3 text-xs text-warn bg-warn-bg px-3 py-1 rounded-full inline-block" },
+                        goals.length === 0 && e('div', { className: "mt-3 text-xs text-warn bg-white border border-warn/30 px-3 py-1 rounded-full inline-block" },
                             lang === 'de' ? '⚠️ Ohne Zielvereinbarung' : lang === 'it' ? '⚠️ Senza accordo obiettivi' : '⚠️ Without Goal Agreement'
                         ),
                         // === NEU: GPS Konfidenz-Anzeige ===
@@ -8776,7 +8833,7 @@
                                 : lang === 'it' ? `Completezza valutazione: ${confidence.label.it}`
                                 : `Assessment completeness: ${confidence.label.en}`
                             ),
-                            e('span', { className: `text-xs ${confColor} opacity-75` }, `(${Math.round(confidence.score)}%)`)
+                            e('span', { className: `text-xs ${confColor}` }, `(${Math.round(confidence.score)}%)`)
                           );
                         })()
                     )
@@ -9453,7 +9510,7 @@
 
 🟢 **Grüne Bubble** = Rating 4-5 (Top Performer)
 🔵 **Blaue gestrichelte Zone** = Solid Backbone (Rating 3)
-🟠 **Orange Bubble** = Rating 2 (Entwicklungsbedarf)
+🟠 **Amber-Bubble** = Rating 2 (Entwicklungsbedarf)
 🔴 **Rote Bubble** = Rating 1 (Handlungsbedarf)
 
 💡 Bubble-Größe = GPS-Score (größer = höher)`
@@ -9487,7 +9544,7 @@
 
 🟢 **Green bubble** = Rating 4-5 (Top Performer)
 🔵 **Blue dashed zone** = Solid Backbone (Rating 3)
-🟠 **Orange bubble** = Rating 2 (Development needed)
+🟠 **Amber bubble** = Rating 2 (Development needed)
 🔴 **Red bubble** = Rating 1 (Action required)
 
 💡 Bubble size = GPS score (larger = higher)`
@@ -10864,7 +10921,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
                 ),
                 React.createElement('button', {
                   onClick: () => setDebugMode(false),
-                  className: 'text-ink-40 hover:text-white transition-colors text-lg'
+                  className: 'text-ink-60 hover:text-white transition-colors text-lg'
                 }, '×')
               ),
               
@@ -10872,32 +10929,32 @@ Goal 3: 20% weight, 80% achieved → 16 points
               React.createElement('div', { className: 'p-4 space-y-4 max-h-[60vh] overflow-y-auto' },
                 // Firebase Status
                 React.createElement('div', null,
-                  React.createElement('h3', { className: 'text-xs font-semibold text-ink-40 uppercase mb-2' }, '🔥 Firebase Status'),
+                  React.createElement('h3', { className: 'text-xs font-semibold text-ink-60 uppercase mb-2' }, '🔥 Firebase Status'),
                   React.createElement('div', { className: 'bg-ink rounded-lg p-3 space-y-1' },
                     React.createElement('div', { className: 'flex justify-between' },
-                      React.createElement('span', { className: 'text-ink-40' }, 'Datenbank:'),
+                      React.createElement('span', { className: 'text-ink-60' }, 'Datenbank:'),
                       React.createElement('span', { className: firebaseStatus.db ? 'text-ok' : 'text-danger' }, 
                         firebaseStatus.db ? '✓ Verbunden' : '✗ Nicht verbunden'
                       )
                     ),
                     React.createElement('div', { className: 'flex justify-between' },
-                      React.createElement('span', { className: 'text-ink-40' }, 'Auth:'),
+                      React.createElement('span', { className: 'text-ink-60' }, 'Auth:'),
                       React.createElement('span', { className: firebaseStatus.auth ? 'text-ok' : 'text-danger' }, 
                         firebaseStatus.auth ? '✓ Aktiv' : '✗ Inaktiv'
                       )
                     ),
                     React.createElement('div', { className: 'flex justify-between' },
-                      React.createElement('span', { className: 'text-ink-40' }, 'User:'),
+                      React.createElement('span', { className: 'text-ink-60' }, 'User:'),
                       React.createElement('span', { className: firebaseStatus.user ? 'text-ok' : 'text-traffic-amber' }, 
                         firebaseStatus.user ? firebaseStatus.userEmail : 'Nicht eingeloggt'
                       )
                     ),
                     firebaseStatus.user && React.createElement('div', { className: 'flex justify-between' },
-                      React.createElement('span', { className: 'text-ink-40' }, 'User ID:'),
+                      React.createElement('span', { className: 'text-ink-60' }, 'User ID:'),
                       React.createElement('span', { className: 'text-nw-blue' }, firebaseStatus.userId)
                     ),
                     firebaseStatus.isAnonymous && React.createElement('div', { className: 'flex justify-between' },
-                      React.createElement('span', { className: 'text-ink-40' }, 'Typ:'),
+                      React.createElement('span', { className: 'text-ink-60' }, 'Typ:'),
                       React.createElement('span', { className: 'text-traffic-amber' }, '⚠️ Anonym (Daten gehen verloren!)')
                     )
                   )
@@ -10905,22 +10962,22 @@ Goal 3: 20% weight, 80% achieved → 16 points
                 
                 // Daten Status
                 React.createElement('div', null,
-                  React.createElement('h3', { className: 'text-xs font-semibold text-ink-40 uppercase mb-2' }, '📊 Daten Status'),
+                  React.createElement('h3', { className: 'text-xs font-semibold text-ink-60 uppercase mb-2' }, '📊 Daten Status'),
                   React.createElement('div', { className: 'bg-ink rounded-lg p-3 space-y-1' },
                     React.createElement('div', { className: 'flex justify-between' },
-                      React.createElement('span', { className: 'text-ink-40' }, 'Team-Mitglieder:'),
+                      React.createElement('span', { className: 'text-ink-60' }, 'Team-Mitglieder:'),
                       React.createElement('span', { className: 'text-ok' }, dataStatus.teamMembers)
                     ),
                     React.createElement('div', { className: 'flex justify-between' },
-                      React.createElement('span', { className: 'text-ink-40' }, getText(lang, 'Beurteilungen:', 'Valutazioni:', 'Assessments:')),
+                      React.createElement('span', { className: 'text-ink-60' }, getText(lang, 'Beurteilungen:', 'Valutazioni:', 'Assessments:')),
                       React.createElement('span', { className: 'text-ok' }, dataStatus.teamAppraisals)
                     ),
                     React.createElement('div', { className: 'flex justify-between' },
-                      React.createElement('span', { className: 'text-ink-40' }, 'Aktive Ansicht:'),
+                      React.createElement('span', { className: 'text-ink-60' }, 'Aktive Ansicht:'),
                       React.createElement('span', { className: 'text-nw-blue' }, dataStatus.activeView)
                     ),
                     React.createElement('div', { className: 'flex justify-between' },
-                      React.createElement('span', { className: 'text-ink-40' }, 'Gast-Modus:'),
+                      React.createElement('span', { className: 'text-ink-60' }, 'Gast-Modus:'),
                       React.createElement('span', { className: dataStatus.guestMode ? 'text-traffic-amber' : 'text-ink-60' }, 
                         dataStatus.guestMode ? '✓ Aktiv' : 'Nein'
                       )
@@ -10930,14 +10987,14 @@ Goal 3: 20% weight, 80% achieved → 16 points
                 
                 // Storage Info
                 React.createElement('div', null,
-                  React.createElement('h3', { className: 'text-xs font-semibold text-ink-40 uppercase mb-2' }, '💾 Storage'),
+                  React.createElement('h3', { className: 'text-xs font-semibold text-ink-60 uppercase mb-2' }, '💾 Storage'),
                   React.createElement('div', { className: 'bg-ink rounded-lg p-3 space-y-1' },
                     React.createElement('div', { className: 'flex justify-between' },
-                      React.createElement('span', { className: 'text-ink-40' }, 'localStorage (nw_*):'),
+                      React.createElement('span', { className: 'text-ink-60' }, 'localStorage (nw_*):'),
                       React.createElement('span', { className: 'text-nw-grey' }, storageInfo.localStorage)
                     ),
                     React.createElement('div', { className: 'flex justify-between' },
-                      React.createElement('span', { className: 'text-ink-40' }, 'sessionStorage:'),
+                      React.createElement('span', { className: 'text-ink-60' }, 'sessionStorage:'),
                       React.createElement('span', { className: 'text-nw-grey' }, storageInfo.sessionStorage)
                     )
                   )
@@ -10945,7 +11002,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
                 
                 // Letzte Logs
                 React.createElement('div', null,
-                  React.createElement('h3', { className: 'text-xs font-semibold text-ink-40 uppercase mb-2' }, '📝 Letzte Aktivitäten'),
+                  React.createElement('h3', { className: 'text-xs font-semibold text-ink-60 uppercase mb-2' }, '📝 Letzte Aktivitäten'),
                   React.createElement('div', { className: 'bg-ink rounded-lg p-3 max-h-32 overflow-y-auto space-y-1' },
                     debugLogs.length === 0 
                       ? React.createElement('span', { className: 'text-ink-60 italic' }, getText(lang, 'Keine Aktivitäten...', 'Nessuna attività...', 'No activities...'))
@@ -11295,7 +11352,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
               color: 'orange', 
               label: 'Unter Markt',
               recommendation: 'Überdurchschnittliche Erhöhung prüfen',
-              bg: 'bg-warn-bg text-warn'
+              bg: 'bg-white border border-warn/30 text-warn'
             };
             if (ratio <= 110) return { 
               status: 'at-market', 
@@ -13224,6 +13281,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
           
           // Quiz-spezifische States entfernt
           const [lang, setLang] = useState('de'); // 'de' or 'it'
+          React.useEffect(() => { document.documentElement.lang = lang; }, [lang]);
           
           // === TERMIN MODAL STATES (App-Level) ===
           const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
@@ -13256,7 +13314,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
           const ScoreBadge = ({ score, active }) => {
             const colors = {
               1: "bg-danger-bg text-danger border-danger/30",
-              2: "bg-warn-bg text-warn border-warn/30",
+              2: "bg-white border border-warn/30 text-warn border-warn/30",
               3: "bg-nw-green-15 text-ok border-nw-green/40",
               4: "bg-nw-blue-12 text-nw-blue border-nw-blue-25",
               5: "bg-nw-green-15 text-ok border-line"
@@ -13335,7 +13393,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
                 border-radius: 12px;
                 font-weight: 600;
                 font-size: 16px;
-                box-shadow: 0 10px 40px rgba(5, 150, 105, 0.4);
+                box-shadow: 0 10px 40px rgba(47, 122, 72, 0.4);
                 z-index: 99999;
                 animation: slideUp 0.3s ease-out;
               `;
@@ -14577,7 +14635,7 @@ Best regards`
                   border-radius: 12px;
                   font-weight: 600;
                   font-size: 16px;
-                  box-shadow: 0 10px 40px rgba(5, 150, 105, 0.4);
+                  box-shadow: 0 10px 40px rgba(47, 122, 72, 0.4);
                   z-index: 99999;
                   animation: slideUp 0.3s ease-out;
                 `;
@@ -14750,9 +14808,9 @@ Best regards`
                 title: lang === 'de' ? 'Team-Übersicht' : lang === 'it' ? 'Panoramica team' : 'Team Overview',
                 meta: [
                   React.createElement('span', { key: 'n' }, `${teamMembers.length} ${lang === 'de' ? 'Mitarbeiter' : 'employees'}`),
-                  teamMembers.length > 0 && React.createElement('span', { key: 'sep', className: 'text-ink-40', 'aria-hidden': true }, '·'),
+                  teamMembers.length > 0 && React.createElement('span', { key: 'sep', className: 'text-ink-60', 'aria-hidden': true }, '·'),
                   teamMembers.length > 0 && React.createElement('span', { key: 'p', className: 'inline-flex items-center gap-2' },
-                    React.createElement('span', { className: 'inline-block h-1.5 w-24 overflow-hidden rounded-full bg-nw-blue-12', role: 'progressbar', 'aria-valuenow': progress, 'aria-valuemin': 0, 'aria-valuemax': 100 },
+                    React.createElement('span', { className: 'inline-block h-1.5 w-24 overflow-hidden rounded-full bg-nw-blue-12', role: 'progressbar', 'aria-label': getText(lang, 'Fortschritt des Teams', 'Avanzamento del team', 'Team progress'), 'aria-valuenow': progress, 'aria-valuemin': 0, 'aria-valuemax': 100 },
                       React.createElement('span', { className: 'block h-full rounded-full bg-nw-green transition-[width] duration-300', style: { width: `${progress}%` } })),
                     React.createElement('span', { className: 'tnum font-medium text-ink' }, `${progress}%`))
                 ],
@@ -14792,7 +14850,7 @@ Best regards`
                       : 'Need help? The HR Copilot in the bottom right knows all processes!'
                   )
                 ),
-                React.createElement('div', { className: 'text-xs text-ink-40', 'aria-hidden': true }, '👇')
+                React.createElement('div', { className: 'text-xs text-ink-60', 'aria-hidden': true }, '👇')
               ),
               
               // === MITARBEITER HINZUFÜGEN (Apple Style) ===
@@ -14807,17 +14865,17 @@ Best regards`
                   React.createElement('input', { 
                     id: 'add-name', type: 'text', 
                     placeholder: lang === 'de' ? 'Name *' : 'Name *',
-                    className: 'flex-1 min-w-[150px] h-9 rounded-lg border border-line bg-white px-3 text-sm text-ink placeholder:text-ink-40 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none' 
+                    className: 'flex-1 min-w-[150px] h-9 rounded-lg border border-line bg-white px-3 text-sm text-ink placeholder:text-ink-60 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none' 
                   }),
                   React.createElement('input', { 
                     id: 'add-pos', type: 'text', 
                     placeholder: lang === 'de' ? 'Position *' : 'Position *',
-                    className: 'flex-1 min-w-[150px] h-9 rounded-lg border border-line bg-white px-3 text-sm text-ink placeholder:text-ink-40 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none' 
+                    className: 'flex-1 min-w-[150px] h-9 rounded-lg border border-line bg-white px-3 text-sm text-ink placeholder:text-ink-60 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none' 
                   }),
                   React.createElement('input', { 
                     id: 'add-email', type: 'email', 
                     placeholder: getText(lang, 'E-Mail (optional)', 'Email (opzionale)', 'Email (optional)'),
-                    className: 'flex-1 min-w-[180px] h-9 rounded-lg border border-line bg-white px-3 text-sm text-ink placeholder:text-ink-40 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none' 
+                    className: 'flex-1 min-w-[180px] h-9 rounded-lg border border-line bg-white px-3 text-sm text-ink placeholder:text-ink-60 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none' 
                   }),
                   React.createElement('button', {
                     onClick: () => {
@@ -14842,7 +14900,7 @@ Best regards`
               teamMembers.length === 0 
                 ? React.createElement('div', { className: 'bg-panel rounded-card p-12 text-center' },
                     React.createElement('div', { className: 'w-16 h-16 mx-auto mb-4 rounded-card bg-line flex items-center justify-center' },
-                      React.createElement(Users, { size: 32, className: 'text-ink-40' })
+                      React.createElement(Users, { size: 32, className: 'text-ink-60' })
                     ),
                     React.createElement('h3', { className: 'font-semibold text-nw-blue mb-1' }, 
                       lang === 'de' ? 'Noch keine Mitarbeiter' : 'No employees yet'
@@ -14874,7 +14932,7 @@ Best regards`
                       
                       // Offene Schritte berechnen
                       const openSteps = [];
-                      if (!status.self) openSteps.push({ key: 'self', label: lang === 'de' ? 'Selbstreflexion' : 'Self-Reflection', color: 'bg-warn-bg text-warn border-warn/30' });
+                      if (!status.self) openSteps.push({ key: 'self', label: lang === 'de' ? 'Selbstreflexion' : 'Self-Reflection', color: 'bg-white border border-warn/30 text-warn border-warn/30' });
                       if (!status.review) openSteps.push({ key: 'review', label: lang === 'de' ? 'Beurteilung' : 'Review', color: 'bg-nw-blue-12 text-nw-blue border-nw-blue-25' });
                       if (!status.goals) openSteps.push({ key: 'goals', label: lang === 'de' ? 'Ziele' : 'Goals', color: 'bg-nw-blue-12 text-nw-blue border-nw-blue-25' });
                       if (!meetingDone) openSteps.push({ key: 'meeting', label: lang === 'de' ? 'Gespräch' : 'Meeting', color: 'bg-nw-green-15 text-ok border-nw-green' });
@@ -14907,9 +14965,9 @@ Best regards`
                         React.createElement('div', { className: 'col-span-1 text-center' },
                           gps 
                             ? React.createElement('span', { 
-                                className: `text-xs font-semibold px-2 py-1 rounded-full ${gps >= 3 ? 'bg-nw-green-15 text-ok' : 'bg-warn-bg text-warn'}`
+                                className: `text-xs font-semibold px-2 py-1 rounded-full ${gps >= 3 ? 'bg-nw-green-15 text-ok' : 'bg-white border border-warn/30 text-warn'}`
                               }, gps.toFixed(1))
-                            : React.createElement('span', { className: 'text-xs text-ink-40' }, '–')
+                            : React.createElement('span', { className: 'text-xs text-ink-60' }, '–')
                         ),
                         // Termin
                         React.createElement('div', { className: 'col-span-2 text-center text-xs' },
@@ -14921,7 +14979,7 @@ Best regards`
                                   'text-ink-60'
                                 }`
                               }, scheduledDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }))
-                            : React.createElement('span', { className: 'text-ink-40' }, '–')
+                            : React.createElement('span', { className: 'text-ink-60' }, '–')
                         ),
                         // Aktionen (kompakt)
                         React.createElement('div', { className: 'col-span-3 flex gap-1 justify-center flex-wrap' },
@@ -15007,7 +15065,7 @@ Best regards`
                               React.createElement('span', { className: 'font-semibold text-ink truncate' }, member.name),
                               gps > 0 && React.createElement('span', { 
                                 className: `text-xs font-semibold px-2 py-0.5 rounded-full ${
-                                  gps >= 3 ? 'bg-nw-green-15 text-ok' : 'bg-warn-bg text-warn'
+                                  gps >= 3 ? 'bg-nw-green-15 text-ok' : 'bg-white border border-warn/30 text-warn'
                                 }`
                               }, `GPS ${gps.toFixed(1)}`),
                               done === 3 && React.createElement('span', { className: 'text-xs bg-ok text-white px-2 py-0.5 rounded-full' }, '✓ Komplett'),
@@ -15079,7 +15137,7 @@ Best regards`
                           React.createElement('div', { className: 'flex items-center gap-1' },
                             isOwner && React.createElement('button', {
                               onClick: () => shareMember(member),
-                              className: `w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isShared ? 'bg-nw-blue-12 text-nw-blue' : 'bg-nw-grey-40 text-ink-40 hover:bg-nw-blue-06 hover:text-nw-blue'}`,
+                              className: `w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isShared ? 'bg-nw-blue-12 text-nw-blue' : 'bg-nw-grey-40 text-ink-60 hover:bg-nw-blue-06 hover:text-nw-blue'}`,
                               title: lang === 'de' ? 'Teilen' : 'Share'
                             }, React.createElement(Share2, { size: 14 })),
                             // Entfernen-Button: Für eigene MA = Löschen, für geteilte MA = Verknüpfung entfernen
@@ -15105,7 +15163,7 @@ Best regards`
                                   }
                                 }
                               },
-                              className: 'w-8 h-8 rounded-lg flex items-center justify-center bg-nw-grey-40 text-ink-40 hover:bg-danger-bg hover:text-danger transition-all',
+                              className: 'w-8 h-8 rounded-lg flex items-center justify-center bg-nw-grey-40 text-ink-60 hover:bg-danger-bg hover:text-danger transition-all',
                               title: isOwner 
                                 ? (lang === 'de' ? 'Entfernen' : 'Remove')
                                 : (lang === 'de' ? 'Aus meiner Ansicht entfernen' : 'Remove from my view')
@@ -15173,7 +15231,7 @@ Best regards`
                           React.createElement('div', { className: 'grid grid-cols-3 gap-3' },
                             // SPALTE 1: Leerraum (über Selbstreflexion)
                             React.createElement('div', { className: 'flex items-center justify-center' },
-                              React.createElement('span', { className: 'text-xs text-ink-40 italic' },
+                              React.createElement('span', { className: 'text-xs text-ink-60 italic' },
                                 lang === 'de' ? 'Gespräche geführt:' : lang === 'it' ? 'Colloqui effettuati:' : 'Meetings completed:'
                               )
                             ),
@@ -15250,7 +15308,7 @@ Best regards`
                           },
                             React.createElement('div', { className: 'flex items-center gap-3 mb-2' },
                               React.createElement('div', { 
-                                className: `w-8 h-8 rounded-lg flex items-center justify-center ${status.self ? 'bg-ok text-white' : 'bg-line text-ink-40'}`
+                                className: `w-8 h-8 rounded-lg flex items-center justify-center ${status.self ? 'bg-ok text-white' : 'bg-line text-ink-60'}`
                               }, status.self ? React.createElement(CheckCircle2, { size: 16 }) : React.createElement(FileText, { size: 16 })),
                               React.createElement('span', { className: 'font-semibold text-sm text-ink' }, 
                                 lang === 'de' ? 'Selbstreflexion' : lang === 'it' ? 'Autovalutazione' : 'Self-Reflection'
@@ -15267,7 +15325,7 @@ Best regards`
                                 `📄 PDF: ${status.selfPdf.pdfFileName || 'Dokument'}`
                               ),
                               // Nichts vorhanden?
-                              !status.selfDigital && !status.selfPdf && React.createElement('div', { className: 'text-ink-40' },
+                              !status.selfDigital && !status.selfPdf && React.createElement('div', { className: 'text-ink-60' },
                                 `⏳ ${lang === 'de' ? 'Noch nicht ausgefüllt' : lang === 'it' ? 'Non ancora compilata' : 'Not yet completed'}`
                               )
                             ),
@@ -15288,7 +15346,7 @@ Best regards`
                               
                               // PDF-Bereich (wenn vorhanden)
                               status.selfPdf && React.createElement('div', {
-                                className: 'w-full bg-warn-bg border border-warn/30 rounded-lg p-2 space-y-2'
+                                className: 'w-full bg-white border border-warn/30 rounded-lg p-2 space-y-2'
                               },
                                 // PDF-Info mit Löschen-Button
                                 React.createElement('div', { className: 'flex items-center gap-2 text-warn text-xs' },
@@ -15410,7 +15468,7 @@ Best regards`
                               status.review 
                                 ? status.review.status === 'completed'
                                   ? 'bg-nw-blue-06 border border-nw-blue-25 hover:border-nw-blue'
-                                  : 'bg-warn-bg border border-warn/30 hover:border-warn'
+                                  : 'bg-white border border-warn/30 hover:border-warn shadow-[inset_3px_0_0_#9A6414]'
                                 : 'bg-panel border border-dashed border-line hover:border-nw-blue hover:bg-nw-blue-06'
                             }`
                           },
@@ -15424,7 +15482,7 @@ Best regards`
                                   className: `w-8 h-8 rounded-lg flex items-center justify-center ${
                                     status.review 
                                       ? status.review.status === 'completed' ? 'bg-nw-blue text-white' : 'bg-warn text-white'
-                                      : 'bg-line text-ink-40'
+                                      : 'bg-line text-ink-60'
                                   }`
                                 }, 
                                   status.review 
@@ -15441,7 +15499,7 @@ Best regards`
                               React.createElement('div', { className: `text-xs ${
                                 status.review 
                                   ? status.review.status === 'completed' ? 'text-nw-blue' : 'text-warn'
-                                  : 'text-ink-40'
+                                  : 'text-ink-60'
                               }` },
                                 status.review 
                                   ? status.review.status === 'completed'
@@ -15519,14 +15577,14 @@ Best regards`
                             },
                               React.createElement('div', { className: 'flex items-center gap-3 mb-2' },
                                 React.createElement('div', { 
-                                  className: `w-8 h-8 rounded-lg flex items-center justify-center ${status.goals ? 'bg-nw-blue text-white' : 'bg-line text-ink-40'}`
+                                  className: `w-8 h-8 rounded-lg flex items-center justify-center ${status.goals ? 'bg-nw-blue text-white' : 'bg-line text-ink-60'}`
                                 }, status.goals ? React.createElement(CheckCircle2, { size: 16 }) : React.createElement(Target, { size: 16 })),
                                 React.createElement('span', { className: 'font-semibold text-sm text-ink' }, 
                                   lang === 'de' ? 'Zielvereinbarung' : lang === 'it' ? 'Accordo obiettivi' : 'Goals'
                                 )
                               ),
                               // Status-Label
-                              React.createElement('div', { className: `text-xs ${status.goals ? 'text-nw-blue' : 'text-ink-40'}` },
+                              React.createElement('div', { className: `text-xs ${status.goals ? 'text-nw-blue' : 'text-ink-60'}` },
                                 status.goals 
                                   ? `✓ ${status.goals.goals?.length || 0} ${lang === 'de' ? 'Ziele definiert' : lang === 'it' ? 'obiettivi definiti' : 'goals defined'}`
                                   : `○ ${lang === 'de' ? 'Noch nicht erstellt' : lang === 'it' ? 'Non ancora creato' : 'Not created'}`
@@ -15614,7 +15672,7 @@ Best regards`
                 React.createElement('div', { 
                   className: 'relative bg-white/95 backdrop-blur-xl rounded-xl shadow-float border border-white/50 p-6 w-full max-w-sm mx-4',
                   onClick: e => e.stopPropagation(),
-                  style: { boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }
+                  style: { boxShadow: '0 25px 50px -12px rgba(28, 31, 46, 0.25)' }
                 },
                   // Header
                   React.createElement('div', { className: 'text-center mb-6' },
@@ -15656,14 +15714,14 @@ Best regards`
                       className: 'w-full px-4 py-3 bg-white border border border-line rounded-lg text-ink text-center text-lg font-medium transition-all focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
                     }),
                     // Hinweis für das Datumsformat
-                    React.createElement('p', { className: 'text-xs text-ink-40 text-center mt-2' },
+                    React.createElement('p', { className: 'text-xs text-ink-60 text-center mt-2' },
                       lang === 'de' ? 'Tipp: Klicken Sie auf das Kalender-Symbol' : lang === 'it' ? 'Suggerimento: Clicca sull\'icona calendario' : 'Tip: Click the calendar icon'
                     )
                   ),
                   
                   // Quelle-Hinweis wenn aus Formular
                   scheduleModalMember?.scheduledSource === 'form' && React.createElement('div', { 
-                    className: 'mb-4 px-3 py-2 bg-warn-bg border border-warn/30 rounded-xl text-xs text-warn text-center'
+                    className: 'mb-4 px-3 py-2 bg-white border border-warn/30 border border-warn/30 rounded-xl text-xs text-warn text-center'
                   },
                     '📝 ' + (lang === 'de' ? 'Automatisch aus Bewertungsbogen übernommen' : lang === 'it' ? 'Importato automaticamente dal modulo' : 'Auto-synced from evaluation form')
                   ),
@@ -16046,7 +16104,7 @@ Best regards`
                           React.createElement('div', { className: 'flex items-center gap-2' },
                             React.createElement('span', { 
                               className: 'px-3 py-1 rounded-full text-xs font-medium ' + 
-                                (emp.status === 'completed' ? 'bg-nw-green-15 text-ok' : 'bg-warn-bg text-warn')
+                                (emp.status === 'completed' ? 'bg-nw-green-15 text-ok' : 'bg-white border border-warn/30 text-warn')
                             }, emp.status === 'completed' 
                               ? getText(lang, 'Abgeschlossen', 'Completato', 'Completed')
                               : getText(lang, 'Entwurf', 'Bozza', 'Draft')
@@ -16063,10 +16121,10 @@ Best regards`
                                 (goal.title || goal.name).substring(0, 80) +
                                 ((goal.title || goal.name).length > 80 ? '...' : '')
                               ),
-                              goal.weight > 0 && React.createElement('span', { className: 'text-xs text-ink-40 flex-shrink-0' }, '(' + goal.weight + '%)')
+                              goal.weight > 0 && React.createElement('span', { className: 'text-xs text-ink-60 flex-shrink-0' }, '(' + goal.weight + '%)')
                             )
                           ),
-                          goals.length > 3 && React.createElement('div', { className: 'text-xs text-ink-40 italic ml-4' },
+                          goals.length > 3 && React.createElement('div', { className: 'text-xs text-ink-60 italic ml-4' },
                             '+ ' + (goals.length - 3) + ' ' + getText(lang, 'weitere Ziele', 'altri obiettivi', 'more goals')
                           )
                         )
@@ -16234,7 +16292,7 @@ Best regards`
                   React.createElement('div', { className: 'flex items-center gap-3' },
                     React.createElement('h2', { className: 'text-lg font-semibold text-nw-blue' }, 'Salary Review ' + new Date().getFullYear()),
                     React.createElement('span', { 
-                      className: 'px-2 py-1 rounded-full text-xs font-medium ' + (userRole.role === 'hr_admin' ? 'bg-nw-blue-12 text-nw-blue' : userRole.role === 'executive' ? 'bg-nw-blue-12 text-nw-blue' : 'bg-warn-bg text-warn')
+                      className: 'px-2 py-1 rounded-full text-xs font-medium ' + (userRole.role === 'hr_admin' ? 'bg-nw-blue-12 text-nw-blue' : userRole.role === 'executive' ? 'bg-nw-blue-12 text-nw-blue' : 'bg-white border border-warn/30 text-warn')
                     }, userRole.role === 'hr_admin' ? 'HR Admin' : userRole.role === 'executive' ? 'Executive' : 'Manager'),
                     salaryReviewPendingSave && React.createElement('span', { className: 'text-ok text-xs animate-pulse' }, 
                       lang === 'de' ? '● Speichert...' : lang === 'it' ? '● Salvataggio...' : '● Saving...')
@@ -16292,7 +16350,7 @@ Best regards`
                     React.createElement('div', { className: 'text-2xs text-ink-60' }, lang === 'de' ? 'Mit Erhöhung' : lang === 'it' ? 'Con aumento' : 'With Increase')
                   ),
                   React.createElement('div', { className: 'bg-warn-bg rounded-lg p-2 text-center' }, 
-                    React.createElement('div', { className: 'text-lg font-semibold text-warn' }, formatEURCompact(totalNewSalaries)), 
+                    React.createElement('div', { className: 'text-lg font-semibold text-ink' }, formatEURCompact(totalNewSalaries)), 
                     React.createElement('div', { className: 'text-2xs text-ink-60' }, lang === 'de' ? 'Gehaltssumme' : lang === 'it' ? 'Totale stipendi' : 'Total Salaries')
                   )
                 )
@@ -16311,7 +16369,7 @@ Best regards`
                       '(' + (lang === 'de' ? 'Klicken zum ' : lang === 'it' ? 'Clicca per ' : 'Click to ') + 
                       (showRecTable ? (lang === 'de' ? 'Schließen' : lang === 'it' ? 'chiudere' : 'close') : (lang === 'de' ? 'Öffnen' : lang === 'it' ? 'aprire' : 'open')) + ')')
                   ),
-                  React.createElement('span', { className: 'text-ink-40 text-lg' }, showRecTable ? '▲' : '▼')
+                  React.createElement('span', { className: 'text-ink-60 text-lg' }, showRecTable ? '▲' : '▼')
                 ),
                 showRecTable && React.createElement('div', { className: 'px-4 pb-4 border-t bg-white' },
                   React.createElement('table', { className: 'w-full text-sm mt-3' },
@@ -16353,9 +16411,9 @@ Best regards`
                       ),
                       React.createElement('tr', { className: 'bg-warn-bg' },
                         React.createElement('td', { className: 'px-3 py-2 border font-medium' }, '1.51 – 2.50'),
-                        React.createElement('td', { className: 'px-3 py-2 border' }, React.createElement('span', { className: 'px-2 py-0.5 bg-warn-bg text-warn rounded-lg text-xs font-medium' }, 
+                        React.createElement('td', { className: 'px-3 py-2 border' }, React.createElement('span', { className: 'px-2 py-0.5 bg-white border border-warn/30 text-ink-60 rounded-lg text-xs font-medium' }, 
                           lang === 'de' ? 'Unter Erwartungen' : lang === 'it' ? 'Sotto le aspettative' : 'Below Expectations')),
-                        React.createElement('td', { className: 'px-3 py-2 border text-center font-semibold text-warn' }, '0 – 1%'),
+                        React.createElement('td', { className: 'px-3 py-2 border text-center font-semibold text-ink' }, '0 – 1%'),
                         React.createElement('td', { className: 'px-3 py-2 border text-ink-60 text-xs' }, 
                           lang === 'de' ? 'Minimale Anpassung, Entwicklungsplan erforderlich' : lang === 'it' ? 'Adeguamento minimo, piano di sviluppo necessario' : 'Minimal adjustment, development plan required')
                       ),
@@ -16440,10 +16498,10 @@ Best regards`
                         const calc = calculateIncrease(emp);
                         const rec = getRecommendation(emp.gpsScore || 0);
                         const gpsVal = emp.gpsScore || 0;
-                        const gpsColor = gpsVal >= 4.51 ? 'bg-nw-green-15 text-ok' : gpsVal >= 3.51 ? 'bg-nw-green-15 text-ok' : gpsVal >= 2.51 ? 'bg-nw-blue-12 text-nw-blue' : gpsVal >= 1.51 ? 'bg-warn-bg text-warn' : 'bg-danger-bg text-danger';
+                        const gpsColor = gpsVal >= 4.51 ? 'bg-nw-green-15 text-ok' : gpsVal >= 3.51 ? 'bg-nw-green-15 text-ok' : gpsVal >= 2.51 ? 'bg-nw-blue-12 text-nw-blue' : gpsVal >= 1.51 ? 'bg-white border border-warn/30 text-warn' : 'bg-danger-bg text-danger';
                         
                         return React.createElement('tr', { key: emp.id, className: 'border-t hover:bg-panel transition-colors' },
-                          React.createElement('td', { className: 'px-2 py-2 text-ink-40 text-xs text-center' }, idx + 1),
+                          React.createElement('td', { className: 'px-2 py-2 text-ink-60 text-xs text-center' }, idx + 1),
                           React.createElement('td', { className: 'px-3 py-2' },
                             React.createElement('div', { className: 'font-semibold text-ink text-sm' }, emp.name || '—'),
                             emp.position && React.createElement('div', { className: 'text-2xs text-ink-60 truncate max-w-[140px]' }, emp.position)
@@ -16520,7 +16578,7 @@ Best regards`
                       // Access Flags anzeigen
                       (a.accessSalary !== false) && React.createElement('span', { className: 'px-1.5 py-0.5 rounded-lg text-2xs bg-nw-green-15 text-ok', title: 'Salary Review' }, '💰'),
                       (a.accessGoals !== false) && React.createElement('span', { className: 'px-1.5 py-0.5 rounded-lg text-2xs bg-nw-blue-12 text-nw-blue', title: 'Goals Dashboard' }, '🎯'),
-                      React.createElement('span', { className: 'px-2 py-0.5 rounded-lg text-xs ml-1 ' + (a.role === 'executive' ? 'bg-nw-blue-12 text-nw-blue' : 'bg-warn-bg text-warn') }, a.role)
+                      React.createElement('span', { className: 'px-2 py-0.5 rounded-lg text-xs ml-1 ' + (a.role === 'executive' ? 'bg-nw-blue-12 text-nw-blue' : 'bg-white border border-warn/30 text-warn') }, a.role)
                     ),
                     React.createElement('button', { onClick: () => removeSalaryReviewAccess(a.email), className: 'text-danger text-xs hover:text-danger ml-1' }, '×')
                   ))
@@ -16881,8 +16939,8 @@ Best regards`
                       React.createElement('div', { className: 'text-sm text-nw-blue' }, 'Salary Review')
                     ),
                     React.createElement('div', { className: 'bg-warn-bg rounded-lg p-4 text-center' },
-                      React.createElement('div', { className: 'text-2xl font-semibold text-warn' }, restoreData.data?.salaryReviewAccess?.length || 0),
-                      React.createElement('div', { className: 'text-sm text-warn' }, 'Zugriffsrechte')
+                      React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, restoreData.data?.salaryReviewAccess?.length || 0),
+                      React.createElement('div', { className: 'text-sm text-ink-60' }, 'Zugriffsrechte')
                     )
                   ),
                   
@@ -17248,10 +17306,10 @@ Best regards`
                       // Attention Needed
                       needsAttention.length > 0 && 
                         React.createElement('div', { className: 'bg-warn-bg rounded-lg p-3' },
-                          React.createElement('p', { className: 'text-xs font-semibold text-warn mb-2' }, 
+                          React.createElement('p', { className: 'text-xs font-semibold text-ink mb-2' }, 
                             '⚠️ ' + getText(lang, 'Achtung erforderlich', 'Attenzione richiesta', 'Attention Needed')
                           ),
-                          React.createElement('p', { className: 'text-xs text-warn' },
+                          React.createElement('p', { className: 'text-xs text-ink-60' },
                             needsAttention.length + ' ' +
                             getText(lang, 'Mitarbeiter unter GPS 2.5', 'collaboratori sotto GPS 2.5', 'employees below GPS 2.5')
                           )
@@ -17351,13 +17409,13 @@ Best regards`
                                   className: 'px-3 py-1 rounded-lg font-semibold text-sm ' + 
                                     (appraisal.gpsScore >= 4 ? 'bg-nw-green-15 text-ok' : 
                                      appraisal.gpsScore >= 3 ? 'bg-nw-blue-12 text-nw-blue' : 
-                                     'bg-warn-bg text-warn')
+                                     'bg-white border border-warn/30 text-warn')
                                 }, 'GPS: ' + appraisal.gpsScore.toFixed(2))
                               ),
                               // Version Count Badge
                               React.createElement('div', { 
                                 className: versions.length > 0 
-                                  ? 'px-3 py-1 bg-warn-bg text-warn rounded-lg text-sm font-medium flex items-center gap-1' 
+                                  ? 'px-3 py-1 bg-white border border-warn/30 text-warn rounded-lg text-sm font-medium flex items-center gap-1' 
                                   : 'px-3 py-1 bg-nw-grey-40 text-ink-60 rounded-lg text-sm'
                               },
                                 React.createElement(Clock, { size: 14 }),
@@ -17367,7 +17425,7 @@ Best regards`
                               ),
                               // Expand Arrow
                               React.createElement('div', { 
-                                className: 'text-ink-40 transition-transform ' + (isExpanded ? 'rotate-180' : '')
+                                className: 'text-ink-60 transition-transform ' + (isExpanded ? 'rotate-180' : '')
                               },
                                 React.createElement(ChevronDown, { size: 20 })
                               )
@@ -17388,10 +17446,10 @@ Best regards`
                                 )
                               : React.createElement('div', { className: 'space-y-2' },
                                   React.createElement('div', { className: 'flex items-center justify-between mb-3' },
-                                    React.createElement('h4', { className: 'font-semibold text-warn' }, 
+                                    React.createElement('h4', { className: 'font-semibold text-ink' }, 
                                       '📚 ' + getText(lang, 'Gespeicherte Versionen', 'Versioni salvate', 'Saved Versions')
                                     ),
-                                    React.createElement('span', { className: 'text-sm text-warn' },
+                                    React.createElement('span', { className: 'text-sm text-ink-60' },
                                       getText(lang, 'Neueste zuerst', 'Più recente prima', 'Newest first')
                                     )
                                   ),
@@ -17404,10 +17462,10 @@ Best regards`
                                         React.createElement('div', { className: 'flex items-center gap-4' },
                                           // Date/Time
                                           React.createElement('div', { className: 'text-center bg-warn-bg rounded-lg px-3 py-2' },
-                                            React.createElement('div', { className: 'font-semibold text-warn' },
+                                            React.createElement('div', { className: 'font-semibold text-ink' },
                                               new Date(version.savedAt).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })
                                             ),
-                                            React.createElement('div', { className: 'text-xs text-warn' },
+                                            React.createElement('div', { className: 'text-xs text-ink-60' },
                                               new Date(version.savedAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
                                             )
                                           ),
@@ -17417,7 +17475,7 @@ Best regards`
                                               className: 'px-2 py-1 rounded-lg text-sm font-semibold ' +
                                                 ((version.gpsScore || 0) >= 4 ? 'bg-nw-green-15 text-ok' :
                                                  (version.gpsScore || 0) >= 3 ? 'bg-nw-blue-12 text-nw-blue' :
-                                                 'bg-warn-bg text-warn')
+                                                 'bg-white border border-warn/30 text-warn')
                                             }, 'GPS: ' + (version.gpsScore || 0).toFixed(2)),
                                             version.wasScore > 0 && React.createElement('span', { className: 'px-2 py-1 bg-nw-grey-40 text-ink-60 rounded-lg text-xs' },
                                               'WAS: ' + version.wasScore.toFixed(2)
@@ -17590,7 +17648,7 @@ Best regards`
                                       className: 'px-2 py-1 rounded-lg text-xs font-medium ' +
                                         ((goal.achievement || 0) >= 100 ? 'bg-nw-green-15 text-ok' :
                                          (goal.achievement || 0) >= 85 ? 'bg-nw-blue-12 text-nw-blue' :
-                                         'bg-warn-bg text-warn')
+                                         'bg-white border border-warn/30 text-warn')
                                     },
                                       getText(lang, 'Erreichung', 'Raggiungimento', 'Achievement') + ': ' + (goal.achievement || '?') + '%'
                                     )
@@ -17600,8 +17658,8 @@ Best regards`
                                   goal.description
                                 ),
                                 goal.comment && React.createElement('div', { className: 'mt-3 p-3 bg-warn-bg rounded-lg border-l-4 border-warn' },
-                                  React.createElement('div', { className: 'text-xs text-warn font-medium mb-1' }, '💬 Kommentar:'),
-                                  React.createElement('p', { className: 'text-sm text-warn' }, goal.comment)
+                                  React.createElement('div', { className: 'text-xs text-ink-60 font-medium mb-1' }, '💬 Kommentar:'),
+                                  React.createElement('p', { className: 'text-sm text-ink-60' }, goal.comment)
                                 )
                               )
                             )
@@ -17648,7 +17706,7 @@ Best regards`
                                     className: 'px-3 py-1 rounded-lg text-sm font-semibold ' +
                                       (rating >= 4 ? 'bg-nw-green-15 text-ok' :
                                        rating >= 3 ? 'bg-nw-blue-12 text-nw-blue' :
-                                       rating >= 2 ? 'bg-warn-bg text-warn' :
+                                       rating >= 2 ? 'bg-white border border-warn/30 text-warn' :
                                        'bg-danger-bg text-danger')
                                   },
                                     'Level ' + rating
@@ -17699,7 +17757,7 @@ Best regards`
                                 className: 'px-3 py-1 rounded-lg text-sm font-semibold ' +
                                   (rating >= 4 ? 'bg-nw-green-15 text-ok' :
                                    rating >= 3 ? 'bg-nw-blue-12 text-nw-blue' :
-                                   rating >= 2 ? 'bg-warn-bg text-warn' :
+                                   rating >= 2 ? 'bg-white border border-warn/30 text-warn' :
                                    'bg-danger-bg text-danger')
                               },
                                 'Level ' + rating
@@ -18033,7 +18091,7 @@ Best regards`
                       gpsMax: 2.50,
                       color: '#9A6414',
                       bgClass: 'bg-warn',
-                      lightBgClass: 'bg-warn-bg border-warn/30 text-warn',
+                      lightBgClass: 'bg-white border border-warn/30 border-warn/30 text-warn',
                       count: selectedAppraisals.filter(a => a.gpsScore >= 1.51 && a.gpsScore < 2.51).length,
                       get percent() { return (this.count / total) * 100; },
                       idealPercent: 20
@@ -18139,7 +18197,7 @@ Best regards`
                                 5: 'bg-nw-green-15 text-ok',
                                 4: 'bg-nw-green-15 text-ok',
                                 3: 'bg-nw-blue-12 text-nw-blue',
-                                2: 'bg-warn-bg text-warn',
+                                2: 'bg-white border border-warn/30 text-warn',
                                 1: 'bg-danger-bg text-danger'
                               };
                               
@@ -18192,8 +18250,8 @@ Best regards`
                           React.createElement('div', { className: 'text-xs text-nw-blue font-medium' }, '2.51 - 3.50')
                         ),
                         React.createElement('div', { className: 'bg-warn-bg rounded-xl p-3' }, 
-                          React.createElement('div', { className: 'text-xl font-semibold text-warn' }, '2'), 
-                          React.createElement('div', { className: 'text-xs text-warn font-medium' }, '1.51 - 2.50')
+                          React.createElement('div', { className: 'text-xl font-semibold text-ink' }, '2'), 
+                          React.createElement('div', { className: 'text-xs text-ink-60 font-medium' }, '1.51 - 2.50')
                         ),
                         React.createElement('div', { className: 'bg-danger-bg rounded-xl p-3' }, 
                           React.createElement('div', { className: 'text-xl font-semibold text-danger' }, '1'), 
@@ -18251,7 +18309,7 @@ Best regards`
                                 style: { left: `${(bucket.idealPercent / maxPercent) * 100}%` }
                               })
                             ),
-                            React.createElement('div', { className: 'flex justify-between text-xs text-ink-40' },
+                            React.createElement('div', { className: 'flex justify-between text-xs text-ink-60' },
                               React.createElement('span', null, bucket.gpsRange),
                               React.createElement('span', null, 
                                 (bucket.percent - bucket.idealPercent >= 0 ? '+' : '') + (bucket.percent - bucket.idealPercent).toFixed(0) + '% ' +
@@ -18384,10 +18442,10 @@ Best regards`
                           React.createElement('div', { className: 'text-xs text-nw-blue mt-1' }, getText(lang, 'Mitte (Note 3)', 'Centro (3)', 'Middle (Grade 3)'))
                         ),
                         React.createElement('div', { className: 'bg-warn-bg rounded-xl p-4 text-center' },
-                          React.createElement('div', { className: 'text-2xl font-semibold text-warn' }, 
+                          React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, 
                             (buckets[3].percent + buckets[4].percent).toFixed(0) + '%'
                           ),
-                          React.createElement('div', { className: 'text-xs text-warn mt-1' }, getText(lang, 'Unten (Note 1-2)', 'Basso (1-2)', 'Bottom (Grade 1-2)'))
+                          React.createElement('div', { className: 'text-xs text-ink-60 mt-1' }, getText(lang, 'Unten (Note 1-2)', 'Basso (1-2)', 'Bottom (Grade 1-2)'))
                         ),
                         React.createElement('div', { className: 'bg-nw-blue-06 rounded-xl p-4 text-center' },
                           React.createElement('div', { className: 'text-2xl font-semibold text-nw-blue' }, avgGPSSelected),
@@ -18787,7 +18845,7 @@ Best regards`
                               const bottom25 = sorted.slice(0, Math.ceil(sorted.length * 0.25));
                               setHrRaterBiasSelectedEmployees(new Set(bottom25));
                             },
-                            className: 'px-3 py-1.5 text-xs bg-warn-bg text-warn rounded-lg hover:bg-warn-bg font-medium'
+                            className: 'px-3 py-1.5 text-xs bg-white border border-warn/30 text-warn rounded-lg hover:bg-warn-bg font-medium'
                           }, '📉 ' + getText(lang, 'Bottom 25%', 'Bottom 25%', 'Bottom 25%')),
                           React.createElement('button', {
                             onClick: () => {
@@ -18809,7 +18867,7 @@ Best regards`
                               getText(lang, 'Unternehmens-Benchmark (alle)', 'Benchmark aziendale', 'Company Benchmark (all)')
                             ),
                             React.createElement('p', { className: 'text-2xl font-semibold mt-1' }, companyAvgGPS.toFixed(2)),
-                            React.createElement('p', { className: 'text-xs text-ink-40 mt-1' }, 
+                            React.createElement('p', { className: 'text-xs text-ink-60 mt-1' }, 
                               `${allReviewsWithGPS.length} Reviews • σ ${companyStdDev.toFixed(2)}`
                             )
                           ),
@@ -18841,10 +18899,10 @@ Best regards`
                     // === KEINE AUSWAHL WARNUNG ===
                     selectedAppraisals.length === 0 && allReviewsWithGPS.length > 0 && React.createElement('div', { className: 'bg-warn-bg rounded-xl p-6 text-center border border-warn/30' },
                       React.createElement('span', { className: 'text-2xl mb-4 block' }, '⚠️'),
-                      React.createElement('p', { className: 'text-warn font-medium' },
+                      React.createElement('p', { className: 'text-ink-60 font-medium' },
                         getText(lang, 'Keine Mitarbeiter ausgewählt', 'Nessun collaboratore selezionato', 'No employees selected')
                       ),
-                      React.createElement('p', { className: 'text-warn text-sm mt-1' },
+                      React.createElement('p', { className: 'text-ink-60 text-sm mt-1' },
                         getText(lang, 'Bitte wählen Sie mindestens einen Mitarbeiter aus.', 'Seleziona almeno un collaboratore.', 'Please select at least one employee.')
                       )
                     ),
@@ -18872,10 +18930,10 @@ Best regards`
                               React.createElement('div', { className: 'flex gap-2' },
                                 React.createElement('span', { 
                                   className: `px-2 py-0.5 rounded-full text-xs font-medium ${
-                                    ms.biasColor === 'amber' ? 'bg-warn-bg text-warn' :
-                                    ms.biasColor === 'yellow' ? 'bg-warn-bg text-warn' :
+                                    ms.biasColor === 'amber' ? 'bg-white border border-warn/30 text-warn' :
+                                    ms.biasColor === 'yellow' ? 'bg-white border border-warn/30 text-warn' :
                                     ms.biasColor === 'red' ? 'bg-danger-bg text-danger' :
-                                    ms.biasColor === 'orange' ? 'bg-warn-bg text-warn' :
+                                    ms.biasColor === 'orange' ? 'bg-white border border-warn/30 text-warn' :
                                     'bg-nw-green-15 text-ok'
                                   }`
                                 }, ms.biasLabel),
@@ -18949,7 +19007,7 @@ Best regards`
                                 React.createElement('td', { className: 'px-4 py-3 text-ink-60' }, a.formData?.manager || '–'),
                                 React.createElement('td', { className: 'px-4 py-3 text-center' },
                                   React.createElement('span', { className: 'px-2 py-1 rounded-lg font-semibold ' + 
-                                    (a.gpsScore >= 3.5 ? 'bg-nw-green-15 text-ok' : a.gpsScore >= 2.5 ? 'bg-nw-blue-12 text-nw-blue' : 'bg-warn-bg text-warn')
+                                    (a.gpsScore >= 3.5 ? 'bg-nw-green-15 text-ok' : a.gpsScore >= 2.5 ? 'bg-nw-blue-12 text-nw-blue' : 'bg-white border border-warn/30 text-warn')
                                   }, a.gpsScore.toFixed(2))
                                 ),
                                 React.createElement('td', { className: 'px-4 py-3 text-center ' + (diff >= 0 ? 'text-ok' : 'text-danger') },
@@ -19001,7 +19059,7 @@ Best regards`
                           getText(lang, 'Legende', 'Legenda', 'Legend')
                         ),
                         React.createElement('div', { className: 'flex flex-wrap gap-2 text-xs' },
-                          React.createElement('span', { className: 'px-2 py-1 bg-warn-bg text-warn rounded-lg' }, 'Milde: Δ ≥ +0.5'),
+                          React.createElement('span', { className: 'px-2 py-1 bg-white border border-warn/30 text-warn rounded-lg' }, 'Milde: Δ ≥ +0.5'),
                           React.createElement('span', { className: 'px-2 py-1 bg-nw-green-15 text-ok rounded-lg' }, 'Neutral: Δ ±0.25'),
                           React.createElement('span', { className: 'px-2 py-1 bg-danger-bg text-danger rounded-lg' }, 'Streng: Δ ≤ -0.5')
                         )
@@ -19042,11 +19100,11 @@ Best regards`
                   
                   // Farben für die Linien (max 5)
                   const lineColors = [
-                    { stroke: '#243186', fill: 'rgba(139, 92, 246, 0.15)', name: 'Violet' },
-                    { stroke: '#2F7A48', fill: 'rgba(6, 182, 212, 0.15)', name: 'Cyan' },
-                    { stroke: '#9A6414', fill: 'rgba(249, 115, 22, 0.15)', name: 'Orange' },
-                    { stroke: '#2F7A48', fill: 'rgba(16, 185, 129, 0.15)', name: 'Emerald' },
-                    { stroke: '#9B2C22', fill: 'rgba(236, 72, 153, 0.15)', name: 'Pink' }
+                    { stroke: '#243186', fill: 'rgba(58, 70, 160, 0.15)', name: 'Violet' },
+                    { stroke: '#2F7A48', fill: 'rgba(110, 189, 132, 0.15)', name: 'Cyan' },
+                    { stroke: '#9A6414', fill: 'rgba(154, 100, 20, 0.15)', name: 'Amber' },
+                    { stroke: '#2F7A48', fill: 'rgba(110, 189, 132, 0.15)', name: 'Emerald' },
+                    { stroke: '#9B2C22', fill: 'rgba(155, 44, 34, 0.15)', name: 'Pink' }
                   ];
                   
                   // Kompetenz-Namen
@@ -19450,7 +19508,7 @@ Best regards`
                           
                           const icon = analysis.type === 'complementary' ? '✅' : analysis.type === 'clone' ? '⚠️' : '📊';
                           const bgColor = analysis.type === 'complementary' ? 'bg-nw-green-15 text-ok' : 
-                                          analysis.type === 'clone' ? 'bg-warn-bg text-warn' : 'bg-nw-grey-40 text-ink';
+                                          analysis.type === 'clone' ? 'bg-white border border-warn/30 text-warn' : 'bg-nw-grey-40 text-ink';
                           
                           return React.createElement('div', { className: `p-3 rounded-lg ${bgColor}` },
                             React.createElement('p', { className: 'font-medium' }, icon + ' ' + analysis.message),
@@ -19479,7 +19537,7 @@ Best regards`
                               return React.createElement('div', { 
                                 key: emp.id,
                                 className: `p-2 rounded-lg ${
-                                  halo.type === 'halo_positive' ? 'bg-warn-bg text-warn' :
+                                  halo.type === 'halo_positive' ? 'bg-white border border-warn/30 text-warn' :
                                   halo.type === 'halo_negative' ? 'bg-danger-bg text-danger' :
                                   'bg-nw-blue-12 text-nw-blue'
                                 }`
@@ -19659,7 +19717,7 @@ Best regards`
                           const quality = analyzeQuality();
                           const statusColors = {
                             green: { bg: 'bg-nw-green-15 border-nw-green/40', icon: '🟢', badge: 'bg-nw-green-15 text-ok' },
-                            amber: { bg: 'bg-warn-bg border-warn/30', icon: '🟡', badge: 'bg-warn-bg text-warn' },
+                            amber: { bg: 'bg-warn-bg border-warn/30', icon: '🟡', badge: 'bg-white border border-warn/30 text-warn' },
                             red: { bg: 'bg-danger-bg border-danger/30', icon: '🔴', badge: 'bg-danger-bg text-danger' }
                           };
                           const statusStyle = statusColors[quality.status];
@@ -19694,7 +19752,7 @@ Best regards`
                             quality.issues.length > 0 && React.createElement('div', { className: 'mt-3 space-y-1' },
                               quality.issues.map((issue, i) => 
                                 React.createElement('p', { key: i, className: 'text-sm text-ink flex items-start gap-2' },
-                                  React.createElement('span', { className: 'text-ink-40' }, '•'),
+                                  React.createElement('span', { className: 'text-ink-60' }, '•'),
                                   issue
                                 )
                               )
@@ -19780,7 +19838,7 @@ Best regards`
                                           React.createElement('td', { className: 'px-2 py-1.5 border-b border-line-2 text-ink-60' },
                                             comment ? 
                                               React.createElement('span', { className: 'line-clamp-2' }, comment) :
-                                              React.createElement('span', { className: needsJustification ? 'text-danger font-medium' : 'text-ink-40 italic' }, 
+                                              React.createElement('span', { className: needsJustification ? 'text-danger font-medium' : 'text-ink-60 italic' }, 
                                                 needsJustification ? '⚠️ ' + getText(lang, 'Begründung fehlt!', 'Manca giustificazione!', 'Justification missing!') :
                                                 getText(lang, 'Keine Begründung', 'Nessuna giustificazione', 'No justification')
                                               )
@@ -19816,7 +19874,7 @@ Best regards`
                                           React.createElement('td', { className: 'px-2 py-1.5 border-b border-line-2 text-ink-60' },
                                             comment ? 
                                               React.createElement('span', { className: 'line-clamp-2' }, comment) :
-                                              React.createElement('span', { className: needsJustification ? 'text-danger font-medium' : 'text-ink-40 italic' }, 
+                                              React.createElement('span', { className: needsJustification ? 'text-danger font-medium' : 'text-ink-60 italic' }, 
                                                 needsJustification ? '⚠️ ' + getText(lang, 'Begründung fehlt!', 'Manca giustificazione!', 'Justification missing!') :
                                                 getText(lang, 'Keine Begründung', 'Nessuna giustificazione', 'No justification')
                                               )
@@ -19902,8 +19960,8 @@ Best regards`
                               React.createElement('p', { className: 'text-xs text-ok' }, getText(lang, 'Gut dokumentiert', 'Ben documentati', 'Well documented'))
                             ),
                             React.createElement('div', { key: 'amber', className: 'p-3 bg-warn-bg rounded-lg' },
-                              React.createElement('p', { className: 'text-2xl font-semibold text-warn' }, amberCount),
-                              React.createElement('p', { className: 'text-xs text-warn' }, getText(lang, 'Zu prüfen', 'Da verificare', 'To review'))
+                              React.createElement('p', { className: 'text-2xl font-semibold text-ink' }, amberCount),
+                              React.createElement('p', { className: 'text-xs text-ink-60' }, getText(lang, 'Zu prüfen', 'Da verificare', 'To review'))
                             ),
                             React.createElement('div', { key: 'red', className: 'p-3 bg-danger-bg rounded-lg' },
                               React.createElement('p', { className: 'text-2xl font-semibold text-danger' }, redCount),
@@ -19956,7 +20014,7 @@ Best regards`
                                   const val = allScores[comp.key] || 0;
                                   const bgColor = val >= 4 ? 'bg-nw-green-15 text-ok' : 
                                                   val >= 3 ? 'bg-nw-blue-12 text-nw-blue' : 
-                                                  val > 0 ? 'bg-warn-bg text-warn' : 'bg-nw-grey-40 text-ink-40';
+                                                  val > 0 ? 'bg-white border border-warn/30 text-warn' : 'bg-nw-grey-40 text-ink-60';
                                   return React.createElement('td', { key: comp.key, className: 'px-3 py-2 text-center' },
                                     React.createElement('span', { className: `px-2 py-0.5 rounded-lg font-medium ${bgColor}` }, 
                                       val > 0 ? val.toFixed(1) : '–'
@@ -20078,8 +20136,8 @@ Best regards`
                           lang === 'de' ? 'Abgeschlossen' : lang === 'it' ? 'Completati' : 'Completed')
                       ),
                       React.createElement('div', { className: 'bg-warn-bg rounded-xl p-4 text-center' },
-                        React.createElement('div', { className: 'text-2xl font-semibold text-warn' }, draftGoals),
-                        React.createElement('div', { className: 'text-xs text-warn' }, 
+                        React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, draftGoals),
+                        React.createElement('div', { className: 'text-xs text-ink-60' }, 
                           lang === 'de' ? 'Entwürfe' : lang === 'it' ? 'Bozze' : 'Drafts')
                       ),
                       React.createElement('div', { className: 'bg-nw-blue-12 rounded-xl p-4 text-center' },
@@ -20229,7 +20287,7 @@ Best regards`
                                     <h3 class="text-xl font-semibold text-ink">${ga.employeeName || ga.formData?.employee || 'Unbekannt'}</h3>
                                     <p class="text-sm text-ink-60">${ga.formData?.position || ''}</p>
                                   </div>
-                                  <button onclick="this.closest('.fixed').remove()" class="text-ink-40 hover:text-ink-60 text-2xl">&times;</button>
+                                  <button onclick="this.closest('.fixed').remove()" class="text-ink-60 hover:text-ink-60 text-2xl">&times;</button>
                                 </div>
                                 <div class="p-6 space-y-6">
                                   <div>
@@ -20240,7 +20298,7 @@ Best regards`
                                         <tbody>${goalsHtml}</tbody>
                                       </table>
                                       <p class="text-sm text-ink-60 mt-2">${lang === 'de' ? 'Gesamtgewichtung' : 'Total weight'}: ${(ga.goals || []).reduce((s, g) => s + (parseFloat(g.weight) || 0), 0)}%</p>
-                                    ` : `<p class="text-ink-40 text-sm">${lang === 'de' ? 'Keine Leistungsziele definiert' : 'No performance goals defined'}</p>`}
+                                    ` : `<p class="text-ink-60 text-sm">${lang === 'de' ? 'Keine Leistungsziele definiert' : 'No performance goals defined'}</p>`}
                                   </div>
                                   ${ga.devGoals?.length > 0 ? `
                                   <div>
@@ -20251,7 +20309,7 @@ Best regards`
                                     </table>
                                   </div>
                                   ` : ''}
-                                  <div class="text-xs text-ink-40 pt-4 border-t">
+                                  <div class="text-xs text-ink-60 pt-4 border-t">
                                     ${lang === 'de' ? 'Zuletzt aktualisiert' : 'Last updated'}: ${new Date(ga.updatedAt || ga.createdAt).toLocaleString('de-DE')}
                                     ${ga.status === 'completed' ? ` • <span class="text-ok">${lang === 'de' ? 'Abgeschlossen' : 'Completed'}</span>` : ` • <span class="text-warn">${lang === 'de' ? 'Entwurf' : 'Draft'}</span>`}
                                   </div>
@@ -20274,11 +20332,11 @@ Best regards`
                           React.createElement('div', { className: 'flex items-center gap-2' },
                             React.createElement('span', { 
                               className: 'px-2 py-1 rounded-lg text-xs font-medium ' + 
-                                (ga.status === 'completed' ? 'bg-nw-green-15 text-ok' : 'bg-warn-bg text-warn')
+                                (ga.status === 'completed' ? 'bg-nw-green-15 text-ok' : 'bg-white border border-warn/30 text-warn')
                             }, ga.status === 'completed' 
                               ? (lang === 'de' ? '✓ Fertig' : lang === 'it' ? '✓ Completato' : '✓ Complete') 
                               : (lang === 'de' ? 'Entwurf' : lang === 'it' ? 'Bozza' : 'Draft')),
-                            React.createElement('span', { className: 'text-xs text-ink-40' },
+                            React.createElement('span', { className: 'text-xs text-ink-60' },
                               new Date(ga.updatedAt || ga.createdAt).toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'it' ? 'it-IT' : 'en-GB')
                             ),
                             React.createElement('span', { className: 'text-nw-blue text-xs' }, '→')
@@ -20519,12 +20577,12 @@ Best regards`
                             const isPdf = a.type === 'self_pdf' || a.isPdfUpload === true;
                             const isReview = a.type === 'review' || (!a.type && !isSelf && !isPdf);
                             const typeLabel = isPdf ? '📄 PDF' : isSelf ? '🪞 Self' : a.type === 'goals' ? '🎯 Goals' : '📋 Review';
-                            const typeColor = isPdf ? 'bg-warn-bg text-warn' : isSelf ? 'bg-nw-blue-12 text-nw-blue' : 
+                            const typeColor = isPdf ? 'bg-white border border-warn/30 text-warn' : isSelf ? 'bg-nw-blue-12 text-nw-blue' : 
                                               a.type === 'goals' ? 'bg-nw-blue-12 text-nw-blue' : 'bg-nw-green-15 text-ok';
                             
                             const gpsColor = gps >= 3.5 ? 'bg-nw-green-15 text-ok' : 
                                              gps >= 2.5 ? 'bg-nw-blue-06 text-nw-blue' : 
-                                             gps > 0 ? 'bg-warn-bg text-warn' : 'bg-panel text-ink-40';
+                                             gps > 0 ? 'bg-white border border-warn/30 text-warn' : 'bg-panel text-ink-60';
                             
                             return React.createElement('tr', { key: a.id, className: 'hover:bg-panel group' },
                               React.createElement('td', { className: 'px-4 py-3' },
@@ -20542,7 +20600,7 @@ Best regards`
                               React.createElement('td', { className: 'px-4 py-3 text-center text-ink-60' }, wie > 0 ? wie.toFixed(2) : '–'),
                               React.createElement('td', { className: 'px-4 py-3' },
                                 React.createElement('span', { 
-                                  className: 'px-2 py-1 rounded-full text-xs ' + (a.status === 'completed' ? 'bg-nw-green-15 text-ok' : 'bg-warn-bg text-warn')
+                                  className: 'px-2 py-1 rounded-full text-xs ' + (a.status === 'completed' ? 'bg-nw-green-15 text-ok' : 'bg-white border border-warn/30 text-warn')
                                 }, a.status === 'completed' ? '✓' : '✎')
                               ),
                               React.createElement('td', { className: 'px-4 py-3 text-ink-60 text-xs' },
@@ -20689,7 +20747,7 @@ Best regards`
                       React.createElement('div', { className: 'bg-panel rounded-xl p-4 space-y-3' },
                         hrViewAppraisal.goals.map((g, i) => 
                           React.createElement('div', { key: i, className: 'flex items-center gap-3 bg-white rounded-lg p-3 border' },
-                            React.createElement('span', { className: 'text-lg font-semibold text-ink-40' }, i + 1),
+                            React.createElement('span', { className: 'text-lg font-semibold text-ink-60' }, i + 1),
                             React.createElement('div', { className: 'flex-1' },
                               React.createElement('p', { className: 'font-medium text-ink' }, g.name || g.n || 'N/A'),
                               React.createElement('div', { className: 'flex gap-4 text-xs text-ink-60 mt-1' },
@@ -20779,8 +20837,8 @@ Best regards`
                         React.createElement('p', { className: 'text-sm text-nw-blue whitespace-pre-wrap' }, hrViewAppraisal.formData.feedbackManager)
                       ),
                       hrViewAppraisal.formData.careerComment && React.createElement('div', { className: 'bg-warn-bg rounded-xl p-4 border border-warn/30' },
-                        React.createElement('h4', { className: 'font-semibold text-warn mb-2' }, '📈 ' + getText(lang, 'Karriere-Kommentar', 'Commento carriera', 'Career comment')),
-                        React.createElement('p', { className: 'text-sm text-warn whitespace-pre-wrap' }, hrViewAppraisal.formData.careerComment)
+                        React.createElement('h4', { className: 'font-semibold text-ink mb-2' }, '📈 ' + getText(lang, 'Karriere-Kommentar', 'Commento carriera', 'Career comment')),
+                        React.createElement('p', { className: 'text-sm text-ink-60 whitespace-pre-wrap' }, hrViewAppraisal.formData.careerComment)
                       )
                     ),
                     
@@ -21012,7 +21070,7 @@ Best regards`
                     ),
                     // === KOMMENTARE ===
                     React.createElement('div', { className: 'bg-warn-bg rounded-lg p-4' },
-                      React.createElement('h4', { className: 'font-medium text-warn mb-3' }, getText(lang, 'Kommentare', 'Commenti', 'Comments')),
+                      React.createElement('h4', { className: 'font-medium text-ink-60 mb-3' }, getText(lang, 'Kommentare', 'Commenti', 'Comments')),
                       React.createElement('div', { className: 'grid grid-cols-2 gap-3' },
                         React.createElement('div', null,
                           React.createElement('label', { className: 'block text-xs text-ink-60 mb-1' }, getText(lang, 'Stärken', 'Punti forza', 'Strengths')),
@@ -21116,7 +21174,7 @@ Best regards`
               ),
               
               // Footer
-              React.createElement('div', { className: 'text-center text-xs text-ink-40 py-4' },
+              React.createElement('div', { className: 'text-center text-xs text-ink-60 py-4' },
                 '🔐 HR Admin – ' + (user?.email || '')
               )
             );
@@ -21411,7 +21469,7 @@ Best regards`
                       onClick: () => setCalibrationFilter('draft'),
                       className: `px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
                         calibrationFilter === 'draft' 
-                          ? 'bg-warn-bg text-warn shadow-card' 
+                          ? 'bg-white border border-warn/30 text-warn shadow-card' 
                           : 'text-ink-60 hover:text-ink'
                       }`
                     }, `✎ ${lang === 'de' ? 'Entwürfe' : lang === 'it' ? 'Bozze' : 'Drafts'}`)
@@ -21466,7 +21524,7 @@ Best regards`
                   React.createElement('div', { className: "bg-warn-bg rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center" },
                     React.createElement(Info, { size: 32, className: "text-warn" })
                   ),
-                  React.createElement('h3', { className: "font-semibold text-warn text-xl mb-3" },
+                  React.createElement('h3', { className: "font-semibold text-ink text-xl mb-3" },
                     lang === 'de' ? 'Noch keine Daten für Kalibrierung' : lang === 'it' ? 'Nessun dato per la calibrazione' : 'No data for calibration yet'
                   ),
                   React.createElement('p', { className: "text-warn mb-4 leading-relaxed" },
@@ -21476,10 +21534,10 @@ Best regards`
                   ),
                   // Checkliste
                   React.createElement('div', { className: "bg-white rounded-xl p-4 mb-4 text-left border border-warn/30" },
-                    React.createElement('div', { className: "text-sm font-medium text-warn mb-2" },
+                    React.createElement('div', { className: "text-sm font-medium text-ink-60 mb-2" },
                       lang === 'de' ? 'So startest du:' : lang === 'it' ? 'Come iniziare:' : 'How to start:'
                     ),
-                    React.createElement('ul', { className: "text-sm text-warn space-y-1.5" },
+                    React.createElement('ul', { className: "text-sm text-ink-60 space-y-1.5" },
                       React.createElement('li', { className: "flex items-center gap-2" },
                         React.createElement('span', { className: "text-warn" }, "1."),
                         lang === 'de' ? 'Gehe zu "Team-Übersicht"' : lang === 'it' ? 'Vai a "Panoramica team"' : 'Go to "Team Overview"'
@@ -21506,7 +21564,7 @@ Best regards`
                     lang === 'de' ? 'Zur Team-Übersicht' : lang === 'it' ? 'Vai alla panoramica team' : 'Go to Team Overview'
                   ),
                   // Draft-Hinweis falls vorhanden
-                  draftReviews.length > 0 && React.createElement('p', { className: "text-sm text-warn mt-4" },
+                  draftReviews.length > 0 && React.createElement('p', { className: "text-sm text-ink-60 mt-4" },
                     lang === 'de' 
                       ? `💡 Du hast ${draftReviews.length} Entwürfe. Schließe diese ab, um GPS-Werte zu erhalten.`
                       : `💡 Hai ${draftReviews.length} bozze. Completale per ottenere i valori GPS.`
@@ -22021,7 +22079,7 @@ Best regards`
                           React.createElement('text', {
                             x: cx, y: cy, textAnchor: 'middle', dy: '0.35em',
                             fill: 'white', fontWeight: '600', fontSize: r > 26 ? '14px' : '11px',
-                            style: { textShadow: '0 1px 3px rgba(0,0,0,0.4)' }
+                            style: { textShadow: '0 1px 3px rgba(28, 31, 46,0.4)' }
                           }, emp.initials)
                         );
                       })
@@ -22066,11 +22124,11 @@ Best regards`
                           // WAS & WIE
                           React.createElement('div', { className: "grid grid-cols-2 gap-2 text-xs mb-3" },
                             React.createElement('div', { className: "bg-panel rounded-lg p-2 text-center" },
-                              React.createElement('div', { className: "text-ink-40 mb-0.5" }, lang === 'de' ? 'WAS' : lang === 'it' ? 'COSA' : 'WHAT'),
+                              React.createElement('div', { className: "text-ink-60 mb-0.5" }, lang === 'de' ? 'WAS' : lang === 'it' ? 'COSA' : 'WHAT'),
                               React.createElement('div', { className: "font-semibold text-sm" }, bubbleTooltip.was > 0 ? bubbleTooltip.was.toFixed(1) : '–')
                             ),
                             React.createElement('div', { className: "bg-panel rounded-lg p-2 text-center" },
-                              React.createElement('div', { className: "text-ink-40 mb-0.5" }, lang === 'de' ? 'WIE' : lang === 'it' ? 'COME' : 'HOW'),
+                              React.createElement('div', { className: "text-ink-60 mb-0.5" }, lang === 'de' ? 'WIE' : lang === 'it' ? 'COME' : 'HOW'),
                               React.createElement('div', { className: "font-semibold text-sm" }, bubbleTooltip.wie > 0 ? bubbleTooltip.wie.toFixed(1) : '–')
                             )
                           ),
@@ -22191,17 +22249,17 @@ Best regards`
               allReviews.length > 0 && (() => {
                 // Hilfsfunktionen für Farbcodierung (Unternehmensfarben)
                 const getColorForGPS = (gps) => {
-                  if (!gps || gps <= 0) return 'bg-nw-grey-40 text-ink-40';
+                  if (!gps || gps <= 0) return 'bg-nw-grey-40 text-ink-60';
                   if (gps < 2.0) return 'bg-danger-bg text-danger';
-                  if (gps < 2.5) return 'bg-warn-bg text-warn';
+                  if (gps < 2.5) return 'bg-white border border-warn/30 text-warn';
                   if (gps < 3.5) return 'bg-nw-green-15 text-nw-blue'; // Niederwieser Blau auf hellem Grün
                   return 'bg-nw-blue text-white'; // Niederwieser Grün
                 };
                 
                 const getColorForLevel = (level) => {
-                  if (!level || level <= 0) return 'bg-panel text-ink-40';
+                  if (!level || level <= 0) return 'bg-panel text-ink-60';
                   if (level <= 1.4) return 'bg-danger-bg text-danger';
-                  if (level <= 2.4) return 'bg-warn-bg text-warn';
+                  if (level <= 2.4) return 'bg-white border border-warn/30 text-warn';
                   if (level <= 3.4) return 'bg-nw-green-15 text-nw-blue'; // Niederwieser Blau
                   return 'bg-nw-blue text-white'; // Niederwieser Grün
                 };
@@ -22401,7 +22459,7 @@ Best regards`
                     // Legende (Unternehmensfarben)
                     React.createElement('div', { className: "flex flex-wrap gap-2 mt-3 md:mt-0 text-xs" },
                       React.createElement('span', { className: "px-2 py-1 rounded-lg bg-danger-bg text-danger" }, "1 Kritisch"),
-                      React.createElement('span', { className: "px-2 py-1 rounded-lg bg-warn-bg text-warn" }, "2 Below"),
+                      React.createElement('span', { className: "px-2 py-1 rounded-lg bg-white border border-warn/30 text-warn" }, "2 Below"),
                       React.createElement('span', { className: "px-2 py-1 rounded-lg bg-nw-green-15 text-nw-blue" }, "3 Baseline"),
                       React.createElement('span', { className: "px-2 py-1 rounded-lg bg-nw-blue text-white" }, "4-5 Top")
                     )
@@ -22649,11 +22707,11 @@ Best regards`
                                 className: "cursor-pointer text-sm"
                               },
                                 emp.note 
-                                  ? React.createElement('div', { className: "bg-warn-bg border border-warn/30 rounded-lg p-2 text-warn" },
+                                  ? React.createElement('div', { className: "bg-white border border-warn/30 border border-warn/30 rounded-lg p-2 text-warn" },
                                       React.createElement('span', { className: "mr-1" }, "📝"),
                                       emp.note
                                     )
-                                  : React.createElement('div', { className: "text-ink-40 hover:text-ink-60 flex items-center gap-1" },
+                                  : React.createElement('div', { className: "text-ink-60 hover:text-ink-60 flex items-center gap-1" },
                                       React.createElement(Edit2, { size: 12 }),
                                       lang === 'de' ? 'Notiz hinzufügen...' : lang === 'it' ? 'Aggiungi nota...' : 'Add note...'
                                     )
@@ -22723,7 +22781,7 @@ Best regards`
                                 React.createElement('span', { className: "font-semibold text-ink" }, emp.name),
                                 // Status Badge
                                 React.createElement('span', { 
-                                  className: `text-xs px-2 py-0.5 rounded-full ${emp.status === 'completed' ? 'bg-nw-green-15 text-ok' : 'bg-warn-bg text-warn'}`
+                                  className: `text-xs px-2 py-0.5 rounded-full ${emp.status === 'completed' ? 'bg-nw-green-15 text-ok' : 'bg-white border border-warn/30 text-warn'}`
                                 }, emp.status === 'completed' ? '✓' : '✎'),
                                 // FK Badge
                                 emp.includeLeadership && React.createElement('span', { 
@@ -22887,10 +22945,10 @@ Best regards`
                           React.createElement(Target, { size: 20, className: "text-white" })
                         ),
                         React.createElement('div', { className: "flex-1" },
-                          React.createElement('h4', { className: "font-semibold text-warn text-sm mb-1" },
+                          React.createElement('h4', { className: "font-semibold text-ink text-sm mb-1" },
                             lang === 'de' ? '🎯 Team-Entwicklungsempfehlung' : lang === 'it' ? '🎯 Raccomandazione sviluppo team' : '🎯 Team Development Recommendation'
                           ),
-                          React.createElement('p', { className: "text-sm text-warn mb-3" },
+                          React.createElement('p', { className: "text-sm text-ink-60 mb-3" },
                             lang === 'de' 
                               ? `Niedrigster Team-Durchschnitt: ${labels[lowestId]} (Ø ${lowestAvg.toFixed(1)}) – ${rec.title}`
                               : `Media team più bassa: ${labels[lowestId]} (Ø ${lowestAvg.toFixed(1)}) – ${rec.title}`
@@ -22899,7 +22957,7 @@ Best regards`
                             ...rec.actions.map((action, i) => 
                               React.createElement('span', { 
                                 key: i, 
-                                className: "inline-flex items-center gap-1 px-2 py-1 bg-white rounded-full text-xs text-warn border border-warn/30"
+                                className: "inline-flex items-center gap-1 px-2 py-1 bg-white rounded-full text-xs text-ink-60 border border-warn/30"
                               },
                                 React.createElement(CheckCircle2, { size: 12 }),
                                 action
@@ -23228,7 +23286,7 @@ const renderDashboard = () => {
                   })()
                 ),
                 React.createElement('div', { className: "border-t border-line-2 px-5 py-2.5" },
-                  React.createElement('p', { className: "text-xs text-ink-40" },
+                  React.createElement('p', { className: "text-xs text-ink-60" },
                     lang === 'de' ? '💡 Nutzen Sie die Seitenleiste links zur Navigation.' : lang === 'it' ? '💡 Usa la barra laterale per navigare.' : '💡 Use the sidebar to navigate.'
                   )
                 )
@@ -23731,11 +23789,11 @@ const renderDashboard = () => {
               ),
               // Bereichshinweis-Box am Anfang
               React.createElement('div', { className: 'bg-warn-bg border-2 border-warn/30 rounded-xl p-5' },
-                React.createElement('h3', { className: 'font-semibold text-warn flex items-center gap-2 mb-3' },
+                React.createElement('h3', { className: 'font-semibold text-ink flex items-center gap-2 mb-3' },
                   React.createElement(Factory, { size: 20 }),
                   productionBoxTitle[lang] || productionBoxTitle.de
                 ),
-                React.createElement('p', { className: 'text-warn text-sm leading-relaxed' },
+                React.createElement('p', { className: 'text-ink-60 text-sm leading-relaxed' },
                   lang === 'de' 
                     ? 'Für Mitarbeiter in Produktion & Logistik gilt ein angepasster Prozess: Die Selbstreflexion wird NICHT vorab digital versendet, sondern die Selbsteinschätzung wird direkt im Gespräch mündlich abgefragt. Achten Sie bei den folgenden Schritten auf die orangefarbenen Hinweise.'
                     : lang === 'it'
@@ -23764,11 +23822,11 @@ const renderDashboard = () => {
                         React.createElement('p', { className: 'font-semibold text-nw-blue mb-1' }, '📧 ' + (lang === 'de' ? 'E-Mail Vorlage:' : lang === 'it' ? 'Modello email:' : 'Email template:')),
                         React.createElement('pre', { className: 'text-ink-60 whitespace-pre-wrap font-sans' }, step.email)
                       ),
-                      step.warning && React.createElement('div', { className: 'mt-3 p-3 bg-warn-bg border border-warn/30 rounded-lg text-sm text-warn flex items-start gap-2' },
+                      step.warning && React.createElement('div', { className: 'mt-3 p-3 bg-warn-bg border border-warn/30 rounded-lg text-sm text-ink-60 flex items-start gap-2' },
                         React.createElement(AlertCircle, { size: 16, className: 'flex-shrink-0 mt-0.5' }), step.warning
                       ),
                       // Produktions-Hinweis (orange Box)
-                      step.productionNote && React.createElement('div', { className: 'mt-3 p-3 bg-warn-bg border-2 border-warn/30 rounded-lg text-sm text-warn flex items-start gap-2' },
+                      step.productionNote && React.createElement('div', { className: 'mt-3 p-3 bg-warn-bg border-2 border-warn/30 rounded-lg text-sm text-ink-60 flex items-start gap-2' },
                         React.createElement(Factory, { size: 16, className: 'flex-shrink-0 mt-0.5 text-warn' }),
                         React.createElement('div', null,
                           React.createElement('span', { className: 'font-semibold' }, '🏭 '),
@@ -23871,7 +23929,7 @@ const renderDashboard = () => {
               // Bereichs-Header mit Navigation
               React.createElement('div', { className: "bg-white rounded-xl shadow-card border border-line p-4 flex items-center justify-between" },
                 React.createElement('div', { className: "flex items-center gap-3" },
-                  React.createElement('div', { className: `p-2 rounded-lg ${isProduction ? 'bg-warn-bg text-warn' : 'bg-nw-blue-12 text-nw-blue'}` },
+                  React.createElement('div', { className: `p-2 rounded-lg ${isProduction ? 'bg-white border border-warn/30 text-warn' : 'bg-nw-blue-12 text-nw-blue'}` },
                     React.createElement(isProduction ? Factory : Briefcase, { size: 24 })
                   ),
                   React.createElement('div', null,
@@ -24025,7 +24083,7 @@ const renderDashboard = () => {
                     React.createElement('div', { className: `p-3 rounded-xl ${isProductionDetail ? 'bg-warn' : 'bg-nw-blue'} text-white` }, React.createElement(compData.icon, { size: 32 })),
                     React.createElement('div', null,
                       React.createElement('h2', { className: "text-lg font-semibold text-nw-blue" }, compData.title),
-                      React.createElement('span', { className: `text-xs uppercase tracking-wider font-semibold px-2 py-1 rounded-lg ${isProductionDetail ? 'bg-warn-bg text-warn' : 'bg-nw-blue-12 text-nw-blue'}` }, 
+                      React.createElement('span', { className: `text-xs uppercase tracking-wider font-semibold px-2 py-1 rounded-lg ${isProductionDetail ? 'bg-white border border-warn/30 text-warn' : 'bg-nw-blue-12 text-nw-blue'}` }, 
                         isProductionDetail 
                           ? (lang === 'de' ? 'Produktion & Logistik' : lang === 'it' ? 'Produzione & Logistica' : 'Production & Logistics')
                           : (compData.category === 'core' ? 'Core' : 'Leadership')
@@ -24036,13 +24094,13 @@ const renderDashboard = () => {
                   
                   // Beobachtungstipps für Produktion
                   compData.observationTips && compData.observationTips.length > 0 && React.createElement('div', { className: "mt-4 bg-warn-bg border border-warn/30 rounded-lg p-4" },
-                    React.createElement('h4', { className: "text-sm font-semibold text-warn mb-2 flex items-center gap-2" },
+                    React.createElement('h4', { className: "text-sm font-semibold text-ink mb-2 flex items-center gap-2" },
                       React.createElement(Eye, { size: 16 }),
                       lang === 'de' ? 'Woran erkenne ich das im Alltag?' : lang === 'it' ? 'Come lo riconosco nella quotidianità?' : 'How do I recognize this in daily work?'
                     ),
                     React.createElement('ul', { className: "space-y-1" },
                       compData.observationTips.map((tip, idx) => 
-                        React.createElement('li', { key: idx, className: "text-sm text-warn flex items-start gap-2" },
+                        React.createElement('li', { key: idx, className: "text-sm text-ink-60 flex items-start gap-2" },
                           React.createElement('span', { className: "text-warn mt-0.5" }, '•'),
                           tip
                         )
@@ -24052,7 +24110,7 @@ const renderDashboard = () => {
                 ),
                 React.createElement('div', { className: "p-6 md:p-8" },
                   React.createElement('div', { className: "flex flex-col items-center mb-8" },
-                    React.createElement('span', { className: "text-sm font-semibold text-ink-40 mb-4 uppercase tracking-widest" }, t.selectScore),
+                    React.createElement('span', { className: "text-sm font-semibold text-ink-60 mb-4 uppercase tracking-widest" }, t.selectScore),
                     React.createElement('div', { className: "flex gap-3 md:gap-6" },
                       [1, 2, 3, 4, 5].map(s => React.createElement(ScoreBadge, { key: s, score: s, active: activeScore === s }))
                     )
@@ -24063,7 +24121,7 @@ const renderDashboard = () => {
                       React.createElement('h3', { className: "text-lg font-semibold text-nw-blue mb-2 flex items-center gap-2" },
                         activeScore === 3 ? React.createElement(CheckCircle2, { className: "text-ok", size: 20 }) :
                         activeScore === 5 ? React.createElement(Award, { className: "text-ok", size: 20 }) :
-                        activeScore === 1 ? React.createElement(ShieldAlert, { className: "text-danger", size: 20 }) : React.createElement(BookOpen, { className: "text-ink-40", size: 20 }),
+                        activeScore === 1 ? React.createElement(ShieldAlert, { className: "text-danger", size: 20 }) : React.createElement(BookOpen, { className: "text-ink-60", size: 20 }),
                         activeScore === 1 ? t.level1 :
                         activeScore === 2 ? t.level2 :
                         activeScore === 3 ? t.level3 :
@@ -24072,7 +24130,7 @@ const renderDashboard = () => {
                       React.createElement('p', { className: "text-ink text-lg leading-relaxed whitespace-pre-line" }, currentLevel.text)
                     ),
                     React.createElement('div', { className: "bg-white rounded-xl p-5 border-l-4 border-l-line shadow-card" },
-                      React.createElement('h4', { className: "text-sm font-semibold text-ink-40 uppercase mb-2 flex items-center gap-2" },
+                      React.createElement('h4', { className: "text-sm font-semibold text-ink-60 uppercase mb-2 flex items-center gap-2" },
                         React.createElement(Lightbulb, { size: 16 }), " ", t.example
                       ),
                       React.createElement('p', { className: "text-ink-60 italic font-medium" }, `"${currentLevel.example}"`)
@@ -25007,7 +25065,7 @@ const renderDashboard = () => {
                       border-radius: 12px;
                       font-weight: 600;
                       font-size: 16px;
-                      box-shadow: 0 10px 40px rgba(5, 150, 105, 0.4);
+                      box-shadow: 0 10px 40px rgba(47, 122, 72, 0.4);
                       z-index: 99999;
                       animation: slideUp 0.3s ease-out;
                     `;
@@ -25344,7 +25402,7 @@ const renderDashboard = () => {
                     
                     // Warning
                     e('div', { className: 'flex items-start gap-3 text-sm text-ink-60' },
-                      e(Info, { size: 18, className: 'flex-shrink-0 mt-0.5 text-ink-40' }),
+                      e(Info, { size: 18, className: 'flex-shrink-0 mt-0.5 text-ink-60' }),
                       e('p', null,
                         getText(
                           'Wichtig: Der Link enthält Ihre Selbstreflexion. Teilen Sie ihn nur mit Ihrer Führungskraft.',
@@ -25968,7 +26026,7 @@ const renderDashboard = () => {
                 
                 // Hinweis
                 e('div', { className: 'bg-warn-bg border border-warn/30 rounded-xl p-4 mb-4 no-print' },
-                  e('p', { className: 'text-warn text-sm' }, '💡 ' + (lang === 'de' ? 'Hinweis: Alle Felder außer Name und FK-E-Mail sind freiwillig!' : lang === 'it' ? 'Nota: Tutti i campi tranne nome e e-mail FK sono facoltativi!' : 'Note: All fields except name and manager email are optional!'))
+                  e('p', { className: 'text-ink-60 text-sm' }, '💡 ' + (lang === 'de' ? 'Hinweis: Alle Felder außer Name und FK-E-Mail sind freiwillig!' : lang === 'it' ? 'Nota: Tutti i campi tranne nome e e-mail FK sono facoltativi!' : 'Note: All fields except name and manager email are optional!'))
                 ),
                 
                 // === NEU: BARS-Kompetenz-Hinweis mit Link zum Öffnen in neuem Tab ===
@@ -26178,10 +26236,10 @@ const renderDashboard = () => {
                       className: 'w-5 h-5 rounded-lg border-warn text-warn focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
                     }),
                     e('div', null,
-                      e('span', { className: 'font-medium text-warn' }, 
+                      e('span', { className: 'font-medium text-ink-60' }, 
                         lang === 'de' ? 'Keine Ziele vereinbart' : lang === 'it' ? 'Nessun obiettivo concordato' : 'No goals agreed'
                       ),
-                      e('p', { className: 'text-xs text-warn mt-0.5' },
+                      e('p', { className: 'text-xs text-ink-60 mt-0.5' },
                         lang === 'de' 
                           ? 'Aktivieren Sie diese Option, falls für Sie keine Ziele festgelegt wurden. Der GPS wird dann nur aus den Kompetenzen (100%) berechnet.'
                           : lang === 'it'
@@ -26198,10 +26256,10 @@ const renderDashboard = () => {
                   e('tbody', null, goals.map(g => renderGoalRow(g)))
                 ),
                 !noGoalsMode && e('button', { onClick: () => addItem(goals, setGoals, { name: '', weight: 0, achievement: 0 }), className: 'no-print mt-3 text-xs flex items-center gap-1 text-nw-blue' }, e(PlusCircle, { size: 14 }), ' ', t.addGoal),
-                !noGoalsMode && totalGoalWeight !== 100 && goals.length > 0 && e('div', { className: 'mt-3 text-sm p-3 rounded-lg bg-warn-bg text-warn border border-warn/30 no-print' }, t.totalWeight + ': ' + totalGoalWeight + '% (' + t.shouldBe100 + ')'),
+                !noGoalsMode && totalGoalWeight !== 100 && goals.length > 0 && e('div', { className: 'mt-3 text-sm p-3 rounded-lg bg-warn-bg text-ink-60 border border-warn/30 no-print' }, t.totalWeight + ': ' + totalGoalWeight + '% (' + t.shouldBe100 + ')'),
                 
                 // Info wenn keine Ziele
-                noGoalsMode && e('div', { className: 'text-center py-8 text-ink-40' },
+                noGoalsMode && e('div', { className: 'text-center py-8 text-ink-60' },
                   e('p', { className: 'text-sm' }, 
                     lang === 'de' 
                       ? '📊 Der GPS wird nur aus Teil C (Kompetenzen = 100%) berechnet.'
@@ -26259,8 +26317,8 @@ const renderDashboard = () => {
                 e('div', { className: 'flex items-start gap-3' },
                   e('div', { className: 'text-2xl' }, '🎭'),
                   e('div', null,
-                    e('div', { className: 'font-semibold text-warn mb-1' }, lang === 'de' ? 'Möglicher Halo-Effekt' : 'Possibile Effetto Halo'),
-                    e('p', { className: 'text-sm text-warn' }, lang === 'de' ? 'Alle Kompetenzen haben die gleiche Bewertung.' : 'Tutte le competenze hanno la stessa valutazione.')
+                    e('div', { className: 'font-semibold text-ink mb-1' }, lang === 'de' ? 'Möglicher Halo-Effekt' : 'Possibile Effetto Halo'),
+                    e('p', { className: 'text-sm text-ink-60' }, lang === 'de' ? 'Alle Kompetenzen haben die gleiche Bewertung.' : 'Tutte le competenze hanno la stessa valutazione.')
                   )
                 )
               ),
@@ -26276,7 +26334,7 @@ const renderDashboard = () => {
                       ? (isManager ? '(100% WIE: 50% Core + 50% Leadership)' : '(100% WIE: Kern-Kompetenzen)')
                       : (isManager ? '(WAS 50% + WIE Core 25% + WIE Lead 25%)' : '(WAS 50% + WIE Core 50%)')
                   ),
-                  goals.length === 0 && e('div', { className: 'mt-3 text-xs text-warn bg-warn-bg px-3 py-1 rounded-full inline-block' }, lang === 'de' ? '⚠️ Ohne Zielvereinbarung' : '⚠️ Senza accordo obiettivi')
+                  goals.length === 0 && e('div', { className: 'mt-3 text-xs text-warn bg-white border border-warn/30 px-3 py-1 rounded-full inline-block' }, lang === 'de' ? '⚠️ Ohne Zielvereinbarung' : '⚠️ Senza accordo obiettivi')
                 )
               ),
               
@@ -26421,7 +26479,7 @@ const renderDashboard = () => {
                   ),
                   
                   // Schließen-Button
-                  React.createElement('p', { className: 'text-sm text-ink-40' },
+                  React.createElement('p', { className: 'text-sm text-ink-60' },
                     lang === 'de' 
                       ? 'Sie können dieses Fenster jetzt schließen.'
                       : lang === 'it'
@@ -26456,7 +26514,7 @@ const renderDashboard = () => {
                   React.createElement('div', { className: 'inline-flex items-center gap-2 bg-nw-grey-40 px-4 py-2 rounded-full text-sm text-ink-60' },
                     React.createElement(Briefcase, { size: 16 }),
                     guestEmployee.position,
-                    guestEmployee.department && React.createElement('span', { className: 'text-ink-40' }, ' • ', guestEmployee.department)
+                    guestEmployee.department && React.createElement('span', { className: 'text-ink-60' }, ' • ', guestEmployee.department)
                   )
                 ),
                 
@@ -26564,7 +26622,7 @@ const renderDashboard = () => {
                 ),
                 
                 // Footer Hinweis
-                React.createElement('p', { className: 'text-xs text-ink-40 mt-6 text-center' },
+                React.createElement('p', { className: 'text-xs text-ink-60 mt-6 text-center' },
                   lang === 'de'
                     ? '🔒 Ihre Eingaben werden vertraulich behandelt und dienen der Vorbereitung auf das Gespräch mit Ihrer Führungskraft.'
                     : '🔒 I tuoi dati saranno trattati in modo confidenziale e serviranno a preparare il colloquio con il tuo responsabile.'
@@ -27018,7 +27076,7 @@ const renderDashboard = () => {
               return React.createElement('div', { className: 'space-y-6' },
                 // Info-Box
                 React.createElement('div', { className: 'bg-warn-bg border border-warn/30 rounded-xl p-4' },
-                  React.createElement('p', { className: 'text-sm text-warn flex items-start gap-2' },
+                  React.createElement('p', { className: 'text-sm text-ink-60 flex items-start gap-2' },
                     React.createElement(AlertCircle, { size: 18, className: 'flex-shrink-0 mt-0.5' }),
                     lang === 'de'
                       ? 'Bitte prüfen Sie Ihre Angaben. Nach dem Absenden können Sie diese nicht mehr ändern.'
@@ -27132,17 +27190,17 @@ const renderDashboard = () => {
                   React.createElement('div', { className: 'flex items-start gap-3' },
                     React.createElement('div', { className: 'text-2xl' }, '⚠️'),
                     React.createElement('div', { className: 'flex-1' },
-                      React.createElement('p', { className: 'font-semibold text-warn' },
+                      React.createElement('p', { className: 'font-semibold text-ink' },
                         lang === 'de' ? 'Bereits eingereicht!' : lang === 'it' ? 'Già inviata!' : 'Already submitted!'
                       ),
-                      React.createElement('p', { className: 'text-sm text-warn' },
+                      React.createElement('p', { className: 'text-sm text-ink-60' },
                         lang === 'de' 
                           ? `Sie haben bereits am ${new Date(existingAssessment.data?.submittedAt || existingAssessment.data?.createdAt).toLocaleDateString('de-DE')} eine Selbstreflexion eingereicht.` 
                           : lang === 'it'
                           ? `Hai già inviato un'autovalutazione il ${new Date(existingAssessment.data?.submittedAt || existingAssessment.data?.createdAt).toLocaleDateString('it-IT')}.`
                           : `You already submitted a self-reflection on ${new Date(existingAssessment.data?.submittedAt || existingAssessment.data?.createdAt).toLocaleDateString('en-GB')}.`
                       ),
-                      React.createElement('p', { className: 'text-xs text-warn mt-1' },
+                      React.createElement('p', { className: 'text-xs text-ink-60 mt-1' },
                         lang === 'de' 
                           ? 'Eine neue Eingabe wird die vorherige überschreiben.' 
                           : lang === 'it'
@@ -27168,7 +27226,7 @@ const renderDashboard = () => {
                         lang === 'de' ? 'Selbstreflexion' : lang === 'it' ? 'Autovalutazione' : 'Self-Reflection'
                       ),
                       // === NEU: Auto-Save Indikator ===
-                      lastAutoSave && React.createElement('p', { className: 'text-xs text-ink-40 mt-1' },
+                      lastAutoSave && React.createElement('p', { className: 'text-xs text-ink-60 mt-1' },
                         '💾 ', DraftManager.formatSavedTime(lastAutoSave, lang)
                       )
                     ),
@@ -27228,7 +27286,7 @@ const renderDashboard = () => {
                             step === currentStep ? 'bg-nw-blue' : 'bg-line'
                           }`
                         }),
-                        React.createElement('p', { className: `text-xs mt-1 text-center ${step === currentStep ? 'text-nw-blue font-medium' : 'text-ink-40'}` },
+                        React.createElement('p', { className: `text-xs mt-1 text-center ${step === currentStep ? 'text-nw-blue font-medium' : 'text-ink-60'}` },
                           stepTitles[lang][step - 1]
                         )
                       )
@@ -27955,7 +28013,7 @@ const renderDashboard = () => {
               
               // Info wenn keine Ziele
               noGoalsMode && e('div', { className: 'bg-warn-bg border border-warn/30 rounded-xl p-4' },
-                e('p', { className: 'text-warn text-sm flex items-center gap-2' },
+                e('p', { className: 'text-ink-60 text-sm flex items-center gap-2' },
                   e(AlertCircle, { size: 16 }),
                   lang === 'de' ? 'Keine Ziele vereinbart - GPS wird nur aus Kompetenzen berechnet.' : 'No goals - GPS is calculated from competencies only.'
                 )
@@ -27984,7 +28042,7 @@ const renderDashboard = () => {
                         e('div', { className: 'flex-1 h-2 bg-nw-grey-40 rounded-full overflow-hidden' },
                           e('div', { className: `h-full ${colors.bg} rounded-full`, style: { width: `${(score / 5) * 100}%` } })
                         ),
-                        e('span', { className: 'text-xs text-ink-40 w-8' }, `${score}/5`)
+                        e('span', { className: 'text-xs text-ink-60 w-8' }, `${score}/5`)
                       ),
                       comment && e('div', { className: 'mt-2 bg-panel rounded-lg p-2 text-sm text-ink-60 italic break-words overflow-hidden', style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' } },
                         '"', comment, '"'
@@ -28017,7 +28075,7 @@ const renderDashboard = () => {
                         e('div', { className: 'flex-1 h-2 bg-nw-grey-40 rounded-full overflow-hidden' },
                           e('div', { className: `h-full ${colors.bg} rounded-full`, style: { width: `${(score / 5) * 100}%` } })
                         ),
-                        e('span', { className: 'text-xs text-ink-40 w-8' }, `${score}/5`)
+                        e('span', { className: 'text-xs text-ink-60 w-8' }, `${score}/5`)
                       ),
                       comment && e('div', { className: 'mt-2 bg-white rounded-lg p-2 text-sm text-ink-60 italic border border-nw-blue-12 break-words overflow-hidden', style: { wordBreak: 'break-all', whiteSpace: 'pre-wrap' } },
                         '"', comment, '"'
@@ -28043,7 +28101,7 @@ const renderDashboard = () => {
                     formData.strengths1 && e('div', { className: 'bg-nw-green-15 rounded-lg p-3 text-sm text-ink', style: { whiteSpace: 'pre-wrap', wordBreak: 'break-all', overflowWrap: 'break-word' } }, formData.strengths1),
                     formData.strengths2 && e('div', { className: 'bg-nw-green-15 rounded-lg p-3 text-sm text-ink', style: { whiteSpace: 'pre-wrap', wordBreak: 'break-all', overflowWrap: 'break-word' } }, formData.strengths2),
                     !formData.strengths1 && !formData.strengths2 && 
-                      e('p', { className: 'text-ink-40 text-sm italic' }, lang === 'de' ? getText(lang, 'Keine Angabe', 'Non specificato', 'Not specified') : lang === 'it' ? 'Nessuna indicazione' : 'No data')
+                      e('p', { className: 'text-ink-60 text-sm italic' }, lang === 'de' ? getText(lang, 'Keine Angabe', 'Non specificato', 'Not specified') : lang === 'it' ? 'Nessuna indicazione' : 'No data')
                   )
                 )
               ),
@@ -28061,7 +28119,7 @@ const renderDashboard = () => {
                     )
                   )
                 ),
-                !careerChecks.some(c => c) && e('p', { className: 'text-ink-40 text-sm italic' }, 
+                !careerChecks.some(c => c) && e('p', { className: 'text-ink-60 text-sm italic' }, 
                   lang === 'de' ? 'Keine Auswahl getroffen' : lang === 'it' ? 'Nessuna selezione' : 'No selection made'
                 ),
                 formData.careerComment && e('div', { className: 'mt-4 bg-nw-blue-06 rounded-lg p-4' },
@@ -28192,7 +28250,7 @@ const renderDashboard = () => {
                     'Stiamo trasferendo i tuoi dati locali nel cloud in modo sicuro. Ci vorrà solo un momento.',
                     'We are securely transferring your local data to the cloud. This will only take a moment.')
                 ),
-                React.createElement('div', { className: 'mt-6 flex items-center justify-center gap-2 text-xs text-ink-40' },
+                React.createElement('div', { className: 'mt-6 flex items-center justify-center gap-2 text-xs text-ink-60' },
                   React.createElement('div', { className: 'w-2 h-2 rounded-full bg-nw-green animate-pulse' }),
                   React.createElement('span', null, getText(lang, 'Bitte warten...', 'Attendere prego...', 'Please wait...'))
                 )
@@ -28244,7 +28302,7 @@ const renderDashboard = () => {
                   ),
                   React.createElement('div', { className: 'text-center' },
                     React.createElement('span', { className: 'font-semibold text-nw-blue' }, guestEmployee.name),
-                    React.createElement('span', { className: 'text-ink-40 mx-2' }, '•'),
+                    React.createElement('span', { className: 'text-ink-60 mx-2' }, '•'),
                     React.createElement('span', { className: 'text-ink-60 text-sm' }, 
                       lang === 'de' ? 'Selbstreflexion' : lang === 'it' ? 'Autovalutazione' : 'Self-Reflection'
                     )
@@ -28406,7 +28464,7 @@ const renderDashboard = () => {
                       
                       // Hinweis falls nicht eingeloggt
                       !user && React.createElement('div', { className: 'bg-warn-bg border border-warn/30 rounded-xl p-4' },
-                        React.createElement('p', { className: 'text-warn text-sm font-medium' },
+                        React.createElement('p', { className: 'text-ink-60 text-sm font-medium' },
                           '⚠️ ' + (lang === 'de' 
                             ? 'Bitte melden Sie sich zuerst an, um die Selbstreflexion zu importieren.'
                             : lang === 'it'
@@ -28614,7 +28672,7 @@ const renderDashboard = () => {
                     ),
                     React.createElement('div', { className: "min-w-0 flex-1" },
                       React.createElement('div', { className: "truncate text-sm font-semibold text-ink" }, getUserDisplayName(user)),
-                      React.createElement('div', { className: "truncate text-2xs text-ink-40" }, isHRAdmin ? 'HR Admin' : getText(lang, 'Führungskraft', 'Responsabile', 'Manager'))
+                      React.createElement('div', { className: "truncate text-2xs text-ink-60" }, isHRAdmin ? 'HR Admin' : getText(lang, 'Führungskraft', 'Responsabile', 'Manager'))
                     ),
                     React.createElement(NwButton, { variant: 'ghost', size: 'sm', icon: LogOut, onClick: handleLogout, title: user.email || '' }, getText(lang, 'Abmelden', 'Esci', 'Logout'))
                   )

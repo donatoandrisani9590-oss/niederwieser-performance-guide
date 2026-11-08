@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// n.Org: Knöpfe ohne dekorative Emojis (Icons kommen aus Lucide).
+// n.Org: Knöpfe und Texte ohne dekorative Emojis (Icons kommen aus Lucide).
+// Aufruf: node button-emoji.mjs [--all]   (--all: alle Textelemente statt nur Knöpfe)
 // Fasst NUR direkte Textkinder von <button>/NwButton an (reine Strings, Sprach-Ternäre, getText(...)),
 // nie Props, Handler oder verschachtelte Elemente. Entfernt nur echte Emoji (ab U+1F000); → ✓ ✎ bleiben.
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -7,7 +8,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const file = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'index.html');
 let src = readFileSync(file, 'utf8');
-const E = '[\\u{1F000}-\\u{1FAFF}](?:\\uFE0F|\\u200D[\\u{1F000}-\\u{1FAFF}])*\\uFE0F?';
+const E = '(?:[\\u{1F300}-\\u{1F5FF}\\u{1F600}-\\u{1F6FF}\\u{1F900}-\\u{1F9FF}\\u{1FA70}-\\u{1FAFF}\\u{1F7F0}-\\u{1F7FF}]|[\\u2600-\\u26FF\\u2728\\u23F3\\u2B50])(?:\\uFE0F|\\u200D[\\u{1F300}-\\u{1FAFF}])*\\uFE0F?';
 const lead = new RegExp('^\\s*(?:' + E + '\\s*)+', 'u'), trail = new RegExp('(?:\\s*' + E + ')+\\s*$', 'u');
 
 function skipString(t, i) { const q = t[i]; i++; while (i < t.length && t[i] !== q) { if (t[i] === '\\') i++; i++; } return i + 1; }
@@ -45,7 +46,12 @@ const TEXT_ARG = /^\s*(?:(?:lang\s*===\s*'[a-z]{2}'\s*\?\s*)?'(?:[^'\\\n]|\\.)*'
 
 const pa = src.indexOf('const PrintLayout = ('), pb = src.indexOf('const Zielvereinbarung = (');
 const edits = [];
-for (const m of src.matchAll(/(?:React\.createElement|\be)\(\s*(?:'button'|NwButton)\s*,/g)) {
+const ALL = process.argv.includes('--all');
+const ELEM = ALL ? /(?:React\.createElement|\be)\(\s*(?:'(?:button|p|span|div|h[1-6]|li|label|strong|td|th|summary|option)'|NwButton)\s*,/g : /(?:React\.createElement|\be)\(\s*(?:'button'|NwButton)\s*,/g;
+// Hilfe-Assistent (Wissensinhalte) auslassen
+const ha = src.indexOf('function HelpChat('), hb = src.indexOf('function PerformanceApp(');
+for (const m of src.matchAll(ELEM)) {
+  if (m.index >= ha && m.index < hb) continue;
   if (m.index >= pa && m.index < pb) continue;
   const open = src.indexOf('(', m.index);
   const close = blockEnd(src, open);

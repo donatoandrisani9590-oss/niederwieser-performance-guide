@@ -52,7 +52,9 @@ Bausteine (aus `kit/` als `React.createElement` nachgebaut, ohne Build): `NwButt
 4. **Screens**: dunkle Banner → ruhige Flächen (`flip-dark-surfaces.mjs`), Dashboard und Team-Übersicht von Hand
    neu, Formulare mit angehefteter Aktionsleiste, HR-Tabs, Eingabefelder einheitlich (`inputs.mjs`).
 5. **Feinschliff**:
-   - Überschriften ohne Emojis (41 Stellen; die Wörter bleiben).
+   - Überschriften, Knöpfe und Texte ohne dekorative Emojis (die Wörter bleiben).
+   - Hinweisbalken „Brauchst du Hilfe? Der HR-Copilot unten rechts …“ in der Team-Übersicht entfernt.
+     Der HR-Copilot steht dauerhaft in der Seitenleiste.
    - Schnellstart-Guide aufklappbar, nach „erklären, wenn gefragt“: offen für neue Nutzer, eingeklappt für Führungskräfte mit Team.
    - Restliche grüne und dunkle Kacheln als ruhige Flächen.
    - Toasts (dunkel, Live-Region), Assistent per Tastatur, Bewegung nur mit n.Org-Keyframes und unter
@@ -114,7 +116,12 @@ Screenshots: `docs/screenshots/before/` (Ausgangslage) und `docs/screenshots/aft
 3. **Pull Request #1** benennt `index.html` in `Index.html` um. Das würde Mitarbeiter-Links und Lesezeichen brechen.
 4. **Tailwind läuft im Browser (Play CDN).** Das ist so gewollt (kein Build), aber langsamer als vorkompiliertes CSS.
    Ein Build-Schritt wäre eine eigene Entscheidung.
-5. **Emojis**: aus Überschriften (41) und Knopftexten (7) entfernt. Im Fließtext und in Hinweisen stehen sie noch, weil sie dort Teil des Inhalts sind.
+5. **Emojis** sind aus Überschriften (41), Knopftexten (7) und 45 weiteren Textstellen entfernt.
+   Es bleiben:
+   - Farbkreise (🟢 🔴 …) und Flaggen, weil sie Bedeutung tragen,
+   - Texte, die aus mehreren Teilen zusammengesetzt werden,
+   - die Inhalte des HR-Copilot,
+   - die PDF-Vorlage.
 6. **Live-Abnahme mit echten Konten** fehlt noch. Deine Regel lautet, nie gegen Produktivdaten zu arbeiten. Deshalb ist alles nur
    gegen den Emulator mit Testdaten geprüft. Empfehlung: vor dem Zusammenführen eine Testperson mit eigenem Konto
    das Erst-Login durchspielen lassen und die Checkliste in `NOTFALL-BACKUP.md` §3 abarbeiten.

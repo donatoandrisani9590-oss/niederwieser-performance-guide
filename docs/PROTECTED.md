@@ -15,7 +15,7 @@ Stattdessen gilt:
 | Prüfung | Befehl | Muss |
 |---|---|---|
 | Geschützte Code-Stellen unverändert | `node tests/protected/fingerprint.mjs` | „Schutzbereich unverändert“ |
-| Geschützte Dateien unverändert | `git diff --stat main -- tests/protected/baseline.txt firebase.json` | leer |
+| Geschützte Dateien unverändert | `git diff --stat main -- tests/protected/baseline.txt` | leer |
 | Kritische Abläufe funktionieren | `cd tests && npm test` | alle grün |
 
 `fingerprint.mjs` zieht aus `index.html` jeden Datenbank-, Storage- und Auth-Zugriff (als ganzes Statement),

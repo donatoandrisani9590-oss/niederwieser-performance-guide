@@ -720,7 +720,8 @@
             ClipboardList, CalendarCheck, Calculator, Info, RotateCcw, Trophy, PlusCircle, XCircle,
             Download, Loader2, Trash2, FileText, Edit2, Edit3, Eye, UserPlus, Play, LogOut, Mail, Lock, Link, Save, LayoutGrid, List,
             Building2, ArrowLeft, RefreshCw, Calendar, User, HelpCircle, Send, Sparkles, Copy, Circle, Share2, Users2,
-            Upload, FileUp, ExternalLink, Settings, Factory, ChevronLeft, Filter, SlidersHorizontal, ChevronDown, ChevronUp
+            Upload, FileUp, ExternalLink, Settings, Factory, ChevronLeft, Filter, SlidersHorizontal, ChevronDown, ChevronUp,
+            MoreHorizontal
         } from 'https://esm.sh/lucide-react@0.292.0';
 
         // ============================================
@@ -808,11 +809,36 @@
               if (key) btn.setAttribute('aria-label', L[key]);
             });
           };
+          // Dialoge: Fokus hinein beim Öffnen, Tab bleibt im Dialog, Fokus zurück zum Auslöser beim Schließen
+          const topOverlay = () => { const o = [...document.querySelectorAll('div.fixed.inset-0')].filter(el => el.getClientRects().length > 0); return o[o.length - 1] || null; };
+          const focusables = (el) => [...el.querySelectorAll('button:not([disabled]), [href], input:not([disabled]):not([type=hidden]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')].filter(x => x.getClientRects().length > 0);
+          let lastFocus = null, trapped = null;
+          document.addEventListener('focusin', (ev) => { if (!topOverlay()) lastFocus = ev.target; }, true);
+          const syncTrap = () => {
+            const top = topOverlay();
+            if (top && trapped !== top) {
+              trapped = top;
+              if (!top.contains(document.activeElement)) { const f = focusables(top)[0]; f && f.focus({ preventScroll: true }); }
+            } else if (!top && trapped) {
+              trapped = null;
+              if (lastFocus && document.contains(lastFocus)) lastFocus.focus({ preventScroll: true });
+            }
+          };
+          document.addEventListener('keydown', (ev) => {
+            if (ev.key !== 'Tab') return;
+            const top = topOverlay();
+            if (!top) return;
+            const f = focusables(top);
+            if (!f.length) return;
+            const first = f[0], last = f[f.length - 1], act = document.activeElement;
+            if (!top.contains(act)) { ev.preventDefault(); first.focus(); }
+            else if (ev.shiftKey && act === first) { ev.preventDefault(); last.focus(); }
+            else if (!ev.shiftKey && act === last) { ev.preventDefault(); first.focus(); }
+          });
           // Esc schließt den obersten Dialog über dessen eigenen Schließen-/Abbrechen-Knopf (gleiche Logik wie ein Klick)
           document.addEventListener('keydown', (ev) => {
             if (ev.key !== 'Escape' || ev.defaultPrevented) return;
-            const overlays = [...document.querySelectorAll('div.fixed.inset-0')].filter(el => el.getClientRects().length > 0);
-            const top = overlays[overlays.length - 1];
+            const top = topOverlay();
             if (!top) return;
             const CLOSE = /^(×|✕|schließen|abbrechen|später|close|cancel|later|chiudi|annulla|più tardi)$/i;
             const buttons = [...top.querySelectorAll('button')];
@@ -824,7 +850,7 @@
           });
           let timer = null;
           const start = () => {
-            new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(fix, 120); }).observe(document.body, { childList: true, subtree: true });
+            new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(() => { fix(); syncTrap(); }, 120); }).observe(document.body, { childList: true, subtree: true });
             fix();
           };
           if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
@@ -909,6 +935,50 @@
             text && React.createElement('div', { className: 'mt-0.5 max-w-[52ch] text-xs text-ink-60' }, text),
             action && React.createElement('div', { className: 'mt-3' }, action)
           );
+        // ⋯-Menü für Zeilenaktionen (n.Org Menu): schwebt fixiert neben dem Auslöser, schließt bei Klick außerhalb, Esc, Scroll
+        const NW_MENU_ITEM = 'flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-sm text-ink transition-colors duration-150 hover:bg-nw-blue-06 focus-visible:bg-nw-blue-06';
+        const NwRowMenu = ({ label, children }) => {
+          const [pos, setPos] = useState(null);
+          const ref = useRef(null);
+          const btnRef = useRef(null);
+          useEffect(() => {
+            if (!pos) return;
+            const close = () => setPos(null);
+            const onDoc = (ev) => { if (ref.current && !ref.current.contains(ev.target)) close(); };
+            const onKey = (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); close(); btnRef.current && btnRef.current.focus(); } };
+            document.addEventListener('mousedown', onDoc);
+            document.addEventListener('keydown', onKey, true);
+            window.addEventListener('scroll', close, true);
+            const first = ref.current && ref.current.querySelector('[role=menu] button');
+            first && first.focus();
+            return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey, true); window.removeEventListener('scroll', close, true); };
+          }, [pos]);
+          const toggle = () => {
+            if (pos) { setPos(null); return; }
+            const r = btnRef.current.getBoundingClientRect();
+            setPos({ top: Math.min(r.bottom + 4, window.innerHeight - 220), left: Math.max(8, r.right - 220) });
+          };
+          return React.createElement('div', { ref, className: 'inline-block' },
+            React.createElement('button', {
+              ref: btnRef, type: 'button', onClick: toggle, 'aria-haspopup': 'menu', 'aria-expanded': !!pos, 'aria-label': label, title: label,
+              className: nwBtnClass('ghost', 'sm', true)
+            }, React.createElement(MoreHorizontal, { size: 14, 'aria-hidden': true })),
+            pos && React.createElement('div', {
+              role: 'menu', 'aria-label': label,
+              className: 'fixed z-30 w-[220px] animate-menu-in rounded-lg border border-line bg-white p-1 shadow-float',
+              style: { top: pos.top + 'px', left: pos.left + 'px' },
+              onClick: () => setPos(null),
+              onKeyDown: (ev) => {
+                const items = [...ref.current.querySelectorAll('[role=menu] button')];
+                const i = items.indexOf(document.activeElement);
+                if (ev.key === 'ArrowDown') { ev.preventDefault(); items[(i + 1) % items.length].focus(); }
+                if (ev.key === 'ArrowUp') { ev.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+                if (ev.key === 'Home') { ev.preventDefault(); items[0].focus(); }
+                if (ev.key === 'End') { ev.preventDefault(); items[items.length - 1].focus(); }
+              }
+            }, children)
+          );
+        };
         // Segmented: Pillen-Auswahl (z. B. Sprache, Ansicht)
         const NwSegmented = ({ options, value, onChange, size = 'md', ariaLabel, className }) =>
           React.createElement('div', { role: 'radiogroup', 'aria-label': ariaLabel, title: ariaLabel, className: 'inline-flex shrink-0 gap-0.5 rounded-lg bg-nw-blue-12 p-[3px] ' + (size === 'sm' ? 'h-7' : 'h-8') + (className ? ' ' + className : '') },
@@ -20620,13 +20690,15 @@ Best regards`
                               ),
                               // Aktions-Spalte
                               React.createElement('td', { className: 'px-4 py-3' },
-                                React.createElement('div', { className: 'flex gap-1 opacity-50 group-hover:opacity-100 transition-opacity' },
+                                React.createElement('div', { className: 'flex items-center justify-center gap-1' },
                                   // Ansehen Button
                                   React.createElement('button', {
                                     onClick: () => setHrViewAppraisal(a),
-                                    className: 'p-1.5 rounded-lg bg-nw-blue-06 text-nw-blue hover:bg-nw-blue-12 transition-colors',
-                                    title: getText(lang, 'Ansehen', 'Visualizza', 'View')
-                                  }, React.createElement(Eye, { size: 14 })),
+                                    className: nwBtnClass('ghost', 'sm', true),
+                                    title: getText(lang, 'Ansehen', 'Visualizza', 'View'),
+                                    'aria-label': getText(lang, 'Ansehen', 'Visualizza', 'View')
+                                  }, React.createElement(Eye, { size: 14, 'aria-hidden': true })),
+                                  React.createElement(NwRowMenu, { label: getText(lang, 'Weitere Aktionen', 'Altre azioni', 'More actions') },
                                   // Im Formular bearbeiten Button (öffnet AppraisalForm)
                                   React.createElement('button', {
                                     onClick: () => {
@@ -20655,27 +20727,32 @@ Best regards`
                                       // Wechsle zur Formular-Ansicht
                                       setActiveView('formular');
                                     },
-                                    className: 'p-1.5 rounded-lg bg-nw-blue-06 text-nw-blue hover:bg-nw-blue-12 transition-colors',
+                                    role: 'menuitem', type: 'button',
+                                    className: NW_MENU_ITEM,
                                     title: getText(lang, 'Im Formular bearbeiten', 'Modifica nel modulo', 'Edit in Form')
-                                  }, React.createElement(Edit2, { size: 14 })),
+                                  }, React.createElement(Edit2, { size: 14, 'aria-hidden': true }), getText(lang, 'Im Formular bearbeiten', 'Modifica nel modulo', 'Edit in Form')),
                                   // PDF Export Button
                                   React.createElement('button', {
                                     onClick: () => exportHRAppraisalAsPDF(a),
-                                    className: 'p-1.5 rounded-lg bg-nw-green-15 text-ok hover:bg-nw-green-15 transition-colors',
+                                    role: 'menuitem', type: 'button',
+                                    className: NW_MENU_ITEM,
                                     title: getText(lang, 'PDF Export', 'Esporta PDF', 'Export PDF')
-                                  }, React.createElement(Download, { size: 14 })),
+                                  }, React.createElement(Download, { size: 14, 'aria-hidden': true }), getText(lang, 'PDF Export', 'Esporta PDF', 'Export PDF')),
                                   // Drucken Button
                                   React.createElement('button', {
                                     onClick: () => printHRAppraisal(a),
-                                    className: 'p-1.5 rounded-lg bg-panel text-ink-60 hover:bg-nw-grey-40 transition-colors',
+                                    role: 'menuitem', type: 'button',
+                                    className: NW_MENU_ITEM,
                                     title: getText(lang, 'Drucken', 'Stampa', 'Print')
-                                  }, React.createElement(FileText, { size: 14 })),
+                                  }, React.createElement(FileText, { size: 14, 'aria-hidden': true }), getText(lang, 'Drucken', 'Stampa', 'Print')),
                                   // Löschen Button
                                   React.createElement('button', {
                                     onClick: () => setHrDeleteConfirm(a),
-                                    className: 'p-1.5 rounded-lg bg-danger-bg text-danger hover:bg-danger-bg transition-colors',
+                                    role: 'menuitem', type: 'button',
+                                    className: NW_MENU_ITEM + ' text-danger hover:bg-danger-bg',
                                     title: getText(lang, 'Löschen', 'Elimina', 'Delete')
-                                  }, React.createElement(Trash2, { size: 14 }))
+                                  }, React.createElement(Trash2, { size: 14, 'aria-hidden': true }), getText(lang, 'Löschen', 'Elimina', 'Delete'))
+                                  ) // Ende ⋯-Menü
                                 )
                               )
                             );

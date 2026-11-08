@@ -137,3 +137,43 @@ test('Dialoge: Esc schließt den Dialog', async ({ page }) => {
   await page.keyboard.press('Escape');
   await expect(page.locator('div.fixed.inset-0')).toHaveCount(0);
 });
+
+test('Dialoge: Fokus im Dialog gefangen und nach dem Schließen zurück beim Auslöser', async ({ page }) => {
+  await seed();
+  await loginVia(page, USERS.managerA);
+  const trigger = page.getByText('Termin festlegen').first();
+  await trigger.click();
+  const overlay = page.locator('div.fixed.inset-0').first();
+  await expect(overlay).toBeVisible();
+  await expect.poll(() => overlay.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+  for (let i = 0; i < 8; i++) {
+    await page.keyboard.press('Tab');
+    expect(await overlay.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+  }
+  await page.keyboard.press('Escape');
+  await expect(page.locator('div.fixed.inset-0')).toHaveCount(0);
+  await expect.poll(() => page.evaluate(() => (document.activeElement?.textContent || '').trim())).toContain('Termin festlegen');
+});
+
+test('HR-Tabelle: Zeilenaktionen im ⋯-Menü, per Tastatur bedienbar', async ({ page, consoleErrors }) => {
+  await seed();
+  await loginVia(page, USERS.hr);
+  await page.getByText('HR Dashboard', { exact: true }).first().click();
+  const more = page.getByRole('button', { name: 'Weitere Aktionen' }).first();
+  await expect(page.getByRole('button', { name: 'Ansehen' }).first()).toBeVisible();
+  await more.click();
+  const menu = page.getByRole('menu');
+  await expect(menu).toBeVisible();
+  for (const label of ['Im Formular bearbeiten', 'PDF Export', 'Drucken', 'Löschen']) await expect(menu.getByRole('menuitem', { name: label })).toBeVisible();
+  await shot(page, '21g-hr-zeilenmenue');
+  await page.keyboard.press('ArrowDown');
+  await expect(menu.getByRole('menuitem', { name: 'PDF Export' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('menu')).toHaveCount(0);
+  await expect(more).toBeFocused();
+  // Menüeintrag löst dieselbe Aktion aus wie vorher der Icon-Knopf
+  await more.click();
+  await page.getByRole('menuitem', { name: 'Im Formular bearbeiten' }).click();
+  await expect(page.getByRole('button', { name: /Entwurf speichern/ }).first()).toBeVisible();
+  expect(consoleErrors).toEqual([]);
+});

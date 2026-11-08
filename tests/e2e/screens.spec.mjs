@@ -90,7 +90,8 @@ test('HR-Admin: HR-Seiten rendern ohne Fehler', async ({ page, consoleErrors }) 
   const tabs = [['Normalverteilung', '21b-hr-normalverteilung'], ['Rater-Bias', '21c-hr-rater-bias'], ['Kompetenz-Radar', '21d-hr-kompetenz-radar'],
     ['Versionen', '21e-hr-versionen'], ['Backup & Restore', '21f-hr-backup']];
   for (const [label, file] of tabs) {
-    await page.getByRole('button', { name: new RegExp(label.replace(/[&]/g, '.')) }).first().click();
+    // seit dem Redesign echte Tabs (role=tab) statt Knöpfe
+    await page.getByRole('tab', { name: new RegExp(label.replace(/[&]/g, '.')) }).first().click();
     await shot(page, file);
   }
   await clickNav(page, 'Salary Review');

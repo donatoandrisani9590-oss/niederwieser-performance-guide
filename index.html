@@ -1088,7 +1088,6 @@
                 React.createElement('div', { className: 'w-full max-w-md rounded-xl border border-line bg-white p-8 shadow-float animate-pop-in' },
                     // Header
                     React.createElement('div', { className: 'mb-6' },
-                        React.createElement('img', { src: NW_LOGO_SRC, alt: 'Niederwieser — Flexible Food Packaging', className: 'mb-6 h-auto w-[160px]' }),
                         React.createElement('h2', { className: 'flex items-center gap-2 text-xl font-semibold tracking-[-.014em] text-nw-blue' },
                             React.createElement(Users, { size: 20, 'aria-hidden': true }),
                             txt.teamAccess
@@ -5435,8 +5434,7 @@
                 e('div', { className: "bg-white p-8 rounded-xl shadow-float border border-line-2" },
                     e('div', { className: "flex justify-between items-start mb-6" },
                         e('div', null, 
-                            e('h1', { className: "text-2xl font-semibold", style: { color: "#243186" } }, "nıederwıeser"), 
-                            e('span', { className: "text-sm tracking-wider font-medium", style: { color: "#2F7A48" } }, "FLEXIBLE FOOD PACKAGING")
+                            e('img', { src: NW_LOGO_SRC, alt: 'Niederwieser — Flexible Food Packaging', className: 'h-auto w-[196px]' })
                         ),
                         e('button', { 
                             onClick: handleDownloadPDF, 
@@ -5457,44 +5455,45 @@
                     
                     // === TEAM BUTTONS (wenn teamContext) ===
                     teamButtonsVisible && teamContext && e('div', {
-                      className: 'mb-6 p-5 bg-white border border-line shadow-card rounded-xl  border border-line'
+                      className: 'sticky top-0 z-10 mb-6 rounded-card border border-line bg-white/95 p-4 shadow-float backdrop-blur-sm'
                     },
-                      e('div', { className: 'flex flex-col gap-4' },
+                      e('div', { className: 'flex flex-col gap-3' },
                         e('div', { className: 'flex justify-between items-start' },
                           e('div', { className: 'text-ink' },
-                            e('h2', { className: 'text-2xl font-semibold mb-1', style: { color: '#243186' } }, 
+                            e('h2', { className: 'text-xl font-semibold tracking-[-.014em] text-nw-blue' }, 
                               teamContext.employee?.name || teamContext.existingData?.employeeName || getText(lang, 'Mitarbeiter', 'Collaboratore', 'Employee')
                             ),
-                            e('p', { className: 'text-ink-60 text-base font-semibold' }, 
+                            e('p', { className: 'text-sm text-ink-60' }, 
                               (teamContext.employee?.position || teamContext.existingData?.position || '') + (teamContext.employee?.department ? ' • ' + teamContext.employee.department : '')
                             ),
-                            e('p', { className: 'text-ink-60 text-sm mt-2 font-medium' }, 
+                            e('p', { className: 'mt-0.5 text-xs text-ink-40' }, 
                               (lang === 'de' ? 'Bewertungszeitraum: ' : lang === 'it' ? 'Periodo: ' : 'Assessment period: ') + (teamContext.period || new Date().getFullYear())
                             )
                           ),
                           e('button', {
                             onClick: handleCancelTeam,
                             type: 'button',
-                            className: 'text-ink-60 hover:text-nw-blue transition-colors text-2xl leading-none font-semibold'
-                          }, '×')
+                            className: nwBtnClass('ghost', 'md', true),
+                            'aria-label': getText(lang, 'Schließen', 'Chiudi', 'Close')
+                          }, e(X, { size: 18, 'aria-hidden': true }))
                         ),
-                        e('div', { className: 'grid grid-cols-3 gap-4 mt-2' },
+                        e('div', { className: 'grid grid-cols-3 gap-2' },
                           e('button', {
                             onClick: () => handleSaveTeamAppraisal('draft'),
                             type: 'button',
                             disabled: isSaving,
-                            className: `py-4 px-5 rounded-xl font-semibold text-base transition-all shadow-float ${isSaving ? 'bg-ink-40 text-ink-60 cursor-not-allowed' : 'bg-line hover:bg-nw-grey text-ink transform hover:scale-105'}`
+                            className: nwBtnClass('secondary', 'lg') + ' w-full'
                           }, isSaving ? '⏳ ...' : '💾 ' + (lang === 'de' ? 'Als Entwurf' : lang === 'it' ? 'Bozza' : 'Save Draft')),
                           e('button', {
                             onClick: () => handleSaveTeamAppraisal('completed'),
                             type: 'button',
                             disabled: isSaving,
-                            className: `py-4 px-5 rounded-xl font-semibold text-base transition-all shadow-float ${isSaving ? 'bg-nw-green-15 text-ink-60 cursor-not-allowed' : 'bg-nw-green-15 hover:bg-nw-green text-ink transform hover:scale-105'}`
+                            className: nwBtnClass('primary', 'lg') + ' w-full'
                           }, isSaving ? '⏳ ...' : '✓ ' + (lang === 'de' ? 'Abschließen' : lang === 'it' ? 'Completa' : 'Complete')),
                           e('button', {
                             onClick: handleCancelTeam,
                             type: 'button',
-                            className: 'border-2 border-line text-nw-blue py-4 px-5 rounded-xl font-semibold hover:bg-nw-blue-06 transition-all shadow-float text-base'
+                            className: nwBtnClass('ghost', 'lg') + ' w-full'
                           }, lang === 'de' ? 'Abbrechen' : lang === 'it' ? 'Annulla' : 'Cancel')
                         )
                       )
@@ -6734,7 +6733,7 @@
                               e('span', { className: 'text-sm text-ink' }, comp.name),
                               e('div', { className: 'flex items-center gap-2' },
                                 e('span', { 
-                                  className: 'px-2 py-1 rounded-lg text-sm font-semibold' + 
+                                  className: 'px-2 py-1 rounded-lg text-sm font-semibold ' + 
                                     (rating >= 4 ? 'bg-nw-green-15 text-ok' : 
                                      rating >= 3 ? 'bg-nw-blue-12 text-nw-blue' : 
                                      rating >= 2 ? 'bg-warn-bg text-warn' : 'bg-danger-bg text-danger')
@@ -6771,7 +6770,7 @@
                               e('span', { className: 'text-sm text-ink' }, comp.name),
                               e('div', { className: 'flex items-center gap-2' },
                                 e('span', { 
-                                  className: 'px-2 py-1 rounded-lg text-sm font-semibold' + 
+                                  className: 'px-2 py-1 rounded-lg text-sm font-semibold ' + 
                                     (rating >= 4 ? 'bg-nw-green-15 text-ok' : 
                                      rating >= 3 ? 'bg-nw-blue-12 text-nw-blue' : 
                                      rating >= 2 ? 'bg-warn-bg text-warn' : 'bg-danger-bg text-danger')
@@ -7872,8 +7871,7 @@
                 e('div', { className: "bg-white p-8 rounded-xl shadow-float border border-line-2" },
                     e('div', { className: "flex justify-between items-start mb-6" },
                         e('div', null, 
-                            e('h1', { className: "text-2xl font-semibold", style: { color: "#243186" } }, "nıederwıeser"), 
-                            e('span', { className: "text-sm tracking-wider font-medium", style: { color: "#2F7A48" } }, "FLEXIBLE FOOD PACKAGING")
+                            e('img', { src: NW_LOGO_SRC, alt: 'Niederwieser — Flexible Food Packaging', className: 'h-auto w-[196px]' })
                         ),
                         e('button', { onClick: handleDownloadPDF, disabled: isGenerating, className: "no-print flex items-center gap-2 bg-nw-blue text-white px-4 py-2 rounded-card hover:bg-nw-blue-90 transition-colors disabled:opacity-50" }, 
                             isGenerating ? e(Loader2, { className: "animate-spin", size: 18 }) : e(Download, { size: 18 }), 
@@ -7884,12 +7882,12 @@
                     
                     // === TEAM BUTTONS (wenn teamContext) ===
                     teamButtonsVisible && teamContext && e('div', {
-                      className: 'mb-6 p-5 bg-white border border-line shadow-card rounded-xl  border border-line'
+                      className: 'sticky top-0 z-10 mb-6 rounded-card border border-line bg-white/95 p-4 shadow-float backdrop-blur-sm'
                     },
-                      e('div', { className: 'flex flex-col gap-4' },
+                      e('div', { className: 'flex flex-col gap-3' },
                         e('div', { className: 'flex justify-between items-start' },
                           e('div', { className: 'text-ink' },
-                            e('h2', { className: 'text-2xl font-semibold mb-1', style: { color: '#243186' } }, 
+                            e('h2', { className: 'text-xl font-semibold tracking-[-.014em] text-nw-blue' }, 
                               teamContext.employee?.name || teamContext.existingData?.employeeName || formData.employee || getText(lang, 'Mitarbeiter', 'Collaboratore', 'Employee')
                             ),
                             e('p', { className: 'text-ink-60 text-sm font-medium' }, 
@@ -7902,26 +7900,27 @@
                           e('button', {
                             onClick: handleCancelTeam,
                             type: 'button',
-                            className: 'text-ink-60 hover:text-nw-blue transition-colors text-2xl leading-none font-semibold'
-                          }, '×')
+                            className: nwBtnClass('ghost', 'md', true),
+                            'aria-label': getText(lang, 'Schließen', 'Chiudi', 'Close')
+                          }, e(X, { size: 18, 'aria-hidden': true }))
                         ),
                         e('div', { className: 'grid grid-cols-3 gap-3 mt-2' },
                           e('button', {
                             onClick: () => handleSaveTeamAppraisal('draft'),
                             type: 'button',
                             disabled: isSaving,
-                            className: `py-3 px-4 rounded-lg font-semibold text-sm transition-all shadow-float flex items-center justify-center gap-2 ${isSaving ? 'bg-ink-40 text-ink-60 cursor-not-allowed' : 'bg-line hover:bg-nw-grey text-ink'}`
+                            className: nwBtnClass('secondary', 'lg') + ' w-full'
                           }, isSaving ? '⏳ ...' : '💾 ', isSaving ? '' : (lang === 'de' ? 'Entwurf speichern' : lang === 'it' ? 'Salva bozza' : 'Save Draft')),
                           e('button', {
                             onClick: () => handleSaveTeamAppraisal('completed'),
                             type: 'button',
                             disabled: isSaving,
-                            className: `py-3 px-4 rounded-lg font-semibold text-sm transition-all shadow-float flex items-center justify-center gap-2 ${isSaving ? 'bg-nw-green-15 text-ink-60 cursor-not-allowed' : 'bg-nw-green-15 hover:bg-nw-green text-ink'}`
+                            className: nwBtnClass('primary', 'lg') + ' w-full'
                           }, isSaving ? '⏳ ...' : '✓ ', isSaving ? '' : (lang === 'de' ? 'Abschließen' : lang === 'it' ? 'Completa' : 'Complete')),
                           e('button', {
                             onClick: handleCancelTeam,
                             type: 'button',
-                            className: 'border-2 border-line text-ink py-3 px-4 rounded-lg font-semibold hover:bg-nw-blue-06 transition-all shadow-float text-sm'
+                            className: nwBtnClass('ghost', 'lg') + ' w-full'
                           }, lang === 'de' ? 'Abbrechen' : lang === 'it' ? 'Annulla' : 'Cancel')
                         )
                       )
@@ -16046,7 +16045,7 @@ Best regards`
                           ),
                           React.createElement('div', { className: 'flex items-center gap-2' },
                             React.createElement('span', { 
-                              className: 'px-3 py-1 rounded-full text-xs font-medium' + 
+                              className: 'px-3 py-1 rounded-full text-xs font-medium ' + 
                                 (emp.status === 'completed' ? 'bg-nw-green-15 text-ok' : 'bg-warn-bg text-warn')
                             }, emp.status === 'completed' 
                               ? getText(lang, 'Abgeschlossen', 'Completato', 'Completed')
@@ -16762,43 +16761,48 @@ Best regards`
               ),
               
               // === HR SUB-TAB NAVIGATION ===
-              React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-2 flex flex-wrap gap-2' },
+              React.createElement('div', { role: 'tablist', 'aria-label': 'HR Dashboard', className: 'flex flex-wrap gap-0.5 border-b border-line' },
                 React.createElement('button', {
                   onClick: () => setHrSubTab('overview'),
-                  className: 'flex-1 min-w-[140px] px-4 py-3 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2' + 
-                    (hrSubTab === 'overview' ? 'bg-nw-blue text-white shadow-card' : 'bg-nw-grey-40 text-ink-60 hover:bg-line')
+                  role: 'tab', 'aria-selected': hrSubTab === 'overview', type: 'button',
+                  className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-150 hover:scale-[1.03] active:scale-[.98] ' + 
+                    (hrSubTab === 'overview' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   React.createElement(Building2, { size: 16 }),
                   getText(lang, 'Übersicht', 'Panoramica', 'Overview')
                 ),
                 React.createElement('button', {
                   onClick: () => setHrSubTab('calibration'),
-                  className: 'flex-1 min-w-[140px] px-4 py-3 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2' + 
-                    (hrSubTab === 'calibration' ? 'bg-nw-blue text-white shadow-card' : 'bg-nw-grey-40 text-ink-60 hover:bg-line')
+                  role: 'tab', 'aria-selected': hrSubTab === 'calibration', type: 'button',
+                  className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-150 hover:scale-[1.03] active:scale-[.98] ' + 
+                    (hrSubTab === 'calibration' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   '🔔',
                   getText(lang, 'Normalverteilung', 'Distribuzione', 'Distribution')
                 ),
                 React.createElement('button', {
                   onClick: () => setHrSubTab('rater-bias'),
-                  className: 'flex-1 min-w-[140px] px-4 py-3 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2' + 
-                    (hrSubTab === 'rater-bias' ? 'bg-nw-blue text-white shadow-card' : 'bg-nw-grey-40 text-ink-60 hover:bg-line')
+                  role: 'tab', 'aria-selected': hrSubTab === 'rater-bias', type: 'button',
+                  className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-150 hover:scale-[1.03] active:scale-[.98] ' + 
+                    (hrSubTab === 'rater-bias' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   '⚖️',
                   getText(lang, 'Rater-Bias', 'Bias Valutatore', 'Rater Bias')
                 ),
                 React.createElement('button', {
                   onClick: () => setHrSubTab('radar'),
-                  className: 'flex-1 min-w-[140px] px-4 py-3 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2' + 
-                    (hrSubTab === 'radar' ? 'bg-nw-blue text-white shadow-card' : 'bg-nw-grey-40 text-ink-60 hover:bg-line')
+                  role: 'tab', 'aria-selected': hrSubTab === 'radar', type: 'button',
+                  className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-150 hover:scale-[1.03] active:scale-[.98] ' + 
+                    (hrSubTab === 'radar' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   '🕸️',
                   getText(lang, 'Kompetenz-Radar', 'Radar Competenze', 'Competency Radar')
                 ),
                 React.createElement('button', {
                   onClick: () => setHrSubTab('goals-dashboard'),
-                  className: 'flex-1 min-w-[140px] px-4 py-3 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2' + 
-                    (hrSubTab === 'goals-dashboard' ? 'bg-nw-blue text-white shadow-card' : 'bg-nw-grey-40 text-ink-60 hover:bg-line')
+                  role: 'tab', 'aria-selected': hrSubTab === 'goals-dashboard', type: 'button',
+                  className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-150 hover:scale-[1.03] active:scale-[.98] ' + 
+                    (hrSubTab === 'goals-dashboard' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   '📋',
                   getText(lang, 'Ziel-Dashboard', 'Dashboard Obiettivi', 'Goals Dashboard')
@@ -16806,8 +16810,9 @@ Best regards`
                 // Versions Tab Button
                 React.createElement('button', {
                   onClick: () => setHrSubTab('versions'),
-                  className: 'flex-1 min-w-[140px] px-4 py-3 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2' + 
-                    (hrSubTab === 'versions' ? 'bg-warn text-white shadow-card' : 'bg-warn-bg text-warn hover:bg-warn-bg border border-warn/30')
+                  role: 'tab', 'aria-selected': hrSubTab === 'versions', type: 'button',
+                  className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-150 hover:scale-[1.03] active:scale-[.98] ' + 
+                    (hrSubTab === 'versions' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   React.createElement(Clock, { size: 16 }),
                   getText(lang, 'Versionen', 'Versioni', 'Versions')
@@ -16815,8 +16820,9 @@ Best regards`
                 // Backup/Restore Button
                 React.createElement('button', {
                   onClick: () => setHrSubTab('backup'),
-                  className: 'flex-1 min-w-[140px] px-4 py-3 rounded-lg font-medium text-sm transition-all flex items-center justify-center gap-2' + 
-                    (hrSubTab === 'backup' ? 'bg-danger text-white shadow-card' : 'bg-danger-bg text-danger hover:bg-danger-bg border border-danger/30')
+                  role: 'tab', 'aria-selected': hrSubTab === 'backup', type: 'button',
+                  className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-150 hover:scale-[1.03] active:scale-[.98] ' + 
+                    (hrSubTab === 'backup' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   '💾',
                   getText(lang, 'Backup & Restore', 'Backup & Ripristino', 'Backup & Restore')
@@ -17342,7 +17348,7 @@ Best regards`
                               // GPS Score
                               appraisal.gpsScore > 0 && React.createElement('div', { className: 'text-center' },
                                 React.createElement('div', { 
-                                  className: 'px-3 py-1 rounded-lg font-semibold text-sm' + 
+                                  className: 'px-3 py-1 rounded-lg font-semibold text-sm ' + 
                                     (appraisal.gpsScore >= 4 ? 'bg-nw-green-15 text-ok' : 
                                      appraisal.gpsScore >= 3 ? 'bg-nw-blue-12 text-nw-blue' : 
                                      'bg-warn-bg text-warn')
@@ -17408,7 +17414,7 @@ Best regards`
                                           // Scores
                                           React.createElement('div', { className: 'flex flex-wrap gap-2' },
                                             React.createElement('span', { 
-                                              className: 'px-2 py-1 rounded-lg text-sm font-semibold' +
+                                              className: 'px-2 py-1 rounded-lg text-sm font-semibold ' +
                                                 ((version.gpsScore || 0) >= 4 ? 'bg-nw-green-15 text-ok' :
                                                  (version.gpsScore || 0) >= 3 ? 'bg-nw-blue-12 text-nw-blue' :
                                                  'bg-warn-bg text-warn')
@@ -17581,7 +17587,7 @@ Best regards`
                                       getText(lang, 'Gewicht', 'Peso', 'Weight') + ': ' + (goal.weight || 0) + '%'
                                     ),
                                     React.createElement('span', { 
-                                      className: 'px-2 py-1 rounded-lg text-xs font-medium' +
+                                      className: 'px-2 py-1 rounded-lg text-xs font-medium ' +
                                         ((goal.achievement || 0) >= 100 ? 'bg-nw-green-15 text-ok' :
                                          (goal.achievement || 0) >= 85 ? 'bg-nw-blue-12 text-nw-blue' :
                                          'bg-warn-bg text-warn')
@@ -17639,7 +17645,7 @@ Best regards`
                                     displayName
                                   ),
                                   React.createElement('div', { 
-                                    className: 'px-3 py-1 rounded-lg text-sm font-semibold' +
+                                    className: 'px-3 py-1 rounded-lg text-sm font-semibold ' +
                                       (rating >= 4 ? 'bg-nw-green-15 text-ok' :
                                        rating >= 3 ? 'bg-nw-blue-12 text-nw-blue' :
                                        rating >= 2 ? 'bg-warn-bg text-warn' :
@@ -17690,7 +17696,7 @@ Best regards`
                                 displayName
                               ),
                               React.createElement('div', { 
-                                className: 'px-3 py-1 rounded-lg text-sm font-semibold' +
+                                className: 'px-3 py-1 rounded-lg text-sm font-semibold ' +
                                   (rating >= 4 ? 'bg-nw-green-15 text-ok' :
                                    rating >= 3 ? 'bg-nw-blue-12 text-nw-blue' :
                                    rating >= 2 ? 'bg-warn-bg text-warn' :
@@ -18077,21 +18083,21 @@ Best regards`
                         React.createElement('div', { className: 'flex flex-wrap gap-2' },
                           React.createElement('button', {
                             onClick: () => { setHrCalibrationTypeFilter('review'); setHrCalibrationSelectAll(true); },
-                            className: 'px-5 py-2.5 rounded-xl text-sm font-semibold transition-all' + 
+                            className: 'px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ' + 
                               (hrCalibrationTypeFilter === 'review' 
                                 ? 'bg-nw-blue text-white shadow-float' 
                                 : 'bg-nw-grey-40 text-ink-60 hover:bg-line')
                           }, '📋 ' + getText(lang, 'Führungskraft-Beurteilungen', 'Valutazioni manager', 'Manager Reviews')),
                           React.createElement('button', {
                             onClick: () => { setHrCalibrationTypeFilter('self'); setHrCalibrationSelectAll(true); },
-                            className: 'px-5 py-2.5 rounded-xl text-sm font-semibold transition-all' + 
+                            className: 'px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ' + 
                               (hrCalibrationTypeFilter === 'self' 
                                 ? 'bg-ok text-white shadow-float' 
                                 : 'bg-nw-grey-40 text-ink-60 hover:bg-line')
                           }, '🪞 ' + getText(lang, 'Selbstreflexionen', 'Autoriflessioni', 'Self-Assessments')),
                           React.createElement('button', {
                             onClick: () => { setHrCalibrationTypeFilter('all'); setHrCalibrationSelectAll(true); },
-                            className: 'px-5 py-2.5 rounded-xl text-sm font-semibold transition-all' + 
+                            className: 'px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ' + 
                               (hrCalibrationTypeFilter === 'all' 
                                 ? 'bg-nw-blue text-white shadow-float' 
                                 : 'bg-nw-grey-40 text-ink-60 hover:bg-line')
@@ -18659,7 +18665,7 @@ Best regards`
                           React.createElement('div', { className: 'flex flex-wrap gap-2' },
                             React.createElement('button', {
                               onClick: () => setHrManagerFilter('all'),
-                              className: 'px-4 py-2 rounded-xl text-sm font-semibold transition-all' + 
+                              className: 'px-4 py-2 rounded-xl text-sm font-semibold transition-all ' + 
                                 (hrManagerFilter === 'all' 
                                   ? 'bg-nw-blue text-white shadow-float' 
                                   : 'bg-nw-grey-40 text-ink-60 hover:bg-line')
@@ -18668,7 +18674,7 @@ Best regards`
                               React.createElement('button', {
                                 key: m,
                                 onClick: () => setHrManagerFilter(m),
-                                className: 'px-4 py-2 rounded-xl text-sm font-semibold transition-all' + 
+                                className: 'px-4 py-2 rounded-xl text-sm font-semibold transition-all ' + 
                                   (hrManagerFilter === m 
                                     ? 'bg-nw-blue text-white shadow-float' 
                                     : 'bg-nw-grey-40 text-ink-60 hover:bg-line')
@@ -18942,7 +18948,7 @@ Best regards`
                                 React.createElement('td', { className: 'px-4 py-3 font-medium' }, a.employeeName || a.formData?.employee || 'N/A'),
                                 React.createElement('td', { className: 'px-4 py-3 text-ink-60' }, a.formData?.manager || '–'),
                                 React.createElement('td', { className: 'px-4 py-3 text-center' },
-                                  React.createElement('span', { className: 'px-2 py-1 rounded-lg font-semibold' + 
+                                  React.createElement('span', { className: 'px-2 py-1 rounded-lg font-semibold ' + 
                                     (a.gpsScore >= 3.5 ? 'bg-nw-green-15 text-ok' : a.gpsScore >= 2.5 ? 'bg-nw-blue-12 text-nw-blue' : 'bg-warn-bg text-warn')
                                   }, a.gpsScore.toFixed(2))
                                 ),
@@ -20267,7 +20273,7 @@ Best regards`
                           ),
                           React.createElement('div', { className: 'flex items-center gap-2' },
                             React.createElement('span', { 
-                              className: 'px-2 py-1 rounded-lg text-xs font-medium' + 
+                              className: 'px-2 py-1 rounded-lg text-xs font-medium ' + 
                                 (ga.status === 'completed' ? 'bg-nw-green-15 text-ok' : 'bg-warn-bg text-warn')
                             }, ga.status === 'completed' 
                               ? (lang === 'de' ? '✓ Fertig' : lang === 'it' ? '✓ Completato' : '✓ Complete') 
@@ -25806,8 +25812,7 @@ const renderDashboard = () => {
               e('div', { className: 'bg-white p-8 rounded-xl shadow-float border border-line-2' },
                 e('div', { className: 'flex justify-between items-start mb-6' },
                   e('div', null,
-                    e('h1', { className: 'text-2xl font-semibold', style: { color: '#243186' } }, 'nıederwıeser'),
-                    e('span', { className: 'text-sm tracking-wider font-medium', style: { color: '#2F7A48' } }, 'FLEXIBLE FOOD PACKAGING')
+                    e('img', { src: NW_LOGO_SRC, alt: 'Niederwieser — Flexible Food Packaging', className: 'h-auto w-[196px]' })
                   ),
                   e('button', { onClick: handlePrint, disabled: isGenerating, className: 'no-print flex items-center gap-2 bg-nw-blue text-white px-4 py-2 rounded-card hover:bg-nw-blue-90 disabled:opacity-50' },
                     isGenerating ? e(Loader2, { className: 'animate-spin', size: 18 }) : e(Download, { size: 18 }), isGenerating ? t.generating : t.print)
@@ -26431,8 +26436,8 @@ const renderDashboard = () => {
               React.createElement('div', { className: 'bg-white rounded-card shadow-float border border-line p-8 max-w-2xl w-full' },
                 // Header mit Logo
                 React.createElement('div', { className: 'text-center mb-8' },
-                  React.createElement('h1', { className: 'text-2xl font-semibold tracking-tight', style: { color: '#243186' } }, 'nıederwıeser'),
-                  React.createElement('p', { className: 'text-xs uppercase tracking-widest', style: { color: '#2F7A48' } }, 'Performance Manager')
+                  React.createElement('img', { src: NW_LOGO_SRC, alt: 'Niederwieser — Flexible Food Packaging', className: 'mx-auto h-auto w-[196px]' }),
+                  React.createElement('p', { className: 'mt-2 text-xs font-semibold text-nw-blue' }, 'Performance Manager')
                 ),
                 
                 // Willkommens-Icon
@@ -27158,7 +27163,7 @@ const renderDashboard = () => {
                   React.createElement('div', { className: 'flex items-center justify-between mb-4' },
                     // Links: Logo
                     React.createElement('div', null,
-                      React.createElement('h1', { className: 'text-xl font-semibold', style: { color: '#243186' } }, 'nıederwıeser'),
+                      React.createElement('img', { src: NW_LOGO_SRC, alt: 'Niederwieser — Flexible Food Packaging', className: 'h-auto w-[160px]' }),
                       React.createElement('p', { className: 'text-xs uppercase tracking-widest', style: { color: '#2F7A48' } }, 
                         lang === 'de' ? 'Selbstreflexion' : lang === 'it' ? 'Autovalutazione' : 'Self-Reflection'
                       ),
@@ -28279,22 +28284,17 @@ const renderDashboard = () => {
           // === LOADING SCREEN (während Auth oder AccessCode-Check läuft) - APPLE STYLE ===
           if (authLoading || accessCodeChecking) {
             return React.createElement('div', { 
-              className: 'min-h-screen bg-white flex items-center justify-center'
+              className: 'min-h-screen bg-panel flex items-center justify-center',
+              role: 'status', 'aria-live': 'polite'
             },
-              React.createElement('div', { className: 'text-center' },
-                // Pulsierendes Logo
-                React.createElement('div', { 
-                  className: 'w-20 h-20 mx-auto mb-8 rounded-xl bg-nw-blue flex items-center justify-center shadow-float shadow-[#243186]/30 animate-pulse'
-                },
-                  React.createElement('span', { className: 'text-white font-semibold text-2xl' }, 'N')
-                ),
-                React.createElement('h1', { className: "text-nw-blue font-semibold text-xl tracking-tight mb-1" }, "nıederwıeser"),
-                React.createElement('p', { className: "text-xs uppercase tracking-[0.2em] text-ok font-medium" }, "Performance Manager"),
+              React.createElement('div', { className: 'text-center animate-fade-in' },
+                React.createElement('img', { src: NW_LOGO_SRC, alt: 'Niederwieser — Flexible Food Packaging', className: 'mx-auto mb-2 h-auto w-[196px]' }),
+                React.createElement('p', { className: "eyebrow" }, "Performance Manager"),
                 // Minimale Lade-Punkte
                 React.createElement('div', { className: 'flex items-center justify-center gap-1.5 mt-8' },
                   [0, 1, 2].map(i => React.createElement('div', {
                     key: i,
-                    className: 'w-2 h-2 rounded-full bg-nw-grey animate-bounce',
+                    className: 'w-2 h-2 rounded-full bg-nw-blue/60 animate-pulse',
                     style: { animationDelay: `${i * 0.15}s` }
                   }))
                 )

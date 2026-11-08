@@ -1,0 +1,195 @@
+/*
+ * n.Org Design-Tokens als CSS Custom Properties
+ * ------------------------------------------------------------------
+ * Für Ziel-Apps OHNE Tailwind 3 (plain CSS, CSS Modules, styled-components,
+ * MUI/Chakra-Themes, Angular, Vue …). Werte 1:1 aus tailwind.config.ts und
+ * src/index.css von n.Org (Stand 08.11.2026).
+ *
+ * Hinweis: n.Org selbst nutzt KEINE CSS-Variablen (bewusst kein Runtime-
+ * Theming, Tokens leben nur in tailwind.config.ts). Diese Datei ist eine
+ * Übersetzung für die Übernahme — die Namen folgen den Tailwind-Klassen
+ * (bg-nw-blue → --nw-blue).
+ */
+
+:root {
+  /* ── Marke / Primär ─────────────────────────────────────────── */
+  --nw-blue: #243186;      /* Primärknopf, ALLE Überschriften, aktiv, Fokusring */
+  --nw-blue-90: #3a46a0;   /* Hover Primärknopf */
+  --nw-blue-25: #c9cde3;   /* Hover-Rahmen, gestrichelte Rahmen */
+  --nw-blue-12: #e6e8f2;   /* Segmented-Spur, Tag brand, Zähler aktiv */
+  --nw-blue-06: #f2f3f8;   /* Hover-Fläche, Chip brand, Input-Fokusring */
+
+  /* ── Akzent ─────────────────────────────────────────────────── */
+  --nw-green: #6ebd84;     /* Ampel „ok" (Fläche), Logo-Unterzeile, Präsenz */
+  --nw-green-15: #e8f5ec;
+
+  /* ── Neutral (warm) ─────────────────────────────────────────── */
+  --nw-grey: #d7cfc5;
+  --nw-grey-40: #f3f0ec;   /* Tabellenkopf, kbd, neutrale Chips */
+  --line: #e4e0da;         /* Standard-Rahmen aller Flächen und Felder */
+  --line-2: #eeebe6;       /* Trenner, Tabellenzeilen, Panel-Kopf */
+  --panel: #f4f2ee;        /* App-Hintergrund (body) */
+  --surface: #ffffff;      /* Flächen (Pane, Karte, Dialog) */
+
+  /* ── Text ───────────────────────────────────────────────────── */
+  --ink: #1c1f2e;          /* Fließtext 16.3:1 · Toast-Fläche · Overlay-Basis */
+  --ink-60: #5f6377;       /* Sekundärtext, Labels 5.9:1 */
+  --ink-40: #8b8fa1;       /* NUR Meta/Placeholder/Deko-Icons 3.2:1 */
+
+  /* ── Status (nur App-UI, nie im Druck) ──────────────────────── */
+  --ok: #2f7a48;
+  --ok-bg: #e8f5ec;
+  --warn: #9a6414;
+  --warn-bg: #fbf1dd;
+  --warn-border: #ebd9b4;
+  --danger: #9b2c22;
+  --danger-bg: #fbecea;
+  --danger-border: #ebc5c0;
+  --danger-hover: #82241c;
+
+  /* ── Ampel-Flächen (Brandbook 2026, nur Flächen, nie Text) ──── */
+  --traffic-red: #e50046;
+  --traffic-amber: #f59d24;
+  --traffic-green: var(--nw-green);
+
+  /* ── Overlay ────────────────────────────────────────────────── */
+  --overlay: rgba(28, 31, 46, 0.3); /* bg-ink/30 */
+
+  /* ── Typografie ─────────────────────────────────────────────── */
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-print: Arial, Helvetica, sans-serif; /* nur gedruckte Blätter / PDF */
+  --font-features: 'cv11', 'ss01';
+
+  /* Skala ersetzt Tailwind-Defaults: [Größe]/[Zeilenhöhe] */
+  --text-2xs: 11px;  --leading-2xs: 14px; /* Overline, Tag, Chip */
+  --text-xs: 12px;   --leading-xs: 16px;  /* Caption, Label, Meta */
+  --text-sm: 13px;   --leading-sm: 18px;  /* Sekundär, Zelle, Menü */
+  --text-base: 14px; --leading-base: 20px;/* BODY, Tabs, Pane-Titel (H2) */
+  --text-md: 15px;   --leading-md: 20px;  /* Dialogtitel (H3) */
+  --text-lg: 17px;   --leading-lg: 24px;  /* Zwischentitel */
+  --text-xl: 22px;   --leading-xl: 28px;  /* Seitentitel (H1), Kennzahl */
+  --text-2xl: 26px;  --leading-2xl: 32px; /* Reserve */
+
+  --weight-normal: 400;
+  --weight-medium: 500;   /* Buttons, Tabs, Navigation */
+  --weight-semibold: 600; /* Überschriften, Labels, Eyebrows, Chips */
+
+  --tracking-h1: -0.014em;
+  --tracking-kpi: -0.02em;
+  --tracking-eyebrow: 0.07em;
+  --tracking-tag: 0.04em;
+  --tracking-chip: 0.01em;
+
+  /* ── Abstände (Raster 4 · 8 · 12 · 16 · 24 · 32) ────────────── */
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;   /* Standard-Gap zwischen Bedienelementen */
+  --space-2-5: 10px;
+  --space-3: 12px;
+  --space-3-5: 14px;
+  --space-4: 16px;  /* Flächen-Innenabstand horizontal, Rasterlücke */
+  --space-5: 20px;  /* Dialog-Innenabstand */
+  --space-6: 24px;  /* Seiten-Innenabstand horizontal */
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* ── Radien: 7/8 Bedienelement · 10 Fläche · 12 Dialog · full Status */
+  --radius-xs: 4px;    /* kbd, Tag */
+  --radius-sm: 6px;    /* Menüeintrag, Segmented-Pille */
+  --radius-btn-sm: 7px;
+  --radius-control: 8px;
+  --radius-card: 10px;
+  --radius-dialog: 12px;
+  --radius-full: 9999px;
+
+  /* ── Schatten ───────────────────────────────────────────────── */
+  --shadow-card: 0 1px 2px rgba(28, 31, 46, 0.05);
+  --shadow-float: 0 1px 2px rgba(28, 31, 46, 0.05), 0 12px 32px -16px rgba(28, 31, 46, 0.18);
+  --shadow-sheet: 0 1px 2px rgba(28, 31, 46, 0.08), 0 24px 48px -24px rgba(28, 31, 46, 0.28);
+  --shadow-active-left: inset 3px 0 0 #243186;
+  --shadow-input-focus: 0 0 0 3px #f2f3f8;
+
+  /* ── Bedienhöhen ────────────────────────────────────────────── */
+  --h-control-sm: 28px;  /* Button sm */
+  --h-control-md: 32px;  /* Button md, Input, Nav-Eintrag */
+  --h-control-lg: 36px;  /* Button lg, Pillen-Knopf */
+  --h-chip: 24px;
+  --h-tag: 18px;
+  --size-dot: 8px;
+
+  /* ── Shell ──────────────────────────────────────────────────── */
+  --sidebar-w: 256px;
+  --sidebar-w-collapsed: 84px;
+  --sidebar-logo-w: 196px;
+  --assistant-panel-w: 420px;
+
+  /* ── Bewegung ───────────────────────────────────────────────── */
+  --dur-out: 120ms;      /* Abgänge — immer kürzer als der Auftritt */
+  --dur-fast: 150ms;     /* STANDARD Hover/Press */
+  --dur-in: 180ms;       /* fade-in, pop-in */
+  --dur-panel: 200ms;    /* Karten-Hover, Sidebar-Breite, Toast */
+  --dur-meaning: 300ms;  /* Farbwechsel mit Bedeutung (rot → grün) */
+  --dur-hero: 650ms;     /* Signature-Moment (Blatt gleitet ein) */
+  --ease-glide: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out: ease-out;
+  --ease-in: ease-in;
+
+  /* ── Ebenen ─────────────────────────────────────────────────── */
+  --z-inline: 10;
+  --z-sidebar: 20;
+  --z-popover: 30;  /* Menü, Popover, Tooltip (Portal) */
+  --z-modal: 40;    /* Overlay + Dialog (Portal) */
+  --z-toast: 50;    /* Toast, Konflikt-Alert, Tour */
+}
+
+/* ── Druck-/Chart-Palette (getrennt von der UI, Orange verboten) ── */
+:root {
+  --chart-blue: #243186;
+  --chart-light-blue: #bbd4f0;
+  --chart-light-blue-50: #ddeaf8;
+  --chart-light-blue-25: #eef5fc;
+  --chart-green: #6ebd84;
+  --chart-green-75: #92cea3;
+  --chart-green-50: #b7dec2;
+  --chart-green-25: #dbeee0;
+  --chart-grey: #d7cfc5;
+  --chart-grey-75: #e1dbd4;
+  --chart-grey-50: #ebe7e2;
+  --chart-grey-25: #f5f3f0;
+  --chart-ink-secondary: #444444;
+}
+
+/* ── Globale Grundregeln (Entsprechung zu src/index.css @layer base) ── */
+body {
+  background: var(--panel);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  font-feature-settings: var(--font-features);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+:focus-visible {
+  outline: 2px solid var(--nw-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+.tnum { font-variant-numeric: tabular-nums; }
+.eyebrow {
+  font-size: var(--text-2xs);
+  line-height: var(--leading-2xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-eyebrow);
+  color: var(--ink-40);
+}

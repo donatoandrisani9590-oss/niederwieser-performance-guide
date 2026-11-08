@@ -1,0 +1,198 @@
+/*
+ * n.Org Design-Tokens für Tailwind CSS v4 (CSS-first, @theme)
+ * ------------------------------------------------------------------
+ * Für Ziel-Apps mit Tailwind 4. Erzeugt dieselben Klassennamen wie n.Orgs
+ * tailwind.config.ts (Tailwind 3): bg-nw-blue, text-ink-60, border-line,
+ * rounded-card, shadow-float, animate-pop-in, text-2xs …
+ *
+ * Einbinden: statt `@import "tailwindcss";` in der Haupt-CSS
+ *   @import "tailwindcss";
+ *   @import "./tailwind-v4-theme.css";
+ *
+ * Mit Tailwind 3 stattdessen tokens/tailwind.config.ts + tokens/index.css 1:1 nehmen.
+ */
+
+@theme {
+  /* Tailwind-Standard-Schriftgrößen entfernen — n.Org hat eine FESTE Skala */
+  --text-*: initial;
+  --text-2xs: 11px;  --text-2xs--line-height: 14px;
+  --text-xs: 12px;   --text-xs--line-height: 16px;
+  --text-sm: 13px;   --text-sm--line-height: 18px;
+  --text-base: 14px; --text-base--line-height: 20px;
+  --text-md: 15px;   --text-md--line-height: 20px;
+  --text-lg: 17px;   --text-lg--line-height: 24px;
+  --text-xl: 22px;   --text-xl--line-height: 28px;
+  --text-2xl: 26px;  --text-2xl--line-height: 32px;
+
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --color-nw-blue: #243186;
+  --color-nw-blue-90: #3a46a0;
+  --color-nw-blue-25: #c9cde3;
+  --color-nw-blue-12: #e6e8f2;
+  --color-nw-blue-06: #f2f3f8;
+  --color-nw-green: #6ebd84;
+  --color-nw-green-15: #e8f5ec;
+  --color-nw-grey: #d7cfc5;
+  --color-nw-grey-40: #f3f0ec;
+  --color-ink: #1c1f2e;
+  --color-ink-60: #5f6377;
+  --color-ink-40: #8b8fa1;
+  --color-line: #e4e0da;
+  --color-line-2: #eeebe6;
+  --color-panel: #f4f2ee;
+  --color-ok: #2f7a48;
+  --color-ok-bg: #e8f5ec;
+  --color-warn: #9a6414;
+  --color-warn-bg: #fbf1dd;
+  --color-danger: #9b2c22;
+  --color-danger-bg: #fbecea;
+  --color-traffic-red: #e50046;
+  --color-traffic-amber: #f59d24;
+  /* Auslauf-Aliasse (nicht neu verwenden, = warn) */
+  --color-amber: #9a6414;
+  --color-amber-bg: #fbf1dd;
+
+  --radius-card: 10px;
+
+  --shadow-card: 0 1px 2px rgba(28, 31, 46, 0.05);
+  --shadow-float: 0 1px 2px rgba(28, 31, 46, 0.05), 0 12px 32px -16px rgba(28, 31, 46, 0.18);
+  --shadow-sheet: 0 1px 2px rgba(28, 31, 46, 0.08), 0 24px 48px -24px rgba(28, 31, 46, 0.28);
+
+  --animate-fade-in: fade-in 0.18s ease-out both;
+  --animate-pop-in: pop-in 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-slide-up: slide-up 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-menu-in: menu-in 0.14s ease-out both;
+  --animate-sheet-enter: sheet-enter 0.65s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-fade-out: fade-out 0.12s ease-in both;
+  --animate-menu-out: menu-out 0.12s ease-in both;
+  --animate-pop-out: pop-out 0.12s ease-in both;
+  --animate-toast-in: toast-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-toast-out: toast-out 0.18s ease-in both;
+  --animate-sheet-swap: fade-in 0.14s ease-out both;
+  --animate-attention: attention 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 1 both;
+  --animate-shine-sweep: shine-sweep 1.6s ease-in-out 1 both;
+  --animate-stamp-in: stamp-in 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-dissolve: dissolve 0.5s ease-in both;
+  --animate-ink-pulse: ink-pulse 0.7s ease-out both;
+
+  @keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes pop-in {
+    from { opacity: 0; transform: scale(0.98) translateY(4px) }
+    to { opacity: 1; transform: scale(1) translateY(0) }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translate(-50%, 8px) }
+    to { opacity: 1; transform: translate(-50%, 0) }
+  }
+  @keyframes menu-in {
+    from { opacity: 0; transform: translateY(-4px) }
+    to { opacity: 1; transform: translateY(0) }
+  }
+  @keyframes sheet-enter {
+    from { opacity: 0; transform: scale(0.96) translateY(12px) }
+    to { opacity: 1; transform: none }
+  }
+  @keyframes fade-out { from { opacity: 1 } to { opacity: 0 } }
+  @keyframes menu-out {
+    from { opacity: 1; transform: translateY(0) }
+    to { opacity: 0; transform: translateY(-4px) }
+  }
+  @keyframes pop-out {
+    from { opacity: 1; transform: scale(1) translateY(0) }
+    to { opacity: 0; transform: scale(0.98) translateY(4px) }
+  }
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(8px) }
+    to { opacity: 1; transform: translateY(0) }
+  }
+  @keyframes toast-out {
+    from { opacity: 1; transform: translateY(0) }
+    to { opacity: 0; transform: translateY(8px) }
+  }
+  @keyframes attention {
+    0%, 100% { transform: scale(1) }
+    50% { transform: scale(1.45) }
+  }
+  @keyframes shine-sweep {
+    from { background-position: 200% 0 }
+    to { background-position: -200% 0 }
+  }
+  @keyframes stamp-in {
+    0% { opacity: 0; transform: scale(1.7) rotate(-8deg) }
+    60% { opacity: 1; transform: scale(0.94) rotate(-8deg) }
+    80% { transform: scale(1.04) rotate(-8deg) }
+    100% { opacity: 1; transform: scale(1) rotate(-8deg) }
+  }
+  @keyframes dissolve {
+    from { opacity: 1; filter: blur(0) }
+    to { opacity: 0; filter: blur(6px) }
+  }
+  @keyframes ink-pulse {
+    0% { opacity: 0; transform: scale(0.6) }
+    15% { opacity: 0.3 }
+    100% { opacity: 0; transform: scale(1.6) }
+  }
+}
+
+@layer base {
+  body {
+    background-color: var(--color-panel);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-nw-blue);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}
+
+/* Die Komponenten-Klassen aus n.Orgs index.css (@layer components) */
+@utility tnum { font-variant-numeric: tabular-nums; }
+@utility eyebrow {
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-ink-40);
+}
+@layer components {
+  .dlg-label {
+    margin-top: 0.75rem;
+    display: block;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 600;
+    color: var(--color-ink-60);
+  }
+  .dlg-input {
+    margin-top: 0.25rem;
+    height: 2rem;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-line);
+    background: #fff;
+    padding: 0 0.75rem;
+    font-size: 13px;
+    color: var(--color-ink);
+    transition: border-color 150ms, box-shadow 150ms;
+  }
+  .dlg-input::placeholder { color: var(--color-ink-40); }
+  .dlg-input:focus { border-color: var(--color-nw-blue); box-shadow: 0 0 0 3px #f2f3f8; outline: none; }
+  textarea.dlg-input { height: auto; padding-top: 0.5rem; padding-bottom: 0.5rem; }
+  .menu-chevron, .disclose-chevron { transition: transform 150ms; }
+  [aria-expanded='true'] > .menu-chevron, [aria-expanded='true'] .menu-chevron { transform: rotate(180deg); }
+  [aria-expanded='true'] > .disclose-chevron, [aria-expanded='true'] .disclose-chevron { transform: rotate(90deg); }
+}

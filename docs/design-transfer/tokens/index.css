@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-panel text-ink font-sans antialiased text-base;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  :focus-visible {
+    outline: 2px solid theme('colors.nw-blue');
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  /* Ruhe für alle, die Bewegung reduziert haben wollen */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}
+
+@layer components {
+  /* Übergangs-Alias: entspricht <Button variant="secondary" size="sm">.
+     Wird beim Umzug der Screens auf die Komponente ersetzt. */
+  .btn-row {
+    @apply inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-[7px] border border-line bg-white px-2.5 text-xs font-medium text-ink transition-colors hover:border-nw-blue-25 hover:bg-nw-blue-06;
+  }
+  /* Formularfelder in Dialogen — Bausteinmaße: Label 12/600, Feld 32 px hoch */
+  .dlg-label {
+    @apply mt-3 block text-xs font-semibold text-ink-60;
+  }
+  .dlg-input {
+    @apply mt-1 h-8 w-full rounded-lg border border-line bg-white px-3 text-sm text-ink transition-[border-color,box-shadow] duration-150 placeholder:text-ink-40 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none;
+  }
+  textarea.dlg-input {
+    @apply h-auto py-2;
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Overline: Abschnittsbeschriftung 11/600, +7 % Laufweite */
+  .eyebrow {
+    @apply text-2xs font-semibold uppercase tracking-[.07em] text-ink-40;
+  }
+  /* Aufklapp-Quittung (Motion-Runde 31.08.): Chevrons an Menü-/Popover-
+     Auslösern drehen bei offenem Panel — Rotation auf dem Icon, nie auf dem
+     skalierenden Button. aria-expanded liefern Menu/Popover bereits. */
+  .menu-chevron,
+  .disclose-chevron {
+    @apply transition-transform duration-150;
+  }
+  [aria-expanded='true'] > .menu-chevron,
+  [aria-expanded='true'] .menu-chevron {
+    transform: rotate(180deg);
+  }
+  [aria-expanded='true'] > .disclose-chevron,
+  [aria-expanded='true'] .disclose-chevron {
+    transform: rotate(90deg);
+  }
+}

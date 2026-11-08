@@ -1,7 +1,7 @@
 // Kritische Wege: Anmeldung, Daten laden, Datensatz anlegen/ändern/speichern, nach Neuladen wiederfinden.
 // Läuft nur gegen den Firebase-Emulator mit synthetischen Testdaten (siehe fixtures.mjs / seed.mjs).
 import { test, expect, openApp } from './fixtures.mjs';
-import { seed, USERS, ACCESS_CODE, listDocs, getDoc } from './seed.mjs';
+import { seed, USERS, ACCESS_CODE, YEAR, PREV_YEAR, listDocs, getDoc } from './seed.mjs';
 
 const field = (doc, name) => {
   const v = doc.fields?.[name];
@@ -17,6 +17,11 @@ async function gotoTeamAndLogin(page, user) {
 }
 
 const memberCard = (page, name) => page.getByText(name, { exact: true }).first();
+// Zeile der Status-Matrix (Standardansicht der Team-Übersicht) und Knopf darin
+const memberRow = (page, name) => page.getByRole('row').filter({ hasText: name });
+// Formularfeld mit genau diesem Wert vorhanden? (Eingaben sind gesteuert, value steht nicht als Attribut im DOM)
+const hasFieldValue = (page, v) => expect.poll(() => page.evaluate((x) => [...document.querySelectorAll('input, textarea')].some((el) => el.value === x), v), { timeout: 10000 });
+const rowButton = (page, name, label) => memberRow(page, name).getByRole('button', { name: label, exact: true });
 
 let ids;
 test.beforeEach(async () => { ids = await seed(); });
@@ -31,8 +36,14 @@ test('Führungskraft sieht nach Anmeldung genau ihre eigenen und geteilten Mitar
   await gotoTeamAndLogin(page, USERS.managerA);
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
   for (const n of ['Clara Beispiel', 'David Muster', 'Emil Probe', 'Frieda Geteilt']) await expect(memberCard(page, n)).toBeVisible();
+  // Status-Matrix: Unterlagen des laufenden Jahres richtig zugeordnet
+  await expect(memberRow(page, 'Clara Beispiel')).toContainText('GPS 3.9');
+  await expect(memberRow(page, 'David Muster')).toContainText('Entwurf');
+  await expect(memberRow(page, 'Emil Probe')).toContainText('Vereinbart · 2 Ziele');
+  await expect(memberRow(page, 'Frieda Geteilt')).toContainText('Geteilt');
+  // Kartenansicht zeigt dieselben Daten
+  await page.getByRole('radio', { name: 'Karten' }).click();
   await expect(page.getByText('Geteilt von: fk.bernd@test.local')).toBeVisible();
-  // Bestehende Beurteilungen werden ihren Mitarbeitern richtig zugeordnet
   await expect(page.getByText('GPS 3.9').first()).toBeVisible();
   await expect(page.getByText('✎ Entwurf gespeichert')).toBeVisible();
 });
@@ -69,10 +80,11 @@ test('Sitzung bleibt nach Neuladen erhalten', async ({ page }) => {
 test('Mitarbeiter anlegen: wird gespeichert und nach Neuladen wiedergefunden', async ({ page }) => {
   await gotoTeamAndLogin(page, USERS.managerA);
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  await page.getByRole('button', { name: 'Mitarbeiter hinzufügen' }).click();
   await page.locator('#add-name').fill('Gerda Neu');
   await page.locator('#add-pos').fill('Assistenz');
   await page.locator('#add-email').fill('gerda.neu@test.local');
-  await page.getByRole('button', { name: /Hinzufügen/ }).first().click();
+  await page.getByRole('button', { name: 'Hinzufügen', exact: true }).click();
   await expect(page.getByText('5 Mitarbeiter')).toBeVisible();
 
   // In der Datenbank: richtiger Besitzer, Felder unverändert benannt
@@ -95,26 +107,37 @@ test('Beurteilung anlegen, als Entwurf speichern, ändern, abschließen und nach
   await gotoTeamAndLogin(page, USERS.managerA);
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
 
-  // Emil hat noch keine Beurteilung
-  const before = (await listDocs('teamAppraisals')).filter((d) => field(d, 'employeeId') === 'tm-emil');
+  // Emil hat noch keine Beurteilung, aber eine Zielvereinbarung für das laufende Jahr
+  const before = (await listDocs('teamAppraisals')).filter((d) => field(d, 'employeeId') === 'tm-emil' && field(d, 'type') === 'review');
   expect(before).toHaveLength(0);
+  await expect(memberRow(page, 'Emil Probe')).toContainText('2 Ziele aus der Zielvereinbarung werden übernommen');
 
-  await page.getByText('→ Review starten').first().click();
+  await rowButton(page, 'Emil Probe', 'Starten').click();
   await expect(page.getByRole('button', { name: /Entwurf speichern/ }).first()).toBeVisible();
+  // Vereinbarte Ziele sind automatisch eingesetzt, Erreichung noch offen
+  await expect(page.getByText(`Ziele aus der Zielvereinbarung ${YEAR} übernommen`)).toBeVisible();
+  await hasFieldValue(page, 'Wartungsquote 95 %').toBe(true);
   await page.getByRole('button', { name: /Entwurf speichern/ }).first().click();
 
   await expect.poll(async () => (await listDocs('teamAppraisals')).filter((d) => field(d, 'employeeId') === 'tm-emil' && field(d, 'type') === 'review').length, { timeout: 15000 }).toBe(1);
-  let doc = (await listDocs('teamAppraisals')).find((d) => field(d, 'employeeId') === 'tm-emil');
+  let doc = (await listDocs('teamAppraisals')).find((d) => field(d, 'employeeId') === 'tm-emil' && field(d, 'type') === 'review');
   expect(field(doc, 'userId')).toBe(ids.uidA);
   expect(field(doc, 'status')).toBe('draft');
   expect(field(doc, 'employeeName')).toBe('Emil Probe');
+  expect(String(field(doc, 'period'))).toBe(YEAR);
+  const savedGoals = (doc.fields.goals.arrayValue.values || []).map((v) => v.mapValue.fields.name.stringValue);
+  expect(savedGoals).toEqual(['Wartungsquote 95 %', 'Dokumentation digitalisieren']);
+  // Zielvereinbarung selbst unverändert
+  const agreement = await getDoc('teamAppraisals/ap-emil-goals');
+  expect(field(agreement, 'status')).toBe('completed');
+  expect(agreement.fields.goals.arrayValue.values).toHaveLength(2);
 
   // Neu laden → Entwurf ist da und wird fortgesetzt
   await page.reload();
   await page.getByText('Team-Übersicht', { exact: true }).first().click();
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
-  await expect(page.getByText('→ Fortsetzen')).toHaveCount(2); // David (Seed) + Emil (neu)
-  await page.getByText('→ Fortsetzen').nth(1).click();
+  await expect(memberRow(page, 'David Muster').getByRole('button', { name: 'Fortsetzen', exact: true })).toHaveCount(1); // Seed-Entwurf
+  await rowButton(page, 'Emil Probe', 'Fortsetzen').click();
   await expect(page.getByRole('button', { name: /Abschließen/ }).first()).toBeVisible();
   await page.getByRole('button', { name: /Abschließen/ }).first().click();
   const confirm = page.getByRole('button', { name: /Ja|Bestätigen|Abschließen/ }).last();
@@ -179,7 +202,7 @@ test('Neue Führungskraft registriert sich: Konto mit Namen und registeredUsers 
 test('PDF-Export der Beurteilung erzeugt eine PDF-Datei', async ({ page }) => {
   await gotoTeamAndLogin(page, USERS.managerA);
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
-  await page.getByText('→ Bearbeiten').first().click();
+  await rowButton(page, 'Clara Beispiel', 'Öffnen').click();
   const pdfBtn = page.getByRole('button', { name: /Als PDF herunterladen|PDF/ }).first();
   await expect(pdfBtn).toBeVisible();
   const [download] = await Promise.all([page.waitForEvent('download', { timeout: 45000 }), pdfBtn.click()]);
@@ -204,4 +227,51 @@ test('Bestehendes Konto ohne registeredUsers-Eintrag: Anmeldung trägt ihn nach,
   const reg = (await listDocs('registeredUsers')).find((d) => field(d, 'email') === 'alt.konto@test.local');
   expect(field(reg, 'uid')).toBe(r.localId);
   expect(JSON.stringify((await listDocs('teamMembers')).map((d) => d.fields))).toBe(before);
+});
+
+test('Jahreswechsel in der Team-Übersicht: jedes Jahr zeigt nur seine Unterlagen, Daten bleiben unverändert', async ({ page }) => {
+  const before = JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields));
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  const yearPicker = page.getByRole('radiogroup', { name: 'Jahr' });
+  await expect(yearPicker.getByRole('radio', { name: YEAR })).toHaveAttribute('aria-checked', 'true');
+  await expect(memberRow(page, 'Clara Beispiel')).toContainText('GPS 3.9');
+  await expect(page.getByRole('columnheader', { name: `Beurteilung ${YEAR}` })).toBeVisible();
+
+  await yearPicker.getByRole('radio', { name: PREV_YEAR }).click();
+  await expect(page.getByRole('columnheader', { name: `Beurteilung ${PREV_YEAR}` })).toBeVisible();
+  await expect(memberRow(page, 'Clara Beispiel')).toContainText('GPS 3.2');
+  await expect(memberRow(page, 'Clara Beispiel')).not.toContainText('GPS 3.9');
+  await expect(memberRow(page, 'David Muster')).not.toContainText('Entwurf');
+  // Beurteilung des Vorjahres öffnen: richtiges Dokument
+  await rowButton(page, 'Clara Beispiel', 'Öffnen').click();
+  await hasFieldValue(page, 'Rahmenverträge neu verhandeln').toBe(true);
+  await page.getByText('Team-Übersicht', { exact: true }).first().click();
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+
+  // Ansehen und Umschalten verändert keine Daten
+  expect(JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields))).toBe(before);
+});
+
+test('Bestehender Beurteilungsentwurf: Ziele der Zielvereinbarung nur auf Knopfdruck, gespeichert erst mit Entwurf speichern', async ({ page }) => {
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  await rowButton(page, 'David Muster', 'Fortsetzen').last().click();
+  await expect(page.getByRole('button', { name: /Entwurf speichern/ }).first()).toBeVisible();
+  // Entwurf bleibt wie gespeichert
+  await hasFieldValue(page, 'Ausschuss reduzieren').toBe(true);
+  const banner = page.getByTestId('goal-agreement-banner');
+  await expect(banner).toContainText(`Zielvereinbarung ${YEAR} vorhanden`);
+  // Rückfrage abgelehnt (Fixture lehnt Dialoge ab) → nichts ersetzt
+  await banner.getByRole('button', { name: 'Ziele übernehmen' }).click();
+  await hasFieldValue(page, 'Ausschuss reduzieren').toBe(true);
+  // Rückfrage bestätigt → Ziele der Zielvereinbarung eingesetzt
+  page.removeAllListeners('dialog');
+  page.on('dialog', (d) => d.accept().catch(() => {}));
+  await banner.getByRole('button', { name: 'Ziele übernehmen' }).click();
+  await hasFieldValue(page, 'OEE auf 85 %').toBe(true);
+  await expect(banner).toContainText(`Ziele aus der Zielvereinbarung ${YEAR} übernommen`);
+  // Noch nichts gespeichert
+  const draft = await getDoc('teamAppraisals/ap-david-draft');
+  expect(draft.fields.goals.arrayValue.values.map((v) => v.mapValue.fields.name.stringValue)).toEqual(['Ausschuss reduzieren']);
 });

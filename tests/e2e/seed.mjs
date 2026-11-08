@@ -12,6 +12,9 @@ export const USERS = {
 };
 
 export const ACCESS_CODE = 'TESTCODE-0001';
+// Laufendes Jahr: Die Team-Übersicht zeigt standardmäßig das aktuelle Jahr. PREV_YEAR prüft den Jahreswechsel.
+export const YEAR = String(new Date().getFullYear());
+export const PREV_YEAR = String(new Date().getFullYear() - 1);
 
 const iso = (d) => new Date(d).toISOString();
 
@@ -92,7 +95,7 @@ export async function seed() {
   await member('tm-frieda', uidB, USERS.managerB.email, 'Frieda Geteilt', 'Controllerin', { sharedWith: [USERS.managerA.email] });
 
   const base = (id, emp, owner, type, status, extra) => setDoc(`teamAppraisals/${id}`, {
-    id, type, status, period: '2025', employeeId: emp.id, employeeName: emp.name, employeePosition: emp.position,
+    id, type, status, period: YEAR, employeeId: emp.id, employeeName: emp.name, employeePosition: emp.position,
     position: emp.position, userId: owner, managerId: owner, managerName: 'Testleitung', createdAt: iso('2025-11-01'),
     updatedAt: iso('2025-11-15'), ...extra,
   });
@@ -123,6 +126,20 @@ export async function seed() {
   await base('ap-david-goals', david, uidA, 'goals', 'completed', {
     goals: [{ id: 1, name: 'OEE auf 85 %', weight: 50, achievement: 0 }, { id: 2, name: 'Team-Schulungen', weight: 50, achievement: 0 }],
     devGoals: [{ id: 1, name: 'Führung', category: 'leadership', target: 'Führungstraining', deadline: '2026-06-30' }],
+  });
+  // Emil: Zielvereinbarung im laufenden Jahr, noch keine Beurteilung (Ziel-Übernahme)
+  const emil = { id: 'tm-emil', name: 'Emil Probe', position: 'Techniker' };
+  await base('ap-emil-goals', emil, uidA, 'goals', 'completed', {
+    goals: [{ id: 1, name: 'Wartungsquote 95 %', weight: 70, target: '95 %', type: 'performance' }, { id: 2, name: 'Dokumentation digitalisieren', weight: 30, target: 'bis Q3', type: 'performance' }],
+    devGoals: [],
+  });
+  // Clara: Beurteilung aus dem Vorjahr (darf im laufenden Jahr nicht als „abgeschlossen“ zählen)
+  await base('ap-clara-review-prev', clara, uidA, 'review', 'completed', {
+    period: PREV_YEAR, isManager: false, includeLeadership: false, noGoalsMode: false,
+    goals: [{ id: 1, name: 'Rahmenverträge neu verhandeln', weight: 100, achievement: 95 }],
+    coreScores: CORE, wasScore: 95, wieCoreScore: 3.4, gpsScore: 3.2, finalGPS: 3.2,
+    createdAt: iso(`${PREV_YEAR}-11-01`), updatedAt: iso(`${PREV_YEAR}-11-20`),
+    formData: { employee: clara.name, position: clara.position, manager: 'Anna Testleiterin', date: `${PREV_YEAR}-11-20` }, versionHistory: [],
   });
   await base('ap-frieda-review', frieda, uidB, 'review', 'completed', {
     isManager: false, includeLeadership: false, goals: [{ id: 1, name: 'Monatsabschluss in 3 Tagen', weight: 100, achievement: 100 }],

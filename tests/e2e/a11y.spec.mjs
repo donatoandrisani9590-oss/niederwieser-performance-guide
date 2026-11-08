@@ -36,6 +36,8 @@ test('Team-Übersicht und Beurteilungsformular: keine WCAG-AA-Verstöße', async
   await login(page, USERS.managerA);
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
   expect(await violations(page), 'Team-Übersicht').toEqual([]);
+  await page.getByRole('radio', { name: 'Karten' }).click();
+  expect(await violations(page), 'Team-Übersicht (Karten)').toEqual([]);
   await page.getByText('→ Bearbeiten').first().click();
   await expect(page.getByRole('button', { name: /Entwurf speichern/ }).first()).toBeVisible();
   expect(await violations(page), 'Beurteilungsformular').toEqual([]);

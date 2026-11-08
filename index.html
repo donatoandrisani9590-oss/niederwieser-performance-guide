@@ -21326,7 +21326,8 @@ Best regards`
           // === TEAM CALIBRATION RENDER FUNCTION ===
           const renderTeamCalibration = () => {
             // Sammle alle Reviews (type: 'review' oder kein type für Rückwärtskompatibilität)
-            const allReviews = teamAppraisals.filter(a => a.type === 'review' || !a.type);
+            // nur das gewählte Jahr (gemeinsam mit der Team-Übersicht), vorher wurden alle Jahre gemischt
+            const allReviews = teamAppraisals.filter(a => (a.type === 'review' || !a.type) && nwDocYear(a) === teamYear);
             
             // Completed = Reviews mit status 'completed' UND gpsScore > 0
             const completedReviews = allReviews.filter(a => a.status === 'completed' && a.gpsScore && a.gpsScore > 0);
@@ -21350,8 +21351,8 @@ Best regards`
             // Team-Name aus user oder Fallback
             const teamName = user?.displayName ? `Team ${user.displayName.split(' ')[0]}` : getText(lang, 'Team-Übersicht', 'Panoramica team', 'Team Overview');
             
-            // Aktuelle Review-Periode
-            const currentPeriod = new Date().getFullYear().toString();
+            // Review-Periode = gewähltes Jahr
+            const currentPeriod = teamYear;
             
             // === STATISTIK-BERECHNUNGEN ===
             
@@ -21436,14 +21437,15 @@ Best regards`
             // Zähle eindeutige Mitarbeiter aus allen Reviews (unternehmenweit)
             const uniqueEmployees = new Set();
             allReviews.forEach(r => {
-              if (r.employeeId) uniqueEmployees.add(r.employeeId);
-              if (r.employeeName) uniqueEmployees.add(r.employeeName);
+              // je Mitarbeiter einmal zählen (vorher zählten ID und Name doppelt)
+              const key = r.employeeId || r.employeeName;
+              if (key) uniqueEmployees.add(key);
             });
             // Fallback auf teamMembers wenn keine Reviews vorhanden
             const totalEmployeeCount = uniqueEmployees.size > 0 ? uniqueEmployees.size : teamMembers.length;
             
             // Berechne Selbstreflexionen separat (alle Typen)
-            const selfReflections = teamAppraisals.filter(a => a.type === 'self' || a.type === 'self-reflection' || a.type === 'self_assessment' || a.type === 'self_assessment_standalone' || a.type === 'self_pdf');
+            const selfReflections = teamAppraisals.filter(a => nwDocYear(a) === teamYear && (a.type === 'self' || a.type === 'self-reflection' || a.type === 'self_assessment' || a.type === 'self_assessment_standalone' || a.type === 'self_pdf'));
             
             // Berechne alle Statistiken
             const stats = {
@@ -21521,8 +21523,19 @@ Best regards`
                       `${stats.totalMembers} ${lang === 'de' ? 'Mitarbeiter' : lang === 'it' ? 'Collaboratori' : 'Employees'} | Review-Periode: ${currentPeriod}`
                     )
                   ),
-                  // Status-Badge
-                  React.createElement('div', { className: "mt-4 md:mt-0 flex items-center gap-2" },
+                  // Jahr + Status-Badge
+                  React.createElement('div', { className: "mt-4 md:mt-0 flex flex-wrap items-center gap-2" },
+                    (() => {
+                      const thisYear = new Date().getFullYear();
+                      const ys = new Set([String(thisYear), String(thisYear + 1)]);
+                      teamAppraisals.forEach(ap => ys.add(nwDocYear(ap)));
+                      const years = [...ys].sort((x, y) => y.localeCompare(x));
+                      return React.createElement('div', { className: 'inline-flex items-center gap-2' },
+                        React.createElement('span', { className: 'eyebrow', 'aria-hidden': true }, getText(lang, 'Jahr', 'Anno', 'Year')),
+                        years.length <= 5
+                          ? React.createElement(NwSegmented, { ariaLabel: getText(lang, 'Jahr', 'Anno', 'Year'), value: teamYear, onChange: (v) => setTeamYear(v), options: years.map(y => ({ value: y, label: y })) })
+                          : React.createElement('select', { 'aria-label': getText(lang, 'Jahr', 'Anno', 'Year'), value: teamYear, onChange: (ev) => setTeamYear(ev.target.value), className: 'h-8 rounded-lg border border-line bg-white px-2 text-sm font-medium text-nw-blue focus:border-nw-blue focus:outline-none' }, years.map(y => React.createElement('option', { key: y, value: y }, y))));
+                    })(),
                     React.createElement('span', { 
                       className: "bg-nw-blue-06 backdrop-blur px-4 py-2 rounded-full text-sm font-medium"
                     },

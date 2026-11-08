@@ -275,3 +275,19 @@ test('Bestehender Beurteilungsentwurf: Ziele der Zielvereinbarung nur auf Knopfd
   const draft = await getDoc('teamAppraisals/ap-david-draft');
   expect(draft.fields.goals.arrayValue.values.map((v) => v.mapValue.fields.name.stringValue)).toEqual(['Ausschuss reduzieren']);
 });
+
+test('Kalibrierung: nur das gewählte Jahr, jeder Mitarbeiter einmal gezählt', async ({ page }) => {
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  await page.getByText('Kalibrierung', { exact: true }).first().click();
+  await expect(page.getByText(`3 Mitarbeiter | Review-Periode: ${YEAR}`)).toBeVisible();
+  const heatmapRows = page.getByRole('row').filter({ hasText: 'Clara Beispiel' });
+  await expect(heatmapRows).toHaveCount(1);
+  await expect(heatmapRows).toContainText('3.9');
+  // Jahr wechseln: Vorjahres-Beurteilung, gleiche Auswahl wie in der Team-Übersicht
+  await page.getByRole('radiogroup', { name: 'Jahr' }).getByRole('radio', { name: PREV_YEAR }).click();
+  await expect(page.getByText(`1 Mitarbeiter | Review-Periode: ${PREV_YEAR}`)).toBeVisible();
+  await expect(page.getByRole('row').filter({ hasText: 'Clara Beispiel' })).toContainText('3.2');
+  await page.getByText('Team-Übersicht', { exact: true }).first().click();
+  await expect(page.getByRole('columnheader', { name: `Beurteilung ${PREV_YEAR}` })).toBeVisible();
+});

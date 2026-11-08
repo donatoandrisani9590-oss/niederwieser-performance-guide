@@ -1085,34 +1085,36 @@
             };
 
             return React.createElement('div', { className: 'min-h-[60vh] flex items-center justify-center' },
-                React.createElement('div', { className: 'bg-white p-8 rounded-card shadow-float border border-line w-full max-w-md' },
+                React.createElement('div', { className: 'w-full max-w-md rounded-xl border border-line bg-white p-8 shadow-float animate-pop-in' },
                     // Header
-                    React.createElement('div', { className: 'text-center mb-8' },
-                        React.createElement('div', { className: 'w-16 h-16 bg-nw-blue rounded-full flex items-center justify-center mx-auto mb-4' },
-                            React.createElement(Users, { size: 32, className: 'text-white' })
-                        ),
-                        React.createElement('h2', { className: 'text-2xl font-semibold', style: { color: '#243186' } },
+                    React.createElement('div', { className: 'mb-6' },
+                        React.createElement('img', { src: NW_LOGO_SRC, alt: 'Niederwieser — Flexible Food Packaging', className: 'mb-6 h-auto w-[160px]' }),
+                        React.createElement('h2', { className: 'flex items-center gap-2 text-xl font-semibold tracking-[-.014em] text-nw-blue' },
+                            React.createElement(Users, { size: 20, 'aria-hidden': true }),
                             txt.teamAccess
                         ),
-                        React.createElement('p', { className: 'text-ink-60 mt-2 text-sm' },
+                        React.createElement('p', { className: 'mt-1 text-sm text-ink-60' },
                             txt.teamDesc
                         )
                     ),
 
                     // Tabs
-                    React.createElement('div', { className: 'flex bg-nw-grey-40 rounded-lg p-1 mb-6' },
+                    React.createElement('div', { className: 'mb-5 flex h-9 gap-0.5 rounded-lg bg-nw-blue-12 p-[3px]', role: 'tablist' },
                         React.createElement('button', {
                             onClick: () => { setIsLogin(true); setError(''); },
-                            className: `flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${isLogin ? 'bg-nw-blue text-white shadow-card' : 'text-ink-60 hover:text-ink'}`
+                            role: 'tab', 'aria-selected': isLogin, type: 'button',
+                            className: `flex-1 rounded-md text-sm font-medium transition-[background-color,color,box-shadow] duration-150 ${isLogin ? 'bg-white text-nw-blue shadow-card' : 'text-ink-60 hover:text-nw-blue'}`
                         }, txt.loginTitle),
                         React.createElement('button', {
                             onClick: () => { setIsLogin(false); setError(''); },
-                            className: `flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${!isLogin ? 'bg-nw-blue text-white shadow-card' : 'text-ink-60 hover:text-ink'}`
+                            role: 'tab', 'aria-selected': !isLogin, type: 'button',
+                            className: `flex-1 rounded-md text-sm font-medium transition-[background-color,color,box-shadow] duration-150 ${!isLogin ? 'bg-white text-nw-blue shadow-card' : 'text-ink-60 hover:text-nw-blue'}`
                         }, txt.registerTitle)
                     ),
 
                     // Error Message
-                    error && React.createElement('div', { className: 'bg-danger-bg border border-danger/30 text-danger px-4 py-3 rounded-lg mb-4 text-sm' },
+                    error && React.createElement('div', { role: 'alert', className: 'mb-4 flex items-start gap-2 rounded-lg bg-danger-bg px-3 py-2.5 text-sm text-danger' },
+                        React.createElement(AlertCircle, { size: 16, 'aria-hidden': true, className: 'mt-0.5 shrink-0' }),
                         error
                     ),
 
@@ -1120,17 +1122,17 @@
                     React.createElement('form', { onSubmit: handleSubmit, className: 'space-y-4' },
                         // Email
                         React.createElement('div', null,
-                            React.createElement('label', { className: 'block text-sm font-medium text-ink mb-1' }, txt.email),
+                            React.createElement('label', { className: 'mb-1 block text-xs font-semibold text-ink-60' }, txt.email),
                             React.createElement('div', { className: 'relative' },
                                 React.createElement('div', { className: 'absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none' },
-                                    React.createElement(Mail, { size: 18, className: 'text-ink-40' })
+                                    React.createElement(Mail, { size: 16, className: 'text-ink-40', 'aria-hidden': true })
                                 ),
                                 React.createElement('input', {
                                     type: 'email',
                                     value: email,
                                     onChange: (e) => setEmail(e.target.value),
                                     required: true,
-                                    className: 'w-full pl-10 pr-4 py-2.5 bg-nw-grey-40 border-transparent rounded-card focus:bg-white focus:ring-2 focus:ring-nw-blue/20 focus:border-transparent outline-none transition-all',
+                                    className: 'h-9 w-full rounded-lg border border-line bg-white pl-9 pr-3 text-sm text-ink placeholder:text-ink-40 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none',
                                     placeholder: 'name@firma.de'
                                 })
                             )
@@ -1138,17 +1140,17 @@
 
                         // v92: Full Name (nur bei Registrierung)
                         !isLogin && React.createElement('div', null,
-                            React.createElement('label', { className: 'block text-sm font-medium text-ink mb-1' }, txt.fullName),
+                            React.createElement('label', { className: 'mb-1 block text-xs font-semibold text-ink-60' }, txt.fullName),
                             React.createElement('div', { className: 'relative' },
                                 React.createElement('div', { className: 'absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none' },
-                                    React.createElement(Users, { size: 18, className: 'text-ink-40' })
+                                    React.createElement(Users, { size: 16, className: 'text-ink-40', 'aria-hidden': true })
                                 ),
                                 React.createElement('input', {
                                     type: 'text',
                                     value: fullName,
                                     onChange: (e) => setFullName(e.target.value),
                                     required: !isLogin,
-                                    className: 'w-full pl-10 pr-4 py-2.5 bg-nw-grey-40 border-transparent rounded-card focus:bg-white focus:ring-2 focus:ring-nw-blue/20 focus:border-transparent outline-none transition-all',
+                                    className: 'h-9 w-full rounded-lg border border-line bg-white pl-9 pr-3 text-sm text-ink placeholder:text-ink-40 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none',
                                     placeholder: txt.fullNamePlaceholder
                                 })
                             )
@@ -1156,10 +1158,10 @@
 
                         // Password
                         React.createElement('div', null,
-                            React.createElement('label', { className: 'block text-sm font-medium text-ink mb-1' }, txt.password),
+                            React.createElement('label', { className: 'mb-1 block text-xs font-semibold text-ink-60' }, txt.password),
                             React.createElement('div', { className: 'relative' },
                                 React.createElement('div', { className: 'absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none' },
-                                    React.createElement(Lock, { size: 18, className: 'text-ink-40' })
+                                    React.createElement(Lock, { size: 16, className: 'text-ink-40', 'aria-hidden': true })
                                 ),
                                 React.createElement('input', {
                                     type: 'password',
@@ -1167,7 +1169,7 @@
                                     onChange: (e) => setPassword(e.target.value),
                                     required: true,
                                     minLength: 6,
-                                    className: 'w-full pl-10 pr-4 py-2.5 bg-nw-grey-40 border-transparent rounded-card focus:bg-white focus:ring-2 focus:ring-nw-blue/20 focus:border-transparent outline-none transition-all',
+                                    className: 'h-9 w-full rounded-lg border border-line bg-white pl-9 pr-3 text-sm text-ink placeholder:text-ink-40 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none',
                                     placeholder: '••••••••'
                                 })
                             )
@@ -1175,10 +1177,10 @@
 
                         // Confirm Password (nur bei Registrierung)
                         !isLogin && React.createElement('div', null,
-                            React.createElement('label', { className: 'block text-sm font-medium text-ink mb-1' }, txt.confirmPassword),
+                            React.createElement('label', { className: 'mb-1 block text-xs font-semibold text-ink-60' }, txt.confirmPassword),
                             React.createElement('div', { className: 'relative' },
                                 React.createElement('div', { className: 'absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none' },
-                                    React.createElement(Lock, { size: 18, className: 'text-ink-40' })
+                                    React.createElement(Lock, { size: 16, className: 'text-ink-40', 'aria-hidden': true })
                                 ),
                                 React.createElement('input', {
                                     type: 'password',
@@ -1186,7 +1188,7 @@
                                     onChange: (e) => setConfirmPassword(e.target.value),
                                     required: true,
                                     minLength: 6,
-                                    className: 'w-full pl-10 pr-4 py-2.5 bg-nw-grey-40 border-transparent rounded-card focus:bg-white focus:ring-2 focus:ring-nw-blue/20 focus:border-transparent outline-none transition-all',
+                                    className: 'h-9 w-full rounded-lg border border-line bg-white pl-9 pr-3 text-sm text-ink placeholder:text-ink-40 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none',
                                     placeholder: '••••••••'
                                 })
                             )
@@ -1196,9 +1198,9 @@
                         React.createElement('button', {
                             type: 'submit',
                             disabled: loading,
-                            className: 'w-full bg-nw-blue text-white py-3 rounded-card font-semibold hover:bg-nw-blue transition-colors flex items-center justify-center gap-2 disabled:opacity-50'
+                            className: nwBtnClass('primary', 'lg') + ' w-full mt-2'
                         },
-                            loading ? React.createElement(Loader2, { size: 20, className: 'animate-spin' }) : null,
+                            loading ? React.createElement(Loader2, { size: 16, className: 'animate-spin', 'aria-hidden': true }) : null,
                             isLogin ? txt.loginBtn : txt.registerBtn
                         )
                     )
@@ -5267,7 +5269,7 @@
                             t.goalName
                         ),
                         e('textarea', { 
-                            className: 'w-full bg-nw-grey-40/80 border-transparent rounded-xl p-3 text-sm resize-none focus:bg-white focus:ring-2 focus:ring-nw-blue/20 outline-none', 
+                            className: 'w-full bg-white/80 border border-line rounded-lg p-3 text-sm resize-none focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150', 
                             value: item.name, 
                             rows: 2,
                             placeholder: lang === 'de' ? 'Zielbezeichnung eingeben...' : lang === 'it' ? 'Inserisci nome obiettivo...' : 'Enter goal name...', 
@@ -5312,7 +5314,7 @@
                         ),
                         e('input', { 
                             type: 'text',
-                            className: 'w-full bg-nw-grey-40/80 border-transparent rounded-xl p-3 text-sm focus:bg-white focus:ring-2 focus:ring-nw-blue/20 outline-none', 
+                            className: 'w-full bg-white/80 border border-line rounded-lg p-3 text-sm focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150', 
                             value: item.target, 
                             placeholder: lang === 'de' ? 'z.B. 500.000€, 95% Qualität...' : lang === 'it' ? 'es. 500.000€, 95% qualità...' : 'e.g. 500,000€, 95% quality...', 
                             onChange: (ev) => updateItem(goals, setGoals, item.id, 'target', ev.target.value) 
@@ -5395,7 +5397,7 @@
                         e('div', null,
                             e('label', { className: 'text-xs font-medium text-ink-60 block mb-1' }, t.measure),
                             e('textarea', { 
-                                className: 'w-full bg-nw-grey-40/80 border-transparent rounded-xl p-3 text-sm focus:bg-white focus:ring-2 focus:ring-nw-blue/20 outline-none resize-none', 
+                                className: 'w-full bg-white/80 border border-line rounded-lg p-3 text-sm resize-none focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150', 
                                 value: item.measure, 
                                 placeholder: '...', 
                                 rows: 2,
@@ -5408,7 +5410,7 @@
                                 e('label', { className: 'text-xs font-medium text-ink-60 block mb-1' }, t.responsible),
                                 e('input', { 
                                     type: 'text',
-                                    className: 'w-full bg-nw-grey-40/80 border-transparent rounded-xl p-3 text-sm focus:bg-white focus:ring-2 focus:ring-nw-blue/20 outline-none', 
+                                    className: 'w-full bg-white/80 border border-line rounded-lg p-3 text-sm focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150', 
                                     value: item.responsible, 
                                     placeholder: '...', 
                                     onChange: (ev) => updateItem(devPlan, setDevPlan, item.id, 'responsible', ev.target.value) 
@@ -5418,7 +5420,7 @@
                                 e('label', { className: 'text-xs font-medium text-ink-60 block mb-1' }, t.deadline),
                                 e('input', { 
                                     type: 'date',
-                                    className: 'w-full bg-nw-grey-40/80 border-transparent rounded-xl p-3 text-sm focus:bg-white focus:ring-2 focus:ring-nw-blue/20 outline-none', 
+                                    className: 'w-full bg-white/80 border border-line rounded-lg p-3 text-sm focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150', 
                                     value: item.deadline, 
                                     onChange: (ev) => updateItem(devPlan, setDevPlan, item.id, 'deadline', ev.target.value) 
                                 })
@@ -7660,7 +7662,7 @@
                     e('div', { className: 'mb-3' },
                         e('label', { className: 'text-xs font-medium text-ink-60 block mb-1' }, t.goalName),
                         e('textarea', { 
-                            className: 'w-full bg-nw-grey-40/80 border-transparent rounded-xl p-3 text-sm resize-none focus:bg-white focus:ring-2 focus:ring-nw-blue/20 outline-none', 
+                            className: 'w-full bg-white/80 border border-line rounded-lg p-3 text-sm resize-none focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150', 
                             value: item.name, 
                             rows: 2,
                             placeholder: lang === 'de' ? 'Zielbezeichnung...' : lang === 'it' ? 'Nome obiettivo...' : 'Goal name...', 
@@ -7784,7 +7786,7 @@
                             lang === 'de' ? 'Begründung / Beispiele' : lang === 'it' ? 'Motivazione / Esempi' : 'Justification / Examples'
                         ),
                         e('textarea', { 
-                            className: 'w-full bg-nw-grey-40/80 border-transparent rounded-xl p-3 text-sm resize-vertical focus:bg-white focus:ring-2 focus:ring-nw-blue/20 outline-none competency-comment-textarea', 
+                            className: 'w-full bg-white/80 border border-line rounded-lg p-3 text-sm resize-vertical competency-comment-textarea focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150', 
                             rows: 3, 
                             value: item.comment, 
                             placeholder: lang === 'de' ? 'Konkrete Beispiele...' : lang === 'it' ? 'Esempi concreti...' : 'Specific examples...', 
@@ -7822,7 +7824,7 @@
                         e('div', null,
                             e('label', { className: 'text-xs font-medium text-ink-60 block mb-1' }, t.measure),
                             e('textarea', { 
-                                className: 'w-full bg-nw-grey-40/80 border-transparent rounded-xl p-3 text-sm focus:bg-white focus:ring-2 focus:ring-nw-blue/20 outline-none resize-none', 
+                                className: 'w-full bg-white/80 border border-line rounded-lg p-3 text-sm resize-none focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150', 
                                 value: item.measure, 
                                 placeholder: '...', 
                                 rows: 2,
@@ -7835,7 +7837,7 @@
                                 e('label', { className: 'text-xs font-medium text-ink-60 block mb-1' }, t.responsible),
                                 e('input', { 
                                     type: 'text',
-                                    className: 'w-full bg-nw-grey-40/80 border-transparent rounded-xl p-3 text-sm focus:bg-white focus:ring-2 focus:ring-nw-blue/20 outline-none', 
+                                    className: 'w-full bg-white/80 border border-line rounded-lg p-3 text-sm focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150', 
                                     value: item.responsible, 
                                     placeholder: '...', 
                                     onChange: (ev) => updateItem(devPlan, setDevPlan, item.id, 'responsible', ev.target.value) 
@@ -7845,7 +7847,7 @@
                                 e('label', { className: 'text-xs font-medium text-ink-60 block mb-1' }, t.deadline),
                                 e('input', { 
                                     type: 'date',
-                                    className: 'w-full bg-nw-grey-40/80 border-transparent rounded-xl p-3 text-sm focus:bg-white focus:ring-2 focus:ring-nw-blue/20 outline-none', 
+                                    className: 'w-full bg-white/80 border border-line rounded-lg p-3 text-sm focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150', 
                                     value: item.deadline, 
                                     onChange: (ev) => updateItem(devPlan, setDevPlan, item.id, 'deadline', ev.target.value) 
                                 })
@@ -10284,7 +10286,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
                     onChange: (e) => setInputValue(e.target.value),
                     onKeyPress: handleKeyPress,
                     placeholder: lang === 'de' ? 'Frag mich...' : lang === 'it' ? 'Chiedimi...' : 'Ask me...',
-                    className: 'flex-1 px-4 py-2.5 rounded-xl border border-line text-sm focus:outline-none focus:ring-2 focus:ring-nw-blue/30 focus:border-nw-blue'
+                    className: 'flex-1 px-4 py-2.5 rounded-lg border border-line text-sm focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
                   }),
                   React.createElement('button', {
                     onClick: handleSend,
@@ -14740,164 +14742,49 @@ Best regards`
               : null;
             
             // === RENDER ===
-            return React.createElement('div', { className: 'space-y-6 pb-10 max-w-5xl mx-auto' },
+            return React.createElement('div', { className: 'space-y-5 pb-10 max-w-5xl mx-auto' },
               
-              // === HEADER (Kompakter) ===
-              React.createElement('div', { 
-                className: 'rounded-xl p-6 text-ink relative overflow-hidden bg-white border border-line shadow-card',
-                style: { }
-              },
-                // Decorative circles
-                React.createElement('div', { 
-                  className: 'absolute -right-10 -top-10 w-40 h-40 rounded-full bg-nw-blue-06'
-                }),
-                React.createElement('div', { 
-                  className: 'absolute -right-5 -bottom-10 w-32 h-32 rounded-full bg-nw-blue-06'
-                }),
-                
-                React.createElement('div', { className: 'relative flex justify-between items-start' },
-                  React.createElement('div', null,
-                    React.createElement('h1', { className: 'text-2xl font-semibold flex items-center gap-3' },
-                      React.createElement(Users, { size: 28 }),
-                      lang === 'de' ? 'Team-Übersicht' : lang === 'it' ? 'Panoramica team' : 'Team Overview'
-                    ),
-                    React.createElement('p', { className: 'text-ink-60 mt-1 text-sm' },
-                      `${teamMembers.length} ${lang === 'de' ? 'Mitarbeiter' : 'employees'}`
-                    )
-                  ),
-                  React.createElement('div', { className: 'flex items-center gap-3' },
-                    // View Toggle (Karten/Liste)
-                    React.createElement('div', { className: 'flex items-center gap-1 bg-nw-blue-06 rounded-xl p-1 backdrop-blur-sm' },
-                      React.createElement('button', {
-                        onClick: () => setTeamViewMode('cards'),
-                        className: `px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${teamViewMode === 'cards' ? 'bg-nw-blue text-white' : 'text-ink-60 hover:text-nw-blue'}`
-                      }, React.createElement(LayoutGrid, { size: 14 }), lang === 'de' ? 'Karten' : 'Cards'),
-                      React.createElement('button', {
-                        onClick: () => setTeamViewMode('list'),
-                        className: `px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${teamViewMode === 'list' ? 'bg-nw-blue text-white' : 'text-ink-60 hover:text-nw-blue'}`
-                      }, React.createElement(List, { size: 14 }), lang === 'de' ? 'Liste' : 'List')
-                    ),
-                    // Logout Button
-                    React.createElement('button', {
-                      onClick: handleLogout,
-                      className: 'px-4 py-2 bg-nw-blue-06 hover:bg-nw-blue-06 rounded-card text-sm flex items-center gap-2 backdrop-blur-sm border border-line'
-                    }, React.createElement(LogOut, { size: 16 }), getText(lang, 'Abmelden', 'Esci', 'Logout'))
-                  )
-                ),
-                
-                // Mini Progress
-                teamMembers.length > 0 && React.createElement('div', { className: 'relative mt-4 flex items-center gap-3' },
-                  React.createElement('div', { className: 'flex-1 bg-nw-blue-06 rounded-full h-2' },
-                    React.createElement('div', { 
-                      className: 'h-full rounded-full bg-nw-green transition-all',
-                      style: { width: `${progress}%` }
-                    })
-                  ),
-                  React.createElement('span', { className: 'text-sm font-semibold' }, `${progress}%`)
-                )
-              ),
+              // === n.Org SEITENKOPF (Muster B: Kopf + Flächen) ===
+              React.createElement(NwPageHeader, {
+                eyebrow: getText(lang, 'Team', 'Team', 'Team'),
+                icon: Users,
+                title: lang === 'de' ? 'Team-Übersicht' : lang === 'it' ? 'Panoramica team' : 'Team Overview',
+                meta: [
+                  React.createElement('span', { key: 'n' }, `${teamMembers.length} ${lang === 'de' ? 'Mitarbeiter' : 'employees'}`),
+                  teamMembers.length > 0 && React.createElement('span', { key: 'sep', className: 'text-ink-40', 'aria-hidden': true }, '·'),
+                  teamMembers.length > 0 && React.createElement('span', { key: 'p', className: 'inline-flex items-center gap-2' },
+                    React.createElement('span', { className: 'inline-block h-1.5 w-24 overflow-hidden rounded-full bg-nw-blue-12', role: 'progressbar', 'aria-valuenow': progress, 'aria-valuemin': 0, 'aria-valuemax': 100 },
+                      React.createElement('span', { className: 'block h-full rounded-full bg-nw-green transition-[width] duration-300', style: { width: `${progress}%` } })),
+                    React.createElement('span', { className: 'tnum font-medium text-ink' }, `${progress}%`))
+                ],
+                actions: React.createElement(NwSegmented, {
+                  ariaLabel: getText(lang, 'Ansicht', 'Vista', 'View'),
+                  value: teamViewMode,
+                  onChange: (v) => setTeamViewMode(v),
+                  options: [
+                    { value: 'cards', label: lang === 'de' ? 'Karten' : 'Cards', icon: LayoutGrid },
+                    { value: 'list', label: lang === 'de' ? 'Liste' : 'List', icon: List }
+                  ]
+                })
+              }),
               
-              // === KPI-DASHBOARD CARDS ===
+              // === KENNZAHLEN ===
               teamMembers.length > 0 && React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-4 gap-3' },
-                // Card 1: Offene Reviews
-                React.createElement('div', { 
-                  className: `p-4 rounded-card border-2 transition-all cursor-pointer hover:shadow-float ${
-                    pendingReviews > 0 ? 'bg-warn-bg border-warn/30 hover:border-warn' : 'bg-nw-green-15 border-nw-green/40'
-                  }`,
-                  onClick: () => {} // TODO: Filter
-                },
-                  React.createElement('div', { className: 'flex items-center gap-3' },
-                    React.createElement('div', { 
-                      className: `w-10 h-10 rounded-xl flex items-center justify-center ${
-                        pendingReviews > 0 ? 'bg-warn text-white' : 'bg-ok text-white'
-                      }`
-                    }, React.createElement(ClipboardList, { size: 20 })),
-                    React.createElement('div', null,
-                      React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, pendingReviews),
-                      React.createElement('div', { className: 'text-xs text-ink-60' }, 
-                        lang === 'de' ? 'Reviews offen' : 'Reviews pending'
-                      )
-                    )
-                  )
-                ),
-                
-                // Card 2: Selbstreflexionen
-                React.createElement('div', { 
-                  className: `p-4 rounded-card border transition-all cursor-pointer hover:shadow-float ${
-                    pendingSelfReflections > 0 ? 'bg-nw-green-15 border-nw-green/40 hover:border-nw-green' : 'bg-nw-green-15 border-nw-green/40'
-                  }`
-                },
-                  React.createElement('div', { className: 'flex items-center gap-3' },
-                    React.createElement('div', { 
-                      className: `w-10 h-10 rounded-xl flex items-center justify-center ${
-                        pendingSelfReflections > 0 ? 'bg-ok text-white' : 'bg-ok text-white'
-                      }`
-                    }, React.createElement(FileText, { size: 20 })),
-                    React.createElement('div', null,
-                      React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, pendingSelfReflections),
-                      React.createElement('div', { className: 'text-xs text-ink-60' }, 
-                        lang === 'de' ? 'Selbstrefl. fehlen' : 'Self-refl. missing'
-                      )
-                    )
-                  )
-                ),
-                
-                // Card 3: Termine diese Woche
-                React.createElement('div', { 
-                  className: `p-4 rounded-card border transition-all cursor-pointer hover:shadow-float ${
-                    overdueAppointments.length > 0 ? 'bg-danger-bg border-danger/30 hover:border-danger' :
-                    appointmentsThisWeek.length > 0 ? 'bg-nw-blue-06 border-nw-blue-25 hover:border-nw-blue' : 
-                    'bg-panel border-line'
-                  }`
-                },
-                  React.createElement('div', { className: 'flex items-center gap-3' },
-                    React.createElement('div', { 
-                      className: `w-10 h-10 rounded-xl flex items-center justify-center ${
-                        overdueAppointments.length > 0 ? 'bg-danger text-white' :
-                        appointmentsThisWeek.length > 0 ? 'bg-nw-blue text-white' : 'bg-ink-40 text-white'
-                      }`
-                    }, React.createElement(Calendar, { size: 20 })),
-                    React.createElement('div', null,
-                      React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, 
-                        overdueAppointments.length > 0 ? overdueAppointments.length : appointmentsThisWeek.length
-                      ),
-                      React.createElement('div', { className: 'text-xs text-ink-60' }, 
-                        overdueAppointments.length > 0 
-                          ? (lang === 'de' ? '⚠️ Überfällig!' : '⚠️ Overdue!')
-                          : (lang === 'de' ? 'Diese Woche' : 'This week')
-                      )
-                    )
-                  )
-                ),
-                
-                // Card 4: GPS-Durchschnitt
-                React.createElement('div', { 
-                  className: `p-4 rounded-card border-2 transition-all ${
-                    avgGPS ? (avgGPS >= 3 ? 'bg-nw-green-15 border-nw-green/40' : 'bg-warn-bg border-warn/30') : 'bg-panel border-line'
-                  }`
-                },
-                  React.createElement('div', { className: 'flex items-center gap-3' },
-                    React.createElement('div', { 
-                      className: `w-10 h-10 rounded-xl flex items-center justify-center ${
-                        avgGPS ? (avgGPS >= 3 ? 'bg-ok text-white' : 'bg-warn text-white') : 'bg-ink-40 text-white'
-                      }`
-                    }, React.createElement(TrendingUp, { size: 20 })),
-                    React.createElement('div', null,
-                      React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, avgGPS || '—'),
-                      React.createElement('div', { className: 'text-xs text-ink-60' }, 
-                        lang === 'de' ? 'Ø GPS-Score' : 'Avg GPS Score'
-                      )
-                    )
-                  )
-                )
+                React.createElement(NwStatCard, { icon: ClipboardList, label: lang === 'de' ? 'Reviews offen' : 'Reviews pending', value: pendingReviews, tone: pendingReviews > 0 ? 'warn' : 'ok' }),
+                React.createElement(NwStatCard, { icon: FileText, label: lang === 'de' ? 'Selbstrefl. fehlen' : 'Self-refl. missing', value: pendingSelfReflections, tone: pendingSelfReflections > 0 ? 'warn' : 'ok' }),
+                React.createElement(NwStatCard, { icon: Calendar,
+                  label: overdueAppointments.length > 0 ? (lang === 'de' ? '⚠️ Überfällig!' : '⚠️ Overdue!') : (lang === 'de' ? 'Diese Woche' : 'This week'),
+                  value: overdueAppointments.length > 0 ? overdueAppointments.length : appointmentsThisWeek.length,
+                  tone: overdueAppointments.length > 0 ? 'danger' : undefined }),
+                React.createElement(NwStatCard, { icon: TrendingUp, label: lang === 'de' ? 'Ø GPS-Score' : 'Avg GPS Score', value: avgGPS || '—', tone: avgGPS ? (avgGPS >= 3 ? 'ok' : 'warn') : undefined })
               ),
               
               // === HILFE-HINWEIS (Chatbot) ===
               teamMembers.length > 0 && React.createElement('div', { 
-                className: 'flex items-center gap-3 px-4 py-3 bg-white border border-line shadow-card rounded-card border border-nw-blue/10'
+                className: 'flex items-center gap-3 rounded-card border border-line bg-white px-4 py-2.5'
               },
-                React.createElement('div', { className: 'w-8 h-8 rounded-xl bg-nw-blue flex items-center justify-center' },
-                  React.createElement(MessageCircle, { size: 16, className: 'text-ink' })
+                React.createElement('div', { className: 'grid h-7 w-7 shrink-0 place-items-center rounded-full bg-nw-blue-06 text-nw-blue' },
+                  React.createElement(MessageCircle, { size: 14, 'aria-hidden': true })
                 ),
                 React.createElement('div', { className: 'flex-1' },
                   React.createElement('span', { className: 'text-sm text-ink-60' },
@@ -14906,32 +14793,32 @@ Best regards`
                       : 'Need help? The HR Copilot in the bottom right knows all processes!'
                   )
                 ),
-                React.createElement('div', { className: 'text-xs text-ink-40 animate-bounce' }, '👇')
+                React.createElement('div', { className: 'text-xs text-ink-40', 'aria-hidden': true }, '👇')
               ),
               
               // === MITARBEITER HINZUFÜGEN (Apple Style) ===
-              React.createElement('div', { className: 'bg-white rounded-card p-5 shadow-card border border-line-2' },
-                React.createElement('div', { className: 'flex items-center gap-2 mb-3' },
-                  React.createElement(UserPlus, { size: 18, className: 'text-ink-40' }),
-                  React.createElement('span', { className: 'font-medium text-ink' }, 
+              React.createElement('div', { className: 'rounded-card border border-line bg-white shadow-card' },
+                React.createElement('div', { className: 'flex min-h-[46px] items-center gap-2.5 border-b border-line-2 px-4 py-2' },
+                  React.createElement(UserPlus, { size: 16, className: 'text-nw-blue', 'aria-hidden': true }),
+                  React.createElement('h2', { className: 'text-base font-semibold text-nw-blue' }, 
                     lang === 'de' ? 'Neuen Mitarbeiter hinzufügen' : 'Add new employee'
                   )
                 ),
-                React.createElement('div', { className: 'flex flex-wrap gap-3 items-center' },
+                React.createElement('div', { className: 'flex flex-wrap gap-2 items-center p-4' },
                   React.createElement('input', { 
                     id: 'add-name', type: 'text', 
                     placeholder: lang === 'de' ? 'Name *' : 'Name *',
-                    className: 'flex-1 min-w-[150px] bg-nw-grey-40 border-transparent rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-nw-blue/20 outline-none transition-all' 
+                    className: 'flex-1 min-w-[150px] h-9 rounded-lg border border-line bg-white px-3 text-sm text-ink placeholder:text-ink-40 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none' 
                   }),
                   React.createElement('input', { 
                     id: 'add-pos', type: 'text', 
                     placeholder: lang === 'de' ? 'Position *' : 'Position *',
-                    className: 'flex-1 min-w-[150px] bg-nw-grey-40 border-transparent rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-nw-blue/20 outline-none transition-all' 
+                    className: 'flex-1 min-w-[150px] h-9 rounded-lg border border-line bg-white px-3 text-sm text-ink placeholder:text-ink-40 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none' 
                   }),
                   React.createElement('input', { 
                     id: 'add-email', type: 'email', 
                     placeholder: getText(lang, 'E-Mail (optional)', 'Email (opzionale)', 'Email (optional)'),
-                    className: 'flex-1 min-w-[180px] bg-nw-grey-40 border-transparent rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-nw-blue/20 outline-none transition-all' 
+                    className: 'flex-1 min-w-[180px] h-9 rounded-lg border border-line bg-white px-3 text-sm text-ink placeholder:text-ink-40 transition-[border-color,box-shadow] duration-150 focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none' 
                   }),
                   React.createElement('button', {
                     onClick: () => {
@@ -14947,8 +14834,8 @@ Best regards`
                         showToast(lang === 'de' ? 'Name und Position sind Pflichtfelder' : 'Name and position required', 'warning');
                       }
                     },
-                    className: 'px-5 py-2.5 bg-nw-blue text-white rounded-xl hover:bg-nw-blue-90 font-semibold flex items-center gap-2 shadow-float shadow-[#6EBD84]/30 transition-all hover:scale-105'
-                  }, React.createElement(UserPlus, { size: 18 }), lang === 'de' ? 'Hinzufügen' : 'Add')
+                    className: nwBtnClass('primary', 'lg')
+                  }, React.createElement(UserPlus, { size: 16, 'aria-hidden': true }), lang === 'de' ? 'Hinzufügen' : 'Add')
                 )
               ),
               
@@ -15119,7 +15006,7 @@ Best regards`
                           React.createElement('div', { className: 'flex-1 min-w-0' },
                             React.createElement('div', { className: 'flex items-center gap-2 flex-wrap' },
                               React.createElement('span', { className: 'font-semibold text-ink truncate' }, member.name),
-                              gps && React.createElement('span', { 
+                              gps > 0 && React.createElement('span', { 
                                 className: `text-xs font-semibold px-2 py-0.5 rounded-full ${
                                   gps >= 3 ? 'bg-nw-green-15 text-ok' : 'bg-warn-bg text-warn'
                                 }`
@@ -15273,11 +15160,11 @@ Best regards`
                           !status.self && selfLink && React.createElement('div', { className: 'flex items-center gap-2' },
                             React.createElement('button', {
                               onClick: () => copyLink(member),
-                              className: 'flex items-center gap-1.5 px-3 py-1.5 bg-ink-60 text-white rounded-lg hover:bg-ink text-xs font-medium transition-all'
+                              className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06'
                             }, React.createElement(Link, { size: 12 }), lang === 'de' ? 'Link für Selbstreflexion kopieren' : lang === 'it' ? 'Copia link autovalutazione' : 'Copy self-reflection link'),
                             member.email && React.createElement('button', {
                               onClick: () => sendEmail(member),
-                              className: 'flex items-center gap-1.5 px-3 py-1.5 bg-ok text-white rounded-lg hover:bg-ok text-xs font-medium transition-all'
+                              className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06'
                             }, React.createElement(Mail, { size: 12 }), lang === 'de' ? 'Link per E-Mail senden' : lang === 'it' ? 'Invia link via e-mail' : 'Send link via email')
                           )
                         ),
@@ -15394,7 +15281,7 @@ Best regards`
                                   setActiveView('viewSelfAssessment');
                                   localStorage.setItem('nw_view_self_assessment', JSON.stringify(status.selfDigital));
                                 },
-                                className: 'w-full py-2 px-3 bg-ok text-white rounded-lg text-xs font-semibold hover:bg-ok transition-all flex items-center justify-center gap-2'
+                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent w-full'
                               }, 
                                 React.createElement(Eye, { size: 14 }),
                                 lang === 'de' ? 'Digital ansehen' : lang === 'it' ? 'Visualizza digitale' : 'View Digital'
@@ -15426,7 +15313,7 @@ Best regards`
                                       e.stopPropagation();
                                       openPdfInNewTab(status.selfPdf, status.selfPdf.pdfFileName || 'Selbstreflexion.pdf');
                                     },
-                                    className: 'flex-1 py-1.5 px-2 bg-warn-bg text-warn rounded-lg text-xs font-medium hover:bg-warn-bg transition-all flex items-center justify-center gap-1'
+                                    className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue flex-1'
                                   }, 
                                     React.createElement(Eye, { size: 12 }),
                                     lang === 'de' ? 'Ansehen' : lang === 'it' ? 'Visualizza' : 'View'
@@ -15455,7 +15342,7 @@ Best regards`
                                         showToast(lang === 'de' ? 'Fehler beim Download' : 'Download error', 'error');
                                       }
                                     },
-                                    className: 'flex-1 py-1.5 px-2 bg-warn text-white rounded-lg text-xs font-semibold hover:bg-warn transition-all flex items-center justify-center gap-1'
+                                    className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 flex-1'
                                   }, 
                                     React.createElement(Download, { size: 12 }),
                                     lang === 'de' ? 'Download' : lang === 'it' ? 'Scarica' : 'Download'
@@ -15477,7 +15364,7 @@ Best regards`
                                     e.stopPropagation();
                                     copyLink(member);
                                   },
-                                  className: 'flex-1 py-1.5 px-2 bg-line text-ink-60 rounded-lg text-xs font-medium hover:bg-nw-grey transition-all flex items-center justify-center gap-1',
+                                  className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 flex-1',
                                   title: lang === 'de' ? 'Link für Selbstreflexion kopieren' : lang === 'it' ? 'Copia link autovalutazione' : 'Copy self-reflection link'
                                 }, 
                                   React.createElement(Link, { size: 12 }),
@@ -15488,7 +15375,7 @@ Best regards`
                                     e.stopPropagation();
                                     sendEmail(member);
                                   },
-                                  className: 'flex-1 py-1.5 px-2 bg-nw-blue text-white rounded-lg text-xs font-medium hover:bg-nw-blue transition-all flex items-center justify-center gap-1',
+                                  className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 flex-1',
                                   title: lang === 'de' ? 'Selbstreflexions-Link per E-Mail senden' : lang === 'it' ? 'Invia link autovalutazione via email' : 'Send self-reflection link via email'
                                 }, 
                                   React.createElement(Mail, { size: 12 }),
@@ -15497,7 +15384,7 @@ Best regards`
                               ),
                               // Button 3: PDF Upload (NEU)
                               React.createElement('label', {
-                                className: 'w-full py-1.5 px-2 bg-warn-bg text-warn rounded-lg text-xs font-medium hover:bg-warn-bg transition-all flex items-center justify-center gap-1 cursor-pointer',
+                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue w-full cursor-pointer',
                                 title: lang === 'de' ? 'PDF-Selbstreflexion hochladen' : lang === 'it' ? 'Carica PDF autovalutazione' : 'Upload PDF self-reflection'
                               },
                                 React.createElement('input', {
@@ -15595,7 +15482,7 @@ Best regards`
                               ),
                               // Upload Button
                               React.createElement('label', {
-                                className: 'w-full py-1.5 px-2 bg-nw-blue-12 text-nw-blue rounded-lg text-xs font-medium hover:bg-nw-blue-25 transition-all flex items-center justify-center gap-1 cursor-pointer',
+                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue w-full cursor-pointer',
                                 title: lang === 'de' ? 'Unterschriebene Beurteilung hochladen' : lang === 'it' ? 'Carica valutazione firmata' : 'Upload signed review'
                               },
                                 React.createElement('input', {
@@ -15675,7 +15562,7 @@ Best regards`
                               ),
                               // Upload Button
                               React.createElement('label', {
-                                className: 'w-full py-1.5 px-2 bg-nw-blue-12 text-nw-blue rounded-lg text-xs font-medium hover:bg-nw-blue-25 transition-all flex items-center justify-center gap-1 cursor-pointer',
+                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue w-full cursor-pointer',
                                 title: lang === 'de' ? 'Unterschriebene Zielvereinbarung hochladen' : lang === 'it' ? 'Carica accordo obiettivi firmato' : 'Upload signed goals agreement'
                               },
                                 React.createElement('input', {
@@ -15767,7 +15654,7 @@ Best regards`
                       type: 'datetime-local',
                       value: scheduleModalDate,
                       onChange: e => setScheduleModalDate(e.target.value),
-                      className: 'w-full px-4 py-3 bg-nw-grey-40 border-2 border-transparent rounded-card text-ink text-center text-lg font-medium focus:bg-white focus:border-nw-blue focus:ring-2 focus:ring-nw-blue/20 outline-none transition-all'
+                      className: 'w-full px-4 py-3 bg-white border border border-line rounded-lg text-ink text-center text-lg font-medium transition-all focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
                     }),
                     // Hinweis für das Datumsformat
                     React.createElement('p', { className: 'text-xs text-ink-40 text-center mt-2' },
@@ -16107,14 +15994,14 @@ Best regards`
                       placeholder: lang === 'de' ? 'Mitarbeiter suchen...' : lang === 'it' ? 'Cerca collaboratore...' : 'Search employee...',
                       defaultValue: searchFilter,
                       onChange: e => setFilter('search', e.target.value),
-                      className: 'w-full px-4 py-2 border border-line rounded-lg focus:ring-2 focus:ring-nw-blue focus:border-nw-blue'
+                      className: 'w-full px-4 py-2 border border-line rounded-lg focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
                     })
                   ),
                   // Status Filter Dropdown
                   React.createElement('select', {
                     defaultValue: statusFilter,
                     onChange: e => setFilter('status', e.target.value),
-                    className: 'px-4 py-2 border border-line rounded-lg focus:ring-2 focus:ring-nw-blue'
+                    className: 'px-4 py-2 border border-line rounded-lg focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
                   },
                     React.createElement('option', { value: 'all' }, getText(lang, 'Alle Status', 'Tutti gli stati', 'All Status')),
                     React.createElement('option', { value: 'completed' }, getText(lang, 'Abgeschlossen', 'Completati', 'Completed')),
@@ -18790,7 +18677,7 @@ Best regards`
                             uniqueManagers.length > 5 && React.createElement('select', {
                               value: hrManagerFilter,
                               onChange: (e) => setHrManagerFilter(e.target.value),
-                              className: 'px-3 py-2 text-sm border border-line rounded-xl bg-white focus:ring-2 focus:ring-nw-blue outline-none'
+                              className: 'px-3 py-2 text-sm border border-line rounded-lg bg-white focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
                             },
                               React.createElement('option', { value: 'all' }, getText(lang, 'Mehr...', 'Altri...', 'More...')),
                               uniqueManagers.map(m => 
@@ -20429,7 +20316,7 @@ Best regards`
                       placeholder: getText(lang, 'Name, Position, FK...', 'Nome, posizione...', 'Name, position...'),
                       value: hrSearch,
                       onChange: (e) => setHrSearch(e.target.value),
-                      className: 'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-nw-blue outline-none text-sm'
+                      className: 'w-full px-3 py-2 border rounded-lg text-sm focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
                     })
                   ),
                   // Typ
@@ -20438,7 +20325,7 @@ Best regards`
                     React.createElement('select', {
                       value: hrFilter,
                       onChange: (e) => setHrFilter(e.target.value),
-                      className: 'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-nw-blue outline-none text-sm'
+                      className: 'w-full px-3 py-2 border rounded-lg text-sm focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
                     },
                       React.createElement('option', { value: 'all' }, getText(lang, 'Alle Typen', 'Tutti', 'All Types')),
                       React.createElement('option', { value: 'reviews' }, '📋 Reviews'),
@@ -20454,7 +20341,7 @@ Best regards`
                     React.createElement('select', {
                       value: hrLocationFilter,
                       onChange: (e) => setHrLocationFilter(e.target.value),
-                      className: 'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-nw-blue outline-none text-sm'
+                      className: 'w-full px-3 py-2 border rounded-lg text-sm focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
                     },
                       React.createElement('option', { value: 'all' }, getText(lang, 'Alle', 'Tutti', 'All')),
                       React.createElement('option', { value: 'Sulzberg' }, '🇩🇪 Sulzberg'),
@@ -20468,7 +20355,7 @@ Best regards`
                     React.createElement('select', {
                       value: hrManagerFilter,
                       onChange: (e) => setHrManagerFilter(e.target.value),
-                      className: 'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-nw-blue outline-none text-sm'
+                      className: 'w-full px-3 py-2 border rounded-lg text-sm focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
                     },
                       React.createElement('option', { value: 'all' }, getText(lang, 'Alle', 'Tutti', 'All')),
                       uniqueManagers.map(m => React.createElement('option', { key: m, value: m }, m))
@@ -20480,7 +20367,7 @@ Best regards`
                     React.createElement('select', {
                       value: hrGpsFilter,
                       onChange: (e) => setHrGpsFilter(e.target.value),
-                      className: 'w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-nw-blue outline-none text-sm'
+                      className: 'w-full px-3 py-2 border rounded-lg text-sm focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
                     },
                       React.createElement('option', { value: 'all' }, getText(lang, 'Alle', 'Tutti', 'All')),
                       React.createElement('option', { value: 'high' }, '🟢 ≥3.51 (High)'),
@@ -26240,7 +26127,7 @@ const renderDashboard = () => {
                     value: formData.managerEmail || '', 
                     onChange: (ev) => handleFormChange('managerEmail', ev.target.value), 
                     placeholder: lang === 'de' ? 'vorname.nachname@niederwieser.com' : 'nome.cognome@niederwieser.com',
-                    className: 'w-full border-2 border-nw-green rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-ok focus:border-ok text-lg' 
+                    className: 'w-full border border-nw-green rounded-lg px-4 py-3 text-lg border border-line focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150' 
                   }),
                   e('div', { className: 'mt-3 p-3 bg-white/70 rounded-lg border border-nw-green/40' },
                     e('p', { className: 'text-sm text-ok font-medium flex items-start gap-2' }, 
@@ -26283,7 +26170,7 @@ const renderDashboard = () => {
                       type: 'checkbox', 
                       checked: noGoalsMode,
                       onChange: (ev) => handleNoGoalsToggle(ev.target.checked),
-                      className: 'w-5 h-5 rounded-lg border-warn text-warn focus:ring-warn'
+                      className: 'w-5 h-5 rounded-lg border-warn text-warn focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
                     }),
                     e('div', null,
                       e('span', { className: 'font-medium text-warn' }, 
@@ -26988,7 +26875,7 @@ const renderDashboard = () => {
                     placeholder: lang === 'de' 
                       ? 'Beschreiben Sie konkrete Situationen, die Ihre Einschätzung belegen...'
                       : 'Descrivi situazioni concrete che supportano la tua valutazione...',
-                    className: 'w-full border border-line rounded-lg px-4 py-3 text-sm resize-none focus:ring-2 focus:ring-nw-green focus:border-nw-green outline-none',
+                    className: 'w-full border border-line rounded-lg px-4 py-3 text-sm resize-none focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150',
                     rows: 3
                   })
                 )
@@ -27026,7 +26913,7 @@ const renderDashboard = () => {
                   placeholder: lang === 'de' 
                     ? 'Beschreiben Sie 2-3 Stärken mit konkreten Beispielen...'
                     : 'Descrivi 2-3 punti di forza con esempi concreti...',
-                  className: 'w-full border border-line rounded-lg px-4 py-3 resize-none focus:ring-2 focus:ring-nw-green focus:border-nw-green outline-none',
+                  className: 'w-full border border-line rounded-lg px-4 py-3 resize-none focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150',
                   rows: 5
                 })
               ),
@@ -27048,7 +26935,7 @@ const renderDashboard = () => {
                   placeholder: lang === 'de' 
                     ? 'Beschreiben Sie 1-2 Bereiche, in denen Sie sich entwickeln möchten...'
                     : 'Descrivi 1-2 aree in cui vorresti svilupparti...',
-                  className: 'w-full border border-line rounded-lg px-4 py-3 resize-none focus:ring-2 focus:ring-nw-green focus:border-nw-green outline-none',
+                  className: 'w-full border border-line rounded-lg px-4 py-3 resize-none focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150',
                   rows: 5
                 })
               )
@@ -27073,7 +26960,7 @@ const renderDashboard = () => {
                   placeholder: lang === 'de' 
                     ? 'z.B. neue Verantwortungsbereiche, Weiterbildungen, Projektteilnahme...'
                     : 'es. nuove responsabilità, formazione, partecipazione a progetti...',
-                  className: 'w-full border border-line rounded-lg px-4 py-3 resize-none focus:ring-2 focus:ring-nw-green focus:border-nw-green outline-none',
+                  className: 'w-full border border-line rounded-lg px-4 py-3 resize-none focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150',
                   rows: 4
                 })
               ),
@@ -27095,7 +26982,7 @@ const renderDashboard = () => {
                   placeholder: lang === 'de' 
                     ? 'Konstruktives Feedback zur Zusammenarbeit...'
                     : 'Feedback costruttivo sulla collaborazione...',
-                  className: 'w-full border border-line rounded-lg px-4 py-3 resize-none focus:ring-2 focus:ring-nw-green focus:border-nw-green outline-none',
+                  className: 'w-full border border-line rounded-lg px-4 py-3 resize-none focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150',
                   rows: 4
                 })
               ),
@@ -27112,7 +26999,7 @@ const renderDashboard = () => {
                   placeholder: lang === 'de' 
                     ? 'Weitere Themen, die Sie besprechen möchten...'
                     : 'Altri argomenti che vorresti discutere...',
-                  className: 'w-full border border-line rounded-lg px-4 py-3 resize-none focus:ring-2 focus:ring-nw-green focus:border-nw-green outline-none',
+                  className: 'w-full border border-line rounded-lg px-4 py-3 resize-none focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150',
                   rows: 3
                 })
               )

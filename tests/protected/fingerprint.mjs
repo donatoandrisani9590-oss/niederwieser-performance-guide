@@ -72,6 +72,7 @@ const add = (section, value) => { (out[section] ||= []).push(norm(value)); };
   add('config', src.slice(i, scan(src, i + 'const firebaseConfig = '.length, { matchFirstBrace: true })));
   const m = src.match(/const HR_ADMIN_EMAILS = [^\n]+/); add('config', m[0]);
   const h = src.match(/const isUserHRAdmin = [^\n]+/); add('config', h[0]);
+  const wdb = src.match(/window\.db = db;[^\n]*/); if (wdb) add('auth', wdb[0]); // freigegeben 08.11.2026
   const csp = src.match(/<meta http-equiv="Content-Security-Policy"[^>]+>/); add('config', csp[0]);
   for (const s of src.match(/<script src="[^"]+"><\/script>/g)) add('config', s);
   for (const s of src.match(/import [^;]+ from 'https:\/\/esm\.sh\/[^']+';/gs)) add('config', s.replace(/\{[^}]*\}/s, '{…}'));

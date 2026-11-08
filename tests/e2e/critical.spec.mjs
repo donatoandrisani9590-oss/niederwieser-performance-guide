@@ -148,7 +148,7 @@ test('HR-Admin sieht alle Mitarbeiter und den HR-Bereich', async ({ page }) => {
   await expect(page.getByText(/HR.?Dashboard/).first()).toBeVisible({ timeout: 15000 });
 });
 
-test('Neue Führungskraft registriert sich: Konto mit Namen angelegt, angemeldet, leeres Team mit Hinweis', async ({ page }) => {
+test('Neue Führungskraft registriert sich: Konto mit Namen und registeredUsers angelegt, leeres Team mit Hinweis', async ({ page }) => {
   await openApp(page);
   await page.getByText('Team-Übersicht', { exact: true }).first().click();
   await page.getByRole('tab', { name: 'Registrieren' }).click();
@@ -165,10 +165,12 @@ test('Neue Führungskraft registriert sich: Konto mit Namen angelegt, angemeldet
   expect(nina, 'Auth-Konto angelegt').toBeTruthy();
   expect(nina.displayName).toBe('Nina Neu');
   await expect(page.locator('aside').getByText('Nina Neu')).toBeVisible();
-  // BEKANNT (vor dem Redesign schon so, Schutzbereich Anmeldung, nicht geändert):
-  // handleSubmit schreibt registeredUsers nur, wenn window.db gesetzt ist – das passiert nirgends.
-  // Daher entsteht hier KEIN registeredUsers-Dokument. Siehe docs/redesign/BERICHT.md.
-  expect((await listDocs('registeredUsers')).filter((d) => field(d, 'email') === 'nina.neu@test.local')).toHaveLength(0);
+  // registeredUsers/<uid> wird angelegt (behoben 08.11.2026: window.db war nie gesetzt), Feldnamen unverändert
+  await expect.poll(async () => (await listDocs('registeredUsers')).filter((d) => field(d, 'email') === 'nina.neu@test.local').length, { timeout: 15000 }).toBe(1);
+  const reg = (await listDocs('registeredUsers')).find((d) => field(d, 'email') === 'nina.neu@test.local');
+  expect(field(reg, 'fullName')).toBe('Nina Neu');
+  expect(field(reg, 'uid')).toBe(nina.localId);
+  expect(reg.name.split('/').pop()).toBe(nina.localId);
   // Dashboard führt als nächsten Schritt zum Anlegen des Teams
   await page.getByText('Dashboard', { exact: true }).first().click();
   await expect(page.getByText('Legen Sie Ihr Team an')).toBeVisible();
@@ -186,4 +188,20 @@ test('PDF-Export der Beurteilung erzeugt eine PDF-Datei', async ({ page }) => {
   const head = (await import('node:fs')).readFileSync(path).subarray(0, 5).toString();
   expect(head).toBe('%PDF-');
   expect((await import('node:fs')).statSync(path).size).toBeGreaterThan(10000);
+});
+
+
+test('Bestehendes Konto ohne registeredUsers-Eintrag: Anmeldung trägt ihn nach, Teamdaten unverändert', async ({ page }) => {
+  // Konto wie aus der Zeit vor dem Fix: Auth-Konto mit Namen, aber ohne registeredUsers-Dokument
+  const r = await (await fetch('http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1/accounts:signUp?key=fake-api-key', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: 'alt.konto@test.local', password: 'Test-1234', displayName: 'Alt Konto', returnSecureToken: true }) })).json();
+  const before = JSON.stringify((await listDocs('teamMembers')).map((d) => d.fields));
+  expect((await listDocs('registeredUsers')).filter((d) => field(d, 'email') === 'alt.konto@test.local')).toHaveLength(0);
+  await gotoTeamAndLogin(page, { email: 'alt.konto@test.local', password: 'Test-1234' });
+  await expect(page.getByText('Noch keine Mitarbeiter')).toBeVisible({ timeout: 15000 });
+  await expect.poll(async () => (await listDocs('registeredUsers')).filter((d) => field(d, 'email') === 'alt.konto@test.local').length, { timeout: 15000 }).toBe(1);
+  const reg = (await listDocs('registeredUsers')).find((d) => field(d, 'email') === 'alt.konto@test.local');
+  expect(field(reg, 'uid')).toBe(r.localId);
+  expect(JSON.stringify((await listDocs('teamMembers')).map((d) => d.fields))).toBe(before);
 });

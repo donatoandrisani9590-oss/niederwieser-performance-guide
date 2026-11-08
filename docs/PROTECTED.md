@@ -63,6 +63,7 @@ Hosting-Konfiguration. Diese liegen in der Firebase-Konsole und werden nicht ang
 | Führungskraft | Sieht `teamMembers` mit `userId == uid` und mit `sharedWith array-contains <eigene E-Mail>`, plus zugehörige `teamAppraisals` |
 | Gehaltsrunde | `salaryReviewAccess` (Rollen `executive`, `manager`; Flags `accessSalary`, `accessGoals`, `teamMemberIds`) |
 | Anzeigename | `getUserDisplayName(user)`: displayName → aus E-Mail formatiert → „Manager“ |
+| `window.db = db` | Nach der Firebase-Initialisierung (freigegeben 08.11.2026). Nur darüber schreibt `LoginView` `registeredUsers`. |
 
 Firebase Authentication enthält 143 Konten (Stand Backup), davon 31 mit E-Mail/Passwort; der Rest sind
 anonyme Gast-Konten. Auth-Provider, Redirect-Verhalten und Session-Logik bleiben unverändert.

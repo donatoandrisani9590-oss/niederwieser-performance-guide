@@ -746,6 +746,7 @@
             firebaseApp = firebase.initializeApp(firebaseConfig);
             auth = firebase.auth();
             db = firebase.firestore();
+            window.db = db;  // Freigegeben 08.11.2026: LoginView schreibt registeredUsers nur über window.db (war nie gesetzt)
             storage = firebase.storage();  // Firebase Storage für große Dateien (PDFs)
             devLog("Firebase erfolgreich initialisiert (inkl. Storage)");
         } catch (error) {

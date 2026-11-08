@@ -10,7 +10,7 @@ Daten, Anmeldung, Rollen, Speicherschlüssel, Links, Export-Formate und Berechnu
 
 | Prüfung | Vorher (Phase 0) | Nachher |
 |---|---|---|
-| Automatische Tests | 14 / 14 grün | **24 / 24 grün** (10 neue) |
+| Automatische Tests | 14 / 14 grün | **25 / 25 grün** (11 neue) |
 | Schutzbereich (`node tests/protected/fingerprint.mjs`) | Baseline angelegt | **unverändert** (Baseline seit Anlage nicht angefasst) |
 | Konsolenfehler in allen Abläufen | 0 | 0 |
 | WCAG 2 A/AA (axe-core) auf 6 Kernseiten | nicht gemessen | **0 Verstöße** |
@@ -71,7 +71,8 @@ Nebenbei behobene **Darstellungsfehler** (vorher schon vorhanden):
 - `node tests/protected/fingerprint.mjs` meldet „Schutzbereich unverändert“ für alle 83 Datenbankzugriffe, 17 Auth-Stellen,
   57 Speicherschlüssel, 9 URL-Parameter, 31 Berechnungs- und Datenfunktionen und die Konfiguration
   (Firebase-Config, HR-Admins, CSP, Skript-Versionen).
-- `tests/protected/baseline.txt` ist seit seiner Anlage (Commit `76e6527`) unverändert.
+- `tests/protected/baseline.txt` ist seit seiner Anlage (Commit `76e6527`) unverändert, mit einer freigegebenen Ausnahme:
+  `window.db = db;` (Registrierungs-Fix, siehe Offene Punkte 1).
 - Zwei bewusste Verschiebungen ohne inhaltliche Änderung:
   - `handleLogout` steht jetzt eine Ebene höher, damit die Seitenleiste es nutzen kann.
   - Die Ampelklassen der geschützten `calculateGPSConfidence` werden erst bei der Anzeige auf Status-Tokens übersetzt.
@@ -112,9 +113,12 @@ Screenshots: `docs/screenshots/before/` (Ausgangslage) und `docs/screenshots/aft
 
 ## Offene Punkte – brauchen deine Entscheidung
 
-1. **Registrierung schreibt `registeredUsers` nicht.** `LoginView.handleSubmit` prüft `window.db`, das nirgends gesetzt wird.
-   Das war schon vor dem Redesign so und passt zu den echten Daten (31 Passwort-Konten, 4 `registeredUsers`).
-   Es liegt im Schutzbereich Anmeldung, deshalb habe ich es nicht geändert. Die Behebung wäre eine einzige Zeile.
+1. ~~Registrierung schreibt `registeredUsers` nicht.~~ **Behoben am 08.11.2026 nach Freigabe.** `window.db` wird jetzt gesetzt.
+   - Neue Konten bekommen ihren Eintrag in `registeredUsers`.
+   - Bestehende Konten ohne Eintrag bekommen ihn beim nächsten Login nachgetragen. Es kommen nur neue Dokumente dazu,
+     vorhandene bleiben unverändert.
+   - Konten ohne hinterlegten Namen werden beim ersten Login einmalig nach Vor- und Nachname gefragt (so in v92 vorgesehen).
+   - Die Schutz-Baseline wurde nur um diese eine Zeile ergänzt. Abgesichert durch zwei Tests.
 2. **Firebase-Abrechnungskonto geschlossen.** PDFs in Firebase Storage sind deshalb nicht abrufbar (Fehler 402).
    Das betrifft „PDF ansehen/hochladen“ im Live-Betrieb.
 3. **Pull Request #1** benennt `index.html` in `Index.html` um. Das würde Mitarbeiter-Links und Lesezeichen brechen.

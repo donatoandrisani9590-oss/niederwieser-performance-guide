@@ -6685,7 +6685,7 @@
                   className: 'bg-white rounded-card shadow-float max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col'
                 },
                   // Header
-                  e('div', { className: 'bg-warn text-white p-6' },
+                  e('div', { className: 'bg-white border border-line shadow-card text-ink p-6' },
                     e('div', { className: 'flex justify-between items-start' },
                       e('div', null,
                         e('h2', { className: 'text-lg font-semibold flex items-center gap-3 text-nw-blue' },
@@ -6699,24 +6699,24 @@
                       ),
                       e('button', {
                         onClick: onClose,
-                        className: 'text-white/80 hover:text-white text-2xl leading-none'
+                        className: 'text-ink-60 hover:text-nw-blue text-2xl leading-none'
                       }, '×')
                     ),
                     // Score Zusammenfassung
                     e('div', { className: 'flex gap-4 mt-4' },
-                      e('div', { className: 'bg-white/20 rounded-lg px-4 py-2' },
+                      e('div', { className: 'bg-nw-blue-06 rounded-lg px-4 py-2' },
                         e('div', { className: 'text-2xl font-semibold' }, (version.gpsScore || 0).toFixed(2)),
                         e('div', { className: 'text-xs text-warn-bg' }, 'GPS Score')
                       ),
-                      e('div', { className: 'bg-white/20 rounded-lg px-4 py-2' },
+                      e('div', { className: 'bg-nw-blue-06 rounded-lg px-4 py-2' },
                         e('div', { className: 'text-2xl font-semibold' }, (version.wasScore || 0).toFixed(2)),
                         e('div', { className: 'text-xs text-warn-bg' }, 'WAS')
                       ),
-                      e('div', { className: 'bg-white/20 rounded-lg px-4 py-2' },
+                      e('div', { className: 'bg-nw-blue-06 rounded-lg px-4 py-2' },
                         e('div', { className: 'text-2xl font-semibold' }, (version.wieCoreScore || 0).toFixed(2)),
                         e('div', { className: 'text-xs text-warn-bg' }, 'WIE')
                       ),
-                      versionGoals.length > 0 && e('div', { className: 'bg-white/20 rounded-lg px-4 py-2' },
+                      versionGoals.length > 0 && e('div', { className: 'bg-nw-blue-06 rounded-lg px-4 py-2' },
                         e('div', { className: 'text-2xl font-semibold' }, versionGoals.length),
                         e('div', { className: 'text-xs text-warn-bg' }, lang === 'de' ? 'Ziele' : 'Goals')
                       )
@@ -8079,9 +8079,9 @@
                     ),
                     e('div', { className: 'flex-1' },
                       e('h4', { className: 'font-semibold text-nw-blue mb-1' },
-                        lang === 'de' ? '📊 Verhaltensanker (BARS) als Referenz öffnen' 
-                          : lang === 'it' ? '📊 Apri gli ancoraggi comportamentali (BARS) come riferimento'
-                          : '📊 Open Behavioral Anchors (BARS) as Reference'
+                        lang === 'de' ? 'Verhaltensanker (BARS) als Referenz öffnen' 
+                          : lang === 'it' ? 'Apri gli ancoraggi comportamentali (BARS) come riferimento'
+                          : 'Open Behavioral Anchors (BARS) as Reference'
                       ),
                       e('p', { className: 'text-sm text-nw-blue mb-3' },
                         lang === 'de' 
@@ -10912,14 +10912,14 @@ Goal 3: 20% weight, 80% achieved → 16 points
               style: { fontFamily: 'monospace', fontSize: '11px' }
             },
               // Header
-              React.createElement('div', { className: 'bg-ink px-4 py-3 flex items-center justify-between border-b border-ink-60' },
+              React.createElement('div', { className: 'bg-white border border-line shadow-card px-4 py-3 flex items-center justify-between border-b border-ink-60' },
                 React.createElement('div', { className: 'flex items-center gap-2' },
                   React.createElement('span', { className: 'text-lg' }, '🔧'),
                   React.createElement('span', { className: 'font-semibold text-sm' }, 'Debug Panel')
                 ),
                 React.createElement('button', {
                   onClick: () => setDebugMode(false),
-                  className: 'text-ink-60 hover:text-white transition-colors text-lg'
+                  className: 'text-ink-60 hover:text-nw-blue transition-colors text-lg'
                 }, '×')
               ),
               
@@ -16787,7 +16787,7 @@ Best regards`
               },
                 React.createElement('h1', { className: 'text-xl tracking-[-.014em] font-semibold mb-2 flex items-center gap-3 text-nw-blue' },
                   React.createElement(Building2, { size: 28 }),
-                  '🔐 HR Admin Dashboard'
+                  'HR Admin Dashboard'
                 ),
                 React.createElement('p', { className: 'text-ink-60 mb-4' },
                   getText(lang, 'Unternehmensweite Übersicht aller Performance-Daten', 'Panoramica aziendale', 'Company-wide overview')
@@ -16890,7 +16890,7 @@ Best regards`
                 // Warning Banner
                 React.createElement('div', { className: 'bg-danger-bg border-2 border-danger/30 rounded-xl p-6' },
                   React.createElement('h3', { className: 'text-lg font-semibold text-danger mb-2 flex items-center gap-2' },
-                    '⚠️ Backup & Datenwiederherstellung'
+                    'Backup & Datenwiederherstellung'
                   ),
                   React.createElement('p', { className: 'text-danger mb-4' },
                     'Hier können Sie ein vollständiges Backup aller Daten erstellen oder aus einem früheren Backup wiederherstellen.'
@@ -16921,7 +16921,7 @@ Best regards`
                 // Restore Preview (wenn Backup geladen)
                 restoreData && React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-6' },
                   React.createElement('h3', { className: 'text-lg font-semibold text-nw-blue mb-4' },
-                    '📋 Backup-Vorschau: ' + (restoreData.exportedAt ? new Date(restoreData.exportedAt).toLocaleString('de-DE') : 'Unbekannt')
+                    'Backup-Vorschau: ' + (restoreData.exportedAt ? new Date(restoreData.exportedAt).toLocaleString('de-DE') : 'Unbekannt')
                   ),
                   React.createElement('div', { className: 'grid md:grid-cols-4 gap-4 mb-6' },
                     React.createElement('div', { className: 'bg-nw-blue-06 rounded-lg p-4 text-center' },
@@ -16992,7 +16992,7 @@ Best regards`
                 // Current Data Overview
                 React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-6' },
                   React.createElement('h3', { className: 'text-lg font-semibold text-nw-blue mb-4' },
-                    '📊 Aktuelle Daten in Firebase'
+                    'Aktuelle Daten in Firebase'
                   ),
                   React.createElement('div', { className: 'grid md:grid-cols-4 gap-4' },
                     React.createElement('div', { className: 'bg-panel rounded-lg p-4 text-center' },
@@ -17017,7 +17017,7 @@ Best regards`
                 // === VERSIONSHISTORIE INITIALISIEREN ===
                 React.createElement('div', { className: 'bg-nw-blue-06 border-2 border-nw-blue-25 rounded-xl p-6' },
                   React.createElement('h3', { className: 'text-lg font-semibold text-nw-blue mb-2 flex items-center gap-2' },
-                    '📚 Versionshistorie für bestehende Beurteilungen'
+                    'Versionshistorie für bestehende Beurteilungen'
                   ),
                   React.createElement('p', { className: 'text-nw-blue mb-4' },
                     'Diese Funktion erstellt für alle bestehenden Beurteilungen eine initiale Version. So können Führungskräfte auf ältere Versionen zugreifen. Diese Aktion sollte EINMALIG ausgeführt werden.'
@@ -17038,7 +17038,7 @@ Best regards`
                 // === BESITZER-REPARATUR TOOL (userId + managerId) ===
                 React.createElement('div', { className: 'bg-nw-green-15 border border-line rounded-xl p-6' },
                   React.createElement('h3', { className: 'text-lg font-semibold text-ok mb-2 flex items-center gap-2' },
-                    '✅ Besitzer-Integritätsprüfung (userId + managerId)'
+                    'Besitzer-Integritätsprüfung (userId + managerId)'
                   ),
                   React.createElement('div', { className: 'bg-nw-green-15 rounded-lg p-3 mb-4' },
                     React.createElement('p', { className: 'text-ok font-medium flex items-center gap-2' },
@@ -17077,7 +17077,7 @@ Best regards`
                 // === LEGACY APPRAISALS COLLECTION SUCHE ===
                 React.createElement('div', { className: 'bg-nw-blue-06 border-2 border-nw-blue-25 rounded-xl p-6' },
                   React.createElement('h3', { className: 'text-lg font-semibold text-nw-blue mb-2 flex items-center gap-2' },
-                    '🗄️ Legacy Collection durchsuchen'
+                    'Legacy Collection durchsuchen'
                   ),
                   React.createElement('p', { className: 'text-nw-blue mb-4' },
                     'Es existiert eine ältere Collection "appraisals" (neben der aktuellen "teamAppraisals"). Hier könnten noch alte Daten liegen, die möglicherweise bei einer Migration verloren gegangen sind.'
@@ -17142,7 +17142,7 @@ Best regards`
               React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-6' },
                 React.createElement('h3', { className: 'text-lg font-semibold text-nw-blue mb-4 flex items-center gap-2' },
                   React.createElement(TrendingUp, { size: 20 }),
-                  getText(lang, '📊 Analytics & Verteilung', '📊 Analytics e Distribuzione', '📊 Analytics & Distribution')
+                  getText(lang, 'Analytics & Verteilung', 'Analytics e Distribuzione', 'Analytics & Distribution')
                 ),
                 React.createElement('div', { className: 'grid md:grid-cols-3 gap-6' },
                   
@@ -17445,7 +17445,7 @@ Best regards`
                               : React.createElement('div', { className: 'space-y-2' },
                                   React.createElement('div', { className: 'flex items-center justify-between mb-3' },
                                     React.createElement('h4', { className: 'font-semibold text-ink' }, 
-                                      '📚 ' + getText(lang, 'Gespeicherte Versionen', 'Versioni salvate', 'Saved Versions')
+                                      '' + getText(lang, 'Gespeicherte Versionen', 'Versioni salvate', 'Saved Versions')
                                     ),
                                     React.createElement('span', { className: 'text-sm text-ink-60' },
                                       getText(lang, 'Neueste zuerst', 'Più recente prima', 'Newest first')
@@ -17619,7 +17619,7 @@ Best regards`
                     // === ZIELE SECTION ===
                     React.createElement('div', { className: 'bg-nw-blue-06 rounded-xl p-5' },
                       React.createElement('h3', { className: 'text-lg font-semibold text-nw-blue mb-4 flex items-center gap-2' },
-                        '🎯 ', getText(lang, 'Ziele', 'Obiettivi', 'Goals'),
+                        '', getText(lang, 'Ziele', 'Obiettivi', 'Goals'),
                         React.createElement('span', { className: 'text-sm font-normal text-nw-blue' },
                           '(' + (hrVersionDetailModal.version.goals || []).length + ')'
                         )
@@ -17667,7 +17667,7 @@ Best regards`
                     // === KERNKOMPETENZEN SECTION ===
                     React.createElement('div', { className: 'bg-nw-blue-06 rounded-xl p-5' },
                       React.createElement('h3', { className: 'text-lg font-semibold text-nw-blue mb-4 flex items-center gap-2' },
-                        '⭐ ', getText(lang, 'Kernkompetenzen', 'Competenze chiave', 'Core Competencies'),
+                        '', getText(lang, 'Kernkompetenzen', 'Competenze chiave', 'Core Competencies'),
                         React.createElement('span', { className: 'text-sm font-normal text-nw-blue' },
                           '(' + Object.keys(hrVersionDetailModal.version.coreScores || {}).length + ')'
                         )
@@ -17723,7 +17723,7 @@ Best regards`
                     Object.keys(hrVersionDetailModal.version.leaderScores || {}).length > 0 &&
                     React.createElement('div', { className: 'bg-nw-blue-06 rounded-xl p-5' },
                       React.createElement('h3', { className: 'text-lg font-semibold text-nw-blue mb-4 flex items-center gap-2' },
-                        '👑 ', getText(lang, 'Führungskompetenzen', 'Competenze di leadership', 'Leadership Competencies'),
+                        '', getText(lang, 'Führungskompetenzen', 'Competenze di leadership', 'Leadership Competencies'),
                         React.createElement('span', { className: 'text-sm font-normal text-nw-blue' },
                           '(' + Object.keys(hrVersionDetailModal.version.leaderScores || {}).length + ')'
                         )
@@ -17773,7 +17773,7 @@ Best regards`
                     // === METADATA ===
                     React.createElement('div', { className: 'bg-nw-grey-40 rounded-xl p-5' },
                       React.createElement('h3', { className: 'text-lg font-semibold text-nw-blue mb-3 flex items-center gap-2' },
-                        '📋 ', getText(lang, 'Metadaten', 'Metadati', 'Metadata')
+                        '', getText(lang, 'Metadaten', 'Metadati', 'Metadata')
                       ),
                       React.createElement('div', { className: 'grid grid-cols-2 gap-4 text-sm' },
                         React.createElement('div', null,
@@ -18127,7 +18127,7 @@ Best regards`
                     // === STEUERUNGSBEREICH ===
                     React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-6' },
                       React.createElement('h3', { className: 'font-semibold text-nw-blue mb-4 flex items-center gap-2' },
-                        React.createElement('span', null, '🎛️'),
+                        React.createElement('span', null, ''),
                         getText(lang, 'Datenauswahl', 'Selezione dati', 'Data Selection')
                       ),
                       
@@ -18231,7 +18231,7 @@ Best regards`
                     // === GPS-SKALA INFO ===
                     React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-4' },
                       React.createElement('h4', { className: 'font-semibold text-nw-blue mb-3 flex items-center gap-2 text-sm' },
-                        React.createElement('span', null, '📏'),
+                        React.createElement('span', null, ''),
                         getText(lang, 'GPS-Score zu Note Umrechnung', 'Conversione GPS-Voto', 'GPS Score to Grade Conversion')
                       ),
                       React.createElement('div', { className: 'grid grid-cols-5 gap-2 text-center' },
@@ -18272,7 +18272,7 @@ Best regards`
                     // === HAUPTVISUALISIERUNG ===
                     selectedAppraisals.length > 0 && React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-6' },
                       React.createElement('h3', { className: 'font-semibold text-nw-blue mb-4 flex items-center gap-2' },
-                        React.createElement('span', null, '📊'),
+                        React.createElement('span', null, ''),
                         getText(lang, 'Verteilung: IST vs. SOLL', 'Distribuzione: Effettivo vs. Atteso', 'Distribution: Actual vs. Expected')
                       ),
                       
@@ -18338,7 +18338,7 @@ Best regards`
                     // === ANALYSIS ENGINE FEEDBACK BOX ===
                     selectedAppraisals.length > 0 && React.createElement('div', { className: 'space-y-4' },
                       React.createElement('h3', { className: 'font-semibold text-nw-blue flex items-center gap-2' },
-                        React.createElement('span', null, '🧠'),
+                        React.createElement('span', null, ''),
                         getText(lang, 'Intelligente Analyse & Coaching-Hinweise', 'Analisi intelligente', 'Smart Analysis & Coaching Nudges')
                       ),
                       
@@ -18419,7 +18419,7 @@ Best regards`
                     // === STATISTIK ZUSAMMENFASSUNG ===
                     selectedAppraisals.length > 0 && React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-6' },
                       React.createElement('h3', { className: 'font-semibold text-nw-blue mb-4 flex items-center gap-2' },
-                        React.createElement('span', null, '📈'),
+                        React.createElement('span', null, ''),
                         getText(lang, 'Zusammenfassung', 'Riepilogo', 'Summary')
                       ),
                       React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-5 gap-4' },
@@ -18455,7 +18455,7 @@ Best regards`
                     // === DISKUSSIONSFRAGEN FÜR KALIBRIERUNGSMEETING ===
                     selectedAppraisals.length > 0 && React.createElement('div', { className: 'bg-nw-blue-06 rounded-xl p-6 border border-nw-blue-25' },
                       React.createElement('h3', { className: 'font-semibold text-nw-blue mb-4 flex items-center gap-2' },
-                        React.createElement('span', null, '💬'),
+                        React.createElement('span', null, ''),
                         getText(lang, 'Diskussionsfragen für das Kalibrierungsmeeting', 'Domande per la riunione di calibrazione', 'Discussion Questions for Calibration Meeting')
                       ),
                       React.createElement('div', { className: 'grid md:grid-cols-2 gap-4' },
@@ -18706,7 +18706,7 @@ Best regards`
                     // === STEUERUNGSBEREICH ===
                     allReviewsWithGPS.length > 0 && React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-6' },
                       React.createElement('h3', { className: 'font-semibold text-nw-blue mb-4 flex items-center gap-2' },
-                        React.createElement('span', null, '🎛️'),
+                        React.createElement('span', null, ''),
                         getText(lang, 'Datenauswahl', 'Selezione dati', 'Data Selection')
                       ),
                       
@@ -18858,10 +18858,10 @@ Best regards`
                     // === BENCHMARK-KARTEN ===
                     selectedAppraisals.length > 0 && React.createElement('div', { className: 'grid md:grid-cols-2 gap-4' },
                       // Unternehmens-Benchmark
-                      React.createElement('div', { className: 'bg-ink rounded-xl p-5 text-white' },
+                      React.createElement('div', { className: 'bg-white border border-line shadow-card rounded-xl p-5 text-ink' },
                         React.createElement('div', { className: 'flex items-center justify-between' },
                           React.createElement('div', null,
-                            React.createElement('p', { className: 'text-xs text-nw-grey uppercase tracking-wider' }, 
+                            React.createElement('p', { className: 'text-xs text-ink-60 uppercase tracking-wider' }, 
                               getText(lang, 'Unternehmens-Benchmark (alle)', 'Benchmark aziendale', 'Company Benchmark (all)')
                             ),
                             React.createElement('p', { className: 'text-2xl font-semibold mt-1' }, companyAvgGPS.toFixed(2)),
@@ -18908,7 +18908,7 @@ Best regards`
                     // === MANAGER-VERGLEICH ===
                     selectedAppraisals.length > 0 && managerStats.length > 0 && React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-6' },
                       React.createElement('h3', { className: 'font-semibold text-nw-blue mb-4 flex items-center gap-2' },
-                        React.createElement('span', null, '📊'),
+                        React.createElement('span', null, ''),
                         getText(lang, 'Bewertungsverhalten nach Führungskraft', 'Comportamento per manager', 'Rating Behavior by Manager')
                       ),
                       
@@ -18982,7 +18982,7 @@ Best regards`
                     // === EINZELNE MITARBEITER-DETAILS (wenn Filterung aktiv) ===
                     !hrRaterBiasSelectAllEmployees && selectedAppraisals.length > 0 && React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-6' },
                       React.createElement('h3', { className: 'font-semibold text-nw-blue mb-4 flex items-center gap-2' },
-                        React.createElement('span', null, '👤'),
+                        React.createElement('span', null, ''),
                         getText(lang, 'Details der ausgewählten Mitarbeiter', 'Dettagli collaboratori', 'Selected Employee Details')
                       ),
                       React.createElement('div', { className: 'overflow-x-auto' },
@@ -19072,14 +19072,14 @@ Best regards`
                 
                 // Header Card
                 React.createElement('div', { 
-                  className: 'rounded-card p-6 text-white',
-                  style: { background: '#2F7A48' }
+                  className: 'rounded-card p-6 text-ink bg-white border border-line shadow-card',
+                  style: { }
                 },
                   React.createElement('h2', { className: 'text-lg font-semibold mb-2 flex items-center gap-3 text-nw-blue' },
                     React.createElement('span', { className: 'text-2xl' }, '🕸️'),
                     getText(lang, 'Kompetenz-Radar: Profilvergleich', 'Radar Competenze: Confronto profili', 'Competency Radar: Profile Comparison')
                   ),
-                  React.createElement('p', { className: 'text-white/80' },
+                  React.createElement('p', { className: 'text-ink-60' },
                     getText(lang, 
                       'Vergleichen Sie die Kompetenzprofile von 2-5 Mitarbeitern. Erkennen Sie komplementäre Stärken, potenzielle "Klone" oder Halo-Effekte (unrealistisch gleichmäßige Profile).', 
                       'Confronta i profili di competenza di 2-5 collaboratori.',
@@ -19346,7 +19346,7 @@ Best regards`
                     reviewsWithCompetencies.length > 0 && React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-6' },
                       React.createElement('div', { className: 'flex flex-wrap justify-between items-center mb-4 gap-4' },
                         React.createElement('h3', { className: 'font-semibold text-nw-blue flex items-center gap-2' },
-                          React.createElement('span', null, '👥'),
+                          React.createElement('span', null, ''),
                           getText(lang, 'Mitarbeiter auswählen (2-5)', 'Seleziona collaboratori', 'Select Employees (2-5)')
                         ),
                         React.createElement('div', { className: 'flex items-center gap-4' },
@@ -19435,7 +19435,7 @@ Best regards`
                     // === RADAR CHART ===
                     selectedEmployees.length >= 2 && React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-6' },
                       React.createElement('h3', { className: 'font-semibold text-nw-blue mb-4 flex items-center gap-2' },
-                        React.createElement('span', null, '🕸️'),
+                        React.createElement('span', null, ''),
                         getText(lang, 'Kompetenz-Radar', 'Radar Competenze', 'Competency Radar')
                       ),
                       
@@ -19497,7 +19497,7 @@ Best regards`
                       // Komplementaritäts-Analyse
                       React.createElement('div', { className: 'bg-nw-green-15 rounded-xl p-4 border border-nw-green/40' },
                         React.createElement('h4', { className: 'font-semibold text-ok mb-3 flex items-center gap-2' },
-                          React.createElement('span', null, '🧩'),
+                          React.createElement('span', null, ''),
                           getText(lang, 'Team-Komplementarität', 'Complementarità team', 'Team Complementarity')
                         ),
                         (() => {
@@ -19523,7 +19523,7 @@ Best regards`
                       // Halo-Effekt Warnungen
                       React.createElement('div', { className: 'bg-nw-blue-06 rounded-xl p-4 border border-nw-blue-25' },
                         React.createElement('h4', { className: 'font-semibold text-nw-blue mb-3 flex items-center gap-2' },
-                          React.createElement('span', null, '🔍'),
+                          React.createElement('span', null, ''),
                           getText(lang, 'Halo-Effekt Prüfung', 'Verifica effetto alone', 'Halo Effect Check')
                         ),
                         React.createElement('div', { className: 'space-y-2' },
@@ -19560,7 +19560,7 @@ Best regards`
                     selectedEmployees.length >= 2 && React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-6' },
                       React.createElement('div', { className: 'flex flex-wrap items-center justify-between gap-4 mb-4' },
                         React.createElement('h3', { className: 'font-semibold text-nw-blue flex items-center gap-2' },
-                          React.createElement('span', null, '📝'),
+                          React.createElement('span', null, ''),
                           getText(lang, 'Qualitäts-Check: Begründungen', 'Quality Check: Giustificazioni', 'Quality Check: Justifications')
                         ),
                         React.createElement('div', { className: 'flex items-center gap-3 text-xs' },
@@ -19973,7 +19973,7 @@ Best regards`
                     // === DETAIL-TABELLE ===
                     selectedEmployees.length >= 2 && React.createElement('div', { className: 'bg-white rounded-xl shadow-card border p-6' },
                       React.createElement('h3', { className: 'font-semibold text-nw-blue mb-4 flex items-center gap-2' },
-                        React.createElement('span', null, '📊'),
+                        React.createElement('span', null, ''),
                         getText(lang, 'Kompetenz-Werte im Detail', 'Valori competenze', 'Competency Values in Detail')
                       ),
                       React.createElement('div', { className: 'overflow-x-auto' },
@@ -20704,7 +20704,7 @@ Best regards`
                     React.createElement('div', { className: 'flex justify-between items-start' },
                       React.createElement('div', null,
                         React.createElement('h2', { className: 'text-lg font-semibold flex items-center gap-2 text-nw-blue' },
-                          hrViewAppraisal.type === 'self' || hrViewAppraisal.type === 'self_assessment' || hrViewAppraisal.type === 'self-reflection' || hrViewAppraisal.type === 'self_assessment_standalone' ? '🪞' : '📋',
+                          hrViewAppraisal.type === 'self' || hrViewAppraisal.type === 'self_assessment' || hrViewAppraisal.type === 'self-reflection' || hrViewAppraisal.type === 'self_assessment_standalone' ? '' : '',
                           hrViewAppraisal.employeeName || hrViewAppraisal.formData?.employee || 'N/A'
                         ),
                         React.createElement('p', { className: 'text-ink-60 text-sm mt-1' },
@@ -20739,7 +20739,7 @@ Best regards`
                     // === Ziele (falls vorhanden) ===
                     hrViewAppraisal.goals && hrViewAppraisal.goals.length > 0 && React.createElement('div', null,
                       React.createElement('h3', { className: 'font-semibold text-nw-blue mb-3 flex items-center gap-2' },
-                        React.createElement('span', null, '🎯'),
+                        React.createElement('span', null, ''),
                         getText(lang, 'Ziele (WAS)', 'Obiettivi (COSA)', 'Goals (WHAT)')
                       ),
                       React.createElement('div', { className: 'bg-panel rounded-xl p-4 space-y-3' },
@@ -20763,7 +20763,7 @@ Best regards`
                     // === Core Kompetenzen ===
                     (hrViewAppraisal.selfCoreScores || hrViewAppraisal.coreScores) && React.createElement('div', null,
                       React.createElement('h3', { className: 'font-semibold text-nw-blue mb-3 flex items-center gap-2' },
-                        React.createElement('span', null, '💡'),
+                        React.createElement('span', null, ''),
                         getText(lang, 'Kernkompetenzen (WIE)', 'Competenze Core (COME)', 'Core Competencies (HOW)')
                       ),
                       React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-5 gap-3' },
@@ -20793,7 +20793,7 @@ Best regards`
                     // === Leader Kompetenzen (falls vorhanden) ===
                     (hrViewAppraisal.selfLeaderScores || hrViewAppraisal.leaderScores) && React.createElement('div', null,
                       React.createElement('h3', { className: 'font-semibold text-nw-blue mb-3 flex items-center gap-2' },
-                        React.createElement('span', null, '👔'),
+                        React.createElement('span', null, ''),
                         getText(lang, 'Führungskompetenzen', 'Competenze Leadership', 'Leadership Competencies')
                       ),
                       React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-5 gap-3' },
@@ -20943,20 +20943,20 @@ Best regards`
                   onClick: e => e.stopPropagation()
                 },
                   // Modal Header
-                  React.createElement('div', { className: 'bg-warn text-white p-6' },
+                  React.createElement('div', { className: 'bg-white border border-line shadow-card text-ink p-6' },
                     React.createElement('div', { className: 'flex justify-between items-start' },
                       React.createElement('div', null,
                         React.createElement('h2', { className: 'text-lg font-semibold flex items-center gap-2 text-nw-blue' },
                           React.createElement(Edit3, { size: 24 }),
                           getText(lang, 'Beurteilung bearbeiten', 'Modifica valutazione', 'Edit Appraisal')
                         ),
-                        React.createElement('p', { className: 'text-white/80 text-sm mt-1' },
+                        React.createElement('p', { className: 'text-ink-60 text-sm mt-1' },
                           hrEditAppraisal.employeeName || hrEditAppraisal.formData?.employee || 'N/A'
                         )
                       ),
                       React.createElement('button', {
                         onClick: () => setHrEditAppraisal(null),
-                        className: 'w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center'
+                        className: 'w-8 h-8 rounded-full bg-nw-blue-06 hover:bg-nw-blue-12 flex items-center justify-center'
                       }, React.createElement(X, { size: 18 }))
                     )
                   ),
@@ -22471,7 +22471,7 @@ Best regards`
                       ),
                       React.createElement('div', { className: "flex-1" },
                         React.createElement('h4', { className: "font-semibold text-nw-blue text-sm mb-2" },
-                          lang === 'de' ? '💡 Coaching-Tipps für das Feedbackgespräch' : lang === 'it' ? '💡 Suggerimenti di coaching per il colloquio' : '💡 Coaching Tips for Feedback Conversations'
+                          lang === 'de' ? 'Coaching-Tipps für das Feedbackgespräch' : lang === 'it' ? 'Suggerimenti di coaching per il colloquio' : 'Coaching Tips for Feedback Conversations'
                         ),
                         React.createElement('div', { className: "grid md:grid-cols-2 gap-3 text-xs text-ink" },
                           React.createElement('div', { className: "flex items-start gap-2" },
@@ -22944,7 +22944,7 @@ Best regards`
                         ),
                         React.createElement('div', { className: "flex-1" },
                           React.createElement('h4', { className: "font-semibold text-ink text-sm mb-1" },
-                            lang === 'de' ? '🎯 Team-Entwicklungsempfehlung' : lang === 'it' ? '🎯 Raccomandazione sviluppo team' : '🎯 Team Development Recommendation'
+                            lang === 'de' ? 'Team-Entwicklungsempfehlung' : lang === 'it' ? 'Raccomandazione sviluppo team' : 'Team Development Recommendation'
                           ),
                           React.createElement('p', { className: "text-sm text-ink-60 mb-3" },
                             lang === 'de' 
@@ -23060,9 +23060,9 @@ Best regards`
                         ),
                         React.createElement('div', { className: "flex-1" },
                           React.createElement('h4', { className: "font-semibold text-sm mb-1", style: { color: '#243186' } },
-                            lang === 'de' ? '🤝 Peer-Learning Impulse' 
-                              : lang === 'it' ? '🤝 Impulsi Peer-Learning' 
-                              : '🤝 Peer-Learning Opportunities'
+                            lang === 'de' ? 'Peer-Learning Impulse' 
+                              : lang === 'it' ? 'Impulsi Peer-Learning' 
+                              : 'Peer-Learning Opportunities'
                           ),
                           React.createElement('p', { className: "text-xs text-nw-blue mb-3" },
                             lang === 'de' 
@@ -23159,7 +23159,7 @@ const renderDashboard = () => {
                   React.createElement(CheckCircle2, { size: 24, className: 'text-ok flex-shrink-0 mt-0.5' }),
                   React.createElement('div', { className: 'flex-1' },
                     React.createElement('h4', { className: 'font-semibold text-ok mb-1' },
-                      getText(lang, '✨ Daten erfolgreich migriert!', '✨ Dati migrati con successo!', '✨ Data successfully migrated!')
+                      getText(lang, 'Daten erfolgreich migriert!', 'Dati migrati con successo!', 'Data successfully migrated!')
                     ),
                     React.createElement('p', { className: 'text-sm text-ok' },
                       getText(lang,
@@ -23237,13 +23237,15 @@ const renderDashboard = () => {
                 );
               })(),
 
-              // === QUICKSTART GUIDE (So funktioniert's) ===
-              React.createElement(NwPane, null,
-                React.createElement(NwPaneHeader, {
-                  icon: Lightbulb,
-                  title: lang === 'de' ? '🚀 Schnellstart-Guide' : lang === 'it' ? '🚀 Guida Rapida' : '🚀 Quick Start Guide',
-                  meta: lang === 'de' ? 'So nutzen Sie den Performance Manager' : lang === 'it' ? 'Come utilizzare il Performance Manager' : 'How to use the Performance Manager'
-                }),
+              // === QUICKSTART GUIDE (So funktioniert's) – n.Org: erklären, wenn gefragt ===
+              // Offen für neue Nutzer (nicht angemeldet / noch kein Team), sonst eingeklappt
+              React.createElement('details', { className: 'group rounded-card border border-line bg-white shadow-card', open: !(user && !user.isAnonymous && teamMembers.length > 0) },
+                React.createElement('summary', { className: 'flex min-h-[46px] cursor-pointer list-none flex-wrap items-center gap-2.5 rounded-card px-4 py-2 transition-colors hover:bg-nw-blue-06 group-open:rounded-b-none group-open:border-b group-open:border-line-2 [&::-webkit-details-marker]:hidden' },
+                  React.createElement(Lightbulb, { size: 16, 'aria-hidden': true, className: 'text-nw-blue' }),
+                  React.createElement('h2', { className: 'text-base font-semibold text-nw-blue' }, lang === 'de' ? 'Schnellstart-Guide' : lang === 'it' ? 'Guida Rapida' : 'Quick Start Guide'),
+                  React.createElement('span', { className: 'text-xs text-ink-60' }, lang === 'de' ? 'So nutzen Sie den Performance Manager' : lang === 'it' ? 'Come utilizzare il Performance Manager' : 'How to use the Performance Manager'),
+                  React.createElement(ChevronDown, { size: 16, 'aria-hidden': true, className: 'ml-auto text-ink-60 transition-transform duration-150 group-open:rotate-180' })
+                ),
                 React.createElement('div', { className: "grid gap-0 md:grid-cols-2 md:divide-x md:divide-line-2" },
                   (() => {
                     const stepRow = (n, title, text, tone) => React.createElement('li', { className: 'flex items-start gap-3', key: n },
@@ -23327,14 +23329,14 @@ const renderDashboard = () => {
               
               React.createElement('div', { className: "bg-white rounded-xl p-6 shadow-card border border-line" },
                 React.createElement('h2', { className: "text-lg font-semibold mb-4", style: { color: "#243186" } }, t.welcome),
-                React.createElement('p', { className: "mb-6 leading-relaxed", style: { color: "#243186" } },
+                React.createElement('p', { className: "mb-6 leading-relaxed text-ink" },
                   t.intro, React.createElement('strong', null, t.introBold), t.introEnd
                 ),
                 React.createElement('div', { className: "bg-panel p-5 rounded-lg border border-line-2 mb-6" },
                   React.createElement('h3', { className: "font-semibold mb-3 flex items-center gap-2", style: { color: "#243186" } },
                     React.createElement(Target, { size: 18 }), " ", t.strategyTitle
                   ),
-                  React.createElement('p', { className: "text-sm leading-relaxed", style: { color: "#243186" } },
+                  React.createElement('p', { className: "text-sm leading-relaxed text-ink" },
                     t.strategyDesc, React.createElement('strong', null, t.strategyBold), t.strategyEnd
                   )
                 )
@@ -23444,7 +23446,7 @@ const renderDashboard = () => {
                 // GPS Result Box - mittig positioniert, zentrierter Text
                 React.createElement('div', { className: "flex justify-center" },
                   React.createElement('div', { 
-                    className: "w-full md:w-1/2 bg-nw-green rounded-card p-6 border-2 border-white shadow-float transform hover:scale-105 transition-all duration-300"
+                    className: "w-full md:w-1/2 bg-white border border-line shadow-card rounded-card p-6 border-2 border-white  transform hover:scale-105 transition-all duration-300"
                   },
                     React.createElement('div', { className: "text-center" },
                       React.createElement('h3', { 
@@ -23963,7 +23965,7 @@ const renderDashboard = () => {
                   isProduction && introData ? React.createElement('div', null,
                     React.createElement('p', { className: "text-lg leading-relaxed" }, introData.description),
                     // Hinweis zur Selbsteinschätzung im Gespräch
-                    React.createElement('div', { className: "bg-warn/20 border border-warn/50 rounded-lg p-4 mt-4" },
+                    React.createElement('div', { className: "bg-white border border-line shadow-card border border-warn/50 rounded-lg p-4 mt-4" },
                       React.createElement('div', { className: "flex items-start gap-3" },
                         React.createElement(AlertCircle, { size: 20, className: "text-traffic-amber flex-shrink-0 mt-0.5" }),
                         React.createElement('p', { className: "text-warn-bg text-sm" }, introData.selfAssessmentNote)
@@ -24261,11 +24263,11 @@ const renderDashboard = () => {
                 
                 // WIE Card
                 React.createElement('div', { 
-                  className: "text-white rounded-card p-6 md:p-8 shadow-float transform hover:scale-[1.02] transition-all duration-300",
-                  style: { background: "#6EBD84" }
+                  className: "text-ink rounded-card p-6 md:p-8  transform hover:scale-[1.02] transition-all duration-300 bg-white border border-line shadow-card",
+                  style: { }
                 },
                   React.createElement('div', { className: "flex items-center gap-4 mb-6" },
-                    React.createElement('div', { className: "bg-white/20 rounded-full p-4" },
+                    React.createElement('div', { className: "bg-nw-blue-06 rounded-full p-4" },
                       React.createElement(Brain, { size: 32 })
                     ),
                     React.createElement('div', null,
@@ -24275,19 +24277,19 @@ const renderDashboard = () => {
                   ),
                   
                   React.createElement('div', { className: "space-y-4" },
-                    React.createElement('p', { className: "text-white/90 leading-relaxed" }, t.wieExplainText),
+                    React.createElement('p', { className: "text-ink-60 leading-relaxed" }, t.wieExplainText),
                     
                     // Gewichtung Pills
                     React.createElement('div', { className: "flex flex-wrap gap-2" },
-                      React.createElement('div', { className: "bg-white/20 rounded-full px-4 py-2 text-sm font-semibold backdrop-blur" },
+                      React.createElement('div', { className: "bg-nw-blue-06 rounded-full px-4 py-2 text-sm font-semibold backdrop-blur" },
                         t.wieCoreExplainWeight
                       ),
-                      React.createElement('div', { className: "bg-white/20 rounded-full px-4 py-2 text-sm font-semibold backdrop-blur" },
+                      React.createElement('div', { className: "bg-nw-blue-06 rounded-full px-4 py-2 text-sm font-semibold backdrop-blur" },
                         t.wieLeadExplainWeight
                       )
                     ),
                     
-                    React.createElement('div', { className: "flex items-center gap-2 text-sm font-semibold bg-white/20 rounded-lg px-4 py-2 w-fit" },
+                    React.createElement('div', { className: "flex items-center gap-2 text-sm font-semibold bg-nw-blue-06 rounded-lg px-4 py-2 w-fit" },
                       React.createElement(ClipboardList, { size: 18 }),
                       lang === 'de' ? 'BARS-Methodik' : 'Metodologia BARS'
                     )
@@ -25951,9 +25953,9 @@ const renderDashboard = () => {
                         ),
                         e('div', null,
                           e('h4', { className: 'font-semibold text-ok mb-2' }, 
-                            lang === 'de' ? '✅ Ihre Eingaben werden automatisch gespeichert' 
-                            : lang === 'it' ? '✅ I tuoi dati vengono salvati automaticamente'
-                            : '✅ Your entries are saved automatically'
+                            lang === 'de' ? 'Ihre Eingaben werden automatisch gespeichert' 
+                            : lang === 'it' ? 'I tuoi dati vengono salvati automaticamente'
+                            : 'Your entries are saved automatically'
                           ),
                           e('p', { className: 'text-sm text-ok' },
                             lang === 'de' 
@@ -25978,9 +25980,9 @@ const renderDashboard = () => {
                         ),
                         e('div', null,
                           e('h4', { className: 'font-semibold text-ok mb-2' }, 
-                            lang === 'de' ? '🚀 So funktioniert es - kinderleicht!' 
-                            : lang === 'it' ? '🚀 Come funziona - semplicissimo!'
-                            : '🚀 How it works - super easy!'
+                            lang === 'de' ? 'So funktioniert es - kinderleicht!' 
+                            : lang === 'it' ? 'Come funziona - semplicissimo!'
+                            : 'How it works - super easy!'
                           ),
                           e('ol', { className: 'text-sm text-ok space-y-2' },
                             e('li', { className: 'flex items-start gap-2' },
@@ -26035,9 +26037,9 @@ const renderDashboard = () => {
                     ),
                     e('div', { className: 'flex-1' },
                       e('h4', { className: 'font-semibold text-lg mb-2', style: { color: '#243186' } }, 
-                        lang === 'de' ? '📚 Verhaltensanker als Orientierung' 
-                        : lang === 'it' ? '📚 Ancoraggi comportamentali come riferimento'
-                        : '📚 Behavioral Anchors as Reference'
+                        lang === 'de' ? 'Verhaltensanker als Orientierung' 
+                        : lang === 'it' ? 'Ancoraggi comportamentali come riferimento'
+                        : 'Behavioral Anchors as Reference'
                       ),
                       e('p', { className: 'text-sm text-ink mb-3' },
                         lang === 'de' 
@@ -27452,11 +27454,11 @@ const renderDashboard = () => {
             
             return e('div', { className: 'space-y-6 pb-10 max-w-5xl mx-auto' },
               // === HEADER ===
-              e('div', { className: 'bg-ok rounded-card p-6 text-white shadow-float' },
+              e('div', { className: 'bg-white border border-line shadow-card rounded-card p-6 text-ink ' },
                 e('div', { className: 'flex items-center justify-between flex-wrap gap-4' },
                   e('div', null,
                     e('div', { className: 'flex items-center gap-3 mb-2' },
-                      e('div', { className: 'bg-white/20 p-3 rounded-full' },
+                      e('div', { className: 'bg-nw-blue-06 p-3 rounded-full' },
                         e(Users, { size: 28 })
                       ),
                       e('div', null,
@@ -27477,7 +27479,7 @@ const renderDashboard = () => {
                         e(Building2, { size: 14 }),
                         selfData.department
                       ),
-                      isManager && e('span', { className: 'bg-white/20 px-2 py-0.5 rounded-lg text-xs' }, '👔 ' + (lang === 'de' ? 'Führungskraft' : 'Manager')),
+                      isManager && e('span', { className: 'bg-nw-blue-06 px-2 py-0.5 rounded-lg text-xs' }, '👔 ' + (lang === 'de' ? 'Führungskraft' : 'Manager')),
                       e('span', { className: 'flex items-center gap-1' },
                         e(Calendar, { size: 14 }),
                         selfData.period || new Date().getFullYear()
@@ -27920,7 +27922,7 @@ const renderDashboard = () => {
                             localStorage.removeItem('nw_return_to_appraisal');
                             setActiveView('teamoverview');
                           },
-                          className: 'px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors'
+                          className: 'px-4 py-2 bg-nw-blue-06 hover:bg-nw-blue-12 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors'
                         }, 
                           lang === 'de' ? 'Übersicht' : lang === 'it' ? 'Panoramica' : 'Overview'
                         )
@@ -27930,7 +27932,7 @@ const renderDashboard = () => {
                           localStorage.removeItem('nw_return_to_appraisal');
                           setActiveView('teamoverview');
                         },
-                        className: 'px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors'
+                        className: 'px-4 py-2 bg-nw-blue-06 hover:bg-nw-blue-12 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors'
                       }, 
                         e(ArrowLeft, { size: 16 }),
                         lang === 'de' ? 'Zurück' : lang === 'it' ? 'Indietro' : 'Back'
@@ -28497,8 +28499,8 @@ const renderDashboard = () => {
             },
               React.createElement('div', { className: 'bg-white rounded-card shadow-float max-w-lg w-full overflow-hidden' },
                 // Header
-                React.createElement('div', { className: 'p-6 border-b border-line', style: { backgroundColor: '#6EBD84' } },
-                  React.createElement('h2', { className: 'text-lg font-semibold text-white flex items-center gap-3' },
+                React.createElement('div', { className: 'p-6 border-b border-line bg-white border border-line shadow-card', style: { } },
+                  React.createElement('h2', { className: 'text-lg font-semibold text-nw-blue flex items-center gap-3' },
                     React.createElement(Sparkles, { size: 28 }),
                     lang === 'de' ? 'Neue Selbstreflexionen!' : lang === 'it' ? 'Nuove autovalutazioni!' : 'New Self-Assessments!'
                   )

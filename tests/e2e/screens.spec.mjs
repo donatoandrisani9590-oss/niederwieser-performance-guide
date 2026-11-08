@@ -115,3 +115,16 @@ test('Mitarbeiter-Link: Willkommen und Formular rendern ohne Fehler', async ({ p
   if (await start.isVisible().catch(() => false)) { await start.click(); await shot(page, '32-gast-formular'); }
   expect(consoleErrors).toEqual([]);
 });
+
+test('Dialoge: Hintergrund bleibt halbtransparent, Inhalt lesbar', async ({ page, consoleErrors }) => {
+  await seed();
+  await loginVia(page, USERS.managerA);
+  await page.getByText('Termin festlegen').first().click();
+  const overlay = page.locator('div.fixed.inset-0').first();
+  await expect(overlay).toBeVisible();
+  const bg = await overlay.evaluate((el) => getComputedStyle(el).backgroundColor);
+  const alpha = bg.startsWith('rgba') ? parseFloat(bg.split(',')[3]) : 1;
+  expect(alpha, `Overlay-Hintergrund ${bg}`).toBeLessThan(1);
+  await shot(page, '17-dialog-termin');
+  expect(consoleErrors).toEqual([]);
+});

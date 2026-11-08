@@ -10,7 +10,7 @@ Daten, Anmeldung, Rollen, Speicherschlüssel, Links, Export-Formate und Berechnu
 
 | Prüfung | Vorher (Phase 0) | Nachher |
 |---|---|---|
-| Automatische Tests | 14 / 14 grün | **21 / 21 grün** (7 neue) |
+| Automatische Tests | 14 / 14 grün | **22 / 22 grün** (8 neue) |
 | Schutzbereich (`node tests/protected/fingerprint.mjs`) | Baseline angelegt | **unverändert** (Baseline seit Anlage nicht angefasst) |
 | Konsolenfehler in allen Abläufen | 0 | 0 |
 | WCAG 2 A/AA (axe-core) auf 6 Kernseiten | nicht gemessen | **0 Verstöße** |
@@ -51,7 +51,11 @@ Bausteine (aus `kit/` als `React.createElement` nachgebaut, ohne Build): `NwButt
    Auf dem Handy klappt das Menü auf und zu.
 4. **Screens**: dunkle Banner → ruhige Flächen (`flip-dark-surfaces.mjs`), Dashboard und Team-Übersicht von Hand
    neu, Formulare mit angehefteter Aktionsleiste, HR-Tabs, Eingabefelder einheitlich (`inputs.mjs`).
-5. **Feinschliff**: Toasts (dunkel, Live-Region), Assistent per Tastatur, Bewegung nur mit n.Org-Keyframes und unter
+5. **Feinschliff**:
+   - Überschriften ohne Emojis (41 Stellen; die Wörter bleiben).
+   - Schnellstart-Guide aufklappbar, nach „erklären, wenn gefragt“: offen für neue Nutzer, eingeklappt für Führungskräfte mit Team.
+   - Restliche grüne und dunkle Kacheln als ruhige Flächen.
+   - Toasts (dunkel, Live-Region), Assistent per Tastatur, Bewegung nur mit n.Org-Keyframes und unter
    `prefers-reduced-motion` aus, WCAG AA (`warn-contrast.mjs`, automatische Beschriftung von Feldern und Icon-Knöpfen,
    `<html lang>` folgt der App-Sprache).
 
@@ -83,6 +87,7 @@ cd tests && npm install && npm test
 Neu seit Phase 0:
 - `a11y.spec.mjs`: 4 Tests, WCAG 2 A/AA auf Dashboard, Anmeldung, Team-Übersicht, Beurteilung, HR-Dashboard und Mitarbeiter-Link.
 - `mobile.spec.mjs`: Handy-Menü, Anmeldung und Team ohne horizontalen Überlauf.
+- `screens.spec.mjs`: Dialog-Hintergrund bleibt halbtransparent (Schutz gegen versehentlich weiße Overlays).
 - `critical.spec.mjs`:
   - Registrierung einer neuen Führungskraft (Erststart: leeres Team, Hinweis, nächster Schritt).
   - PDF-Export der Beurteilung (echte PDF-Datei; Logo und Titel geprüft).
@@ -109,8 +114,10 @@ Screenshots: `docs/screenshots/before/` (Ausgangslage) und `docs/screenshots/aft
 3. **Pull Request #1** benennt `index.html` in `Index.html` um. Das würde Mitarbeiter-Links und Lesezeichen brechen.
 4. **Tailwind läuft im Browser (Play CDN).** Das ist so gewollt (kein Build), aber langsamer als vorkompiliertes CSS.
    Ein Build-Schritt wäre eine eigene Entscheidung.
-5. **Texte mit Emojis** (z. B. „🚀 Schnellstart-Guide“) sind Inhalt und deshalb unverändert. n.Org kommt ohne Emojis aus.
-   Sollen sie aus Überschriften entfernt werden, ist das schnell gemacht.
+5. **Emojis im Fließtext und in Knöpfen** (z. B. „💾 Als Entwurf“) sind noch da; aus Überschriften sind sie entfernt.
+6. **Live-Abnahme mit echten Konten** fehlt noch. Deine Regel lautet, nie gegen Produktivdaten zu arbeiten. Deshalb ist alles nur
+   gegen den Emulator mit Testdaten geprüft. Empfehlung: vor dem Zusammenführen eine Testperson mit eigenem Konto
+   das Erst-Login durchspielen lassen und die Checkliste in `NOTFALL-BACKUP.md` §3 abarbeiten.
 
 ## Nachvollziehbarkeit
 

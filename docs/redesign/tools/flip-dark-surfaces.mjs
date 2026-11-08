@@ -10,7 +10,7 @@ const file = join(root, 'index.html');
 let src = readFileSync(file, 'utf8');
 
 const DARK_BG = /(?<![\w-])(?:[a-z-]+:)?bg-(?:nw-blue|nw-blue-90|ink|ok|danger|warn|nw-blue\/\d+)(?![\w-])/;
-const SURFACE_BG = /(?<![\w-])bg-(?:nw-blue|nw-blue-90)(?:\/\d+)?(?![\w-])/;
+const SURFACE_BG = /(?<![\w-])(?:bg-(?:nw-blue|nw-blue-90|ok|nw-green|danger|warn)(?:\/\d+)?|bg-ink)(?![\w\/-])/;
 
 // Ende eines createElement-Aufrufs ab der öffnenden Klammer (Strings/Templates/Kommentare überspringen)
 function callEnd(text, open) {
@@ -41,7 +41,8 @@ function tmplEnd(text, i) {
 // Klassen in einem String innerhalb einer umgedrehten Fläche anpassen
 function flipString(str) {
   if (!/(text-|bg-white|border-)/.test(str)) return str;
-  if (DARK_BG.test(str) && !SURFACE_BG.test(str)) return str; // eigene dunkle Fläche (Knopf, Badge) behalten
+  // eigene gefüllte Elemente (Knopf, Badge, Zahlenpunkt) behalten – nur echte Flächen mit großem Innenabstand drehen mit
+  if (DARK_BG.test(str) && !(SURFACE_BG.test(str) && /(?<![\w-])p-(?:4|5|6|8)(?![\w-])/.test(str))) return str;
   let s = str;
   // invertierte Knöpfe (weiß auf blau) → Primärknopf
   if (/(?<![\w-])bg-white(?![\w\/-])/.test(s) && /(?<![\w-])text-nw-blue(?![\w-])/.test(s) && !/(?<![\w-])border(?![\w-])/.test(s)) {
@@ -80,12 +81,14 @@ while ((m = re.exec(src))) {
   if (!cm) continue;
   const cls = cm[1];
   // Hintergrund kann auch im style stehen: style: { background(Color): '#243186' }
-  const styleBg = props.match(/(background(?:Color)?):\s*(['"])#(?:243186|3A46A0)\2,?\s*/);
+  const styleBg = props.match(/(background(?:Color)?):\s*(['"])#(?:243186|3A46A0|2F7A48|6EBD84)\2,?\s*/);
   const styleWhite = /color:\s*['"](?:white|#FFFFFF)['"]/.test(props);
   if (!(SURFACE_BG.test(cls) || styleBg)) continue;
   // nur Flächen: mit Innenabstand, nicht rund (Avatare, Zahlenpunkte)
   if (!/(?<![\w-])(?:p|px|py)-(?:4|5|6|8|10|12)(?![\w-])/.test(cls) && !['thead', 'tr'].includes(m[1])) continue;
   if (/rounded-full/.test(cls)) continue;
+  // Overlays, Tooltips, schwebende Elemente nie umdrehen
+  if (/(?<![\w-])(?:fixed|absolute|bg-opacity-\d+)(?![\w-])/.test(cls) || /(?<![\w-])bg-ink\/\d+/.test(cls)) continue;
   const open = src.indexOf('(', start);
   const end = callEnd(src, open);
   let el = src.slice(start, end);

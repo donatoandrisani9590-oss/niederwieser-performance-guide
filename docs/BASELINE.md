@@ -56,3 +56,7 @@ Vorher-Stand aller Hauptseiten: `docs/screenshots/before/` (mit Testdaten, 1440 
   (Fehler 402). Betrifft vermutlich auch „PDF ansehen/hochladen“ im Live-Betrieb.
 - Pull Request #1 benennt `index.html` in `Index.html` um → würde Links brechen (siehe PROTECTED.md §6).
 - Collection `appraisals` ist leer, `mail` wird von der App nicht beschrieben.
+
+## Nach dem Redesign
+
+Ergebnis und Vergleich: `docs/redesign/BERICHT.md`, Screenshots: `docs/screenshots/after/`.

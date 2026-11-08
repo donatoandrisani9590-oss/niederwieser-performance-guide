@@ -10356,6 +10356,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
 
         function PerformanceApp() {
           const [activeView, setActiveView] = useState('dashboard');
+          const [mobileNavOpen, setMobileNavOpen] = useState(false); // n.Org Shell: Menü auf schmalen Bildschirmen
           const [teamViewMode, setTeamViewMode] = useState('cards'); // 'cards' oder 'list'
           const [goalsDashboardSelectedId, setGoalsDashboardSelectedId] = useState(null); // Ausgewählter Mitarbeiter im Goals Dashboard
           const [competencyArea, setCompetencyArea] = useState(null); // null = Auswahl, 'admin' oder 'production'
@@ -28585,17 +28586,27 @@ const renderDashboard = () => {
             React.createElement('aside', { className: "w-full md:w-[268px] flex-shrink-0 p-3 md:pr-0 md:sticky md:top-0 md:h-screen z-20" },
               React.createElement('div', { className: "flex h-full flex-col rounded-xl border border-line bg-white shadow-card" },
                 // 1) Logo (Klick → Start)
-                React.createElement('div', { className: "px-4 pt-4 pb-3" },
-                  React.createElement('button', {
-                    type: 'button',
-                    onClick: () => { setActiveView('dashboard'); setActiveScore(3); },
-                    className: "block rounded-lg text-left",
-                    title: t.dashboard
-                  },
-                    React.createElement('img', { src: NW_LOGO_SRC, alt: 'Niederwieser — Flexible Food Packaging', className: "h-auto w-[196px] max-w-full" })
+                React.createElement('div', { className: "flex items-start gap-2 px-4 pt-4 pb-3" },
+                  React.createElement('div', { className: "min-w-0 flex-1" },
+                    React.createElement('button', {
+                      type: 'button',
+                      onClick: () => { setActiveView('dashboard'); setActiveScore(3); setMobileNavOpen(false); },
+                      className: "block rounded-lg text-left",
+                      title: t.dashboard
+                    },
+                      React.createElement('img', { src: NW_LOGO_SRC, alt: 'Niederwieser — Flexible Food Packaging', className: "h-auto w-[160px] md:w-[196px] max-w-full" })
+                    ),
+                    React.createElement('p', { className: "mt-2 text-xs font-semibold text-nw-blue" }, t.title)
                   ),
-                  React.createElement('p', { className: "mt-2 text-xs font-semibold text-nw-blue" }, t.title)
+                  React.createElement(NwButton, {
+                    className: 'md:hidden',
+                    icon: mobileNavOpen ? X : List,
+                    'aria-expanded': mobileNavOpen,
+                    'aria-controls': 'nw-sidebar-menu',
+                    onClick: () => setMobileNavOpen(o => !o)
+                  }, getText(lang, 'Menü', 'Menu', 'Menu'))
                 ),
+                React.createElement('div', { id: 'nw-sidebar-menu', className: `${mobileNavOpen ? 'flex' : 'hidden'} md:flex min-h-0 flex-1 flex-col` },
                 React.createElement('div', { className: "mx-4 mb-3 border-t border-line-2" }),
                 // 2) App-Sprache
                 React.createElement('div', { className: "px-3 mb-3" },
@@ -28622,7 +28633,7 @@ const renderDashboard = () => {
                 (() => {
                   const navItem = (label, icon, isActive, onClick) => React.createElement('button', {
                     type: 'button',
-                    onClick,
+                    onClick: () => { onClick(); setMobileNavOpen(false); },
                     'aria-current': isActive ? 'page' : undefined,
                     className: `flex h-8 w-full items-center gap-2.5 rounded-lg px-2.5 text-left text-sm transition-colors duration-150 active:scale-[.98] ${isActive ? 'bg-nw-blue-06 font-semibold text-nw-blue' : 'text-ink-60 hover:bg-nw-grey-40 hover:text-ink'}`
                   }, React.createElement(icon, { size: 16, 'aria-hidden': true, className: 'shrink-0' }), React.createElement('span', { className: 'truncate' }, label));
@@ -28674,6 +28685,7 @@ const renderDashboard = () => {
                     React.createElement(NwButton, { variant: 'ghost', size: 'sm', icon: LogOut, onClick: handleLogout, title: user.email || '' }, getText(lang, 'Abmelden', 'Esci', 'Logout'))
                   )
                 )
+                ) // Ende Menü-Container
               )
             ),
             React.createElement('main', { className: "min-w-0 flex-1 overflow-y-auto md:h-screen px-4 py-5 md:px-8 md:py-6 md:pb-20" },

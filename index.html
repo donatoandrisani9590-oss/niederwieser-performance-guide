@@ -1020,6 +1020,61 @@
           });
           return [...ys].sort((x, y) => y.localeCompare(x));
         };
+        // Formular-Leiste (bleibt beim Scrollen oben): Abschnitte A, B, C … zum Springen, aktueller Abschnitt
+        // hervorgehoben, dazu Speichern/Abschließen (gleiche Handler wie im Kopf). Liest die Abschnitte aus den
+        // Überschriften „Teil …“ des umgebenden Bogens – ändert am Bogen selbst nichts.
+        const NwFormBar = ({ lang, actions, offset = 0 }) => {
+          const barRef = useRef(null);
+          const [secs, setSecs] = useState([]);
+          const [active, setActive] = useState(null);
+          useEffect(() => {
+            const scan = () => {
+              const root = barRef.current && barRef.current.parentElement;
+              if (!root) return;
+              const hs = [...root.querySelectorAll('h3')].filter(h => /^(Teil|Parte|Part)\s+[A-Z]/.test((h.textContent || '').trim()) && h.offsetParent !== null);
+              const list = hs.map((h, i) => {
+                const card = h.closest('.rounded-xl, .rounded-card') || h.parentElement;
+                if (!card.id) card.id = 'nw-sec-' + i;
+                card.style.scrollMarginTop = (84 + offset) + 'px';
+                const txt = (h.textContent || '').trim();
+                const m = txt.match(/^(?:Teil|Parte|Part)\s+([A-Z](?:\.\d)?)\s*[:\-–]?\s*(.*)$/);
+                return { id: card.id, code: m ? m[1] : String(i + 1), name: (m ? m[2] : txt).split(/\s[(–-]|\s\(/)[0].replace(/\s*\(.*$/, '').trim() };
+              });
+              setSecs(prev => JSON.stringify(prev) === JSON.stringify(list) ? prev : list);
+            };
+            scan();
+            const t = setInterval(scan, 1500);
+            return () => clearInterval(t);
+          }, []);
+          useEffect(() => {
+            if (!secs.length || typeof IntersectionObserver === 'undefined') return;
+            const io = new IntersectionObserver((entries) => {
+              const vis = entries.filter(en => en.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+              if (vis[0]) setActive(vis[0].target.id);
+            }, { rootMargin: `-${90 + offset}px 0px -55% 0px` });
+            secs.forEach(sc => { const el = document.getElementById(sc.id); if (el) io.observe(el); });
+            return () => io.disconnect();
+          }, [secs]);
+          const jump = (id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+            setActive(id);
+          };
+          const acts = (actions || []).filter(Boolean);
+          return React.createElement('div', { ref: barRef, style: { top: offset + 'px' }, className: 'no-print sticky z-30 rounded-card border border-line bg-white/95 px-2.5 py-2 shadow-card backdrop-blur-sm', 'data-no-print': 'true' },
+            React.createElement('div', { className: 'flex items-center gap-2' },
+              React.createElement('nav', { 'aria-label': getText(lang, 'Abschnitte des Bogens', 'Sezioni del modulo', 'Form sections'), className: 'flex min-w-0 flex-1 gap-1 overflow-x-auto' },
+                secs.map(sc => React.createElement('button', {
+                  key: sc.id, type: 'button', onClick: () => jump(sc.id), 'aria-current': active === sc.id ? 'location' : undefined, title: sc.name,
+                  className: 'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-2 py-1 text-xs transition-colors ' + (active === sc.id ? 'bg-nw-blue-06 font-semibold text-nw-blue' : 'text-ink-60 hover:bg-nw-grey-40 hover:text-ink')
+                }, React.createElement('span', { className: 'grid h-5 min-w-[20px] place-items-center rounded-md px-1 text-2xs font-semibold ' + (active === sc.id ? 'bg-nw-blue text-white' : 'bg-nw-grey-40 text-ink-60') }, sc.code), active === sc.id && React.createElement('span', { className: 'max-w-[180px] truncate' }, sc.name)))),
+              acts.length > 0 && React.createElement('div', { className: 'flex shrink-0 items-center gap-1.5' },
+                acts.map((a, i) => React.createElement(NwButton, { key: i, size: 'sm', variant: a.variant || 'secondary', icon: a.icon, onClick: a.onClick, disabled: a.disabled }, a.label)))
+            )
+          );
+        };
         // Segmented: Pillen-Auswahl (z. B. Sprache, Ansicht)
         const NwSegmented = ({ options, value, onChange, size = 'md', ariaLabel, className }) =>
           React.createElement('div', { role: 'radiogroup', 'aria-label': ariaLabel, title: ariaLabel, className: 'inline-flex shrink-0 gap-0.5 rounded-lg bg-nw-blue-12 p-[3px] ' + (size === 'sm' ? 'h-7' : 'h-8') + (className ? ' ' + className : '') },
@@ -5779,6 +5834,11 @@
                     e('p', { className: "font-medium", style: { color: "#2F7A48" } }, t.headerSubtitle)
                 ),
 
+                // Formular-Leiste: Abschnitte + Speichern/Abschließen immer erreichbar
+                e(NwFormBar, { lang, actions: teamButtonsVisible && teamContext ? [
+                  { label: getText(lang, 'Speichern', 'Salva', 'Save'), icon: Save, onClick: () => handleSaveTeamAppraisal('draft'), disabled: isSaving },
+                  { label: getText(lang, 'Fertig & abschließen', 'Fine e completa', 'Done & complete'), icon: CheckCircle2, variant: 'primary', onClick: () => handleSaveTeamAppraisal('completed'), disabled: isSaving }
+                ] : [] }),
                 e('div', { className: "bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid" },
                     e('h3', { className: "text-lg font-semibold text-nw-blue mb-4 border-b pb-2" }, t.partA),
                     e('div', { className: "grid grid-cols-2 gap-6" },
@@ -7103,6 +7163,9 @@
             const coreRatings = coreList.map(c => c.rating).filter(r => r > 0);
             const allCoreRatingsSame = coreRatings.length >= 5 && coreRatings.every(r => r === coreRatings[0]);
             const haloEffectWarning = allCoreRatingsSame && coreRatings.length >= 5;
+            // Hinweis erst zeigen, wenn bewertet wurde (unberührte Vorbelegung „alle 3“ ist kein Halo-Effekt)
+            const haloInitialRef = React.useRef(JSON.stringify(coreRatings));
+            const showHaloWarning = haloEffectWarning && !(JSON.stringify(coreRatings) === haloInitialRef.current && coreRatings.every(r => r === 3));
             
             // === GAP-ANALYSE (Selbst vs. Fremd) ===
             // Berechne Gaps für alle Kompetenzen
@@ -8396,6 +8459,11 @@
                   onRestore: restoreVersion
                 }),
                 
+                // Formular-Leiste: Abschnitte + Speichern/Abschließen immer erreichbar
+                e(NwFormBar, { lang, actions: teamButtonsVisible && teamContext ? [
+                  { label: getText(lang, 'Speichern', 'Salva', 'Save'), icon: Save, onClick: () => handleSaveTeamAppraisal('draft'), disabled: isSaving },
+                  { label: getText(lang, 'Fertig & abschließen', 'Fine e completa', 'Done & complete'), icon: CheckCircle2, variant: 'primary', onClick: () => handleSaveTeamAppraisal('completed'), disabled: isSaving }
+                ] : [] }),
                 e('div', { className: "bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid" },
                     e('h3', { className: "text-lg font-semibold text-nw-blue mb-4 border-b pb-2" }, t.partA),
                     
@@ -8427,7 +8495,7 @@
                               lang === 'de' ? 'Mitarbeitende/r' : lang === 'it' ? 'Collaboratore/trice' : 'Employee'
                             ),
                             e('span', { className: 'text-xs text-ink-60' }, 
-                              lang === 'de' ? '50% WAS + 50% Kern-Kompetenzen' : lang === 'it' ? '50% COSA + 50% Competenze base' : '50% WHAT + 50% Core Competencies'
+                              lang === 'de' ? 'Ohne Führungsverantwortung (50% Ziele · 50% Kompetenzen)' : lang === 'it' ? 'Senza responsabilità di guida (50% obiettivi · 50% competenze)' : 'No leadership role (50% goals · 50% competencies)'
                             )
                           )
                         ),
@@ -8450,7 +8518,7 @@
                               lang === 'de' ? 'Führungskraft' : lang === 'it' ? 'Manager' : 'Manager'
                             ),
                             e('span', { className: 'text-xs text-ink-60' }, 
-                              lang === 'de' ? '50% WAS + 25% Kern + 25% Leadership' : lang === 'it' ? '50% COSA + 25% Base + 25% Leadership' : '50% WHAT + 25% Core + 25% Leadership'
+                              lang === 'de' ? 'Mit Führungsverantwortung, zusätzlich Führungskompetenzen (50% · 25% · 25%)' : lang === 'it' ? 'Con responsabilità di guida, più competenze di leadership (50% · 25% · 25%)' : 'Leadership role, plus leadership competencies (50% · 25% · 25%)'
                             )
                           )
                         )
@@ -8466,29 +8534,7 @@
                       )
                     ),
                     
-                    // === KOMPETENZ-REFERENZ HINWEIS (kompakt) ===
-                    e('div', { className: 'no-print mb-6 p-3 bg-nw-blue-06 border border-nw-blue-25 rounded-xl flex items-center justify-between gap-3' },
-                      e('div', { className: 'flex items-center gap-2 text-sm text-nw-blue' },
-                        e('span', { className: 'text-lg' }, '📘'),
-                        e('span', null, 
-                          lang === 'de' ? 'Verhaltensanker (BARS) als Referenz öffnen:' 
-                            : lang === 'it' ? 'Apri gli ancoraggi comportamentali (BARS) come riferimento:'
-                            : 'Open behavioral anchors (BARS) as reference:'
-                        )
-                      ),
-                      e('button', {
-                        onClick: () => {
-                          const baseUrl = window.location.href.split('?')[0];
-                          const competencyUrl = baseUrl + '?view=competencies';
-                          window.open(competencyUrl, '_blank', 'noopener,noreferrer');
-                        },
-                        className: 'px-4 py-2 bg-nw-blue text-white rounded-xl text-sm font-medium hover:bg-nw-blue transition-all flex items-center gap-2 shadow-card'
-                      },
-                        e(BookOpen, { size: 16 }),
-                        e(ExternalLink, { size: 12, className: 'opacity-70' }),
-                        lang === 'de' ? 'Kompetenzen' : lang === 'it' ? 'Competenze' : 'Competencies'
-                      )
-                    ),
+                    // (Verhaltensanker-Hinweis steht bereits oben im Bogen; Doppelung entfernt)
                     
                     e('div', { className: "hidden print:block pdf-only mb-4 font-semibold" }, `${t.profile}: ${isManager ? t.roleMgr : t.roleEmp}`),
                     e('div', { className: "grid grid-cols-2 gap-6" },
@@ -8680,8 +8726,8 @@
                     
                     e('button', { onClick: () => addItem(goals, setGoals, {name:'', weight:0, achievement:0}), className: "no-print mt-3 text-xs flex items-center gap-1 text-nw-blue" }, e(PlusCircle, {size:14}), t.addGoal),
                     
-                    // === GOAL-OVERLOAD INDIKATOR ===
-                    goals.length > 0 && e('div', { 
+                    // === GOAL-OVERLOAD INDIKATOR === (entfällt, wenn die Ziele aus der Zielvereinbarung stammen – dort festgelegt)
+                    goals.length > 0 && !linkedGoalAgreement && e('div', { 
                         className: `no-print mt-4 p-4 rounded-xl border flex items-center gap-3 ${
                             goals.length >= 1 && goals.length <= 2 
                                 ? 'bg-warn-bg border-warn/30' 
@@ -8888,7 +8934,7 @@
                 ),
                 
                 // === HALO-EFFEKT WARNUNG ===
-                haloEffectWarning && e('div', { 
+                showHaloWarning && e('div', { 
                   className: "bg-warn-bg border-2 border-warn rounded-xl p-4 no-print",
                   'data-no-print': 'true',
                   style: { WebkitPrintColorAdjust: 'exact' }
@@ -25032,6 +25078,9 @@ const renderDashboard = () => {
             const coreRatings = coreList.map(c => c.rating).filter(r => r > 0);
             const allCoreRatingsSame = coreRatings.length >= 5 && coreRatings.every(r => r === coreRatings[0]);
             const haloEffectWarning = allCoreRatingsSame && coreRatings.length >= 5;
+            // Hinweis erst zeigen, wenn bewertet wurde (unberührte Vorbelegung „alle 3“ ist kein Halo-Effekt)
+            const haloInitialRef = React.useRef(JSON.stringify(coreRatings));
+            const showHaloWarning = haloEffectWarning && !(JSON.stringify(coreRatings) === haloInitialRef.current && coreRatings.every(r => r === 3));
             
             // === AUTO-SAVE: Alle 60 Sekunden automatisch in Firebase speichern ===
             const [lastAutoSave, setLastAutoSave] = React.useState(null);
@@ -26027,7 +26076,7 @@ const renderDashboard = () => {
                   ev.target.style.height = ev.target.scrollHeight + 'px';
                 },
                 className: 'w-full outline-none resize-none overflow-hidden min-h-[2rem]', 
-                placeholder: t.devMeasure,
+                placeholder: t.devMeasure || t.measure,
                 rows: 1,
                 style: { whiteSpace: 'pre-wrap', wordWrap: 'break-word' }
               })),
@@ -26129,32 +26178,16 @@ const renderDashboard = () => {
                 
                 // Anleitung: UNTERSCHIEDLICH für Guest-Modus vs. Normal-Modus
                 isGuestMode 
-                  // === GUEST-MODUS: Einfache Info mit Auto-Save Hinweis ===
-                  ? e('div', { className: 'bg-nw-green-15 border-2 border-nw-green/40 rounded-xl p-5 mb-4 no-print' },
-                      e('div', { className: 'flex items-start gap-4' },
-                        e('div', { className: 'w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0', style: { backgroundColor: '#6EBD84' } },
-                          e(CheckCircle2, { size: 24, className: 'text-white' })
-                        ),
-                        e('div', null,
-                          e('h4', { className: 'font-semibold text-ok mb-2' }, 
-                            lang === 'de' ? 'Ihre Eingaben werden automatisch gespeichert' 
-                            : lang === 'it' ? 'I tuoi dati vengono salvati automaticamente'
-                            : 'Your entries are saved automatically'
-                          ),
-                          e('p', { className: 'text-sm text-ok' },
-                            lang === 'de' 
-                              ? 'Sie können jederzeit unterbrechen und später mit demselben Link fortfahren. Alle Eingaben werden automatisch in der Cloud gesichert. Klicken Sie am Ende auf "Abschließen & Senden".'
-                              : lang === 'it'
-                              ? 'Puoi interrompere in qualsiasi momento e continuare più tardi con lo stesso link. Tutti i dati vengono salvati automaticamente nel cloud. Clicca su "Completa & Invia" alla fine.'
-                              : 'You can stop at any time and continue later with the same link. All entries are automatically saved in the cloud. Click "Complete & Send" when finished.'
-                          ),
-                          // NEU: Visueller Hinweis für Cloud-Speicherung
-                          e('div', { className: 'mt-3 flex items-center gap-2 text-xs text-ok' },
-                            e('span', { className: 'w-2 h-2 rounded-full bg-ok animate-pulse' }),
-                            lang === 'de' ? 'Cloud-Synchronisierung aktiv' : 'Sincronizzazione cloud attiva'
-                          )
-                        )
-                      )
+                  // === GUEST-MODUS: kompakte Zeile (automatisch gespeichert, jederzeit fortsetzbar) ===
+                  ? e('div', { className: 'mb-3 flex items-start gap-2.5 rounded-lg border border-nw-green/40 bg-nw-green-15 px-3.5 py-2.5 text-sm text-ok no-print' },
+                      e('span', { className: 'mt-1.5 h-2 w-2 shrink-0 rounded-full bg-ok motion-safe:animate-pulse', 'aria-hidden': true }),
+                      e('span', null,
+                        e('strong', { className: 'font-semibold' }, lang === 'de' ? 'Wird automatisch gespeichert. ' : lang === 'it' ? 'Salvataggio automatico. ' : 'Saved automatically. '),
+                        lang === 'de'
+                          ? 'Sie können jederzeit unterbrechen und mit demselben Link weitermachen. Am Ende auf „Abschließen & Senden“ klicken.'
+                          : lang === 'it'
+                          ? 'Puoi interrompere in qualsiasi momento e continuare con lo stesso link. Alla fine clicca su „Completa & Invia“.'
+                          : 'You can stop at any time and continue with the same link. Click “Complete & Send” at the end.')
                     )
                   // === NORMAL-MODUS: Neue einfache Anleitung (kein Link-Kopieren mehr nötig!) ===
                   : e('div', { className: 'bg-nw-green-15 border-2 border-nw-green/40 rounded-xl p-5 mb-4 no-print' },
@@ -26209,28 +26242,28 @@ const renderDashboard = () => {
                     ),
                 
                 // Hinweis
-                e('div', { className: 'bg-warn-bg border border-warn/30 rounded-xl p-4 mb-4 no-print' },
-                  e('p', { className: 'text-ink-60 text-sm' }, '💡 ' + (lang === 'de' ? 'Hinweis: Alle Felder außer Name und FK-E-Mail sind freiwillig!' : lang === 'it' ? 'Nota: Tutti i campi tranne nome e e-mail FK sono facoltativi!' : 'Note: All fields except name and manager email are optional!'))
+                e('div', { className: 'mb-3 px-1 no-print' },
+                  e('p', { className: 'text-xs text-ink-60' }, (lang === 'de' ? 'Hinweis: Alle Felder außer Name und FK-E-Mail sind freiwillig!' : lang === 'it' ? 'Nota: Tutti i campi tranne nome e e-mail FK sono facoltativi!' : 'Note: All fields except name and manager email are optional!'))
                 ),
                 
                 // === NEU: BARS-Kompetenz-Hinweis mit Link zum Öffnen in neuem Tab ===
-                e('div', { className: 'bg-nw-blue-06 border-2 border-nw-blue-25 rounded-xl p-5 mb-4 no-print' },
+                e('div', { className: 'bg-nw-blue-06 border border-nw-blue-25 rounded-xl p-4 mb-4 no-print' },
                   e('div', { className: 'flex items-start gap-4' },
-                    e('div', { className: 'w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 shadow-float', style: { background: '#243186' } },
-                      e(BookOpen, { size: 28, className: 'text-white' })
+                    e('div', { className: 'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0', style: { background: '#243186' } },
+                      e(BookOpen, { size: 18, className: 'text-white' })
                     ),
                     e('div', { className: 'flex-1' },
-                      e('h4', { className: 'font-semibold text-lg mb-2', style: { color: '#243186' } }, 
+                      e('h4', { className: 'font-semibold text-base mb-1', style: { color: '#243186' } }, 
                         lang === 'de' ? 'Verhaltensanker als Orientierung' 
                         : lang === 'it' ? 'Ancoraggi comportamentali come riferimento'
                         : 'Behavioral Anchors as Reference'
                       ),
-                      e('p', { className: 'text-sm text-ink mb-3' },
-                        lang === 'de' 
-                          ? 'Um die Kompetenzen richtig einzuschätzen, empfehlen wir Ihnen, die Verhaltensanker (BARS) in einem zweiten Fenster zu öffnen. Dort finden Sie konkrete Beispiele für jede Bewertungsstufe (1-5).'
+                      e('p', { className: 'text-sm text-ink-60 mb-3' },
+                        lang === 'de'
+                          ? 'Unsicher bei der Einstufung? Die Verhaltensanker zeigen für jede Kompetenz konkrete Beispiele zu den Stufen 1–5.'
                           : lang === 'it'
-                          ? 'Per valutare correttamente le competenze, ti consigliamo di aprire gli ancoraggi comportamentali (BARS) in una seconda finestra. Lì troverai esempi concreti per ogni livello di valutazione (1-5).'
-                          : 'To correctly assess competencies, we recommend opening the behavioral anchors (BARS) in a second window. There you will find concrete examples for each rating level (1-5).'
+                          ? 'Incerto sulla valutazione? Gli ancoraggi comportamentali mostrano esempi concreti per i livelli 1–5.'
+                          : 'Unsure about a rating? The behavioral anchors show concrete examples for levels 1–5.'
                       ),
                       e('div', { className: 'flex flex-wrap gap-3' },
                         e('button', {
@@ -26240,7 +26273,7 @@ const renderDashboard = () => {
                             const competencyUrl = baseUrl + '?view=competencies';
                             window.open(competencyUrl, '_blank', 'noopener,noreferrer');
                           },
-                          className: 'flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-white shadow-float hover:shadow-float transition-all transform hover:scale-105',
+                          className: 'flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-semibold text-white transition-all transform hover:scale-105',
                           style: { background: '#6EBD84' }
                         },
                           e(BookOpen, { size: 18 }),
@@ -26267,21 +26300,13 @@ const renderDashboard = () => {
                               showToast(lang === 'de' ? 'Link kopiert!' : lang === 'it' ? 'Link copiato!' : 'Link copied!', 'success');
                             });
                           },
-                          className: 'flex items-center gap-2 px-4 py-3 rounded-xl font-medium text-ink-60 bg-white border border-line hover:bg-panel transition-all cursor-pointer'
+                          className: 'flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium text-ink-60 bg-white border border-line hover:bg-panel transition-all cursor-pointer'
                         },
                           e(Link, { size: 16 }),
                           lang === 'de' ? 'Als Link kopieren' 
                           : lang === 'it' ? 'Copia come link'
                           : 'Copy as link'
                         )
-                      ),
-                      e('p', { className: 'text-xs text-ink-60 mt-3 flex items-center gap-1' },
-                        e(Info, { size: 14 }),
-                        lang === 'de' 
-                          ? 'Tipp: Ordnen Sie beide Fenster nebeneinander an für optimales Arbeiten.'
-                          : lang === 'it'
-                          ? 'Suggerimento: Disponi entrambe le finestre una accanto all\'altra per un lavoro ottimale.'
-                          : 'Tip: Arrange both windows side by side for optimal work.'
                       )
                     )
                   )
@@ -26291,6 +26316,11 @@ const renderDashboard = () => {
                 e('p', { className: 'font-medium', style: { color: '#2F7A48' } }, t.headerSubtitle)
               ),
               
+              // Formular-Leiste: Abschnitte + Speichern/Senden immer erreichbar
+              e(NwFormBar, { lang, offset: isGuestMode ? 52 : 0, actions: [
+                { label: getText(lang, 'Speichern', 'Salva', 'Save'), icon: Save, onClick: () => handleSave('draft'), disabled: isSaving },
+                { label: getText(lang, 'Fertig & senden', 'Fine e invia', 'Done & send'), icon: Send, variant: 'primary', onClick: handleCompleteAndSend, disabled: isSaving }
+              ] }),
               // === TEIL A: STAMMDATEN ===
               e('div', { className: 'bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid' },
                 e('h3', { className: 'text-lg font-semibold text-nw-blue mb-4 border-b pb-2' }, t.partA),
@@ -26320,7 +26350,7 @@ const renderDashboard = () => {
                       }), 
                       e('div', null,
                         e('span', { className: 'font-semibold text-ink block' }, t.roleEmp?.split('(')[0]?.trim() || 'Mitarbeitende'),
-                        e('span', { className: 'text-xs text-ink-60' }, '50% WAS + 50% Kern-Kompetenzen')
+                        e('span', { className: 'text-xs text-ink-60' }, getText(lang, 'Ohne Führungsverantwortung (50% Ziele · 50% Kompetenzen)', 'Senza responsabilità di guida (50% obiettivi · 50% competenze)', 'No leadership role (50% goals · 50% competencies)'))
                       )
                     ),
                     // Führungskraft Option
@@ -26339,7 +26369,7 @@ const renderDashboard = () => {
                       }), 
                       e('div', null,
                         e('span', { className: 'font-semibold text-ink block' }, t.roleMgr?.split('(')[0]?.trim() || 'Führungskraft'),
-                        e('span', { className: 'text-xs text-ink-60' }, '50% WAS + 25% Kern + 25% Leadership')
+                        e('span', { className: 'text-xs text-ink-60' }, getText(lang, 'Mit Führungsverantwortung, zusätzlich Führungskompetenzen (50% · 25% · 25%)', 'Con responsabilità di guida, più competenze di leadership (50% · 25% · 25%)', 'Leadership role, plus leadership competencies (50% · 25% · 25%)'))
                       )
                     )
                   ),
@@ -26497,7 +26527,7 @@ const renderDashboard = () => {
               ),
               
               // === HALO-EFFEKT WARNUNG ===
-              haloEffectWarning && e('div', { className: 'bg-warn-bg border-2 border-warn rounded-xl p-4 no-print' },
+              showHaloWarning && e('div', { className: 'bg-warn-bg border-2 border-warn rounded-xl p-4 no-print' },
                 e('div', { className: 'flex items-start gap-3' },
                   e('div', { className: 'text-2xl' }, '🎭'),
                   e('div', null,
@@ -26528,9 +26558,9 @@ const renderDashboard = () => {
                 e('div', { className: 'mb-6' }, e('label', { className: 'block text-sm font-semibold mb-1 text-ink' }, t.strengthsProfessional), e('textarea', { value: formData.strengths1, onChange: (ev) => handleFormChange('strengths1', ev.target.value), className: 'w-full border border-line rounded-lg p-3 text-sm resize-none outline-none', rows: 3 })),
                 e('div', { className: 'mb-6' }, e('label', { className: 'block text-sm font-semibold mb-1 text-ink' }, t.strengthsPersonal), e('textarea', { value: formData.strengths2, onChange: (ev) => handleFormChange('strengths2', ev.target.value), className: 'w-full border border-line rounded-lg p-3 text-sm resize-none outline-none', rows: 3 })),
                 e('div', null,
-                  e('label', { className: 'block text-sm font-semibold mb-2 text-ink' }, t.devPlanTitle),
+                  e('label', { className: 'block text-sm font-semibold mb-2 text-ink' }, t.devPlanTitle || t.development),
                   e('table', { className: 'w-full text-sm' },
-                    e('thead', { className: 'bg-panel text-left' }, e('tr', null, e('th', { className: 'p-2 border' }, t.devMeasure), e('th', { className: 'p-2 border w-32' }, t.devResponsible), e('th', { className: 'p-2 border w-28' }, t.devDeadline), e('th', { className: 'p-2 border w-10 no-print' }, ''))),
+                    e('thead', { className: 'bg-panel text-left' }, e('tr', null, e('th', { className: 'p-2 border' }, t.devMeasure || t.measure), e('th', { className: 'p-2 border w-32' }, t.devResponsible || t.responsible), e('th', { className: 'p-2 border w-28' }, t.devDeadline || t.deadline), e('th', { className: 'p-2 border w-10 no-print' }, ''))),
                     e('tbody', null, devPlan.map(d => renderDevRow(d)))
                   ),
                   e('button', { onClick: () => addItem(devPlan, setDevPlan, { measure: '', responsible: '', deadline: '' }), className: 'no-print mt-3 text-xs flex items-center gap-1 text-ok' }, e(PlusCircle, { size: 14 }), ' ', t.addDev)
@@ -26551,7 +26581,7 @@ const renderDashboard = () => {
                     e('span', { className: 'text-sm text-ink' }, label)
                   ))
                 ),
-                e('div', { className: 'mt-4' }, e('label', { className: 'block text-sm font-semibold mb-1 text-ink' }, t.careerComment), e('textarea', { value: formData.careerComment, onChange: (ev) => handleFormChange('careerComment', ev.target.value), className: 'w-full border border-line rounded-lg p-3 text-sm resize-none outline-none', rows: 3 })),
+                e('div', { className: 'mt-4' }, e('label', { className: 'block text-sm font-semibold mb-1 text-ink' }, t.careerComment || t.comments), e('textarea', { value: formData.careerComment, onChange: (ev) => handleFormChange('careerComment', ev.target.value), className: 'w-full border border-line rounded-lg p-3 text-sm resize-none outline-none', rows: 3 })),
                 // NEU: Wünsche für das kommende Jahr
                 e('div', { className: 'mt-4' }, 
                   e('label', { className: 'block text-sm font-semibold mb-1 text-ink flex items-center gap-2' }, 
@@ -26730,7 +26760,7 @@ const renderDashboard = () => {
                         React.createElement('span', { className: 'text-nw-blue font-semibold text-xs' }, '1')
                       ),
                       React.createElement('span', null, 
-                        lang === 'de' ? 'Selbsteinschätzung Ihrer 5 Kernkompetenzen' : 'Autovalutazione delle tue 5 competenze chiave'
+                        lang === 'de' ? 'Ihre Ziele und Ihre Kompetenzen selbst einschätzen' : lang === 'it' ? 'Autovalutare obiettivi e competenze' : 'Rate your goals and competencies'
                       )
                     ),
                     // Punkt 2
@@ -26739,7 +26769,7 @@ const renderDashboard = () => {
                         React.createElement('span', { className: 'text-nw-blue font-semibold text-xs' }, '2')
                       ),
                       React.createElement('span', null, 
-                        lang === 'de' ? 'Reflexion zu Stärken & Entwicklungsfeldern' : 'Riflessione su punti di forza e aree di sviluppo'
+                        lang === 'de' ? 'Stärken und Entwicklungsfelder benennen' : lang === 'it' ? 'Punti di forza e aree di sviluppo' : 'Strengths and development areas'
                       )
                     ),
                     // Punkt 3
@@ -26748,7 +26778,7 @@ const renderDashboard = () => {
                         React.createElement('span', { className: 'text-nw-blue font-semibold text-xs' }, '3')
                       ),
                       React.createElement('span', null, 
-                        lang === 'de' ? 'Ihre Wünsche für das kommende Jahr' : 'I tuoi desideri per l\'anno prossimo'
+                        lang === 'de' ? 'Karriereperspektive und Wünsche für das kommende Jahr' : lang === 'it' ? 'Prospettive di carriera e desideri per l\'anno prossimo' : 'Career outlook and wishes for next year'
                       )
                     ),
                     // Punkt 4
@@ -26757,7 +26787,7 @@ const renderDashboard = () => {
                         React.createElement('span', { className: 'text-nw-blue font-semibold text-xs' }, '4')
                       ),
                       React.createElement('span', null, 
-                        lang === 'de' ? 'Feedback zur Zusammenarbeit' : 'Feedback sulla collaborazione'
+                        lang === 'de' ? 'Feedback zur Zusammenarbeit, dann „Abschließen & Senden“' : lang === 'it' ? 'Feedback sulla collaborazione, poi „Completa & Invia“' : 'Feedback on collaboration, then “Complete & Send”'
                       )
                     )
                   )

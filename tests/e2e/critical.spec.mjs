@@ -394,3 +394,30 @@ test('Zurück und Home: auf jeder Seite, Schritt für Schritt zurück, Formular 
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
   expect(JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields))).toBe(before);
 });
+
+test('Bögen: Abschnittsleiste bleibt sichtbar und springt, keine Halo-Warnung vor dem Bewerten', async ({ page }) => {
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  await rowButton(page, 'Emil Probe', 'Starten').click();
+  await expect(page.getByRole('button', { name: /Entwurf speichern/ }).first()).toBeVisible();
+  const nav = page.getByRole('navigation', { name: 'Abschnitte des Bogens' });
+  await expect(nav.getByRole('button', { name: 'D' })).toBeVisible();
+  await nav.getByRole('button', { name: 'D' }).click();
+  await expect(page.getByRole('heading', { name: /^Teil D/ })).toBeInViewport();
+  // Leiste nach dem Sprung weiterhin sichtbar, Speichern erreichbar
+  await expect(nav).toBeInViewport();
+  await expect(page.getByRole('button', { name: 'Speichern', exact: true })).toBeInViewport();
+  // Vorbelegung „alle 3“ ist noch keine Bewertung
+  await expect(page.getByText('Möglicher Halo-Effekt')).toHaveCount(0);
+});
+
+test('Mitarbeiter-Link: Abschnittsleiste unter der Kopfzeile, Spaltenköpfe der Maßnahmen sichtbar', async ({ page }) => {
+  await openApp(page, '?accessCode=CODE-tm-emil');
+  await page.getByRole('button', { name: /Selbstreflexion starten/ }).click();
+  const nav = page.getByRole('navigation', { name: 'Abschnitte des Bogens' });
+  await nav.getByRole('button', { name: 'D' }).click();
+  await expect(page.getByRole('heading', { name: /^Teil D/ })).toBeInViewport();
+  await expect(nav).toBeInViewport();
+  await expect(page.getByRole('columnheader', { name: 'Maßnahme' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Fertig & senden' })).toBeInViewport();
+});

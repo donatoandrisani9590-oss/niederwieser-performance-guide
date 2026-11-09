@@ -1,10 +1,10 @@
 // Erststart ohne Anleitung: Eine neue Führungskraft folgt ausschließlich den sichtbaren Hauptaktionen
-// („Ihr nächster Schritt“) – vom ersten Aufruf bis zur ersten abgeschlossenen Beurteilung. Der Guide wird nie geöffnet.
+// („Dein nächster Schritt“) – vom ersten Aufruf bis zur ersten abgeschlossenen Beurteilung. Der Guide wird nie geöffnet.
 import { test, expect, openApp } from './fixtures.mjs';
 import { seed, listDocs } from './seed.mjs';
 
 const field = (d, n) => { const v = d.fields?.[n]; return v ? Object.values(v)[0] : undefined; };
-const nextStep = (page) => page.locator('section', { hasText: 'Ihr nächster Schritt' }).getByRole('button').first();
+const nextStep = (page) => page.locator('section', { hasText: 'Dein nächster Schritt' }).getByRole('button').first();
 
 test('Erststart: vom ersten Aufruf bis zur ersten abgeschlossenen Beurteilung nur über die Hauptaktionen', async ({ page, consoleErrors }) => {
   await seed();
@@ -25,17 +25,17 @@ test('Erststart: vom ersten Aufruf bis zur ersten abgeschlossenen Beurteilung nu
 
   // 3) Dashboard schlägt das Anlegen des Teams vor
   await page.getByText('Dashboard', { exact: true }).first().click();
-  await expect(page.getByText('Legen Sie Ihr Team an')).toBeVisible();
+  await expect(page.getByText('Lege dein Team an')).toBeVisible();
   await nextStep(page).click();
 
   // 4) Ersten Mitarbeiter anlegen
   await page.locator('#add-name').fill('Mia Muster');
   await page.locator('#add-pos').fill('Einkauf');
-  await page.getByRole('button', { name: /Hinzufügen/ }).first().click();
+  await page.getByRole('button', { name: 'Hinzufügen', exact: true }).click();
   await expect(page.getByText('1 Mitarbeiter')).toBeVisible();
 
-  // 5) Die Karte zeigt die nächste Aktion; Beurteilung starten und abschließen
-  await page.getByText('→ Review starten').first().click();
+  // 5) Die Status-Matrix zeigt die nächste Aktion; Beurteilung starten und abschließen
+  await page.getByRole('row').filter({ hasText: 'Mia Muster' }).getByRole('button', { name: 'Starten', exact: true }).click();
   await page.getByRole('button', { name: /Abschließen/ }).first().click();
   const confirm = page.getByRole('button', { name: /Ja|Bestätigen|Abschließen/ }).last();
   if (await confirm.isVisible().catch(() => false)) await confirm.click().catch(() => {});
@@ -56,8 +56,10 @@ test('Erststart Mitarbeiter: Link öffnen, starten, absenden – Selbstreflexion
   await page.getByRole('button', { name: /Abschließen & Senden/ }).first().click();
   const confirm = page.getByRole('button', { name: /Ja|Bestätigen|Senden/ }).last();
   if (await confirm.isVisible().catch(() => false)) await confirm.click().catch(() => {});
-  await expect.poll(async () => (await listDocs('teamAppraisals')).filter((d) => field(d, 'employeeId') === 'tm-emil').length, { timeout: 20000 }).toBeGreaterThan(0);
-  const doc = (await listDocs('teamAppraisals')).find((d) => field(d, 'employeeId') === 'tm-emil');
+  // Emil hat im Seed bereits eine Zielvereinbarung; gesucht ist die neue Selbstreflexion
+  const isSelf = (d) => field(d, 'employeeId') === 'tm-emil' && /^self/.test(String(field(d, 'type')));
+  await expect.poll(async () => (await listDocs('teamAppraisals')).filter(isSelf).length, { timeout: 20000 }).toBeGreaterThan(0);
+  const doc = (await listDocs('teamAppraisals')).find(isSelf);
   expect(String(field(doc, 'type'))).toMatch(/^self/);
   expect(field(doc, 'userId')).toBe(ids.uidA); // zugeordnet zur richtigen Führungskraft
   expect(consoleErrors).toEqual([]);

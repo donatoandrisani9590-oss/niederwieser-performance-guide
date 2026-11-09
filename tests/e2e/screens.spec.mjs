@@ -1,7 +1,7 @@
 // Alle Hauptseiten öffnen: rendern ohne Fehler, Screenshot, und das bloße Ansehen verändert keine Daten.
 // Screenshots landen in $SHOT_DIR (Standard: ../docs/screenshots/current).
 import { test, expect, openApp } from './fixtures.mjs';
-import { seed, USERS, ACCESS_CODE, listDocs } from './seed.mjs';
+import { seed, USERS, ACCESS_CODE, YEAR, PREV_YEAR, listDocs } from './seed.mjs';
 import { mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -65,9 +65,11 @@ test('Führungskraft: alle Hauptseiten rendern ohne Fehler und Ansehen ändert k
   await loginVia(page, USERS.managerA);
   for (const [label, file] of MANAGER_NAV) { await clickNav(page, label); await shot(page, file); }
   await clickNav(page, 'Team-Übersicht');
-  await page.getByText('Liste', { exact: true }).first().click();
-  await shot(page, '11b-team-liste');
-  await page.getByText('Karten', { exact: true }).first().click();
+  await page.getByRole('radio', { name: 'Karten' }).click();
+  await shot(page, '11b-team-karten');
+  await page.getByRole('radio', { name: PREV_YEAR }).click();
+  await shot(page, '11c-team-vorjahr');
+  await page.getByRole('radio', { name: YEAR }).click();
   await page.getByText('→ Bearbeiten').first().click();
   await expect(page.getByRole('button', { name: /Entwurf speichern/ }).first()).toBeVisible();
   await shot(page, '14-beurteilung-formular');
@@ -75,6 +77,12 @@ test('Führungskraft: alle Hauptseiten rendern ohne Fehler und Ansehen ändert k
   await page.getByText('→ Erstellen').first().click();
   await shot(page, '15-zielvereinbarung');
   await clickNav(page, 'Team-Übersicht');
+  await page.getByRole('radio', { name: 'Liste' }).click();
+  await page.getByRole('row').filter({ hasText: 'Emil Probe' }).getByRole('button', { name: 'Starten', exact: true }).click();
+  await expect(page.getByTestId('goal-agreement-banner')).toBeVisible();
+  await shot(page, '14b-beurteilung-ziele-uebernommen');
+  await clickNav(page, 'Team-Übersicht');
+  await page.getByRole('radio', { name: 'Karten' }).click();
   await page.getByText('Digital ansehen').first().click();
   await shot(page, '16-selbstreflexion-ansehen');
   expect(consoleErrors).toEqual([]);
@@ -119,7 +127,7 @@ test('Mitarbeiter-Link: Willkommen und Formular rendern ohne Fehler', async ({ p
 test('Dialoge: Hintergrund bleibt halbtransparent, Inhalt lesbar', async ({ page, consoleErrors }) => {
   await seed();
   await loginVia(page, USERS.managerA);
-  await page.getByText('Termin festlegen').first().click();
+  await page.getByRole('button', { name: 'Termin planen', exact: true }).first().click();
   const overlay = page.locator('div.fixed.inset-0').first();
   await expect(overlay).toBeVisible();
   const bg = await overlay.evaluate((el) => getComputedStyle(el).backgroundColor);
@@ -132,7 +140,7 @@ test('Dialoge: Hintergrund bleibt halbtransparent, Inhalt lesbar', async ({ page
 test('Dialoge: Esc schließt den Dialog', async ({ page }) => {
   await seed();
   await loginVia(page, USERS.managerA);
-  await page.getByText('Termin festlegen').first().click();
+  await page.getByRole('button', { name: 'Termin planen', exact: true }).first().click();
   await expect(page.locator('div.fixed.inset-0').first()).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.locator('div.fixed.inset-0')).toHaveCount(0);
@@ -141,7 +149,7 @@ test('Dialoge: Esc schließt den Dialog', async ({ page }) => {
 test('Dialoge: Fokus im Dialog gefangen und nach dem Schließen zurück beim Auslöser', async ({ page }) => {
   await seed();
   await loginVia(page, USERS.managerA);
-  const trigger = page.getByText('Termin festlegen').first();
+  const trigger = page.getByRole('button', { name: 'Termin planen', exact: true }).first();
   await trigger.click();
   const overlay = page.locator('div.fixed.inset-0').first();
   await expect(overlay).toBeVisible();
@@ -152,7 +160,7 @@ test('Dialoge: Fokus im Dialog gefangen und nach dem Schließen zurück beim Aus
   }
   await page.keyboard.press('Escape');
   await expect(page.locator('div.fixed.inset-0')).toHaveCount(0);
-  await expect.poll(() => page.evaluate(() => (document.activeElement?.textContent || '').trim())).toContain('Termin festlegen');
+  await expect.poll(() => page.evaluate(() => (document.activeElement?.textContent || '').trim())).toBe('Termin planen');
 });
 
 test('HR-Tabelle: Zeilenaktionen im ⋯-Menü, per Tastatur bedienbar', async ({ page, consoleErrors }) => {
@@ -165,12 +173,17 @@ test('HR-Tabelle: Zeilenaktionen im ⋯-Menü, per Tastatur bedienbar', async ({
   const menu = page.getByRole('menu');
   await expect(menu).toBeVisible();
   for (const label of ['Im Formular bearbeiten', 'PDF Export', 'Drucken', 'Löschen']) await expect(menu.getByRole('menuitem', { name: label })).toBeVisible();
-  await shot(page, '21g-hr-zeilenmenue');
   await page.keyboard.press('ArrowDown');
   await expect(menu.getByRole('menuitem', { name: 'PDF Export' })).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('menu')).toHaveCount(0);
   await expect(more).toBeFocused();
+  // Bildschirmfoto erst nach den Tastaturprüfungen (die Größenänderung fürs Foto scrollt und schließt das Menü)
+  await more.click();
+  await expect(menu).toBeVisible();
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: join(SHOT_DIR, '21g-hr-zeilenmenue.png') });
+  await page.keyboard.press('Escape');
   // Menüeintrag löst dieselbe Aktion aus wie vorher der Icon-Knopf
   await more.click();
   await page.getByRole('menuitem', { name: 'Im Formular bearbeiten' }).click();

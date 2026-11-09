@@ -989,6 +989,35 @@
           const y = d ? new Date(d).getFullYear() : NaN;
           return Number.isFinite(y) ? String(y) : String(new Date().getFullYear());
         };
+        // Beurteilungsjahr (nur Anzeige, ändert keine Daten). Der Beurteilungszyklus für ein Jahr läuft
+        // von Herbst bis Frühjahr: Beurteilungen/Selbstreflexionen, die Jan–Jun angelegt wurden, gehören
+        // zum Vorjahr. Grund: Früher wurde beim Anlegen und erneuten Speichern das Kalenderjahr als
+        // „period“ gespeichert, daher steht z. B. bei im Januar 2026 geführten 2025er Beurteilungen „2026“.
+        // Zielvereinbarungen behalten ihr gespeichertes Jahr (Jahr, für das die Ziele gelten).
+        const nwDateCycleYear = (raw) => {
+          if (!raw) return '';
+          const d = new Date(raw && raw.toDate ? raw.toDate() : raw);
+          if (isNaN(d)) return '';
+          return String(d.getMonth() < 6 ? d.getFullYear() - 1 : d.getFullYear());
+        };
+        const nwIsGoalDoc = (a) => /^goal/.test(String((a && a.type) || ''));
+        const nwCycleYear = (a) => {
+          if (!a) return '';
+          if (nwIsGoalDoc(a)) return nwDocYear(a);
+          return nwDateCycleYear(a.createdAt || a.submittedAt) || nwDocYear(a);
+        };
+        const nwCurrentCycleYear = () => nwDateCycleYear(new Date().toISOString());
+        const NW_SHOW_9BOX = false; // Kalibrierung: GPS-Verteilung (9-Box Grid) – ausgeblendet, siehe renderTeamCalibration
+        // Wählbare Beurteilungsjahre: laufendes Jahr plus alle Jahre mit Unterlagen
+        // (Zielvereinbarung für Y+1 gehört zum Gespräch im Jahr Y)
+        const nwBeurteilungsjahre = (docs) => {
+          const ys = new Set([nwCurrentCycleYear()]);
+          (docs || []).forEach(ap => {
+            const y = nwIsGoalDoc(ap) ? String(Number(nwDocYear(ap)) - 1) : nwCycleYear(ap);
+            if (/^\d{4}$/.test(y)) ys.add(y);
+          });
+          return [...ys].sort((x, y) => y.localeCompare(x));
+        };
         // Segmented: Pillen-Auswahl (z. B. Sprache, Ansicht)
         const NwSegmented = ({ options, value, onChange, size = 'md', ariaLabel, className }) =>
           React.createElement('div', { role: 'radiogroup', 'aria-label': ariaLabel, title: ariaLabel, className: 'inline-flex shrink-0 gap-0.5 rounded-lg bg-nw-blue-12 p-[3px] ' + (size === 'sm' ? 'h-7' : 'h-8') + (className ? ' ' + className : '') },
@@ -6465,7 +6494,8 @@
                 }
                 
                 // Zielvereinbarung desselben Jahres (digital, nicht PDF) für die Ziel-Übernahme merken
-                const reviewYear = nwDocYear({ period: initialContext?.period });
+                // Beurteilungsjahr: bei bestehender Beurteilung aus ihrem Datum (alte Einträge tragen teils das Kalenderjahr)
+                const reviewYear = initialContext?.existingData ? nwCycleYear(initialContext.existingData) : nwDocYear({ period: initialContext?.period });
                 const goalDocs = docs
                   .map(doc => ({ id: doc.id, ...doc.data() }))
                   .filter(a => (a.type === 'goals' || a.type === 'goal') && !a.isPdfUpload && nwDocYear(a) === reviewYear
@@ -10524,7 +10554,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
           const [activeView, setActiveView] = useState('dashboard');
           const [mobileNavOpen, setMobileNavOpen] = useState(false); // n.Org Shell: Menü auf schmalen Bildschirmen
           const [teamViewMode, setTeamViewMode] = useState('list'); // 'list' (Status-Matrix, Standard) oder 'cards'
-          const [teamYear, setTeamYear] = useState(String(new Date().getFullYear())); // Jahr der Team-Übersicht
+          const [teamYear, setTeamYear] = useState(nwCurrentCycleYear()); // Beurteilungsjahr der Team-Übersicht (laufender Zyklus)
           const [showAddMember, setShowAddMember] = useState(false); // Formular „Mitarbeiter hinzufügen“
           const [goalsDashYear, setGoalsDashYear] = useState('all'); // Ziel-Dashboard: Anzeigefilter Jahr ('all' = wie bisher, synchron mit HR-Dashboard)
           const [goalsDashboardSelectedId, setGoalsDashboardSelectedId] = useState(null); // Ausgewählter Mitarbeiter im Goals Dashboard
@@ -13905,6 +13935,49 @@ Goal 3: 20% weight, 80% achieved → 16 points
             setActiveView('zielvereinbarung');
           };
           
+        // Status je Mitarbeiter und Beurteilungsjahr (gemeinsam für Team-Übersicht und Dashboard; nur lesen)
+        const nwMemberStatus = (member, teamYear) => {
+            // Beurteilungsjahr Y: Selbstreflexion und Beurteilung für Y, Zielvereinbarung für Y+1
+            // (im Jahresgespräch wird Y beurteilt und werden die Ziele für Y+1 vereinbart).
+            const nextYear = String(Number(teamYear) + 1);
+            const mine = teamAppraisals.filter(a => a.employeeId === member.id);
+            const appraisals = mine.filter(a => nwIsGoalDoc(a) ? nwDocYear(a) === nextYear : nwCycleYear(a) === teamYear);
+            // Bei mehreren Treffern: abgeschlossen vor Entwurf, dann das zuletzt bearbeitete
+            const pick = (list) => list.slice().sort((x, y) =>
+              ((y.status === 'completed') - (x.status === 'completed')) ||
+              String(y.updatedAt || y.createdAt || '').localeCompare(String(x.updatedAt || x.createdAt || '')))[0];
+            const isSelfType = (a) => a.type === 'self' || a.type === 'self-reflection' || a.type === 'self_assessment' || a.type === 'self_assessment_standalone';
+            
+            const digitalSelf = pick(appraisals.filter(a => isSelfType(a) && !a.isPdfUpload));
+            const pdfSelf = pick(appraisals.filter(a => a.type === 'self_pdf' || (a.isPdfUpload === true && !a.type?.includes('review') && !a.type?.includes('goal'))));
+            const digitalReview = pick(appraisals.filter(a =>
+              (a.type === 'review' || (!a.type && !a.isPdfUpload)) &&
+              !isSelfType(a) && a.type !== 'self_pdf' && a.type !== 'review_pdf' && a.type !== 'goals_pdf' && !a.isPdfUpload));
+            const pdfReview = pick(appraisals.filter(a => a.type === 'review_pdf'));
+            const digitalGoals = pick(appraisals.filter(a => (a.type === 'goal' || a.type === 'goals') && !a.isPdfUpload));
+            const pdfGoals = pick(appraisals.filter(a => a.type === 'goals_pdf'));
+            // Zielvereinbarung für das Beurteilungsjahr selbst (deren Ziele werden in der Beurteilung bewertet)
+            const goalsForReview = pick(mine.filter(a => (a.type === 'goal' || a.type === 'goals') && !a.isPdfUpload && nwDocYear(a) === teamYear));
+            
+            return {
+              self: digitalSelf || pdfSelf,
+              selfDigital: digitalSelf,
+              selfPdf: pdfSelf,
+              review: digitalReview || pdfReview,
+              reviewDigital: digitalReview,
+              reviewPdf: pdfReview,
+              goals: digitalGoals || pdfGoals,
+              goalsDigital: digitalGoals,
+              goalsPdf: pdfGoals,
+              goalsForReview,
+              goalsForReviewCount: goalsForReview ? (goalsForReview.goals || []).filter(g => g && String(g.name || '').trim()).length : 0,
+              // Gespräche: Merker gilt nur, wenn das Datum im gewählten Beurteilungsjahr liegt
+              meetingDone: member.meetingDone === true && (!member.meetingDoneAt || nwDateCycleYear(member.meetingDoneAt) === teamYear),
+              goalMeetingDone: member.goalMeetingDone === true && (!member.goalMeetingDoneAt || nwDateCycleYear(member.goalMeetingDoneAt) === teamYear),
+              scheduledAt: member.scheduledAt && nwDateCycleYear(member.scheduledAt) === teamYear ? member.scheduledAt : null
+            };
+          };
+          
           const saveTeamAppraisal = async (appraisal) => {
             if (!user || !db) {
               addDebugLog('error', 'Speichern fehlgeschlagen: ' + (!user ? 'Kein User' : 'Keine DB'));
@@ -14188,7 +14261,9 @@ Best regards`
               }
               
               try {
-                const currentPeriod = teamYear; // gewähltes Jahr der Team-Übersicht
+                const shownPdf = getStatus(member)[docType + 'Pdf']; // angezeigtes PDF (falls vorhanden)
+                const currentPeriod = shownPdf && shownPdf.period != null && shownPdf.period !== '' ? shownPdf.period
+                  : (docType === 'goals' ? String(Number(teamYear) + 1) : teamYear); // Beurteilungsjahr bzw. Zieljahr
                 const pdfType = `${docType}_pdf`; // 'self_pdf', 'review_pdf', 'goals_pdf'
                 
                 // Prüfe ob bereits eine PDF existiert
@@ -14353,7 +14428,9 @@ Best regards`
               if (!confirmed) return;
               
               try {
-                const currentPeriod = teamYear; // gewähltes Jahr der Team-Übersicht
+                const shownPdf = getStatus(member)[docType + 'Pdf']; // das angezeigte PDF löschen, mit seinem gespeicherten Jahr
+                const currentPeriod = shownPdf && shownPdf.period != null && shownPdf.period !== '' ? shownPdf.period
+                  : (docType === 'goals' ? String(Number(teamYear) + 1) : teamYear);
                 const pdfType = `${docType}_pdf`;
                 
                 devLog(`🗑️ Lösche ${pdfType}`);
@@ -14847,57 +14924,7 @@ Best regards`
                                 }
 };
             
-            const getStatus = (member) => {
-              // Nur Unterlagen des gewählten Jahres (vorher wurden alle Jahre vermischt)
-              const appraisals = teamAppraisals.filter(a => a.employeeId === member.id && nwDocYear(a) === teamYear);
-              
-              // Finde digitale Selbstreflexion (ohne PDF)
-              const digitalSelf = appraisals.find(a => 
-                (a.type === 'self' || a.type === 'self-reflection' || a.type === 'self_assessment' || a.type === 'self_assessment_standalone') && 
-                !a.isPdfUpload
-              );
-              
-              // Finde PDF-Selbstreflexion
-              const pdfSelf = appraisals.find(a => 
-                (a.type === 'self_pdf' || (a.isPdfUpload === true && !a.type?.includes('review') && !a.type?.includes('goal')))
-              );
-              
-              // Finde digitale Review (ohne PDF)
-              const digitalReview = appraisals.find(a => 
-                (a.type === 'review' || (!a.type && !a.isPdfUpload)) && 
-                a.type !== 'self' && a.type !== 'self-reflection' && a.type !== 'self_assessment' && a.type !== 'self_assessment_standalone' && 
-                a.type !== 'self_pdf' && a.type !== 'review_pdf' && a.type !== 'goals_pdf' &&
-                !a.isPdfUpload
-              );
-              
-              // Finde PDF-Review (unterschriebene Beurteilung)
-              const pdfReview = appraisals.find(a => a.type === 'review_pdf');
-              
-              // Finde digitale Goals (ohne PDF)
-              const digitalGoals = appraisals.find(a => 
-                (a.type === 'goal' || a.type === 'goals') && !a.isPdfUpload
-              );
-              
-              // Finde PDF-Goals (unterschriebene Zielvereinbarung)
-              const pdfGoals = appraisals.find(a => a.type === 'goals_pdf');
-              
-              // Bevorzuge digitale wenn vorhanden, sonst PDF
-              const selfReflection = digitalSelf || pdfSelf;
-              const review = digitalReview || pdfReview;
-              const goals = digitalGoals || pdfGoals;
-              
-              return {
-                self: selfReflection,
-                selfDigital: digitalSelf,
-                selfPdf: pdfSelf,
-                review: review,
-                reviewDigital: digitalReview,
-                reviewPdf: pdfReview,
-                goals: goals,
-                goalsDigital: digitalGoals,
-                goalsPdf: pdfGoals
-              };
-            };
+            const getStatus = (member) => nwMemberStatus(member, teamYear);
             
             // Fortschritt berechnen
             const totalTasks = teamMembers.length * 3;
@@ -14965,10 +14992,7 @@ Best regards`
                 actions: [
                   // Jahr: Status, Kennzahlen und Aktionen gelten für das gewählte Jahr
                   (() => {
-                    const thisYear = new Date().getFullYear();
-                    const ys = new Set([String(thisYear), String(thisYear + 1)]);
-                    teamAppraisals.forEach(ap => ys.add(nwDocYear(ap)));
-                    const years = [...ys].sort((x, y) => y.localeCompare(x));
+                    const years = nwBeurteilungsjahre(teamAppraisals);
                     return years.length <= 5
                       ? React.createElement('div', { key: 'year', className: 'inline-flex items-center gap-2' }, React.createElement('span', { className: 'eyebrow', 'aria-hidden': true }, getText(lang, 'Jahr', 'Anno', 'Year')), React.createElement(NwSegmented, { ariaLabel: getText(lang, 'Jahr', 'Anno', 'Year'), value: teamYear, onChange: (v) => setTeamYear(v), options: years.map(y => ({ value: y, label: y })) }))
                       : React.createElement('select', { key: 'year', 'aria-label': getText(lang, 'Jahr', 'Anno', 'Year'), value: teamYear, onChange: (ev) => setTeamYear(ev.target.value), className: 'h-8 rounded-lg border border-line bg-white px-2 text-sm font-medium text-nw-blue focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none' }, years.map(y => React.createElement('option', { key: y, value: y }, y)));
@@ -15072,24 +15096,25 @@ Best regards`
                 : teamViewMode === 'list'
                 ? (() => {
                     const T = (de, it, en) => getText(lang, de, it, en);
+                    const nextYear = String(Number(teamYear) + 1);
                     const locale = lang === 'it' ? 'it-IT' : lang === 'en' ? 'en-GB' : 'de-DE';
                     const fmt = (iso) => { try { return new Date(iso).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: '2-digit' }); } catch (e) { return ''; } };
-                    const cell = (chip, action, hint) => React.createElement('div', { className: 'flex flex-col items-start gap-1.5' }, chip, action || null,
-                      hint ? React.createElement('span', { className: 'text-2xs text-ink-60' }, hint) : null);
-                    const act = (label, onClick, icon) => React.createElement(NwButton, { size: 'sm', icon, onClick }, label);
+                    const cell = (...parts) => React.createElement('div', { className: 'flex flex-col items-start gap-1.5' }, ...parts.filter(Boolean));
+                    const act = (label, onClick, icon, variant) => React.createElement(NwButton, { size: 'sm', icon, onClick, variant: variant || 'secondary' }, label);
+                    const note = (text, tone) => React.createElement('span', { className: 'text-2xs ' + (tone === 'danger' ? 'text-danger' : tone === 'ok' ? 'text-ok' : 'text-ink-60') }, text);
+                    const linkBtn = (label, onClick) => React.createElement('button', { type: 'button', onClick, className: 'text-2xs font-medium text-nw-blue underline-offset-2 hover:underline focus-visible:underline' }, label);
                     const headers = [
                       T('Mitarbeiter', 'Collaboratore', 'Employee'),
                       T(`Selbstreflexion ${teamYear}`, `Autovalutazione ${teamYear}`, `Self-reflection ${teamYear}`),
-                      T(`Zielvereinbarung ${teamYear}`, `Obiettivi ${teamYear}`, `Goals ${teamYear}`),
-                      T(`Beurteilung ${teamYear}`, `Valutazione ${teamYear}`, `Review ${teamYear}`),
-                      T('Gespräch', 'Colloquio', 'Meeting'),
+                      T(`Beurteilung & Gespräch ${teamYear}`, `Valutazione e colloquio ${teamYear}`, `Review & meeting ${teamYear}`),
+                      T(`Zielvereinbarung ${nextYear}`, `Obiettivi ${nextYear}`, `Goals ${nextYear}`),
                       ''
                     ];
                     return React.createElement('div', { className: 'relative overflow-x-auto rounded-card border border-line bg-white shadow-card' },
-                      React.createElement('table', { className: 'w-full min-w-[900px] text-sm' },
+                      React.createElement('table', { className: 'w-full min-w-[860px] text-sm' },
                         React.createElement('thead', null,
                           React.createElement('tr', { className: 'border-b border-line bg-panel text-left' },
-                            headers.map((h, i) => React.createElement('th', { key: i, scope: 'col', className: 'eyebrow px-4 py-2.5' + (i === 5 ? ' w-14' : '') }, h || React.createElement('span', { className: 'sr-only' }, T('Aktionen', 'Azioni', 'Actions'))))
+                            headers.map((h, i) => React.createElement('th', { key: i, scope: 'col', className: 'eyebrow px-4 py-2.5' + (i === 4 ? ' w-14' : '') }, h || React.createElement('span', { className: 'sr-only' }, T('Aktionen', 'Azioni', 'Actions'))))
                           )
                         ),
                         React.createElement('tbody', null,
@@ -15097,48 +15122,63 @@ Best regards`
                             const status = getStatus(member);
                             const isOwner = member._isOwner !== false;
                             const selfLink = getSelfLink(member);
-                            const scheduled = member.scheduledAt ? new Date(member.scheduledAt) : null;
-                            const meetingDone = member.meetingDone === true;
-                            const goalMeetingDone = member.goalMeetingDone === true;
-                            const overdue = scheduled && scheduled < now && !meetingDone;
+                            const scheduled = status.scheduledAt ? new Date(status.scheduledAt) : null;
+                            const overdue = scheduled && scheduled < now && !status.meetingDone;
+                            const sd = status.selfDigital;
                             const rv = status.reviewDigital;
                             const gl = status.goalsDigital;
-                            const agreedGoals = gl ? (gl.goals || []).filter(g => g && g.name && String(g.name).trim()).length : 0;
+                            const agreedNext = gl ? (gl.goals || []).filter(g => g && g.name && String(g.name).trim()).length : 0;
+                            // Bestehende Unterlagen mit ihrem gespeicherten Jahr öffnen (nie überschreiben)
+                            const openReview = () => startTeamAppraisal(member.id, rv && rv.period != null && rv.period !== '' ? rv.period : teamYear, rv || null);
+                            const openGoals = () => startTeamGoalSetting(member.id, gl && gl.period != null && gl.period !== '' ? gl.period : nextYear, gl || null);
 
-                            const selfCell = status.selfDigital
-                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: CheckCircle2 }, T('Eingegangen', 'Ricevuta', 'Received') + ((status.selfDigital.submittedAt || status.selfDigital.createdAt) ? ' · ' + fmt(status.selfDigital.submittedAt || status.selfDigital.createdAt) : '')),
-                                  act(T('Ansehen', 'Visualizza', 'View'), () => openSelfAssessment(status.selfDigital), Eye))
+                            // Selbstreflexion: Offen → In Arbeit (Mitarbeiter) → Eingegangen
+                            const selfCell = sd && sd.status === 'completed'
+                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: CheckCircle2 }, T('Eingegangen', 'Ricevuta', 'Received') + ((sd.submittedAt || sd.updatedAt || sd.createdAt) ? ' · ' + fmt(sd.submittedAt || sd.updatedAt || sd.createdAt) : '')),
+                                  act(T('Ansehen', 'Visualizza', 'View'), () => openSelfAssessment(sd), Eye))
                               : status.selfPdf
-                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: FileText }, T('Als PDF', 'Come PDF', 'As PDF')))
-                              : cell(React.createElement(NwChip, { tone: 'warn', icon: Clock }, T('Ausstehend', 'In attesa', 'Pending')),
-                                  selfLink ? act(T('Link senden', 'Invia link', 'Send link'), () => sendEmail(member), Send) : null);
+                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: FileText }, T('Eingegangen (PDF)', 'Ricevuta (PDF)', 'Received (PDF)')))
+                              : sd
+                              ? cell(React.createElement(NwChip, { tone: 'warn', icon: Edit3 }, T('In Arbeit beim Mitarbeiter', 'In corso dal collaboratore', 'In progress (employee)')),
+                                  selfLink && act(T('Erinnern', 'Ricorda', 'Remind'), () => sendEmail(member), Send))
+                              : cell(React.createElement(NwChip, { tone: 'neutral', icon: Clock }, T('Offen', 'Aperta', 'Open')),
+                                  selfLink && act(T('Link senden', 'Invia link', 'Send link'), () => sendEmail(member), Send));
 
-                            const goalsCell = gl
-                              ? cell(React.createElement(NwChip, { tone: gl.status === 'draft' ? 'warn' : 'ok', icon: gl.status === 'draft' ? Edit3 : CheckCircle2 },
-                                    gl.status === 'draft' ? T('Entwurf', 'Bozza', 'Draft') : `${T('Vereinbart', 'Concordati', 'Agreed')} · ${agreedGoals} ${T('Ziele', 'obiettivi', 'goals')}`),
-                                  act(gl.status === 'draft' ? T('Fortsetzen', 'Continua', 'Continue') : T('Öffnen', 'Apri', 'Open'), () => startTeamGoalSetting(member.id, teamYear, gl), Target))
-                              : status.goalsPdf
-                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: FileText }, T('Als PDF', 'Come PDF', 'As PDF')))
-                              : cell(React.createElement(NwChip, { tone: 'neutral' }, T('Offen', 'Aperta', 'Open')),
-                                  act(T('Erstellen', 'Crea', 'Create'), () => startTeamGoalSetting(member.id, teamYear, null), Target));
-
-                            const reviewCell = rv
-                              ? cell(React.createElement(NwChip, { tone: rv.status === 'draft' ? 'warn' : 'ok', icon: rv.status === 'draft' ? Edit3 : CheckCircle2 },
-                                    rv.status === 'draft' ? T('Entwurf', 'Bozza', 'Draft') : T('Abgeschlossen', 'Completata', 'Completed') + (rv.gpsScore ? ' · GPS ' + Number(rv.gpsScore).toFixed(1) : '')),
-                                  act(rv.status === 'draft' ? T('Fortsetzen', 'Continua', 'Continue') : T('Öffnen', 'Apri', 'Open'), () => startTeamAppraisal(member.id, teamYear, rv), ClipboardList))
+                            // Beurteilung = Performancegespräch: Offen → Entwurf → Abgeschlossen (+ Gespräch)
+                            const meetingLine = status.meetingDone
+                              ? note('✓ ' + T('Gespräch geführt', 'Colloquio svolto', 'Meeting held') + (member.meetingDoneAt ? ' · ' + fmt(member.meetingDoneAt) : ''), 'ok')
+                              : React.createElement('span', { className: 'inline-flex flex-wrap items-center gap-x-2 gap-y-0.5' },
+                                  scheduled
+                                    ? note((overdue ? T('Gespräch überfällig', 'Colloquio scaduto', 'Meeting overdue') : T('Gespräch am', 'Colloquio il', 'Meeting on')) + ' ' + fmt(status.scheduledAt), overdue ? 'danger' : null)
+                                    : note(T('Kein Gesprächstermin', 'Nessun appuntamento', 'No meeting date')),
+                                  linkBtn(scheduled ? T('Ändern', 'Modifica', 'Change') : T('Termin planen', 'Pianifica', 'Schedule'), () => scheduleDate(member)),
+                                  rv && rv.status === 'completed' && linkBtn(T('Als geführt markieren', 'Segna come svolto', 'Mark as held'), () => toggleMeetingDone({ ...member, meetingDone: false })));
+                            const reviewCell = rv && rv.status === 'completed'
+                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: CheckCircle2 }, T('Abgeschlossen', 'Completata', 'Completed') + (rv.gpsScore ? ' · GPS ' + Number(rv.gpsScore).toFixed(1) : '')),
+                                  act(T('Öffnen', 'Apri', 'Open'), openReview, ClipboardList), meetingLine)
+                              : rv
+                              ? cell(React.createElement(NwChip, { tone: 'warn', icon: Edit3 }, T('Entwurf', 'Bozza', 'Draft') + ((rv.updatedAt || rv.createdAt) ? ' · ' + T('gespeichert', 'salvata', 'saved') + ' ' + fmt(rv.updatedAt || rv.createdAt) : '')),
+                                  act(T('Fortsetzen', 'Continua', 'Continue'), openReview, ClipboardList, 'primary'), meetingLine)
                               : status.reviewPdf
-                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: FileText }, T('Als PDF', 'Come PDF', 'As PDF')))
-                              : cell(React.createElement(NwChip, { tone: 'neutral' }, T('Offen', 'Aperta', 'Open')),
-                                  act(T('Starten', 'Avvia', 'Start'), () => startTeamAppraisal(member.id, teamYear, null), ClipboardList),
-                                  agreedGoals > 0 ? T(`${agreedGoals} Ziele aus der Zielvereinbarung werden übernommen`, `${agreedGoals} obiettivi verranno ripresi`, `${agreedGoals} agreed goals will be carried over`) : null);
+                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: FileText }, T('Unterschrieben (PDF)', 'Firmata (PDF)', 'Signed (PDF)')), meetingLine)
+                              : cell(React.createElement(NwChip, { tone: 'neutral', icon: Clock }, T('Offen', 'Aperta', 'Open')),
+                                  act(T('Starten', 'Avvia', 'Start'), openReview, ClipboardList, 'primary'),
+                                  status.goalsForReviewCount > 0
+                                    ? note(T(`${status.goalsForReviewCount} ${status.goalsForReviewCount === 1 ? 'Ziel' : 'Ziele'} ${teamYear} ${status.goalsForReviewCount === 1 ? 'wird' : 'werden'} übernommen`, `${status.goalsForReviewCount} obiettivi ${teamYear} verranno ripresi`, `${status.goalsForReviewCount} goals ${teamYear} will be carried over`))
+                                    : note(T(`Keine Zielvereinbarung ${teamYear} hinterlegt`, `Nessun accordo obiettivi ${teamYear}`, `No ${teamYear} goal agreement`)),
+                                  meetingLine);
 
-                            const meetingCell = meetingDone
-                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: CheckCircle2 }, T('Geführt', 'Svolto', 'Held') + (member.meetingDoneAt ? ' · ' + fmt(member.meetingDoneAt) : '')))
-                              : scheduled
-                              ? cell(React.createElement(NwChip, { tone: overdue ? 'danger' : 'brand', icon: Calendar }, (overdue ? T('Überfällig', 'Scaduto', 'Overdue') + ' · ' : '') + fmt(member.scheduledAt)),
-                                  act(T('Ändern', 'Modifica', 'Change'), () => scheduleDate(member), Calendar))
-                              : cell(React.createElement(NwChip, { tone: 'neutral' }, T('Kein Termin', 'Nessun appuntamento', 'No date')),
-                                  act(T('Termin', 'Appuntamento', 'Schedule'), () => scheduleDate(member), Calendar));
+                            // Zielvereinbarung für das Folgejahr (im selben Gespräch)
+                            const goalsCell = gl && gl.status === 'completed'
+                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: CheckCircle2 }, `${T('Vereinbart', 'Concordati', 'Agreed')} · ${agreedNext} ${agreedNext === 1 ? T('Ziel', 'obiettivo', 'goal') : T('Ziele', 'obiettivi', 'goals')}`),
+                                  act(T('Öffnen', 'Apri', 'Open'), openGoals, Target))
+                              : gl
+                              ? cell(React.createElement(NwChip, { tone: 'warn', icon: Edit3 }, T('Entwurf', 'Bozza', 'Draft') + ((gl.updatedAt || gl.createdAt) ? ' · ' + T('gespeichert', 'salvata', 'saved') + ' ' + fmt(gl.updatedAt || gl.createdAt) : '')),
+                                  act(T('Fortsetzen', 'Continua', 'Continue'), openGoals, Target))
+                              : status.goalsPdf
+                              ? cell(React.createElement(NwChip, { tone: 'ok', icon: FileText }, T('Vereinbart (PDF)', 'Concordati (PDF)', 'Agreed (PDF)')))
+                              : cell(React.createElement(NwChip, { tone: 'neutral', icon: Clock }, T('Offen', 'Aperta', 'Open')),
+                                  act(T('Erstellen', 'Crea', 'Create'), openGoals, Target));
 
                             return React.createElement('tr', { key: member.id, className: 'border-b border-line-2 align-top last:border-0 hover:bg-panel/60' },
                               React.createElement('td', { className: 'px-4 py-3' },
@@ -15153,16 +15193,15 @@ Best regards`
                                 )
                               ),
                               React.createElement('td', { className: 'px-4 py-3' }, selfCell),
-                              React.createElement('td', { className: 'px-4 py-3' }, goalsCell),
                               React.createElement('td', { className: 'px-4 py-3' }, reviewCell),
-                              React.createElement('td', { className: 'px-4 py-3' }, meetingCell),
+                              React.createElement('td', { className: 'px-4 py-3' }, goalsCell),
                               React.createElement('td', { className: 'px-2 py-3 text-right' },
                                 React.createElement(NwRowMenu, { label: T(`Weitere Aktionen für ${member.name}`, `Altre azioni per ${member.name}`, `More actions for ${member.name}`) },
                                   selfLink && React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => copyLink(member) }, React.createElement(Copy, { size: 14, 'aria-hidden': true }), T('Selbstreflexion-Link kopieren', 'Copia link autovalutazione', 'Copy self-reflection link')),
                                   selfLink && React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => sendEmail(member) }, React.createElement(Mail, { size: 14, 'aria-hidden': true }), T('Link per E-Mail senden', 'Invia link via e-mail', 'Send link via email')),
                                   React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => scheduleDate(member) }, React.createElement(Calendar, { size: 14, 'aria-hidden': true }), T('Termin festlegen', 'Fissa appuntamento', 'Set date')),
-                                  React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => toggleMeetingDone(member) }, React.createElement(CheckCircle2, { size: 14, 'aria-hidden': true }), meetingDone ? T('Beurteilungsgespräch: zurücksetzen', 'Colloquio valutazione: annulla', 'Review meeting: reset') : T('Beurteilungsgespräch geführt', 'Colloquio valutazione svolto', 'Review meeting held')),
-                                  React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => toggleGoalMeetingDone(member) }, React.createElement(Target, { size: 14, 'aria-hidden': true }), goalMeetingDone ? T('Zielgespräch: zurücksetzen', 'Colloquio obiettivi: annulla', 'Goal meeting: reset') : T('Zielgespräch geführt', 'Colloquio obiettivi svolto', 'Goal meeting held')),
+                                  React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => toggleMeetingDone({ ...member, meetingDone: status.meetingDone }) }, React.createElement(CheckCircle2, { size: 14, 'aria-hidden': true }), status.meetingDone ? T('Beurteilungsgespräch: zurücksetzen', 'Colloquio valutazione: annulla', 'Review meeting: reset') : T('Beurteilungsgespräch geführt', 'Colloquio valutazione svolto', 'Review meeting held')),
+                                  React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => toggleGoalMeetingDone({ ...member, goalMeetingDone: status.goalMeetingDone }) }, React.createElement(Target, { size: 14, 'aria-hidden': true }), status.goalMeetingDone ? T('Zielgespräch: zurücksetzen', 'Colloquio obiettivi: annulla', 'Goal meeting: reset') : T('Zielgespräch geführt', 'Colloquio obiettivi svolto', 'Goal meeting held')),
                                   isOwner && React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => shareMember(member) }, React.createElement(Share2, { size: 14, 'aria-hidden': true }), T('Mit Führungskraft teilen', 'Condividi con responsabile', 'Share with manager')),
                                   React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => { setTeamViewMode('cards'); setTimeout(() => { const el = document.getElementById('member-card-' + member.id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); } }, React.createElement(LayoutGrid, { size: 14, 'aria-hidden': true }), T('Details & PDF-Upload', 'Dettagli e caricamento PDF', 'Details & PDF upload')),
                                   React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM + ' text-danger hover:bg-danger-bg', onClick: () => removeMemberFromView(member, isOwner) }, React.createElement(Trash2, { size: 14, 'aria-hidden': true }), isOwner ? T('Entfernen', 'Rimuovi', 'Remove') : T('Aus meiner Ansicht entfernen', 'Rimuovi dalla mia vista', 'Remove from my view'))
@@ -15176,7 +15215,7 @@ Best regards`
                   })()
 
                 // === KARTENANSICHT (Detail) ===
-                : React.createElement('div', { className: 'space-y-4' },
+                : React.createElement('div', { className: 'space-y-3' },
                     teamMembers.map(member => {
                       const status = getStatus(member);
                       const isOwner = member._isOwner !== false;
@@ -15186,9 +15225,9 @@ Best regards`
                       const selfLink = getSelfLink(member);
                       
                       // Termin-Status
-                      const scheduledDate = member.scheduledAt ? new Date(member.scheduledAt) : null;
-                      const meetingDone = member.meetingDone === true; // Beurteilungsgespräch geführt
-                      const goalMeetingDone = member.goalMeetingDone === true; // Zielvereinbarungsgespräch geführt
+                      const scheduledDate = status.scheduledAt ? new Date(status.scheduledAt) : null; // nur Termine des gewählten Jahres
+                      const meetingDone = status.meetingDone; // Beurteilungsgespräch im gewählten Jahr geführt
+                      const goalMeetingDone = status.goalMeetingDone; // Zielvereinbarungsgespräch im gewählten Jahr geführt
                       const isOverdue = scheduledDate && scheduledDate < now && !meetingDone; // Nicht überfällig wenn Gespräch geführt
                       const daysUntil = scheduledDate ? Math.ceil((scheduledDate - now) / (1000 * 60 * 60 * 24)) : null;
                       
@@ -15204,13 +15243,13 @@ Best regards`
                       },
                         // === HEADER-ZEILE ===
                         React.createElement('div', { 
-                          className: `px-5 py-4 flex items-center gap-4 ${
+                          className: `px-4 py-2.5 flex items-center gap-3 ${
                             done === 3 ? 'bg-nw-green-15' : isOverdue ? 'bg-danger-bg' : !isOwner ? 'bg-nw-blue-06' : 'bg-panel'
                           }`
                         },
                           // Avatar
                           React.createElement('div', { 
-                            className: `w-12 h-12 rounded-xl flex items-center justify-center font-semibold text-lg ${
+                            className: `w-9 h-9 rounded-lg flex items-center justify-center font-semibold text-sm ${
                               done === 3 ? 'bg-ok text-white' :
                               gps ? (gps >= 3 ? 'bg-nw-blue text-white' : 'bg-traffic-amber text-white') :
                               'bg-line text-ink-60'
@@ -15311,7 +15350,7 @@ Best regards`
                         
                         // === TERMIN-ZEILE (wenn vorhanden oder nötig) ===
                         React.createElement('div', { 
-                          className: 'px-5 py-3 border-t border-line-2 flex items-center gap-3 flex-wrap',
+                          className: 'px-4 py-2 border-t border-line-2 flex items-center gap-2 flex-wrap',
                           style: { background: scheduledDate ? (meetingDone ? '#F2F3F8' : isOverdue ? '#FBECEA' : '#F2F3F8') : '#FFFFFF' }
                         },
                           // Termin-Info oder CTA
@@ -15348,6 +15387,14 @@ Best regards`
                                 lang === 'de' ? 'Termin festlegen' : lang === 'it' ? 'Fissa appuntamento' : 'Schedule meeting'
                               ),
                           
+                          // Gespräche geführt (kompakt; gleiche Handler, bezogen auf das gewählte Jahr)
+                          [[meetingDone, () => toggleMeetingDone({ ...member, meetingDone }), getText(lang, 'Beurteilungsgespräch geführt', 'Colloquio valutazione svolto', 'Review meeting held'), member.meetingDoneAt],
+                           [goalMeetingDone, () => toggleGoalMeetingDone({ ...member, goalMeetingDone }), getText(lang, 'Zielgespräch geführt', 'Colloquio obiettivi svolto', 'Goal meeting held'), member.goalMeetingDoneAt]].map(([on, toggle, label, at], i) =>
+                            React.createElement('button', { key: 'mt' + i, type: 'button', role: 'switch', 'aria-checked': !!on, onClick: toggle,
+                              className: 'inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ' + (on ? 'border-nw-green/40 bg-nw-green-15 text-ok' : 'border-line bg-white text-ink-60 hover:border-nw-blue-25 hover:text-nw-blue') },
+                              React.createElement('span', { className: 'grid h-4 w-4 place-items-center rounded border ' + (on ? 'border-ok bg-ok text-white' : 'border-line bg-white'), 'aria-hidden': true }, on && React.createElement(Check, { size: 11, strokeWidth: 3 })),
+                              label + (on && at ? ' · ' + new Date(at).toLocaleDateString(lang === 'it' ? 'it-IT' : lang === 'en' ? 'en-GB' : 'de-DE') : ''))),
+                          
                           // Spacer
                           React.createElement('div', { className: 'flex-1' }),
                           
@@ -15364,81 +15411,11 @@ Best regards`
                           )
                         ),
                         
-                        // === GESPRÄCHE GEFÜHRT - CHECKBOXEN (3-Spalten Grid, bündig zu Karten) ===
-                        React.createElement('div', { className: 'px-5 pt-4 pb-2' },
-                          React.createElement('div', { className: 'grid grid-cols-3 gap-3' },
-                            // SPALTE 1: Leerraum (über Selbstreflexion)
-                            React.createElement('div', { className: 'flex items-center justify-center' },
-                              React.createElement('span', { className: 'text-xs text-ink-60 italic' },
-                                lang === 'de' ? 'Gespräche geführt:' : lang === 'it' ? 'Colloqui effettuati:' : 'Meetings completed:'
-                              )
-                            ),
-                            // SPALTE 2: Beurteilungsgespräch geführt (über Beurteilungs-Karte)
-                            React.createElement('div', {
-                              onClick: () => toggleMeetingDone(member),
-                              className: `p-3 rounded-xl cursor-pointer transition-all border-2 flex items-center gap-3 ${
-                                meetingDone 
-                                  ? 'bg-nw-green-15 border-nw-green shadow-card' 
-                                  : 'bg-panel border-line hover:border-line hover:bg-nw-grey-40'
-                              }`
-                            },
-                              // Custom Checkbox Icon
-                              React.createElement('div', {
-                                className: `w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
-                                  meetingDone 
-                                    ? 'bg-ok text-white shadow-card' 
-                                    : 'bg-white border-2 border-line'
-                                }`
-                              }, meetingDone && React.createElement(Check, { size: 14, strokeWidth: 3 })),
-                              // Text + Datum
-                              React.createElement('div', { className: 'flex-1 min-w-0' },
-                                React.createElement('span', { 
-                                  className: `text-sm font-medium block truncate ${meetingDone ? 'text-ok' : 'text-ink-60'}`
-                                },
-                                  lang === 'de' ? 'Beurteilungsgespräch' : lang === 'it' ? 'Colloquio valutazione' : 'Review meeting'
-                                ),
-                                meetingDone && member.meetingDoneAt && React.createElement('span', { 
-                                  className: 'text-xs text-ok'
-                                }, new Date(member.meetingDoneAt).toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'it' ? 'it-IT' : 'en-GB'))
-                              )
-                            ),
-                            // SPALTE 3: Zielvereinbarungsgespräch geführt (über Ziele-Karte)
-                            React.createElement('div', {
-                              onClick: () => toggleGoalMeetingDone(member),
-                              className: `p-3 rounded-xl cursor-pointer transition-all border-2 flex items-center gap-3 ${
-                                goalMeetingDone 
-                                  ? 'bg-nw-blue-06 border-nw-blue shadow-card' 
-                                  : 'bg-panel border-line hover:border-line hover:bg-nw-grey-40'
-                              }`
-                            },
-                              // Custom Checkbox Icon
-                              React.createElement('div', {
-                                className: `w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
-                                  goalMeetingDone 
-                                    ? 'bg-nw-blue text-white shadow-card' 
-                                    : 'bg-white border-2 border-line'
-                                }`
-                              }, goalMeetingDone && React.createElement(Check, { size: 14, strokeWidth: 3 })),
-                              // Text + Datum
-                              React.createElement('div', { className: 'flex-1 min-w-0' },
-                                React.createElement('span', { 
-                                  className: `text-sm font-medium block truncate ${goalMeetingDone ? 'text-nw-blue' : 'text-ink-60'}`
-                                },
-                                  lang === 'de' ? 'Zielvereinbarung' : lang === 'it' ? 'Accordo obiettivi' : 'Goal agreement'
-                                ),
-                                goalMeetingDone && member.goalMeetingDoneAt && React.createElement('span', { 
-                                  className: 'text-xs text-nw-blue'
-                                }, new Date(member.goalMeetingDoneAt).toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'it' ? 'it-IT' : 'en-GB'))
-                              )
-                            )
-                          )
-                        ),
-                        
                         // === STATUS-KARTEN (3 Spalten mit klaren Labels) ===
-                        React.createElement('div', { className: 'p-5 grid grid-cols-3 gap-3' },
+                        React.createElement('div', { className: 'px-4 pb-4 pt-3 grid grid-cols-1 gap-3 md:grid-cols-3' },
                           // SELBSTREFLEXION (Verbessert mit 3 Aktionen inkl. PDF-Upload)
                           React.createElement('div', { 
-                            className: `p-4 rounded-xl transition-all ${
+                            className: `p-3 rounded-xl transition-all ${
                               status.self 
                                 ? 'bg-nw-green-15 border-2 border-nw-green/40' 
                                 : 'bg-panel border-2 border-dashed border-line'
@@ -15449,7 +15426,7 @@ Best regards`
                                 className: `w-8 h-8 rounded-lg flex items-center justify-center ${status.self ? 'bg-ok text-white' : 'bg-line text-ink-60'}`
                               }, status.self ? React.createElement(CheckCircle2, { size: 16 }) : React.createElement(FileText, { size: 16 })),
                               React.createElement('span', { className: 'font-semibold text-sm text-ink' }, 
-                                lang === 'de' ? 'Selbstreflexion' : lang === 'it' ? 'Autovalutazione' : 'Self-Reflection'
+                                (lang === 'de' ? 'Selbstreflexion' : lang === 'it' ? 'Autovalutazione' : 'Self-Reflection') + ' ' + teamYear
                               )
                             ),
                             // Status-Label - zeige beide Typen wenn vorhanden
@@ -15544,13 +15521,6 @@ Best regards`
                                 )
                               ),
                               
-                              // Info wenn nichts vorhanden
-                              !status.selfDigital && !status.selfPdf && React.createElement('div', {
-                                className: 'w-full py-2 px-3 bg-nw-grey-40 text-ink-60 rounded-lg text-xs text-center'
-                              }, 
-                                lang === 'de' ? 'Noch keine Daten vorhanden' : lang === 'it' ? 'Nessun dato disponibile' : 'No data available'
-                              ),
-                              
                               // Button-Reihe 2: Link + E-Mail
                               React.createElement('div', { className: 'flex gap-1' },
                                 React.createElement('button', {
@@ -15601,7 +15571,7 @@ Best regards`
                           
                           // BEURTEILUNG
                           React.createElement('div', { 
-                            className: `p-4 rounded-xl transition-all hover:shadow-card ${
+                            className: `p-3 rounded-xl transition-all hover:shadow-card ${
                               status.review 
                                 ? status.review.status === 'completed'
                                   ? 'bg-nw-blue-06 border border-nw-blue-25 hover:border-nw-blue'
@@ -15611,7 +15581,7 @@ Best regards`
                           },
                             // Klickbarer Header-Bereich für Navigation
                             React.createElement('div', { 
-                              onClick: () => startTeamAppraisal(member.id, teamYear, status.review || null),
+                              onClick: () => startTeamAppraisal(member.id, status.review && status.review.period != null && status.review.period !== '' ? status.review.period : teamYear, status.review || null),
                               className: 'cursor-pointer'
                             },
                               React.createElement('div', { className: 'flex items-center gap-3 mb-2' },
@@ -15629,7 +15599,7 @@ Best regards`
                                     : React.createElement(ClipboardList, { size: 16 })
                                 ),
                                 React.createElement('span', { className: 'font-semibold text-sm text-ink' }, 
-                                  lang === 'de' ? 'Beurteilung' : lang === 'it' ? 'Valutazione' : 'Review'
+                                  (lang === 'de' ? 'Beurteilung' : lang === 'it' ? 'Valutazione' : 'Review') + ' ' + teamYear
                                 )
                               ),
                               // Status-Label
@@ -15701,7 +15671,7 @@ Best regards`
                           
                           // ZIELVEREINBARUNG
                           React.createElement('div', { 
-                            className: `p-4 rounded-xl transition-all hover:shadow-card ${
+                            className: `p-3 rounded-xl transition-all hover:shadow-card ${
                               status.goals 
                                 ? 'bg-nw-blue-06 border border-nw-blue-25 hover:border-nw-blue' 
                                 : 'bg-panel border border-dashed border-line hover:border-nw-blue hover:bg-nw-blue-06'
@@ -15709,7 +15679,7 @@ Best regards`
                           },
                             // Klickbarer Header-Bereich für Navigation
                             React.createElement('div', { 
-                              onClick: () => startTeamGoalSetting(member.id, teamYear, status.goals || null),
+                              onClick: () => startTeamGoalSetting(member.id, status.goals && status.goals.period != null && status.goals.period !== '' ? status.goals.period : String(Number(teamYear) + 1), status.goals || null),
                               className: 'cursor-pointer'
                             },
                               React.createElement('div', { className: 'flex items-center gap-3 mb-2' },
@@ -15717,7 +15687,7 @@ Best regards`
                                   className: `w-8 h-8 rounded-lg flex items-center justify-center ${status.goals ? 'bg-nw-blue text-white' : 'bg-line text-ink-60'}`
                                 }, status.goals ? React.createElement(CheckCircle2, { size: 16 }) : React.createElement(Target, { size: 16 })),
                                 React.createElement('span', { className: 'font-semibold text-sm text-ink' }, 
-                                  lang === 'de' ? 'Zielvereinbarung' : lang === 'it' ? 'Accordo obiettivi' : 'Goals'
+                                  (lang === 'de' ? 'Zielvereinbarung' : lang === 'it' ? 'Accordo obiettivi' : 'Goals') + ' ' + (Number(teamYear) + 1)
                                 )
                               ),
                               // Status-Label
@@ -15777,19 +15747,6 @@ Best regards`
                                   : (lang === 'de' ? 'PDF hochladen' : lang === 'it' ? 'Carica PDF' : 'Upload PDF')
                               )
                             )
-                          )
-                        ),
-                        
-                        // === FOOTER: Fortschritt ===
-                        React.createElement('div', { className: 'px-5 py-3 bg-panel border-t border-line-2 flex items-center gap-3' },
-                          React.createElement('div', { className: 'flex gap-1 flex-1' },
-                            [0, 1, 2].map(i => React.createElement('div', {
-                              key: i,
-                              className: `h-1.5 flex-1 rounded-full transition-all ${i < done ? (done === 3 ? 'bg-ok' : 'bg-nw-green') : 'bg-line'}`
-                            }))
-                          ),
-                          React.createElement('span', { className: `text-xs font-semibold ${done === 3 ? 'text-ok' : 'text-ink-60'}` },
-                            done === 3 ? '✓ Alles erledigt' : `${done} von 3 erledigt`
                           )
                         )
                       );
@@ -21338,7 +21295,7 @@ Best regards`
           const renderTeamCalibration = () => {
             // Sammle alle Reviews (type: 'review' oder kein type für Rückwärtskompatibilität)
             // nur das gewählte Jahr (gemeinsam mit der Team-Übersicht), vorher wurden alle Jahre gemischt
-            const allReviews = teamAppraisals.filter(a => (a.type === 'review' || !a.type) && nwDocYear(a) === teamYear);
+            const allReviews = teamAppraisals.filter(a => (a.type === 'review' || !a.type) && nwCycleYear(a) === teamYear);
             
             // Completed = Reviews mit status 'completed' UND gpsScore > 0
             const completedReviews = allReviews.filter(a => a.status === 'completed' && a.gpsScore && a.gpsScore > 0);
@@ -21456,7 +21413,7 @@ Best regards`
             const totalEmployeeCount = uniqueEmployees.size > 0 ? uniqueEmployees.size : teamMembers.length;
             
             // Berechne Selbstreflexionen separat (alle Typen)
-            const selfReflections = teamAppraisals.filter(a => nwDocYear(a) === teamYear && (a.type === 'self' || a.type === 'self-reflection' || a.type === 'self_assessment' || a.type === 'self_assessment_standalone' || a.type === 'self_pdf'));
+            const selfReflections = teamAppraisals.filter(a => nwCycleYear(a) === teamYear && (a.type === 'self' || a.type === 'self-reflection' || a.type === 'self_assessment' || a.type === 'self_assessment_standalone' || a.type === 'self_pdf'));
             
             // Berechne alle Statistiken
             const stats = {
@@ -21537,10 +21494,7 @@ Best regards`
                   // Jahr + Status-Badge
                   React.createElement('div', { className: "mt-4 md:mt-0 flex flex-wrap items-center gap-2" },
                     (() => {
-                      const thisYear = new Date().getFullYear();
-                      const ys = new Set([String(thisYear), String(thisYear + 1)]);
-                      teamAppraisals.forEach(ap => ys.add(nwDocYear(ap)));
-                      const years = [...ys].sort((x, y) => y.localeCompare(x));
+                      const years = nwBeurteilungsjahre(teamAppraisals);
                       return React.createElement('div', { className: 'inline-flex items-center gap-2' },
                         React.createElement('span', { className: 'eyebrow', 'aria-hidden': true }, getText(lang, 'Jahr', 'Anno', 'Year')),
                         years.length <= 5
@@ -21882,8 +21836,9 @@ Best regards`
                 );
               })(),
               
-              // === BUBBLE CHART: WAS vs. WIE ===
-              reviewsWithGPS.length > 0 && (() => {
+              // === BUBBLE CHART: WAS vs. WIE (9-Box) ===
+              // Auf Wunsch der Auftraggeberin ausgeblendet (09.11.2026, „wird nicht genutzt“). Wieder einblenden: NW_SHOW_9BOX = true.
+              NW_SHOW_9BOX && reviewsWithGPS.length > 0 && (() => {
                 // Chart-Dimensionen
                 const width = 650;
                 const height = 450;
@@ -23346,63 +23301,121 @@ const renderDashboard = () => {
               // === n.Org: SEITENKOPF + NÄCHSTE SCHRITTE (eine Primäraktion je Lage) ===
               (() => {
                 const loggedIn = !!(user && !user.isAnonymous);
-                const isReview = (a) => a.type === 'review' || !a.type;
-                const isSelf = (a) => a.isSelfAssessment || String(a.type || '').startsWith('self');
-                const yr = String(new Date().getFullYear()); // Kennzahlen für das laufende Jahr (wie die Team-Übersicht)
-                const inYear = (a) => nwDocYear(a) === yr;
-                const reviewsDone = teamMembers.filter(m => teamAppraisals.some(a => a.employeeId === m.id && inYear(a) && isReview(a) && a.status === 'completed')).length;
-                const reviewsOpen = Math.max(0, teamMembers.length - reviewsDone);
-                const selfMissing = teamMembers.filter(m => !teamAppraisals.some(a => a.employeeId === m.id && inYear(a) && isSelf(a))).length;
-                const goTeam = () => { setTeamYear(yr); setActiveView('teamoverview'); setActiveScore(3); };
+                const yr = nwCurrentCycleYear(); // laufendes Beurteilungsjahr
+                const nextYr = String(Number(yr) + 1);
+                const T = (de, it, en) => getText(lang, de, it, en);
+                const goTeam = () => { setTeamYear(yr); setTeamViewMode('list'); setActiveView('teamoverview'); setActiveScore(3); };
                 const firstName = loggedIn ? (getUserDisplayName(user) || '').split(' ')[0] : '';
-                let step;
-                if (!loggedIn) {
-                  step = {
-                    title: getText(lang, 'Als Führungskraft anmelden', 'Accedi come responsabile', 'Sign in as a manager'),
-                    text: getText(lang, 'Melden Sie sich an, um Ihr Team zu sehen und Beurteilungen zu führen.', 'Accedi per vedere il tuo team e gestire le valutazioni.', 'Sign in to see your team and run reviews.'),
-                    action: getText(lang, 'Zur Anmeldung', 'Vai al login', 'Go to sign-in'), icon: Lock
-                  };
-                } else if (teamMembers.length === 0) {
-                  step = {
-                    title: getText(lang, 'Legen Sie Ihr Team an', 'Crea il tuo team', 'Set up your team'),
-                    text: getText(lang, 'Fügen Sie Ihren ersten Mitarbeiter hinzu. Danach können Sie Selbstreflexions-Links senden und Beurteilungen starten.', 'Aggiungi il tuo primo collaboratore. Poi puoi inviare i link di autovalutazione e avviare le valutazioni.', 'Add your first employee. Then you can send self-reflection links and start reviews.'),
-                    action: getText(lang, 'Mitarbeiter hinzufügen', 'Aggiungi collaboratore', 'Add employee'), icon: UserPlus
-                  };
-                } else if (reviewsOpen > 0) {
-                  step = {
-                    title: getText(lang, `${reviewsOpen} von ${teamMembers.length} Beurteilungen offen`, `${reviewsOpen} di ${teamMembers.length} valutazioni aperte`, `${reviewsOpen} of ${teamMembers.length} reviews open`),
-                    text: getText(lang, 'Öffnen Sie die Team-Übersicht und setzen Sie die nächste Beurteilung fort.', 'Apri la panoramica team e continua con la prossima valutazione.', 'Open the team overview and continue with the next review.'),
-                    action: getText(lang, 'Team-Übersicht öffnen', 'Apri panoramica team', 'Open team overview'), icon: ClipboardList
-                  };
-                } else {
-                  step = {
-                    title: getText(lang, 'Alle Beurteilungen abgeschlossen', 'Tutte le valutazioni completate', 'All reviews completed'),
-                    text: getText(lang, 'Sehr gut. In der Kalibrierung vergleichen Sie die Ergebnisse Ihres Teams.', 'Ottimo. Nella calibrazione confronti i risultati del tuo team.', 'Well done. Compare your team’s results in the calibration view.'),
-                    action: getText(lang, 'Zur Kalibrierung', 'Vai alla calibrazione', 'Go to calibration'), icon: Scale
-                  };
-                }
-                const allDone = loggedIn && teamMembers.length > 0 && reviewsOpen === 0;
-                return React.createElement('div', null,
-                  React.createElement(NwPageHeader, {
-                    eyebrow: t.title,
-                    title: loggedIn && firstName ? getText(lang, `Guten Tag, ${firstName}`, `Buongiorno, ${firstName}`, `Hello, ${firstName}`) : t.dashboard,
-                    meta: loggedIn && teamMembers.length > 0 ? React.createElement('span', null, `${teamMembers.length} ${getText(lang, 'Mitarbeiter im Team', 'collaboratori nel team', 'employees in your team')} · ${getText(lang, 'Jahr', 'Anno', 'Year')} ${yr}`) : null
-                  }),
-                  React.createElement(NwPane, { className: 'p-5' },
-                    React.createElement('div', { className: 'flex flex-wrap items-center gap-4' },
-                      React.createElement('div', { className: 'grid h-10 w-10 shrink-0 place-items-center rounded-full bg-nw-blue-06 text-nw-blue' },
-                        React.createElement(step.icon, { size: 18, 'aria-hidden': true })),
-                      React.createElement('div', { className: 'min-w-0 flex-1' },
-                        React.createElement('div', { className: 'eyebrow mb-0.5' }, getText(lang, 'Ihr nächster Schritt', 'Il tuo prossimo passo', 'Your next step')),
-                        React.createElement('h2', { className: 'text-lg font-semibold text-nw-blue' }, step.title),
-                        React.createElement('p', { className: 'mt-0.5 text-sm text-ink-60' }, step.text)
-                      ),
-                      React.createElement(NwButton, { variant: 'primary', size: 'lg', onClick: allDone ? () => { setActiveView('teamcalibration'); setActiveScore(3); } : goTeam }, step.action, React.createElement(ChevronRight, { size: 16, 'aria-hidden': true }))
+                const header = React.createElement(NwPageHeader, {
+                  eyebrow: t.title,
+                  title: loggedIn && firstName ? T(`Guten Tag, ${firstName}`, `Buongiorno, ${firstName}`, `Hello, ${firstName}`) : t.dashboard,
+                  meta: loggedIn && teamMembers.length > 0 ? React.createElement('span', null, `${T('Beurteilungsjahr', 'Anno di valutazione', 'Review year')} ${yr} · ${teamMembers.length} ${T('Mitarbeiter im Team', 'collaboratori nel team', 'employees in your team')}`) : null
+                });
+                const stepPane = (step, onClick) => React.createElement(NwPane, { className: 'p-5' },
+                  React.createElement('div', { className: 'flex flex-wrap items-center gap-4' },
+                    React.createElement('div', { className: 'grid h-10 w-10 shrink-0 place-items-center rounded-full bg-nw-blue-06 text-nw-blue' },
+                      React.createElement(step.icon, { size: 18, 'aria-hidden': true })),
+                    React.createElement('div', { className: 'min-w-0 flex-1' },
+                      React.createElement('div', { className: 'eyebrow mb-0.5' }, T('Ihr nächster Schritt', 'Il tuo prossimo passo', 'Your next step')),
+                      React.createElement('h2', { className: 'text-lg font-semibold text-nw-blue' }, step.title),
+                      React.createElement('p', { className: 'mt-0.5 text-sm text-ink-60' }, step.text)
                     ),
-                    loggedIn && teamMembers.length > 0 && React.createElement('div', { className: 'mt-4 grid grid-cols-1 gap-3 border-t border-line-2 pt-4 sm:grid-cols-3' },
-                      React.createElement(NwStatCard, { label: getText(lang, 'Beurteilungen offen', 'Valutazioni aperte', 'Reviews open'), value: reviewsOpen, tone: reviewsOpen > 0 ? 'warn' : 'ok', icon: ClipboardList, onClick: goTeam }),
-                      React.createElement(NwStatCard, { label: getText(lang, 'Selbstreflexionen fehlen', 'Autovalutazioni mancanti', 'Self-reflections missing'), value: selfMissing, tone: selfMissing > 0 ? 'warn' : 'ok', icon: FileText, onClick: goTeam }),
-                      React.createElement(NwStatCard, { label: getText(lang, 'Abgeschlossen', 'Completate', 'Completed'), value: `${reviewsDone}/${teamMembers.length}`, tone: 'ok', icon: CheckCircle2, onClick: goTeam })
+                    React.createElement(NwButton, { variant: 'primary', size: 'lg', onClick }, step.action, React.createElement(ChevronRight, { size: 16, 'aria-hidden': true }))
+                  ));
+                if (!loggedIn) {
+                  return React.createElement('div', null, header, stepPane({
+                    title: T('Als Führungskraft anmelden', 'Accedi come responsabile', 'Sign in as a manager'),
+                    text: T('Melden Sie sich an, um Ihr Team zu sehen und Beurteilungen zu führen.', 'Accedi per vedere il tuo team e gestire le valutazioni.', 'Sign in to see your team and run reviews.'),
+                    action: T('Zur Anmeldung', 'Vai al login', 'Go to sign-in'), icon: Lock }, goTeam));
+                }
+                if (teamMembers.length === 0) {
+                  return React.createElement('div', null, header, stepPane({
+                    title: T('Legen Sie Ihr Team an', 'Crea il tuo team', 'Set up your team'),
+                    text: T('Fügen Sie Ihren ersten Mitarbeiter hinzu. Danach können Sie Selbstreflexions-Links senden und Beurteilungen starten.', 'Aggiungi il tuo primo collaboratore. Poi puoi inviare i link di autovalutazione e avviare le valutazioni.', 'Add your first employee. Then you can send self-reflection links and start reviews.'),
+                    action: T('Mitarbeiter hinzufügen', 'Aggiungi collaboratore', 'Add employee'), icon: UserPlus }, goTeam));
+                }
+
+                // === WO ICH STEHE + MEINE OFFENEN PUNKTE (laufendes Beurteilungsjahr) ===
+                const n = teamMembers.length;
+                const rows = teamMembers.map(m => ({ m, st: nwMemberStatus(m, yr) }));
+                const selfIn = rows.filter(r => (r.st.selfDigital && r.st.selfDigital.status === 'completed') || r.st.selfPdf).length;
+                const reviewsDone = rows.filter(r => (r.st.reviewDigital && r.st.reviewDigital.status === 'completed') || (!r.st.reviewDigital && r.st.reviewPdf)).length;
+                const meetingsDone = rows.filter(r => r.st.meetingDone).length;
+                const goalsDone = rows.filter(r => (r.st.goalsDigital && r.st.goalsDigital.status === 'completed') || (!r.st.goalsDigital && r.st.goalsPdf)).length;
+                const overall = Math.round(((selfIn + reviewsDone + goalsDone) / (3 * n)) * 100);
+                const now = new Date();
+                const locale = lang === 'it' ? 'it-IT' : lang === 'en' ? 'en-GB' : 'de-DE';
+                const fmt = (iso) => { try { return new Date(iso).toLocaleDateString(locale, { day: '2-digit', month: '2-digit' }); } catch (e) { return ''; } };
+                const periodOf = (doc, fallback) => doc && doc.period != null && doc.period !== '' ? doc.period : fallback;
+
+                const items = [];
+                rows.forEach(({ m, st }) => {
+                  const rv = st.reviewDigital;
+                  if (st.scheduledAt && new Date(st.scheduledAt) < now && !st.meetingDone)
+                    items.push({ prio: 0, tone: 'danger', icon: Calendar, text: T(`Gespräch mit ${m.name} überfällig (${fmt(st.scheduledAt)})`, `Colloquio con ${m.name} scaduto (${fmt(st.scheduledAt)})`, `Meeting with ${m.name} overdue (${fmt(st.scheduledAt)})`), label: T('Zum Team', 'Al team', 'To team'), go: goTeam });
+                  if (rv && rv.status !== 'completed')
+                    items.push({ prio: 1, tone: 'warn', icon: Edit3, text: T(`Beurteilung ${m.name} fortsetzen (Entwurf vom ${fmt(rv.updatedAt || rv.createdAt)})`, `Continua la valutazione di ${m.name}`, `Continue ${m.name}'s review`), label: T('Fortsetzen', 'Continua', 'Continue'), go: () => startTeamAppraisal(m.id, periodOf(rv, yr), rv) });
+                  else if (!rv && !st.reviewPdf)
+                    items.push({ prio: st.selfDigital && st.selfDigital.status === 'completed' ? 2 : 3, tone: 'brand', icon: ClipboardList,
+                      text: (st.selfDigital && st.selfDigital.status === 'completed')
+                        ? T(`Beurteilung ${m.name} starten – Selbstreflexion liegt vor`, `Avvia la valutazione di ${m.name} – autovalutazione disponibile`, `Start ${m.name}'s review – self-reflection received`)
+                        : T(`Beurteilung ${m.name} starten`, `Avvia la valutazione di ${m.name}`, `Start ${m.name}'s review`),
+                      label: T('Starten', 'Avvia', 'Start'), go: () => startTeamAppraisal(m.id, yr, null) });
+                  const reviewDone = (rv && rv.status === 'completed') || (!rv && st.reviewPdf);
+                  if (reviewDone && !st.goalsDigital && !st.goalsPdf)
+                    items.push({ prio: 4, tone: 'brand', icon: Target, text: T(`Ziele ${nextYr} mit ${m.name} vereinbaren`, `Concorda gli obiettivi ${nextYr} con ${m.name}`, `Agree ${nextYr} goals with ${m.name}`), label: T('Erstellen', 'Crea', 'Create'), go: () => startTeamGoalSetting(m.id, nextYr, null) });
+                  else if (st.goalsDigital && st.goalsDigital.status !== 'completed')
+                    items.push({ prio: 4, tone: 'warn', icon: Target, text: T(`Zielvereinbarung ${nextYr} ${m.name} fortsetzen`, `Continua gli obiettivi ${nextYr} di ${m.name}`, `Continue ${m.name}'s ${nextYr} goals`), label: T('Fortsetzen', 'Continua', 'Continue'), go: () => startTeamGoalSetting(m.id, periodOf(st.goalsDigital, nextYr), st.goalsDigital) });
+                });
+                const selfMissing = n - selfIn;
+                if (selfMissing > 0)
+                  items.push({ prio: 5, tone: 'neutral', icon: Send, text: T(`${selfMissing} Selbstreflexion${selfMissing === 1 ? '' : 'en'} ${yr} noch nicht eingegangen`, `${selfMissing} autovalutazioni ${yr} non ancora ricevute`, `${selfMissing} self-reflection(s) ${yr} not yet received`), label: T('Links senden', 'Invia link', 'Send links'), go: goTeam });
+                items.sort((x, y) => x.prio - y.prio);
+                const shown = items.slice(0, 6);
+
+                const progressRow = (label, done, icon) => React.createElement('div', { className: 'space-y-1.5' },
+                  React.createElement('div', { className: 'flex items-center gap-2 text-sm' },
+                    React.createElement(icon, { size: 15, 'aria-hidden': true, className: 'text-nw-blue' }),
+                    React.createElement('span', { className: 'flex-1 text-ink' }, label),
+                    React.createElement('span', { className: 'tnum font-semibold ' + (done === n ? 'text-ok' : 'text-ink') }, `${done}/${n}`)),
+                  React.createElement('div', { className: 'h-1.5 overflow-hidden rounded-full bg-nw-blue-12', role: 'progressbar', 'aria-label': label, 'aria-valuenow': done, 'aria-valuemin': 0, 'aria-valuemax': n },
+                    React.createElement('div', { className: 'h-full rounded-full transition-[width] duration-300 ' + (done === n ? 'bg-ok' : 'bg-nw-green'), style: { width: `${Math.round(done / n * 100)}%` } })));
+
+                const toneDot = { danger: 'bg-danger-bg text-danger', warn: 'bg-warn-bg text-warn', brand: 'bg-nw-blue-06 text-nw-blue', neutral: 'bg-nw-grey-40 text-ink-60' };
+                return React.createElement('div', { className: 'space-y-5' },
+                  header,
+                  React.createElement('div', { className: 'grid grid-cols-1 gap-5 lg:grid-cols-5' },
+                    // Wo ich stehe
+                    React.createElement(NwPane, { className: 'lg:col-span-2' },
+                      React.createElement(NwPaneHeader, { title: T(`Wo ich stehe · ${yr}`, `A che punto sono · ${yr}`, `Where I stand · ${yr}`), icon: TrendingUp }),
+                      React.createElement('div', { className: 'space-y-4 p-4' },
+                        React.createElement('div', { className: 'flex items-end gap-3' },
+                          React.createElement('span', { className: 'tnum text-2xl font-semibold ' + (overall === 100 ? 'text-ok' : 'text-nw-blue') }, `${overall}%`),
+                          React.createElement('span', { className: 'pb-1 text-sm text-ink-60' }, reviewsDone === n ? T('Alle Beurteilungen abgeschlossen', 'Tutte le valutazioni completate', 'All reviews completed') : T('des Jahresgesprächs-Zyklus erledigt', 'del ciclo annuale completato', 'of the annual cycle done'))),
+                        progressRow(T(`Selbstreflexionen ${yr} eingegangen`, `Autovalutazioni ${yr} ricevute`, `Self-reflections ${yr} received`), selfIn, FileText),
+                        progressRow(T(`Beurteilungen ${yr} abgeschlossen`, `Valutazioni ${yr} completate`, `Reviews ${yr} completed`), reviewsDone, ClipboardList),
+                        progressRow(T('Gespräche geführt', 'Colloqui svolti', 'Meetings held'), meetingsDone, Calendar),
+                        progressRow(T(`Ziele ${nextYr} vereinbart`, `Obiettivi ${nextYr} concordati`, `Goals ${nextYr} agreed`), goalsDone, Target),
+                        React.createElement('div', { className: 'flex flex-wrap gap-2 border-t border-line-2 pt-3' },
+                          React.createElement(NwButton, { size: 'sm', icon: Users, onClick: goTeam }, T('Team-Übersicht', 'Panoramica team', 'Team overview')),
+                          reviewsDone > 0 && React.createElement(NwButton, { size: 'sm', icon: Scale, onClick: () => { setActiveView('teamcalibration'); setActiveScore(3); } }, T('Kalibrierung', 'Calibrazione', 'Calibration'))))
+                    ),
+                    // Meine offenen Punkte
+                    React.createElement(NwPane, { className: 'lg:col-span-3' },
+                      React.createElement(NwPaneHeader, { title: T('Meine offenen Punkte', 'I miei punti aperti', 'My open items'), icon: List,
+                        meta: items.length > 0 ? `${items.length}` : null }),
+                      shown.length === 0
+                        ? React.createElement('div', { className: 'flex items-center gap-3 p-5 text-sm text-ok' },
+                            React.createElement(CheckCircle2, { size: 18, 'aria-hidden': true }),
+                            T('Alles erledigt. Keine offenen Punkte.', 'Tutto fatto. Nessun punto aperto.', 'All done. No open items.'))
+                        : React.createElement('ul', { className: 'divide-y divide-line-2' },
+                            shown.map((it, i) => React.createElement('li', { key: i, className: 'flex items-center gap-3 px-4 py-2.5' },
+                              React.createElement('span', { className: 'grid h-7 w-7 shrink-0 place-items-center rounded-full ' + toneDot[it.tone], 'aria-hidden': true }, React.createElement(it.icon, { size: 14 })),
+                              React.createElement('span', { className: 'min-w-0 flex-1 text-sm text-ink' }, it.text),
+                              React.createElement(NwButton, { size: 'sm', variant: i === 0 ? 'primary' : 'secondary', onClick: it.go }, it.label)))),
+                      items.length > shown.length && React.createElement('div', { className: 'border-t border-line-2 px-4 py-2.5' },
+                        React.createElement('button', { type: 'button', onClick: goTeam, className: 'text-sm font-medium text-nw-blue hover:underline' },
+                          T(`Alle ${items.length} Punkte in der Team-Übersicht ansehen`, `Vedi tutti i ${items.length} punti nella panoramica team`, `See all ${items.length} items in the team overview`)))
                     )
                   )
                 );

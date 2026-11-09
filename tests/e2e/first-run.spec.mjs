@@ -1,10 +1,10 @@
 // Erststart ohne Anleitung: Eine neue Führungskraft folgt ausschließlich den sichtbaren Hauptaktionen
-// („Ihr nächster Schritt“) – vom ersten Aufruf bis zur ersten abgeschlossenen Beurteilung. Der Guide wird nie geöffnet.
+// („Dein nächster Schritt“) – vom ersten Aufruf bis zur ersten abgeschlossenen Beurteilung. Der Guide wird nie geöffnet.
 import { test, expect, openApp } from './fixtures.mjs';
 import { seed, listDocs } from './seed.mjs';
 
 const field = (d, n) => { const v = d.fields?.[n]; return v ? Object.values(v)[0] : undefined; };
-const nextStep = (page) => page.locator('section', { hasText: 'Ihr nächster Schritt' }).getByRole('button').first();
+const nextStep = (page) => page.locator('section', { hasText: 'Dein nächster Schritt' }).getByRole('button').first();
 
 test('Erststart: vom ersten Aufruf bis zur ersten abgeschlossenen Beurteilung nur über die Hauptaktionen', async ({ page, consoleErrors }) => {
   await seed();
@@ -25,7 +25,7 @@ test('Erststart: vom ersten Aufruf bis zur ersten abgeschlossenen Beurteilung nu
 
   // 3) Dashboard schlägt das Anlegen des Teams vor
   await page.getByText('Dashboard', { exact: true }).first().click();
-  await expect(page.getByText('Legen Sie Ihr Team an')).toBeVisible();
+  await expect(page.getByText('Lege dein Team an')).toBeVisible();
   await nextStep(page).click();
 
   // 4) Ersten Mitarbeiter anlegen

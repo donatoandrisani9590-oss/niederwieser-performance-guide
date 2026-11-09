@@ -196,7 +196,7 @@ test('Neue Führungskraft registriert sich: Konto mit Namen und registeredUsers 
   expect(reg.name.split('/').pop()).toBe(nina.localId);
   // Dashboard führt als nächsten Schritt zum Anlegen des Teams
   await page.getByText('Dashboard', { exact: true }).first().click();
-  await expect(page.getByText('Legen Sie Ihr Team an')).toBeVisible();
+  await expect(page.getByText('Lege dein Team an')).toBeVisible();
 });
 
 test('PDF-Export der Beurteilung erzeugt eine PDF-Datei', async ({ page }) => {

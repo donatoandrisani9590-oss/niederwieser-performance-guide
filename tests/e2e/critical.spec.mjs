@@ -1,7 +1,7 @@
 // Kritische Wege: Anmeldung, Daten laden, Datensatz anlegen/ändern/speichern, nach Neuladen wiederfinden.
 // Läuft nur gegen den Firebase-Emulator mit synthetischen Testdaten (siehe fixtures.mjs / seed.mjs).
 import { test, expect, openApp } from './fixtures.mjs';
-import { seed, USERS, ACCESS_CODE, YEAR, PREV_YEAR, listDocs, getDoc, setDoc } from './seed.mjs';
+import { seed, USERS, ACCESS_CODE, YEAR, PREV_YEAR, NEXT_YEAR, listDocs, getDoc, setDoc } from './seed.mjs';
 
 const field = (doc, name) => {
   const v = doc.fields?.[name];
@@ -110,7 +110,7 @@ test('Beurteilung anlegen, als Entwurf speichern, ändern, abschließen und nach
   // Emil hat noch keine Beurteilung, aber eine Zielvereinbarung für das laufende Jahr
   const before = (await listDocs('teamAppraisals')).filter((d) => field(d, 'employeeId') === 'tm-emil' && field(d, 'type') === 'review');
   expect(before).toHaveLength(0);
-  await expect(memberRow(page, 'Emil Probe')).toContainText('2 Ziele aus der Zielvereinbarung werden übernommen');
+  await expect(memberRow(page, 'Emil Probe')).toContainText(`2 Ziele ${YEAR} werden übernommen`);
 
   await rowButton(page, 'Emil Probe', 'Starten').click();
   await expect(page.getByRole('button', { name: /Entwurf speichern/ }).first()).toBeVisible();
@@ -236,10 +236,10 @@ test('Jahreswechsel in der Team-Übersicht: jedes Jahr zeigt nur seine Unterlage
   const yearPicker = page.getByRole('radiogroup', { name: 'Jahr' });
   await expect(yearPicker.getByRole('radio', { name: YEAR })).toHaveAttribute('aria-checked', 'true');
   await expect(memberRow(page, 'Clara Beispiel')).toContainText('GPS 3.9');
-  await expect(page.getByRole('columnheader', { name: `Beurteilung ${YEAR}` })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: `Beurteilung & Gespräch ${YEAR}` })).toBeVisible();
 
   await yearPicker.getByRole('radio', { name: PREV_YEAR }).click();
-  await expect(page.getByRole('columnheader', { name: `Beurteilung ${PREV_YEAR}` })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: `Beurteilung & Gespräch ${PREV_YEAR}` })).toBeVisible();
   await expect(memberRow(page, 'Clara Beispiel')).toContainText('GPS 3.2');
   await expect(memberRow(page, 'Clara Beispiel')).not.toContainText('GPS 3.9');
   await expect(memberRow(page, 'David Muster')).not.toContainText('Entwurf');
@@ -286,10 +286,10 @@ test('Kalibrierung: nur das gewählte Jahr, jeder Mitarbeiter einmal gezählt', 
   await expect(heatmapRows).toContainText('3.9');
   // Jahr wechseln: Vorjahres-Beurteilung, gleiche Auswahl wie in der Team-Übersicht
   await page.getByRole('radiogroup', { name: 'Jahr' }).getByRole('radio', { name: PREV_YEAR }).click();
-  await expect(page.getByText(`1 Mitarbeiter | Review-Periode: ${PREV_YEAR}`)).toBeVisible();
+  await expect(page.getByText(`2 Mitarbeiter | Review-Periode: ${PREV_YEAR}`)).toBeVisible();
   await expect(page.getByRole('row').filter({ hasText: 'Clara Beispiel' })).toContainText('3.2');
   await page.getByText('Team-Übersicht', { exact: true }).first().click();
-  await expect(page.getByRole('columnheader', { name: `Beurteilung ${PREV_YEAR}` })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: `Beurteilung & Gespräch ${PREV_YEAR}` })).toBeVisible();
 });
 
 test('Ziel-Dashboard: Jahresfilter optional, Standard „Alle Jahre“ wie bisher', async ({ page }) => {
@@ -311,4 +311,53 @@ test('Ziel-Dashboard: Jahresfilter optional, Standard „Alle Jahre“ wie bishe
   await picker.getByRole('radio', { name: 'Alle Jahre' }).click();
   await expect.poll(async () => Number(await kpi.textContent())).toBe(all);
   expect(JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields))).toBe(before);
+});
+
+test('Altdaten: im Januar geführte Vorjahres-Beurteilung erscheint im Vorjahr und behält beim Öffnen ihr gespeichertes Jahr', async ({ page }) => {
+  const before = JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields));
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  // Laufendes Jahr: Davids Vorjahres-Beurteilung (period = laufendes Jahr, angelegt im Januar) zählt hier nicht
+  await expect(memberRow(page, 'David Muster')).toContainText('Entwurf');
+  await expect(memberRow(page, 'David Muster')).not.toContainText('GPS 3.4');
+  await page.getByRole('radiogroup', { name: 'Jahr' }).getByRole('radio', { name: PREV_YEAR }).click();
+  await expect(memberRow(page, 'David Muster')).toContainText('GPS 3.4');
+  // Öffnen übergibt das gespeicherte Jahr (kein Überschreiben beim späteren Speichern)
+  await rowButton(page, 'David Muster', 'Öffnen').first().click();
+  await expect(page.getByRole('button', { name: /Entwurf speichern/ }).first()).toBeVisible();
+  const ctx = await page.evaluate(() => JSON.parse(localStorage.getItem('nw_current_employee')));
+  expect(String(ctx.period)).toBe(YEAR);
+  expect(ctx.appraisalId).toBe('ap-david-review-legacy');
+  expect(JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields))).toBe(before);
+});
+
+test('Status-Matrix: Zielvereinbarung gilt dem Folgejahr, Beurteilung zeigt Gespräch', async ({ page }) => {
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: `Zielvereinbarung ${NEXT_YEAR}` })).toBeVisible();
+  await expect(memberRow(page, 'Emil Probe')).toContainText('Vereinbart · 2 Ziele');
+  await expect(memberRow(page, 'Clara Beispiel')).toContainText('Gespräch geführt');
+  await expect(memberRow(page, 'Clara Beispiel')).toContainText('Eingegangen');
+  await expect(memberRow(page, 'David Muster')).toContainText('Kein Gesprächstermin');
+  await expect(memberRow(page, 'David Muster').getByRole('button', { name: 'Termin planen' })).toBeVisible();
+});
+
+test('Dashboard: Stand des Jahres und offene Punkte mit Direktaktion', async ({ page }) => {
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  await page.getByText('Dashboard', { exact: true }).first().click();
+  await expect(page.getByText(`Wo ich stehe · ${YEAR}`)).toBeVisible();
+  await expect(page.getByRole('progressbar', { name: `Beurteilungen ${YEAR} abgeschlossen` })).toHaveAttribute('aria-valuenow', '2');
+  const item = page.getByRole('listitem').filter({ hasText: 'Beurteilung David Muster fortsetzen' });
+  await expect(item).toBeVisible();
+  await item.getByRole('button', { name: 'Fortsetzen' }).click();
+  await hasFieldValue(page, 'Ausschuss reduzieren').toBe(true);
+});
+
+test('Kalibrierung ohne 9-Box-Grid', async ({ page }) => {
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  await page.getByText('Kalibrierung', { exact: true }).first().click();
+  await expect(page.getByText('Kompetenz-Heatmap')).toBeVisible();
+  await expect(page.getByText(/9-Box Grid/)).toHaveCount(0);
 });

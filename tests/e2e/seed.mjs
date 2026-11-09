@@ -12,9 +12,12 @@ export const USERS = {
 };
 
 export const ACCESS_CODE = 'TESTCODE-0001';
-// Laufendes Jahr: Die Team-Übersicht zeigt standardmäßig das aktuelle Jahr. PREV_YEAR prüft den Jahreswechsel.
-export const YEAR = String(new Date().getFullYear());
-export const PREV_YEAR = String(new Date().getFullYear() - 1);
+// Laufendes Beurteilungsjahr (Zyklus Jul–Jun, wie in der App): Die Team-Übersicht zeigt es standardmäßig.
+// PREV_YEAR prüft den Jahreswechsel, NEXT_YEAR die Zielvereinbarung für das Folgejahr.
+const _now = new Date();
+export const YEAR = String(_now.getMonth() < 6 ? _now.getFullYear() - 1 : _now.getFullYear());
+export const PREV_YEAR = String(Number(YEAR) - 1);
+export const NEXT_YEAR = String(Number(YEAR) + 1);
 
 const iso = (d) => new Date(d).toISOString();
 
@@ -89,15 +92,15 @@ export async function seed() {
     accessCode: `CODE-${id}`, createdAt: iso('2025-02-01'), invitedAt: null, lastReminderAt: null, ...extra,
   });
   await member('tm-clara', uidA, USERS.managerA.email, 'Clara Beispiel', 'Sachbearbeiterin Einkauf',
-    { accessCode: ACCESS_CODE, meetingDone: true, meetingDoneAt: iso('2025-11-20'), scheduledAt: iso('2025-11-20'), scheduledSource: 'form' });
+    { accessCode: ACCESS_CODE, meetingDone: true, meetingDoneAt: iso(`${YEAR}-11-20`), scheduledAt: iso(`${YEAR}-11-20`), scheduledSource: 'form' });
   await member('tm-david', uidA, USERS.managerA.email, 'David Muster', 'Teamleiter Produktion', { goalMeetingDone: false, goalMeetingDoneAt: null });
   await member('tm-emil', uidA, USERS.managerA.email, 'Emil Probe', 'Techniker');
   await member('tm-frieda', uidB, USERS.managerB.email, 'Frieda Geteilt', 'Controllerin', { sharedWith: [USERS.managerA.email] });
 
   const base = (id, emp, owner, type, status, extra) => setDoc(`teamAppraisals/${id}`, {
     id, type, status, period: YEAR, employeeId: emp.id, employeeName: emp.name, employeePosition: emp.position,
-    position: emp.position, userId: owner, managerId: owner, managerName: 'Testleitung', createdAt: iso('2025-11-01'),
-    updatedAt: iso('2025-11-15'), ...extra,
+    position: emp.position, userId: owner, managerId: owner, managerName: 'Testleitung', createdAt: iso(`${YEAR}-11-01`),
+    updatedAt: iso(`${YEAR}-11-15`), ...extra,
   });
   const clara = { id: 'tm-clara', name: 'Clara Beispiel', position: 'Sachbearbeiterin Einkauf' };
   const david = { id: 'tm-david', name: 'David Muster', position: 'Teamleiter Produktion' };
@@ -115,7 +118,7 @@ export async function seed() {
   });
   await base('ap-clara-self', clara, uidA, 'self_assessment', 'completed', {
     isSelfAssessment: true, selfCoreScores: CORE, selfCoreComments: { fach: 'Ich kenne mich gut aus' }, selfLeaderScores: null,
-    selfLeaderComments: null, pendingForEmail: null, pendingStatus: null, submittedAt: iso('2025-11-10'),
+    selfLeaderComments: null, pendingForEmail: null, pendingStatus: null, submittedAt: iso(`${YEAR}-11-10`),
   });
   await base('ap-david-draft', david, uidA, 'review', 'draft', {
     isManager: true, includeLeadership: true, noGoalsMode: false, isAutoSave: true,
@@ -132,6 +135,20 @@ export async function seed() {
   await base('ap-emil-goals', emil, uidA, 'goals', 'completed', {
     goals: [{ id: 1, name: 'Wartungsquote 95 %', weight: 70, target: '95 %', type: 'performance' }, { id: 2, name: 'Dokumentation digitalisieren', weight: 30, target: 'bis Q3', type: 'performance' }],
     devGoals: [],
+  });
+  // Emil: Ziele für das Folgejahr bereits vereinbart (Spalte „Zielvereinbarung NEXT_YEAR“)
+  await base('ap-emil-goals-next', emil, uidA, 'goals', 'completed', {
+    period: NEXT_YEAR, goals: [{ id: 1, name: 'Neue Anlage einfahren', weight: 50, target: 'Q2', type: 'performance' }, { id: 2, name: 'Azubi betreuen', weight: 50, target: 'laufend', type: 'performance' }],
+    devGoals: [],
+  });
+  // David: Vorjahres-Beurteilung, im Januar des laufenden Jahres geführt und deshalb mit period = YEAR gespeichert
+  // (so in den Echtdaten gefunden: früher wurde das Kalenderjahr eingetragen). Muss unter PREV_YEAR erscheinen.
+  await base('ap-david-review-legacy', david, uidA, 'review', 'completed', {
+    period: YEAR, isManager: true, includeLeadership: true, noGoalsMode: false,
+    goals: [{ id: 1, name: 'Linie 3 stabilisieren', weight: 100, achievement: 100 }],
+    coreScores: CORE, leaderScores: LEAD, wasScore: 100, wieCoreScore: 3.6, gpsScore: 3.4, finalGPS: 3.4,
+    createdAt: iso(`${YEAR}-01-20`), updatedAt: iso(`${YEAR}-01-22`),
+    formData: { employee: david.name, position: david.position, manager: 'Anna Testleiterin', date: `${YEAR}-01-20` }, versionHistory: [],
   });
   // Clara: Beurteilung aus dem Vorjahr (darf im laufenden Jahr nicht als „abgeschlossen“ zählen)
   await base('ap-clara-review-prev', clara, uidA, 'review', 'completed', {

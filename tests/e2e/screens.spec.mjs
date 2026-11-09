@@ -127,7 +127,7 @@ test('Mitarbeiter-Link: Willkommen und Formular rendern ohne Fehler', async ({ p
 test('Dialoge: Hintergrund bleibt halbtransparent, Inhalt lesbar', async ({ page, consoleErrors }) => {
   await seed();
   await loginVia(page, USERS.managerA);
-  await page.getByRole('button', { name: 'Termin', exact: true }).first().click();
+  await page.getByRole('button', { name: 'Termin planen', exact: true }).first().click();
   const overlay = page.locator('div.fixed.inset-0').first();
   await expect(overlay).toBeVisible();
   const bg = await overlay.evaluate((el) => getComputedStyle(el).backgroundColor);
@@ -140,7 +140,7 @@ test('Dialoge: Hintergrund bleibt halbtransparent, Inhalt lesbar', async ({ page
 test('Dialoge: Esc schließt den Dialog', async ({ page }) => {
   await seed();
   await loginVia(page, USERS.managerA);
-  await page.getByRole('button', { name: 'Termin', exact: true }).first().click();
+  await page.getByRole('button', { name: 'Termin planen', exact: true }).first().click();
   await expect(page.locator('div.fixed.inset-0').first()).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.locator('div.fixed.inset-0')).toHaveCount(0);
@@ -149,7 +149,7 @@ test('Dialoge: Esc schließt den Dialog', async ({ page }) => {
 test('Dialoge: Fokus im Dialog gefangen und nach dem Schließen zurück beim Auslöser', async ({ page }) => {
   await seed();
   await loginVia(page, USERS.managerA);
-  const trigger = page.getByRole('button', { name: 'Termin', exact: true }).first();
+  const trigger = page.getByRole('button', { name: 'Termin planen', exact: true }).first();
   await trigger.click();
   const overlay = page.locator('div.fixed.inset-0').first();
   await expect(overlay).toBeVisible();
@@ -160,7 +160,7 @@ test('Dialoge: Fokus im Dialog gefangen und nach dem Schließen zurück beim Aus
   }
   await page.keyboard.press('Escape');
   await expect(page.locator('div.fixed.inset-0')).toHaveCount(0);
-  await expect.poll(() => page.evaluate(() => (document.activeElement?.textContent || '').trim())).toBe('Termin');
+  await expect.poll(() => page.evaluate(() => (document.activeElement?.textContent || '').trim())).toBe('Termin planen');
 });
 
 test('HR-Tabelle: Zeilenaktionen im ⋯-Menü, per Tastatur bedienbar', async ({ page, consoleErrors }) => {

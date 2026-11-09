@@ -361,3 +361,36 @@ test('Kalibrierung ohne 9-Box-Grid', async ({ page }) => {
   await expect(page.getByText('Kompetenz-Heatmap')).toBeVisible();
   await expect(page.getByText(/9-Box Grid/)).toHaveCount(0);
 });
+
+test('Zurück und Home: auf jeder Seite, Schritt für Schritt zurück, Formular fragt vor dem Verlassen', async ({ page }) => {
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  const back = page.getByRole('navigation', { name: 'Seitennavigation' }).getByRole('button', { name: 'Zurück' });
+  const home = page.getByRole('navigation', { name: 'Seitennavigation' }).getByRole('button', { name: 'Home' });
+  await page.getByText('Kalibrierung', { exact: true }).first().click();
+  await expect(page.getByText(/Review-Periode/)).toBeVisible();
+  await page.getByText('Kompetenzen', { exact: true }).first().click();
+  // Schritt für Schritt zurück: Kompetenzen → Kalibrierung → Team-Übersicht
+  await back.click();
+  await expect(page.getByText(/Review-Periode/)).toBeVisible();
+  await back.click();
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  // Home führt zum Dashboard, dort gibt es keinen Home-Knopf
+  await home.click();
+  await expect(page.getByText(`Wo ich stehe · ${YEAR}`)).toBeVisible();
+  await expect(home).toHaveCount(0);
+  // Formular: Rückfrage abgelehnt → bleibt im Formular, nichts gespeichert
+  await back.click();
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  const before = JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields));
+  await rowButton(page, 'David Muster', 'Fortsetzen').first().click();
+  await expect(page.getByRole('button', { name: /Entwurf speichern/ }).first()).toBeVisible();
+  await back.click();
+  await expect(page.getByRole('button', { name: /Entwurf speichern/ }).first()).toBeVisible();
+  // Rückfrage bestätigt → zurück zur Team-Übersicht
+  page.removeAllListeners('dialog');
+  page.on('dialog', (d) => d.accept().catch(() => {}));
+  await back.click();
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  expect(JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields))).toBe(before);
+});

@@ -173,12 +173,17 @@ test('HR-Tabelle: Zeilenaktionen im ⋯-Menü, per Tastatur bedienbar', async ({
   const menu = page.getByRole('menu');
   await expect(menu).toBeVisible();
   for (const label of ['Im Formular bearbeiten', 'PDF Export', 'Drucken', 'Löschen']) await expect(menu.getByRole('menuitem', { name: label })).toBeVisible();
-  await shot(page, '21g-hr-zeilenmenue');
   await page.keyboard.press('ArrowDown');
   await expect(menu.getByRole('menuitem', { name: 'PDF Export' })).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('menu')).toHaveCount(0);
   await expect(more).toBeFocused();
+  // Bildschirmfoto erst nach den Tastaturprüfungen (die Größenänderung fürs Foto scrollt und schließt das Menü)
+  await more.click();
+  await expect(menu).toBeVisible();
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: join(SHOT_DIR, '21g-hr-zeilenmenue.png') });
+  await page.keyboard.press('Escape');
   // Menüeintrag löst dieselbe Aktion aus wie vorher der Icon-Knopf
   await more.click();
   await page.getByRole('menuitem', { name: 'Im Formular bearbeiten' }).click();

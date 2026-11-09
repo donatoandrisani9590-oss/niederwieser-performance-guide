@@ -719,7 +719,7 @@
             Briefcase, Lightbulb, ShieldAlert, CheckCircle2, Check, AlertCircle,
             ClipboardList, CalendarCheck, Calculator, Info, RotateCcw, Trophy, PlusCircle, XCircle,
             Download, Loader2, Trash2, FileText, Edit2, Edit3, Eye, UserPlus, Play, LogOut, Mail, Lock, Link, Save, LayoutGrid, List,
-            Building2, ArrowLeft, RefreshCw, Calendar, User, HelpCircle, Send, Sparkles, Copy, Circle, Share2, Users2,
+            Building2, ArrowLeft, Home, RefreshCw, Calendar, User, HelpCircle, Send, Sparkles, Copy, Circle, Share2, Users2,
             Upload, FileUp, ExternalLink, Settings, Factory, ChevronLeft, Filter, SlidersHorizontal, ChevronDown, ChevronUp,
             MoreHorizontal
         } from 'https://esm.sh/lucide-react@0.292.0';
@@ -944,14 +944,16 @@
           useEffect(() => {
             if (!pos) return;
             const close = () => setPos(null);
+            const openedAt = Date.now();
+            const onScroll = () => { if (Date.now() - openedAt > 250) close(); }; // Nachrollen direkt nach dem Öffnen ignorieren
             const onDoc = (ev) => { if (ref.current && !ref.current.contains(ev.target)) close(); };
             const onKey = (ev) => { if (ev.key === 'Escape') { ev.stopPropagation(); close(); btnRef.current && btnRef.current.focus(); } };
             document.addEventListener('mousedown', onDoc);
             document.addEventListener('keydown', onKey, true);
-            window.addEventListener('scroll', close, true);
+            window.addEventListener('scroll', onScroll, true);
             const first = ref.current && ref.current.querySelector('[role=menu] button');
-            first && first.focus();
-            return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey, true); window.removeEventListener('scroll', close, true); };
+            first && first.focus({ preventScroll: true }); // Fokus ohne Scrollen (Scrollen schließt das Menü)
+            return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey, true); window.removeEventListener('scroll', onScroll, true); };
           }, [pos]);
           const toggle = () => {
             if (pos) { setPos(null); return; }
@@ -10559,6 +10561,30 @@ Goal 3: 20% weight, 80% achieved → 16 points
           const [goalsDashYear, setGoalsDashYear] = useState('all'); // Ziel-Dashboard: Anzeigefilter Jahr ('all' = wie bisher, synchron mit HR-Dashboard)
           const [goalsDashboardSelectedId, setGoalsDashboardSelectedId] = useState(null); // Ausgewählter Mitarbeiter im Goals Dashboard
           const [competencyArea, setCompetencyArea] = useState(null); // null = Auswahl, 'admin' oder 'production'
+          // === ZURÜCK / HOME: Verlauf der besuchten Ansichten (nur im Speicher; URLs und Daten unberührt) ===
+          const [navHistory, setNavHistory] = useState([]);
+          const navRef = useRef({ view: 'dashboard', area: null, skip: false });
+          useEffect(() => {
+            const prev = navRef.current;
+            if (prev.view === activeView && prev.area === competencyArea) return;
+            if (!prev.skip) setNavHistory(h => [...h, { view: prev.view, area: prev.area }].slice(-30));
+            navRef.current = { view: activeView, area: competencyArea, skip: false };
+          }, [activeView, competencyArea]);
+          // Formulare: vor dem Verlassen nachfragen (nicht gespeicherte Eingaben)
+          const confirmLeaveForm = () => !(activeView === 'formular' || activeView === 'zielvereinbarung') ||
+            confirm(getText(lang, 'Formular verlassen? Nicht gespeicherte Eingaben gehen verloren.', 'Lasciare il modulo? Le modifiche non salvate andranno perse.', 'Leave the form? Unsaved input will be lost.'));
+          const goBack = () => {
+            if (!navHistory.length || !confirmLeaveForm()) return;
+            const last = navHistory[navHistory.length - 1];
+            navRef.current = { ...navRef.current, skip: true };
+            setNavHistory(h => h.slice(0, -1));
+            setActiveView(last.view);
+            setCompetencyArea(last.area);
+          };
+          const goHome = () => {
+            if (activeView === 'dashboard' || !confirmLeaveForm()) return;
+            setActiveView('dashboard');
+          };
           const [detailAreaContext, setDetailAreaContext] = useState('admin'); // Für Detailansicht
 
           // === FIREBASE AUTH STATE ===
@@ -28854,6 +28880,11 @@ const renderDashboard = () => {
             ),
             React.createElement('main', { className: "min-w-0 flex-1 overflow-y-auto md:h-screen px-4 py-5 md:px-8 md:py-6 md:pb-20" },
               React.createElement('div', { className: (activeView === 'hrdashboard' || activeView === 'salaryreview' || activeView === 'goalsdashboard') ? "w-full" : "max-w-5xl mx-auto" },
+                // Zurück und Home auf jeder Seite
+                (navHistory.length > 0 || activeView !== 'dashboard') && React.createElement('nav', { 'aria-label': getText(lang, 'Seitennavigation', 'Navigazione pagina', 'Page navigation'), className: 'no-print mb-4 flex flex-wrap items-center gap-2', 'data-print-hide': 'true' },
+                  React.createElement(NwButton, { size: 'sm', variant: 'secondary', icon: ArrowLeft, onClick: goBack, disabled: navHistory.length === 0, title: getText(lang, 'Eine Seite zurück', 'Una pagina indietro', 'Back one page') }, getText(lang, 'Zurück', 'Indietro', 'Back')),
+                  activeView !== 'dashboard' && React.createElement(NwButton, { size: 'sm', variant: 'ghost', icon: Home, onClick: goHome, title: getText(lang, 'Zum Dashboard', 'Alla dashboard', 'To the dashboard') }, 'Home')
+                ),
                 activeView === 'dashboard' && renderDashboard(),
                 activeView === 'guide' && renderGuide(),
                 activeView === 'list' && renderCompetencyList(),

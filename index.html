@@ -1002,6 +1002,11 @@
           if (isNaN(d)) return '';
           return String(d.getMonth() < 6 ? d.getFullYear() - 1 : d.getFullYear());
         };
+        // Überfällig erst ab dem Folgetag (nur Anzeige): Ein Gespräch mit Datum heute ist „heute“, nicht „überfällig“.
+        // Vorher wurde Mitternacht mit der aktuellen Uhrzeit verglichen, ein Termin von heute galt sofort als überfällig.
+        const nwStartOfToday = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+        const nwIsOverdue = (raw) => { if (!raw) return false; const d = new Date(raw); return !isNaN(d) && d < nwStartOfToday(); };
+        const nwIsToday = (raw) => { if (!raw) return false; const d = new Date(raw); return !isNaN(d) && d.toDateString() === new Date().toDateString(); };
         const nwIsGoalDoc = (a) => /^goal/.test(String((a && a.type) || ''));
         const nwCycleYear = (a) => {
           if (!a) return '';
@@ -10654,6 +10659,13 @@ Goal 3: 20% weight, 80% achieved → 16 points
             if (!prev.skip) setNavHistory(h => [...h, { view: prev.view, area: prev.area }].slice(-30));
             navRef.current = { view: activeView, area: competencyArea, skip: false };
           }, [activeView, competencyArea]);
+          // Seitenwechsel beginnt immer oben: Der Inhaltsbereich (<main>) scrollt selbst und behielt sonst die Position
+          // der vorigen Seite (eine Selbstreflexion öffnete sich mitten im Bogen). Nur Anzeige.
+          useEffect(() => {
+            const main = document.querySelector('main');
+            if (main) main.scrollTop = 0;
+            window.scrollTo(0, 0);
+          }, [activeView, competencyArea]);
           // Formulare: vor dem Verlassen nachfragen (nicht gespeicherte Eingaben)
           const confirmLeaveForm = () => !(activeView === 'formular' || activeView === 'zielvereinbarung') ||
             confirm(getText(lang, 'Formular verlassen? Nicht gespeicherte Eingaben gehen verloren.', 'Lasciare il modulo? Le modifiche non salvate andranno perse.', 'Leave the form? Unsaved input will be lost.'));
@@ -15218,7 +15230,7 @@ Best regards`
             const overdueAppointments = teamMembers.filter(m => {
               if (!m.scheduledAt) return false;
               if (m.meetingDone === true) return false; // Nicht überfällig wenn Gespräch geführt
-              return new Date(m.scheduledAt) < now;
+              return nwIsOverdue(m.scheduledAt);
             });
             
             // GPS-Durchschnitt
@@ -15379,7 +15391,8 @@ Best regards`
                             const isOwner = member._isOwner !== false;
                             const selfLink = getSelfLink(member);
                             const scheduled = status.scheduledAt ? new Date(status.scheduledAt) : null;
-                            const overdue = scheduled && scheduled < now && !status.meetingDone;
+                            const overdue = scheduled && nwIsOverdue(status.scheduledAt) && !status.meetingDone;
+                            const meetingToday = scheduled && nwIsToday(status.scheduledAt) && !status.meetingDone;
                             const sd = status.selfDigital;
                             const rv = status.reviewDigital;
                             const gl = status.goalsDigital;
@@ -15412,7 +15425,9 @@ Best regards`
                               ? note('✓ ' + T('Gespräch geführt', 'Colloquio svolto', 'Meeting held') + (status.meetingDoneAt ? ' · ' + fmt(status.meetingDoneAt) : ''), 'ok')
                               : React.createElement('span', { className: 'inline-flex flex-wrap items-center gap-x-2 gap-y-0.5' },
                                   scheduled
-                                    ? note((overdue ? T('Gespräch überfällig', 'Colloquio scaduto', 'Meeting overdue') : T('Gespräch am', 'Colloquio il', 'Meeting on')) + ' ' + fmt(status.scheduledAt), overdue ? 'danger' : null)
+                                    ? (meetingToday
+                                        ? note(T('Gespräch heute', 'Colloquio oggi', 'Meeting today'))
+                                        : note((overdue ? T('Gespräch überfällig', 'Colloquio scaduto', 'Meeting overdue') : T('Gespräch am', 'Colloquio il', 'Meeting on')) + ' ' + fmt(status.scheduledAt), overdue ? 'danger' : null))
                                     : note(T('Kein Gesprächstermin', 'Nessun appuntamento', 'No meeting date')),
                                   linkBtn(scheduled ? T('Ändern', 'Modifica', 'Change') : T('Termin planen', 'Pianifica', 'Schedule'), () => scheduleDate(member)),
                                   rv && rv.status === 'completed' && linkBtn(T('Als geführt markieren', 'Segna come svolto', 'Mark as held'), () => toggleMeetingDone({ ...member, meetingDone: false })));
@@ -15496,7 +15511,7 @@ Best regards`
                       const scheduledDate = status.scheduledAt ? new Date(status.scheduledAt) : null; // nur Termine des gewählten Jahres
                       const meetingDone = status.meetingDone; // Beurteilungsgespräch im gewählten Jahr geführt
                       const goalMeetingDone = status.goalMeetingDone; // Zielvereinbarungsgespräch im gewählten Jahr geführt
-                      const isOverdue = scheduledDate && scheduledDate < now && !meetingDone; // Nicht überfällig wenn Gespräch geführt
+                      const isOverdue = scheduledDate && nwIsOverdue(status.scheduledAt) && !meetingDone; // Nicht überfällig wenn Gespräch geführt
                       const daysUntil = scheduledDate ? Math.ceil((scheduledDate - now) / (1000 * 60 * 60 * 24)) : null;
                       
                       return React.createElement('div', { 
@@ -23930,7 +23945,7 @@ const renderDashboard = () => {
                   // Selbstreflexion nur als Entwurf gespeichert (Mitarbeiter hat nicht abgeschickt)
                   if (st.selfDigital && st.selfDigital.status !== 'completed' && !st.selfPdf)
                     items.push({ prio: 5, tone: 'warn', icon: Edit3, text: T(`Selbstreflexion ${m.name} liegt nur als Entwurf vor (nicht abgeschickt)`, `L'autovalutazione di ${m.name} è solo una bozza (non inviata)`, `${m.name}'s self-reflection is only a draft (not submitted)`), label: T('Ansehen', 'Visualizza', 'View'), go: goTeam });
-                  if (st.scheduledAt && new Date(st.scheduledAt) < now && !st.meetingDone)
+                  if (nwIsOverdue(st.scheduledAt) && !st.meetingDone)
                     items.push({ prio: 0, tone: 'danger', icon: Calendar, text: T(`Gespräch mit ${m.name} überfällig (${fmt(st.scheduledAt)})`, `Colloquio con ${m.name} scaduto (${fmt(st.scheduledAt)})`, `Meeting with ${m.name} overdue (${fmt(st.scheduledAt)})`), label: T('Zum Team', 'Al team', 'To team'), go: goTeam });
                   if (rv && rv.status !== 'completed')
                     items.push({ prio: 1, tone: 'warn', icon: Edit3, text: T(`Beurteilung ${m.name} fortsetzen (Entwurf vom ${fmt(rv.updatedAt || rv.createdAt)})`, `Continua la valutazione di ${m.name}`, `Continue ${m.name}'s review`), label: T('Fortsetzen', 'Continua', 'Continue'), go: () => startTeamAppraisal(m.id, periodOf(rv, yr), rv) });

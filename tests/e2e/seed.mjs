@@ -158,6 +158,12 @@ export async function seed() {
     createdAt: iso(`${PREV_YEAR}-11-01`), updatedAt: iso(`${PREV_YEAR}-11-20`),
     formData: { employee: clara.name, position: clara.position, manager: 'Anna Testleiterin', date: `${PREV_YEAR}-11-20` }, versionHistory: [],
   });
+  // David: Selbstreflexion ausgefüllt, aber nie abgeschickt (Entwurf per Auto-Save) – Fall aus den Echtdaten
+  await base('ap-david-self-draft', david, uidA, 'self_assessment', 'draft', {
+    isSelfAssessment: true, isAutoSave: true, selfCoreScores: CORE, selfCoreComments: { fach: 'Entwurf-Kommentar' },
+    selfLeaderScores: null, selfLeaderComments: null, pendingForEmail: null, pendingStatus: null, submittedAt: null,
+    formData: { employee: david.name, strengths1: 'Planung' },
+  });
   await base('ap-frieda-review', frieda, uidB, 'review', 'completed', {
     isManager: false, includeLeadership: false, goals: [{ id: 1, name: 'Monatsabschluss in 3 Tagen', weight: 100, achievement: 100 }],
     coreScores: CORE, leaderScores: LEAD, wasScore: 100, wieCoreScore: 3.8, gpsScore: 3.8, finalGPS: 3.8,

@@ -421,3 +421,24 @@ test('Mitarbeiter-Link: Abschnittsleiste unter der Kopfzeile, Spaltenköpfe der 
   await expect(page.getByRole('columnheader', { name: 'Maßnahme' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Fertig & senden' })).toBeInViewport();
 });
+
+test('Nicht abgeschickte Selbstreflexion: als Entwurf sichtbar und ansehbar, im Dashboard als offener Punkt', async ({ page }) => {
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  const row = memberRow(page, 'David Muster');
+  await expect(row).toContainText('Entwurf, nicht abgeschickt');
+  await expect(row).not.toContainText('Eingegangen');
+  await rowButton(page, 'David Muster', 'Ansehen').click();
+  await expect(page.getByText('Planung').first()).toBeVisible();
+  await page.getByText('Dashboard', { exact: true }).first().click();
+  await expect(page.getByRole('listitem').filter({ hasText: 'Selbstreflexion David Muster liegt nur als Entwurf vor' })).toBeVisible();
+});
+
+test('Mitarbeiter-Link: am Ende des Bogens ein klarer Abschicken-Schritt', async ({ page }) => {
+  await openApp(page, '?accessCode=CODE-tm-emil');
+  await page.getByRole('button', { name: /Selbstreflexion starten/ }).click();
+  const submit = page.getByRole('button', { name: 'Selbstreflexion abschicken' });
+  await submit.scrollIntoViewIfNeeded();
+  await expect(submit).toBeVisible();
+  await expect(page.getByText('Bisher ist deine Selbstreflexion nur als Entwurf gespeichert.')).toBeVisible();
+});

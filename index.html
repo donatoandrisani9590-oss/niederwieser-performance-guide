@@ -14145,8 +14145,19 @@ Goal 3: 20% weight, 80% achieved → 16 points
               goalsForReview,
               goalsForReviewCount: goalsForReview ? (goalsForReview.goals || []).filter(g => g && String(g.name || '').trim()).length : 0,
               // Gespräche: Merker gilt nur, wenn das Datum im gewählten Beurteilungsjahr liegt
-              meetingDone: member.meetingDone === true && (!member.meetingDoneAt || nwDateCycleYear(member.meetingDoneAt) === teamYear),
-              goalMeetingDone: member.goalMeetingDone === true && (!member.goalMeetingDoneAt || nwDateCycleYear(member.goalMeetingDoneAt) === teamYear),
+              // Gespräche je Beurteilungsjahr (optionales Feld meetingsByYear); ohne Eintrag wie bisher aus den alten Feldern
+              ...(() => {
+                const by = (member.meetingsByYear || {})[teamYear] || {};
+                const legacyReview = member.meetingDone === true && (!member.meetingDoneAt || nwDateCycleYear(member.meetingDoneAt) === teamYear);
+                const legacyGoal = member.goalMeetingDone === true && (!member.goalMeetingDoneAt || nwDateCycleYear(member.goalMeetingDoneAt) === teamYear);
+                const hasR = typeof by.reviewDone === 'boolean', hasG = typeof by.goalDone === 'boolean';
+                return {
+                  meetingDone: hasR ? by.reviewDone : legacyReview,
+                  meetingDoneAt: hasR ? (by.reviewDone ? by.reviewDoneAt || null : null) : (legacyReview ? member.meetingDoneAt || null : null),
+                  goalMeetingDone: hasG ? by.goalDone : legacyGoal,
+                  goalMeetingDoneAt: hasG ? (by.goalDone ? by.goalDoneAt || null : null) : (legacyGoal ? member.goalMeetingDoneAt || null : null),
+                };
+              })(),
               scheduledAt: member.scheduledAt && nwDateCycleYear(member.scheduledAt) === teamYear ? member.scheduledAt : null
             };
           };
@@ -15040,13 +15051,30 @@ Best regards`
             };
             
             // NEU: "Beurteilungsgespräch geführt" Toggle
+            // Gespräch je Beurteilungsjahr (Freigabe 23.11.2026): schreibt wie bisher meetingDone/meetingDoneAt und
+            // zusätzlich meetingsByYear.<Jahr>. Bevor die alten Felder für ein anderes Jahr überschrieben werden, wird
+            // ihr bisheriger Stand unter seinem Jahr gesichert, damit kein Jahr seinen Haken verliert.
+            const nwMeetingUpdate = (member, kind, newValue) => {
+              const y = String(teamYear);
+              const now = new Date().toISOString();
+              const doneKey = kind === 'goal' ? 'goalMeetingDone' : 'meetingDone';
+              const atKey = kind === 'goal' ? 'goalMeetingDoneAt' : 'meetingDoneAt';
+              const sub = kind === 'goal' ? 'goal' : 'review';
+              const update = { [doneKey]: newValue, [atKey]: newValue ? now : null,
+                [`meetingsByYear.${y}.${sub}Done`]: newValue, [`meetingsByYear.${y}.${sub}DoneAt`]: newValue ? now : null };
+              const orig = teamMembers.find(m => m.id === member.id) || member;
+              const prevYear = orig[doneKey] === true && orig[atKey] ? nwDateCycleYear(orig[atKey]) : '';
+              const prevBy = ((orig.meetingsByYear || {})[prevYear] || {})[`${sub}Done`];
+              if (prevYear && prevYear !== y && typeof prevBy !== 'boolean') {
+                update[`meetingsByYear.${prevYear}.${sub}Done`] = true;
+                update[`meetingsByYear.${prevYear}.${sub}DoneAt`] = orig[atKey];
+              }
+              return update;
+            };
             const toggleMeetingDone = async (member) => {
               try {
                 const newValue = !member.meetingDone;
-                await db.collection('teamMembers').doc(member.id).update({ 
-                  meetingDone: newValue,
-                  meetingDoneAt: newValue ? new Date().toISOString() : null
-                });
+                await db.collection('teamMembers').doc(member.id).update(nwMeetingUpdate(member, 'review', newValue));
                 devLog(`✅ Beurteilungsgespräch geführt`);
               } catch (e) { 
                 console.error('Fehler beim Speichern von meetingDone:', e);
@@ -15078,10 +15106,7 @@ Best regards`
             const toggleGoalMeetingDone = async (member) => {
               try {
                 const newValue = !member.goalMeetingDone;
-                await db.collection('teamMembers').doc(member.id).update({ 
-                  goalMeetingDone: newValue,
-                  goalMeetingDoneAt: newValue ? new Date().toISOString() : null
-                });
+                await db.collection('teamMembers').doc(member.id).update(nwMeetingUpdate(member, 'goal', newValue));
                 devLog(`✅ Zielvereinbarungsgespräch geführt`);
               } catch (e) { 
                 console.error('Fehler beim Speichern von goalMeetingDone:', e);
@@ -15347,7 +15372,7 @@ Best regards`
 
                             // Beurteilung = Performancegespräch: Offen → Entwurf → Abgeschlossen (+ Gespräch)
                             const meetingLine = status.meetingDone
-                              ? note('✓ ' + T('Gespräch geführt', 'Colloquio svolto', 'Meeting held') + (member.meetingDoneAt ? ' · ' + fmt(member.meetingDoneAt) : ''), 'ok')
+                              ? note('✓ ' + T('Gespräch geführt', 'Colloquio svolto', 'Meeting held') + (status.meetingDoneAt ? ' · ' + fmt(status.meetingDoneAt) : ''), 'ok')
                               : React.createElement('span', { className: 'inline-flex flex-wrap items-center gap-x-2 gap-y-0.5' },
                                   scheduled
                                     ? note((overdue ? T('Gespräch überfällig', 'Colloquio scaduto', 'Meeting overdue') : T('Gespräch am', 'Colloquio il', 'Meeting on')) + ' ' + fmt(status.scheduledAt), overdue ? 'danger' : null)

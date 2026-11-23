@@ -65,9 +65,9 @@ await db.collection('teamAppraisals').doc(pending.id).update({ userId: user.uid,
 await db.collection('teamAppraisals').doc(selfAssessmentId).set(selfAssessmentData);
 await db.collection('teamMembers').doc(doc.id).update({ accessCode: newCode });
 await db.collection('teamMembers').doc(id).delete();
+await db.collection('teamMembers').doc(member.id).update(nwMeetingUpdate(member, 'goal', newValue));
+await db.collection('teamMembers').doc(member.id).update(nwMeetingUpdate(member, 'review', newValue));
 await db.collection('teamMembers').doc(member.id).update({ email, emailAddedAt: now, emailAddedBy: (user && user.email) || '' });
-await db.collection('teamMembers').doc(member.id).update({ goalMeetingDone: newValue, goalMeetingDoneAt: newValue ? new Date().toISOString() : null });
-await db.collection('teamMembers').doc(member.id).update({ meetingDone: newValue, meetingDoneAt: newValue ? new Date().toISOString() : null });
 await db.collection('teamMembers').doc(member.id).update({ sharedWith: newShared });
 await db.collection('teamMembers').doc(scheduleModalMember.id).update({ scheduledAt: null, scheduledSource: null, meetingDone: null // Auch meetingDone zurücksetzen });
 await db.collection('teamMembers').doc(scheduleModalMember.id).update({ scheduledAt: parsed.toISOString(), scheduledSource: 'manual' // Markiere als "manuell gesetzt" });

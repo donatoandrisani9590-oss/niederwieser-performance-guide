@@ -706,3 +706,35 @@ test('Abschluss-Prüfung Zielvereinbarung: leere Vereinbarung fragt nach, Abbrec
   await page.waitForTimeout(1000);
   expect(await count()).toBe(before);
 });
+
+test('Gespräche je Jahr: Haken gilt nur für sein Jahr, der Vorjahres-Haken bleibt erhalten', async ({ page }) => {
+  // Altdaten: Gespräch im Vorjahr geführt (nur die alten Felder)
+  await setDoc('teamMembers/tm-clara', { name: 'Clara Beispiel', position: 'Sachbearbeiterin Einkauf', department: '', email: 'tm-clara@test.local',
+    userId: ids.uidA, ownerEmail: USERS.managerA.email, accessCode: ACCESS_CODE, createdAt: '2025-02-01T00:00:00.000Z',
+    meetingDone: true, meetingDoneAt: `${PREV_YEAR}-11-20T00:00:00.000Z`, scheduledAt: null });
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  const yearPicker = page.getByRole('radiogroup', { name: 'Jahr' });
+  await expect(memberRow(page, 'Clara Beispiel')).not.toContainText('Gespräch geführt');
+  await memberRow(page, 'Clara Beispiel').getByRole('button', { name: 'Als geführt markieren' }).click();
+  await expect(memberRow(page, 'Clara Beispiel')).toContainText('Gespräch geführt');
+  await expect.poll(async () => {
+    const d = await getDoc('teamMembers/tm-clara');
+    const by = d.fields.meetingsByYear?.mapValue.fields || {};
+    return [by[YEAR]?.mapValue.fields.reviewDone?.booleanValue, by[PREV_YEAR]?.mapValue.fields.reviewDone?.booleanValue].join(',');
+  }, { timeout: 10000 }).toBe('true,true');
+  let doc = await getDoc('teamMembers/tm-clara');
+  expect(doc.fields.meetingsByYear.mapValue.fields[PREV_YEAR].mapValue.fields.reviewDoneAt.stringValue).toBe(`${PREV_YEAR}-11-20T00:00:00.000Z`);
+  expect(field(doc, 'meetingDone')).toBe(true); // alte Felder werden weiter geschrieben
+  // Vorjahr: Haken weiter sichtbar, mit altem Datum
+  await yearPicker.getByRole('radio', { name: PREV_YEAR }).click();
+  await expect(memberRow(page, 'Clara Beispiel')).toContainText('Gespräch geführt');
+  await expect(memberRow(page, 'Clara Beispiel')).toContainText(`20.11.${PREV_YEAR.slice(2)}`);
+  // Laufendes Jahr zurücksetzen: Vorjahr bleibt
+  await yearPicker.getByRole('radio', { name: YEAR }).click();
+  await memberRow(page, 'Clara Beispiel').getByRole('button', { name: /Weitere Aktionen/ }).click();
+  await page.getByRole('menuitem', { name: 'Beurteilungsgespräch: zurücksetzen' }).click();
+  await expect(memberRow(page, 'Clara Beispiel')).not.toContainText('Gespräch geführt');
+  await yearPicker.getByRole('radio', { name: PREV_YEAR }).click();
+  await expect(memberRow(page, 'Clara Beispiel')).toContainText('Gespräch geführt');
+});

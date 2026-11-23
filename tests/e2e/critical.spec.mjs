@@ -45,7 +45,7 @@ test('Führungskraft sieht nach Anmeldung genau ihre eigenen und geteilten Mitar
   await page.getByRole('radio', { name: 'Karten' }).click();
   await expect(page.getByText('Geteilt von: fk.bernd@test.local')).toBeVisible();
   await expect(page.getByText('GPS 3.9').first()).toBeVisible();
-  await expect(page.getByText('✎ Entwurf gespeichert')).toBeVisible();
+  await expect(page.getByText('Entwurf gespeichert').first()).toBeVisible(); // angepasst: ohne das Zeichen ✎ davor (Designsystem: keine Symbolzeichen)
 });
 
 test('Andere Führungskraft sieht keine fremden Mitarbeiter', async ({ page }) => {

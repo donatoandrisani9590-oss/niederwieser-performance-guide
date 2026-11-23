@@ -319,6 +319,22 @@ Dazu acht Symbolzeichen in der Oberfläche durch Icons ersetzt („ℹ️“, �
 | Diagramme | Farben und Zahlenformat nach System | `ChartFrame` mit Lade-, Leer- und Fehlerzustand fehlt |
 | Eine gefüllte Hauptaktion je Ansicht | mehrere Ansichten mit zwei oder mehr | inhaltliche Entscheidung je Ansicht |
 
+### 14. Einladung zur Selbstreflexion: Versand-Dialog
+
+„Link senden“ und „Ans Abschicken erinnern“ riefen bisher direkt `mailto:` auf. Das öffnet das Standard-Mailprogramm
+des Rechners, nicht Outlook; ohne eingerichtetes Programm passierte scheinbar nichts. Ohne hinterlegte E-Mail-Adresse
+brach die Funktion wortlos ab.
+
+Jetzt erscheint ein Dialog mit drei Wegen:
+
+- **Text kopieren:** Betreff, Text und persönlicher Link in die Zwischenablage. Braucht weder Anmeldung noch Mailprogramm.
+- **In Outlook öffnen:** Outlook im Browser mit Empfänger, Betreff und Text (braucht die Microsoft-Anmeldung).
+- **Mail-Programm:** wie bisher `mailto:`.
+
+Die App verschickt weiterhin nichts selbst und speichert dabei nichts. Der E-Mail-Text ist unverändert. Fehlt die
+Adresse, sagt der Dialog das. Ein echter Ein-Klick-Versand aus der App bräuchte einen Mail-Dienst auf dem Server
+(neue Infrastruktur, Zugangsdaten, neue Datenzugriffe) und ist eine Entscheidung des Auftraggebers.
+
 ## Prüfungen
 
 ```bash
@@ -333,8 +349,8 @@ cd tests && npm test
 cd tests && npm run rules:vorschlag
 ```
 
-Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 88 / 88 grün,
-`npm run rules:vorschlag` 88 / 88 grün.
+Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 89 / 89 grün,
+`npm run rules:vorschlag` 89 / 89 grün.
 
 Die bestehenden Tests mussten für den Dialog nicht umgeschrieben werden: `tests/e2e/fixtures.mjs` meldet jeden
 App-Dialog über dieselben `page.on('dialog')`-Listener wie ein Browser-Fenster.

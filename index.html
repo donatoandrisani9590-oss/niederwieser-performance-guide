@@ -1395,6 +1395,11 @@
           const btnCls = (variant) => sheet ? nwBtnClass(variant, 'lg').replace(' h-9 ', ' h-11 ') + ' min-w-0 flex-1' : nwBtnClass(variant, 'lg');
           const cancel = kind === 'alert' ? null : el('button', btnCls('ghost'), o.cancelLabel || L('Abbrechen', 'Annulla', 'Cancel'));
           if (cancel) { cancel.type = 'button'; cancel.setAttribute('data-nw-cancel', ''); row.appendChild(cancel); }
+          const alts = (Array.isArray(o.alt) ? o.alt : o.alt ? [o.alt] : []).filter(a => a && a.label).map((a) => {
+            const b = el('button', btnCls('secondary'), a.label);
+            b.type = 'button'; b.setAttribute('data-nw-alt', a.value || 'alt'); row.appendChild(b);
+            return b;
+          });
           const ok = el('button', btnCls(o.danger ? 'danger-primary' : 'primary'), o.okLabel || (kind === 'alert' ? L('Verstanden', 'Ho capito', 'Got it') : L('Bestätigen', 'Conferma', 'Confirm')));
           ok.type = 'button';
           ok.setAttribute('data-nw-ok', '');
@@ -1417,6 +1422,7 @@
           if (input) { input.addEventListener('input', syncOk); syncOk(); }
           ok.addEventListener('click', () => { if (!ok.disabled) close(kind === 'prompt' ? input.value : kind === 'alert' ? undefined : true); });
           if (cancel) cancel.addEventListener('click', () => close(cancelValue));
+          alts.forEach((b) => b.addEventListener('click', () => close(b.getAttribute('data-nw-alt'))));
           overlay.addEventListener('mousedown', (ev) => { if (ev.target === overlay) close(cancelValue); });
           overlay.addEventListener('keydown', (ev) => {
             if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); close(cancelValue); }
@@ -14897,7 +14903,7 @@ Weight more important goals higher!`
             // E-Mail mit Link öffnen
             const sendEmail = (member) => {
               const link = getSelfLink(member);
-              if (!member.email || !link) return;
+              if (!link) return;
               
               const subject = encodeURIComponent(
                 lang === 'de' ? `Vorbereitung Jahresgespräch – Selbstreflexion` : 
@@ -14970,7 +14976,40 @@ If you have any questions, feel free to reach out.
 Best regards`
               );
               
-              window.location.href = `mailto:${member.email}?subject=${subject}&body=${body}`;
+              // Versandweg wählen: Outlook im Browser funktioniert unabhängig vom Standard-Mailprogramm des Rechners;
+              // „mailto:“ öffnet das Programm, das dort als Standard eingestellt ist (z. B. Outlook-App, Apple Mail).
+              // Die App verschickt nichts selbst: Die Mail ist vorbereitet, geprüft und gesendet wird im Mailprogramm.
+              const to = encodeURIComponent(member.email || '');
+              nwDialog({
+                title: getText(lang, `Einladung an ${member.name} senden`, `Invia invito a ${member.name}`, `Send invitation to ${member.name}`),
+                text: getText(lang,
+                  'Die Einladung ist fertig vorbereitet: Betreff und Text mit dem persönlichen Link. „Text kopieren“ funktioniert immer, ohne Anmeldung. Outlook und Mail-Programm öffnen die fertige E-Mail zum Prüfen und Senden.',
+                  'L\'invito è pronto: oggetto e testo con il link personale. «Copia testo» funziona sempre, senza accesso. Outlook e il programma di posta aprono l\'e-mail pronta da controllare e inviare.',
+                  'The invitation is ready: subject and text with the personal link. “Copy text” always works, no sign-in needed. Outlook and the mail app open the finished e-mail for you to review and send.'),
+                note: member.email
+                  ? getText(lang, `An: ${member.email}`, `A: ${member.email}`, `To: ${member.email}`)
+                  : getText(lang, 'Für diese Person ist keine E-Mail-Adresse hinterlegt. Trage den Empfänger in der Mail selbst ein.',
+                      'Nessun indirizzo e-mail salvato per questa persona. Inserisci il destinatario nella mail.',
+                      'No e-mail address is stored for this person. Enter the recipient in the e-mail yourself.'),
+                okLabel: getText(lang, 'In Outlook öffnen', 'Apri in Outlook', 'Open in Outlook'),
+                alt: [
+                  { value: 'copy', label: getText(lang, 'Text kopieren', 'Copia testo', 'Copy text') },
+                  { value: 'alt', label: getText(lang, 'Mail-Programm', 'Programma di posta', 'Mail app') }
+                ]
+              }).then((choice) => {
+                if (choice === 'copy') {
+                  // Funktioniert immer, ohne Anmeldung und ohne Mailprogramm: fertige Einladung in die Zwischenablage
+                  const plain = decodeURIComponent(subject) + '\n\n' + decodeURIComponent(body);
+                  const done = () => showToast(getText(lang, 'Einladung kopiert. Füge sie in eine E-Mail oder einen Chat ein.', 'Invito copiato. Incollalo in una e-mail o chat.', 'Invitation copied. Paste it into an e-mail or chat.'), 'success');
+                  const legacy = () => { const ta = document.createElement('textarea'); ta.value = plain; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); };
+                  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(plain).then(done).catch(legacy); else legacy();
+                } else if (choice === true) {
+                  const win = window.open(`https://outlook.office.com/mail/deeplink/compose?to=${to}&subject=${subject}&body=${body}`, '_blank', 'noopener');
+                  if (win === null) showToast(getText(lang, 'Der Browser hat das neue Fenster blockiert. Bitte Pop-ups für diese Seite erlauben.', 'Il browser ha bloccato la nuova finestra. Consenti i pop-up per questa pagina.', 'The browser blocked the new window. Please allow pop-ups for this page.'), 'warning');
+                } else if (choice === 'alt') {
+                  window.location.href = `mailto:${member.email || ''}?subject=${subject}&body=${body}`;
+                }
+              });
             };
             
             // Link kopieren

@@ -652,3 +652,35 @@ test('HR-Dashboard: Reiter-Indikator sitzt unter dem aktiven Reiter und folgt de
   await page.mouse.move(5, 5); // weg vom Reiter: der Hover-Zoom (3 %) verfälscht sonst dessen Maße
   await under(/Papierkorb/);
 });
+
+// Einladung zur Selbstreflexion: Dialog bietet Outlook im Browser (unabhängig vom Standard-Mailprogramm) und „mailto:“ an.
+// Die App verschickt nichts selbst; geprüft wird nur die vorbereitete Adresse, es öffnet sich kein echtes Fenster.
+test('Einladung: „Link senden“ öffnet den Versand-Dialog, Outlook erhält Empfänger, Betreff und persönlichen Link', async ({ page }) => {
+  manualDialogs(page, true);
+  await page.addInitScript(() => { window.__opened = []; window.open = (u) => { window.__opened.push(String(u)); return {}; }; });
+  await loginTeam(page, USERS.managerA);
+  await memberRow(page, 'Emil Probe').getByRole('button', { name: 'Link senden' }).click();
+  const dlg = page.locator('[data-nw-dialog]');
+  await expect(dlg).toContainText('Einladung an Emil Probe senden');
+  await expect(dlg).toContainText('An: tm-emil@test.local');
+  await expect(dlg.getByRole('button', { name: 'Mail-Programm' })).toBeVisible();
+  // „Text kopieren“ braucht weder Anmeldung noch Mailprogramm: Betreff, Text und Link landen in der Zwischenablage
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+  await dlg.getByRole('button', { name: 'Text kopieren' }).click();
+  await expect(page.getByText('Einladung kopiert')).toBeVisible();
+  const clip = await page.evaluate(() => navigator.clipboard.readText());
+  expect(clip).toContain('Vorbereitung Jahresgespräch');
+  expect(clip).toContain('?accessCode=CODE-tm-emil');
+  await expect(dlg).toHaveCount(0); // erster Dialog ist ausgeblendet
+  await memberRow(page, 'Emil Probe').getByRole('button', { name: 'Link senden' }).click();
+  await dlg.getByRole('button', { name: 'In Outlook öffnen' }).click();
+  await expect(dlg).toHaveCount(0);
+  const [url] = await page.evaluate(() => window.__opened);
+  expect(url.startsWith('https://outlook.office.com/mail/deeplink/compose?to=tm-emil%40test.local&subject=')).toBe(true);
+  expect(decodeURIComponent(url)).toContain('?accessCode=CODE-tm-emil');
+  expect(decodeURIComponent(url)).toContain('Selbstreflexion abschicken');
+  // Abbrechen öffnet nichts
+  await memberRow(page, 'Emil Probe').getByRole('button', { name: 'Link senden' }).click();
+  await page.locator('[data-nw-dialog]').getByRole('button', { name: 'Abbrechen' }).click();
+  expect((await page.evaluate(() => window.__opened)).length).toBe(1);
+});

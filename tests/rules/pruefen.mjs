@@ -56,12 +56,16 @@ const checks = [
   // Geteilte Mitarbeiter (tm-frieda gehört Bernd, geteilt mit Anna; tm-clara gehört Anna, nicht geteilt)
   ['Eingeladene FK trägt bei geteiltem Mitarbeiter einen Termin ein', true, () => call(t.a, 'PATCH', 'teamMembers/tm-frieda', fields({ scheduledAt: '2026-12-01T09:00:00.000Z', scheduledSource: 'manual', scheduledByName: 'Anna Testleiterin' }), ['scheduledAt', 'scheduledSource', 'scheduledByName'])],
   ['Eingeladene FK markiert bei geteiltem Mitarbeiter das Gespräch als geführt', true, () => call(t.a, 'PATCH', 'teamMembers/tm-frieda', fields({ meetingDone: true, meetingDoneByName: 'Anna Testleiterin' }), ['meetingDone', 'meetingDoneByName'])],
+  ['Eingeladene FK trägt einen Termin unter fremdem Namen ein', false, () => call(t.a, 'PATCH', 'teamMembers/tm-frieda', fields({ scheduledAt: '2026-12-02T09:00:00.000Z', scheduledByName: 'Bernd Testmann' }), ['scheduledAt', 'scheduledByName'])],
+  ['Besitzer trägt einen Termin unter fremdem Namen ein', false, () => call(t.b, 'PATCH', 'teamMembers/tm-frieda', fields({ scheduledAt: '2026-12-03T09:00:00.000Z', scheduledByName: 'Anna Testleiterin' }), ['scheduledAt', 'scheduledByName'])],
+  ['Besitzer ändert das Datum und lässt den fremden Vermerk stehen', false, () => call(t.b, 'PATCH', 'teamMembers/tm-frieda', fields({ scheduledAt: '2026-12-04T09:00:00.000Z' }), ['scheduledAt'])],
+  ['Besitzer trägt einen Termin unter eigenem Namen ein', true, () => call(t.b, 'PATCH', 'teamMembers/tm-frieda', fields({ scheduledAt: '2026-12-05T09:00:00.000Z', scheduledByName: 'Bernd Testmann' }), ['scheduledAt', 'scheduledByName'])],
   ['Eingeladene FK ändert bei geteiltem Mitarbeiter den Namen', false, () => call(t.a, 'PATCH', 'teamMembers/tm-frieda', fields({ name: 'Umbenannt' }), ['name'])],
   ['Eingeladene FK macht sich bei geteiltem Mitarbeiter zum Besitzer', false, () => call(t.a, 'PATCH', 'teamMembers/tm-frieda', fields({ userId: ids.uidA }), ['userId'])],
   ['Fremde FK übernimmt einen nicht geteilten Mitarbeiter (trägt sich als Besitzer ein)', false, () => call(t.b, 'PATCH', 'teamMembers/tm-clara', fields({ userId: ids.uidB }), ['userId'])],
   ['Mitarbeiter-Link (anonym) übernimmt einen Mitarbeiter', false, () => call(t.anon, 'PATCH', 'teamMembers/tm-clara', fields({ userId: 'anon' }), ['userId'])],
   ['Besitzer ändert den eigenen Mitarbeiter', true, () => call(t.a, 'PATCH', 'teamMembers/tm-clara', fields({ position: 'Sachbearbeiterin Einkauf' }), ['position'])],
-  ['Fremde FK trägt bei nicht geteiltem Mitarbeiter einen Termin ein', false, () => call(t.b, 'PATCH', 'teamMembers/tm-clara', fields({ scheduledAt: '2026-12-01T09:00:00.000Z' }), ['scheduledAt'])],
+  ['Fremde FK trägt bei nicht geteiltem Mitarbeiter einen Termin ein', false, () => call(t.b, 'PATCH', 'teamMembers/tm-clara', fields({ scheduledAt: '2026-12-01T09:00:00.000Z', scheduledByName: 'Bernd Testmann' }), ['scheduledAt', 'scheduledByName'])],
   // Bleibt bis Stufe 2 offen (bewusst, sonst funktioniert die heutige App nicht):
   ['(Stufe 2) Mitarbeiter-Link (anonym) liest alle Beurteilungen', true, () => call(t.anon, 'GET', 'teamAppraisals')],
 ];

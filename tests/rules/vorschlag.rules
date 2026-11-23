@@ -61,6 +61,25 @@ service cloud.firestore {
                  'goalMeetingDone', 'goalMeetingDoneAt', 'goalMeetingDoneByName',
                  'meetingsByYear']);
       }
+      // Vermerk „eingetragen von“: Der Name kommt aus der App. Damit niemand einen fremden Namen einträgt, muss ein
+      // geänderter Vermerk leer sein oder dem Namen im Anmelde-Token entsprechen. Hat das Token (noch) keinen Namen,
+      // etwa direkt nach der Registrierung, bleibt der Eintrag erlaubt, sonst würde das Speichern scheitern.
+      function byNameOk(key) {
+        return !request.resource.data.diff(resource.data).affectedKeys().hasAny([key]) ||
+               request.resource.data[key] == null ||
+               !('name' in request.auth.token) ||
+               request.resource.data[key] == request.auth.token.name;
+      }
+      // Wer das Datum ändert, muss auch den Vermerk auf sich selbst setzen (sonst bliebe ein fremder Name stehen)
+      function scheduleNoteFresh() {
+        return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['scheduledAt']) ||
+               request.resource.data.scheduledAt == null ||
+               !('name' in request.auth.token) ||
+               (('scheduledByName' in request.resource.data) && request.resource.data.scheduledByName == request.auth.token.name);
+      }
+      function byNamesOk() {
+        return byNameOk('scheduledByName') && byNameOk('meetingDoneByName') && byNameOk('goalMeetingDoneByName') && scheduleNoteFresh();
+      }
       allow create: if isAuthenticated() &&
         (request.resource.data.userId == request.auth.uid || isHRAdmin());
       // Besitzer bleibt Besitzer: Ändern darf, wem der Mitarbeiter schon gehört (oder ein Konto bei einem Altbestand
@@ -71,7 +90,7 @@ service cloud.firestore {
                (isAccount() && (!('userId' in resource.data) || resource.data.userId == null));
       }
       allow update: if isAuthenticated() &&
-        ((ownsOrAdoptsOrphan() && request.resource.data.userId == request.auth.uid) || isHRAdmin() || sharedManagerSetsMeeting());
+        (isHRAdmin() || (byNamesOk() && ((ownsOrAdoptsOrphan() && request.resource.data.userId == request.auth.uid) || sharedManagerSetsMeeting())));
       allow delete: if isAuthenticated() &&
         (resource.data.userId == request.auth.uid || isHRAdmin());
     }

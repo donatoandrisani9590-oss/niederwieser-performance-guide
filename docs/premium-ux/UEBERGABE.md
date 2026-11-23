@@ -402,7 +402,16 @@ eingeladene Führungskraft für Termin und Haken). In `tests/rules/aktuell.rules
 Konten weiter; ob die Live-App genau diese Regeln nutzt, lässt sich aus dem Repo nicht prüfen. **Die Regeln
 einzuspielen ist Sache des Auftraggebers.**
 
-Acht neue Regel-Prüfungen in `tests/rules/pruefen.mjs` und ein Ablauf-Test (95 Tests).
+**Vermerk gegen Fälschung abgesichert** (Hinweis der automatischen Sicherheitsprüfung nach dem Commit). Der Name kommt
+aus der App und wäre sonst frei wählbar. Der Vorschlag verlangt jetzt: Ein geänderter Vermerk ist leer oder gleich dem
+Namen im Anmelde-Token, und wer das Datum ändert, muss den Vermerk auf sich selbst setzen. Hat das Token noch keinen
+Namen (direkt nach der Registrierung), bleibt der Eintrag erlaubt, damit das Speichern nicht scheitert; in diesem Fall
+ist der Vermerk nicht geprüft. HR ist ausgenommen.
+
+**Reihenfolge beim Einspielen:** erst die App, dann die Regeln. Die heutige Live-App schreibt den Vermerk noch nicht;
+mit den neuen Regeln würde sie beim Termin-Speichern abgewiesen.
+
+Zwölf neue Regel-Prüfungen in `tests/rules/pruefen.mjs` und ein Ablauf-Test (95 Tests).
 Offen: Die eingeladene Führungskraft kann sich nicht selbst aus der Teilen-Liste austragen.
 
 ## Prüfungen

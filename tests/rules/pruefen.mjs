@@ -25,6 +25,12 @@ const call = async (tok, method, path, body, mask) => {
 };
 
 const ids = await seed();
+// Jemand registriert sich selbst mit einer Adresse, die früher in der HR-Liste der Regeln stand
+const signUp = async (email) => {
+  const r = await fetch(`${AUTH}/accounts:signUp?key=fake-api-key`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: 'Irgendwas-1234', returnSecureToken: true }) });
+  return (await r.json()).idToken;
+};
+const fremdHr = await signUp('hr@niederwiesergroup.com');
 const t = { anon: await anonToken(), a: await token(USERS.managerA), b: await token(USERS.managerB), hr: await token(USERS.hr) };
 
 // [Beschreibung, erwartet im Vorschlag (true = erlaubt), Aufruf]
@@ -53,6 +59,9 @@ const checks = [
   ['HR liest den Papierkorb', true, () => call(t.hr, 'GET', 'trash')],
   ['HR stellt fremden Mitarbeiter wieder her', true, () => call(t.hr, 'PATCH', 'teamMembers/tm-wieder', fields({ name: 'Wieder Da', userId: ids.uidA }))],
   ['Führungskraft legt Mitarbeiter für fremde FK an', false, () => call(t.b, 'PATCH', 'teamMembers/tm-fremd', fields({ name: 'Fremd', userId: ids.uidA }))],
+  ['Selbst registriertes Konto mit alter HR-Adresse liest Gehaltsdaten', false, () => call(fremdHr, 'GET', 'salaryReviewData/current')],
+  ['Selbst registriertes Konto mit alter HR-Adresse liest den Papierkorb', false, () => call(fremdHr, 'GET', 'trash')],
+  ['Selbst registriertes Konto mit alter HR-Adresse gibt sich Gehalts-Zugriff', false, () => call(fremdHr, 'PATCH', 'salaryReviewAccess/hr_niederwiesergroup_com', fields({ email: 'hr@niederwiesergroup.com', role: 'executive' }))],
   // Geteilte Mitarbeiter (tm-frieda gehört Bernd, geteilt mit Anna; tm-clara gehört Anna, nicht geteilt)
   ['Eingeladene FK trägt bei geteiltem Mitarbeiter einen Termin ein', true, () => call(t.a, 'PATCH', 'teamMembers/tm-frieda', fields({ scheduledAt: '2026-12-01T09:00:00.000Z', scheduledSource: 'manual', scheduledByName: 'Anna Testleiterin' }), ['scheduledAt', 'scheduledSource', 'scheduledByName'])],
   ['Eingeladene FK markiert bei geteiltem Mitarbeiter das Gespräch als geführt', true, () => call(t.a, 'PATCH', 'teamMembers/tm-frieda', fields({ meetingDone: true, meetingDoneByName: 'Anna Testleiterin' }), ['meetingDone', 'meetingDoneByName'])],

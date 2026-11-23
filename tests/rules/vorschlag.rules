@@ -27,10 +27,12 @@ service cloud.firestore {
     function isHRAdmin() {
       return isAccount() &&
              request.auth.token.email != null &&
+             // Nur die Adresse, die auch die App als HR kennt (HR_ADMIN_EMAILS in index.html). Vorher standen hier
+             // zwei weitere Adressen: Gibt es für eine davon kein Konto, könnte sich jemand damit registrieren und
+             // hätte in den Regeln HR-Rechte (die Adresse muss nicht bestätigt sein). Wer weitere HR-Konten braucht,
+             // trägt sie hier UND in der App ein und stellt sicher, dass das Konto dem richtigen Menschen gehört.
              request.auth.token.email.lower() in [
-               'd.andrisani@niederwiesergroup.com',
-               'donato.andrisani@niederwiesergroup.com',
-               'hr@niederwiesergroup.com'
+               'd.andrisani@niederwiesergroup.com'
              ];
     }
     // Schlüssel wie in der App: E-Mail klein, alles außer a-z/0-9 durch _ ersetzt

@@ -40,8 +40,8 @@ test('Erststart: vom ersten Aufruf bis zur ersten abgeschlossenen Beurteilung nu
   page.removeAllListeners('dialog');
   page.on('dialog', (d) => d.accept().catch(() => {}));
   await page.getByRole('button', { name: /Abschließen/ }).first().click();
-  const confirm = page.getByRole('button', { name: /Ja|Bestätigen|Abschließen/ }).last();
-  if (await confirm.isVisible().catch(() => false)) await confirm.click().catch(() => {});
+  // Angepasst: Hier stand ein Rest aus der Zeit vor dem Dialog („falls noch ein Bestätigen-Knopf sichtbar ist, klicken“).
+  // Die Rückfrage beantwortet der dialog-Listener oben. Der Rest traf nach U4 den gleichnamigen Knopf in der Leiste.
   await expect.poll(async () => (await listDocs('teamAppraisals')).filter((d) => field(d, 'employeeName') === 'Mia Muster' && field(d, 'status') === 'completed').length, { timeout: 15000 }).toBe(1);
 
   // 6) Dashboard bestätigt den Fortschritt und führt weiter (erst klicken, wenn die App nach dem Abschluss zurück ist)
@@ -60,9 +60,8 @@ test('Erststart Mitarbeiter: Link öffnen, starten, absenden – Selbstreflexion
   // Vor dem Abschicken fragt die App mit einer Übersicht der leeren Felder nach: bestätigen
   page.removeAllListeners('dialog');
   page.on('dialog', (d) => d.accept().catch(() => {}));
-  await page.getByRole('button', { name: /Abschließen & Senden/ }).first().click();
-  const confirm = page.getByRole('button', { name: /Ja|Bestätigen|Senden/ }).last();
-  if (await confirm.isVisible().catch(() => false)) await confirm.click().catch(() => {});
+  await page.getByRole('button', { name: /Selbstreflexion abschicken/ }).first().click(); // angepasst: Knopf hieß „Abschließen & Senden“ (U4, ein Wort je Aktion)
+  // (gleicher Rest wie oben entfernt: Die Rückfrage beantwortet der dialog-Listener)
   // Emil hat im Seed bereits eine Zielvereinbarung; gesucht ist die neue Selbstreflexion
   const isSelf = (d) => field(d, 'employeeId') === 'tm-emil' && /^self/.test(String(field(d, 'type')));
   await expect.poll(async () => (await listDocs('teamAppraisals')).filter(isSelf).length, { timeout: 20000 }).toBeGreaterThan(0);

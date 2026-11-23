@@ -8,12 +8,13 @@ Draft-PR auf `feature/rollen-und-freigaben`
 Dieser Stand ist **ein erster, abgeschlossener Teil**, nicht die ganze Premium-Runde. Erledigt sind die Punkte, die
 ein falsches Bild erzeugten oder den Ablauf am stärksten störten: der einheitliche Dialog statt Browser-Fenstern,
 der falsche „Überfällig“-Alarm, die Scroll-Position beim Seitenwechsel, Rückmeldungen mit „Rückgängig“ und die
-Team-Übersicht auf dem Handy. Offen sind das Glossar, die IT/EN-Texte und alles, was deine Freigabe braucht.
+Team-Übersicht auf dem Handy, einheitliche Knopf-Beschriftungen und der nächste Schritt nach dem Lesen einer
+Selbstreflexion. Offen sind das Glossar, die IT/EN-Texte und alles, was deine Freigabe braucht.
 
 | Prüfung | Ausgangslage | Jetzt |
 |---|---|---|
-| Automatische Tests (`npm test`) | 57 / 57 grün | **70 / 70 grün** (13 neue in `tests/e2e/premium.spec.mjs`) |
-| Dieselben Tests unter den eingespielten Firestore-Regeln (`npm run rules:vorschlag`) | 57 / 57 grün | **70 / 70 grün** |
+| Automatische Tests (`npm test`) | 57 / 57 grün | **74 / 74 grün** (17 neue in `tests/e2e/premium.spec.mjs`) |
+| Dieselben Tests unter den eingespielten Firestore-Regeln (`npm run rules:vorschlag`) | 57 / 57 grün | **74 / 74 grün** |
 | Schutzbereich (`node tests/protected/fingerprint.mjs`) | unverändert | **unverändert**, Baseline nicht angefasst |
 | Konsolenfehler in den getesteten Abläufen | 0 | 0 |
 | Browser-Fenster (`confirm`/`prompt`/`alert`) | 33 Stellen | 2 Stellen, beide im Schutzbereich |
@@ -113,6 +114,37 @@ Dabei zwei Fehler behoben, die nicht nur das Handy betrafen:
 
 ![Zeilenmenü auf dem Handy](screenshots/12-handy-zeilenmenue-nachher.png)
 
+### 7. Je Aktion ein Wort (U4)
+
+Dieselbe Aktion hieß in einem Bogen bis zu dreimal anders. Jetzt gilt:
+
+| Aktion | Vorher | Jetzt |
+|---|---|---|
+| Entwurf sichern | „Entwurf speichern“ / „Speichern“ / „Als Entwurf“ / „Als Entwurf speichern“ | **Entwurf speichern** |
+| Führungskraft schließt ab | „Abschließen“ / „Fertig & abschließen“ | **Abschließen** |
+| Mitarbeiter schickt ab | „Abschließen & Senden“ / „Fertig & senden“ / „Selbstreflexion abschicken“ | **Selbstreflexion abschicken** (in der schmalen Leiste kurz „Abschicken“) |
+
+![Bogenkopf](screenshots/14-bogen-leiste-nachher.png)
+
+Die Hinweise, die den Knopf beim Namen nennen, ziehen mit: die Willkommensseite des Mitarbeiter-Links, der Hinweis
+im Bogen und **die Einladungs-E-Mail der Führungskraft** (dort stand „Klicke am Ende auf ‚Absenden‘“, einen Knopf
+mit diesem Namen gab es nie). Bitte einmal bewusst ansehen, weil es ein Text ist, der die App verlässt.
+
+Nicht angefasst sind die Texte des HR-Copilot. Dort steht an einer Stelle noch „Als Entwurf speichern“.
+
+### 8. Selbstreflexion ansehen: nächster Schritt (U11)
+
+Vorher gab es in der Ansicht drei „Zurück“-Knöpfe und keinen Weg weiter. Jetzt steht oben und am Ende der nächste
+Schritt für dasselbe Beurteilungsjahr: „Beurteilung starten“, „Beurteilung fortsetzen“ oder, wenn sie schon
+abgeschlossen ist, „Beurteilung öffnen“ als Nebenaktion. „Zurück“ oben und „Zurück zum Team“ unten bleiben.
+
+| Vorher | Nachher |
+|---|---|
+| ![vorher](screenshots/13-selbstreflexion-naechster-schritt-vorher.png) | ![nachher](screenshots/13-selbstreflexion-naechster-schritt-nachher.png) |
+
+Der Knopf ruft dieselbe Funktion auf wie „Starten“/„Fortsetzen“ in der Team-Übersicht. Er erscheint nur bei eigenen
+Teammitgliedern; HR und der Weg aus einer Beurteilung heraus („← Beurteilung“) sind unverändert.
+
 ## Prüfungen
 
 ```bash
@@ -127,13 +159,20 @@ cd tests && npm test
 cd tests && npm run rules:vorschlag
 ```
 
-Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 70 / 70 grün,
-`npm run rules:vorschlag` 70 / 70 grün.
+Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 74 / 74 grün,
+`npm run rules:vorschlag` 74 / 74 grün.
 
 Die bestehenden Tests mussten für den Dialog nicht umgeschrieben werden: `tests/e2e/fixtures.mjs` meldet jeden
-App-Dialog über dieselben `page.on('dialog')`-Listener wie ein Browser-Fenster. Ein Test wurde inhaltlich angepasst:
-Beim Entfernen mit falschem Namen bleibt der Knopf gesperrt, die nachträgliche Meldung „Name stimmt nicht überein“
-gibt es an dieser Stelle nicht mehr.
+App-Dialog über dieselben `page.on('dialog')`-Listener wie ein Browser-Fenster.
+
+Angepasste bestehende Tests, jeweils mit Kommentar an der Stelle:
+
+- Entfernen mit falschem Namen: Der Knopf bleibt gesperrt, die nachträgliche Meldung „Name stimmt nicht überein“
+  gibt es dort nicht mehr.
+- Vier Stellen nennen die neuen Knopfnamen (U4).
+- Drei Stellen enthielten einen Rest aus der Zeit vor dem Dialog („falls noch ein Bestätigen-Knopf sichtbar ist,
+  klicken“). Er traf nach U4 den gleichnamigen Knopf in der Leiste und ist entfernt; die Rückfrage beantwortet
+  der Dialog-Listener.
 
 Vorher-Nachher-Bilder neu erzeugen (Vorschau muss laufen):
 
@@ -145,9 +184,7 @@ cd tests && node shots-premium.mjs <pfad-zur-alten-index.html>
 
 | # | Punkt | Warum noch offen |
 |---|---|---|
-| U4 | Knopf-Beschriftungen in der Abschnittsleiste und im Mitarbeiterbogen vereinheitlichen | braucht Anpassungen an mehreren Tests, eigener Schritt |
 | U10 | Erklärungen für GPS, WAS, WIE, BARS beim Darüberfahren (A5) | nicht begonnen |
-| U11 | „Selbstreflexion ansehen“: ein Zurück, dazu „Beurteilung starten“ | nicht begonnen |
 | U12 | Erklärblöcke im Dashboard für Führungskräfte mit Team einklappen | nicht begonnen |
 | U14 | rund 220 Textstellen nur DE/EN, Italienisch zeigt dort Englisch (A6) | groß, eigene Runde |
 

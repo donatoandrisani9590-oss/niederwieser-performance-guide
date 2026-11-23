@@ -63,7 +63,24 @@ async function run(tag, useBase) {
   await page.getByRole('heading', { name: 'Clara Beispiel' }).waitFor({ state: 'attached' });
   await page.waitForTimeout(500);
   await shot('04-selbstreflexion-oeffnen');
+  // Selbstreflexion ansehen: nächster Schritt (vorher drei „Zurück“, nachher „Beurteilung fortsetzen“)
+  await nav('Team-Übersicht');
+  await page.getByText('4 Mitarbeiter').waitFor();
+  await row('David Muster').getByRole('button', { name: 'Ansehen' }).click();
+  await page.getByRole('heading', { name: 'David Muster' }).waitFor({ state: 'attached' });
+  await page.waitForTimeout(500);
+  await shot('13-selbstreflexion-naechster-schritt', { clip: { x: 300, y: 0, width: 1140, height: 330 } });
   if (!useBase) {
+    // Bogen der Führungskraft: gleiche Wörter im Kopf und in der Leiste
+    await nav('Team-Übersicht');
+    await page.getByText('4 Mitarbeiter').waitFor();
+    await row('Emil Probe').getByRole('button', { name: 'Starten', exact: true }).click();
+    await page.getByTestId('form-bar').waitFor();
+    await page.evaluate(() => { document.querySelector('main').scrollTop = 420; });
+    await page.waitForTimeout(500);
+    await shot('14-bogen-leiste', { clip: { x: 300, y: 0, width: 1140, height: 260 } });
+    await page.getByRole('button', { name: 'Home', exact: true }).click();
+    await page.locator('[data-nw-ok]').last().click();
     // Neuer Dialog (vorher: graues Browser-Fenster, lässt sich nicht fotografieren)
     await nav('Team-Übersicht');
     await page.getByText('4 Mitarbeiter').waitFor();

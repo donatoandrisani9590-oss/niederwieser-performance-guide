@@ -273,3 +273,51 @@ test.describe('Handy (390 px): Rückmeldung', () => {
     await expect.poll(async () => field(await getDoc('teamMembers/tm-clara'), 'meetingDone'), { timeout: 10000 }).toBe(true);
   });
 });
+
+test('Bögen der Führungskraft: je Aktion ein Wort, im Kopf und in der Leiste gleich', async ({ page }) => {
+  await loginTeam(page, USERS.managerA);
+  await memberRow(page, 'Emil Probe').getByRole('button', { name: 'Starten', exact: true }).click();
+  const bar = page.getByTestId('form-bar');
+  await expect(bar.getByRole('button', { name: 'Entwurf speichern' })).toBeVisible();
+  await expect(bar.getByRole('button', { name: 'Abschließen', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Entwurf speichern' })).toHaveCount(2); // Kopf und Leiste
+  await expect(page.getByRole('button', { name: 'Abschließen', exact: true })).toHaveCount(2);
+  for (const old of ['Fertig & abschließen', 'Als Entwurf']) await expect(page.getByRole('button', { name: old })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Speichern', exact: true })).toHaveCount(0);
+});
+
+test('Mitarbeiter-Link: „Selbstreflexion abschicken“ heißt überall gleich, die Hinweise nennen denselben Knopf', async ({ page }) => {
+  await openApp(page, '?accessCode=CODE-tm-emil');
+  await expect(page.getByText('dann „Selbstreflexion abschicken“')).toBeVisible();
+  await page.getByRole('button', { name: /Selbstreflexion starten/ }).click();
+  await expect(page.getByRole('button', { name: 'Selbstreflexion abschicken' })).toHaveCount(2); // Kopf und Abschluss-Kasten
+  await expect(page.getByTestId('form-bar').getByRole('button', { name: 'Abschicken', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Entwurf speichern' })).toHaveCount(3); // Kopf, Leiste, Abschluss-Kasten
+  await expect(page.getByText('Am Ende auf „Selbstreflexion abschicken“ klicken.')).toBeVisible();
+  await expect(page.getByText(/Abschließen & Senden|Fertig & senden|Als Entwurf speichern/)).toHaveCount(0);
+});
+
+test('Selbstreflexion ansehen: nächster Schritt „Beurteilung fortsetzen“ führt in den Bogen, Ansehen ändert nichts', async ({ page, consoleErrors }) => {
+  const before = JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields));
+  await loginTeam(page, USERS.managerA);
+  // David: Selbstreflexion als Entwurf, Beurteilung als Entwurf
+  await memberRow(page, 'David Muster').getByRole('button', { name: 'Ansehen' }).click();
+  await expect(page.getByRole('heading', { name: 'David Muster' })).toBeVisible();
+  const next = page.getByTestId('self-next-step');
+  await expect(next).toHaveText('Beurteilung fortsetzen');
+  await expect(page.getByRole('button', { name: 'Beurteilung fortsetzen' })).toHaveCount(2); // oben und am Ende
+  await expect(page.getByRole('button', { name: 'Zurück zum Team' })).toBeVisible();
+  await next.click();
+  await expect(page.getByRole('button', { name: /Entwurf speichern/ }).first()).toBeVisible();
+  await expect(page.getByText('David Muster').first()).toBeVisible();
+  expect(JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields))).toBe(before);
+  expect(consoleErrors).toEqual([]);
+});
+
+test('Selbstreflexion ansehen: bei abgeschlossener Beurteilung „Beurteilung öffnen“ als Nebenaktion, PDF bleibt Hauptaktion', async ({ page }) => {
+  await loginTeam(page, USERS.managerA);
+  await memberRow(page, 'Clara Beispiel').getByRole('button', { name: 'Ansehen' }).click();
+  await expect(page.getByRole('heading', { name: 'Clara Beispiel' })).toBeVisible();
+  await expect(page.getByTestId('self-next-step')).toHaveText('Beurteilung öffnen');
+  await expect(page.getByRole('button', { name: 'PDF herunterladen' })).toBeVisible();
+});

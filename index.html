@@ -1128,7 +1128,7 @@
             setActive(id);
           };
           const acts = (actions || []).filter(Boolean);
-          return React.createElement('div', { ref: barRef, style: { top: offset + 'px' }, className: 'no-print sticky z-30 rounded-card border border-line bg-white/95 px-2.5 py-2 shadow-card backdrop-blur-sm', 'data-no-print': 'true' },
+          return React.createElement('div', { ref: barRef, 'data-testid': 'form-bar', style: { top: offset + 'px' }, className: 'no-print sticky z-30 rounded-card border border-line bg-white/95 px-2.5 py-2 shadow-card backdrop-blur-sm', 'data-no-print': 'true' },
             React.createElement('div', { className: 'flex items-center gap-2' },
               React.createElement('nav', { 'aria-label': getText(lang, 'Abschnitte des Bogens', 'Sezioni del modulo', 'Form sections'), className: 'flex min-w-0 flex-1 gap-1 overflow-x-auto' },
                 secs.map(sc => React.createElement('button', {
@@ -6030,8 +6030,8 @@
 
                 // Formular-Leiste: Abschnitte + Speichern/Abschließen immer erreichbar
                 e(NwFormBar, { lang, actions: teamButtonsVisible && teamContext ? [
-                  { label: getText(lang, 'Speichern', 'Salva', 'Save'), icon: Save, onClick: () => handleSaveTeamAppraisal('draft'), disabled: isSaving },
-                  { label: getText(lang, 'Fertig & abschließen', 'Fine e completa', 'Done & complete'), icon: CheckCircle2, variant: 'primary', onClick: async () => { if (await nwConfirmCompletion({ lang, kind: 'goals', goals, devItems: devGoals })) handleSaveTeamAppraisal('completed'); }, disabled: isSaving }
+                  { label: getText(lang, 'Entwurf speichern', 'Salva bozza', 'Save draft'), icon: Save, onClick: () => handleSaveTeamAppraisal('draft'), disabled: isSaving },
+                  { label: getText(lang, 'Abschließen', 'Completa', 'Complete'), icon: CheckCircle2, variant: 'primary', onClick: async () => { if (await nwConfirmCompletion({ lang, kind: 'goals', goals, devItems: devGoals })) handleSaveTeamAppraisal('completed'); }, disabled: isSaving }
                 ] : [] }),
                 e('div', { className: "bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid" },
                     e('h3', { className: "text-lg font-semibold text-nw-blue mb-4 border-b pb-2" }, t.partA),
@@ -8659,8 +8659,8 @@
                 
                 // Formular-Leiste: Abschnitte + Speichern/Abschließen immer erreichbar
                 e(NwFormBar, { lang, actions: teamButtonsVisible && teamContext ? [
-                  { label: getText(lang, 'Speichern', 'Salva', 'Save'), icon: Save, onClick: () => handleSaveTeamAppraisal('draft'), disabled: isSaving },
-                  { label: getText(lang, 'Fertig & abschließen', 'Fine e completa', 'Done & complete'), icon: CheckCircle2, variant: 'primary', onClick: async () => { if (await nwConfirmCompletion({ lang, kind: 'review', goals, devItems: devPlan })) handleSaveTeamAppraisal('completed'); }, disabled: isSaving }
+                  { label: getText(lang, 'Entwurf speichern', 'Salva bozza', 'Save draft'), icon: Save, onClick: () => handleSaveTeamAppraisal('draft'), disabled: isSaving },
+                  { label: getText(lang, 'Abschließen', 'Completa', 'Complete'), icon: CheckCircle2, variant: 'primary', onClick: async () => { if (await nwConfirmCompletion({ lang, kind: 'review', goals, devItems: devPlan })) handleSaveTeamAppraisal('completed'); }, disabled: isSaving }
                 ] : [] }),
                 e('div', { className: "bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid" },
                     e('h3', { className: "text-lg font-semibold text-nw-blue mb-4 border-b pb-2" }, t.partA),
@@ -14545,7 +14545,7 @@ zur Vorbereitung auf unser Jahresgespräch bitte ich dich, deine Selbstreflexion
 1. Klicke auf den Link unten
 2. Fülle die Fragen zu deinen Stärken und Entwicklungsfeldern aus
 3. Bewerte deine Kompetenzen selbst ein
-4. Klicke am Ende auf "Absenden"
+4. Klicke am Ende auf „Selbstreflexion abschicken“
 
 🔗 Dein persönlicher Link (keine Anmeldung nötig):
 ${link}
@@ -14566,7 +14566,7 @@ per prepararti al nostro colloquio annuale, ti chiedo di compilare la tua autova
 1. Clicca sul link qui sotto
 2. Compila le domande sui tuoi punti di forza e aree di sviluppo
 3. Valuta le tue competenze
-4. Clicca su "Invia" alla fine
+4. Alla fine clicca su „Invia autovalutazione“
 
 🔗 Il tuo link personale (nessuna registrazione necessaria):
 ${link}
@@ -14586,7 +14586,7 @@ To prepare for our annual review meeting, please complete your self-reflection d
 1. Click on the link below
 2. Answer questions about your strengths and development areas
 3. Rate your own competencies
-4. Click "Submit" at the end
+4. Click “Submit self-reflection” at the end
 
 🔗 Your personal link (no login required):
 ${link}
@@ -26901,9 +26901,7 @@ const renderDashboard = () => {
                         className: nwBtnClass('primary', 'lg') + ' w-full' 
                       }, 
                         e(Send, { size: 18 }),
-                        isGuestMode 
-                          ? (lang === 'de' ? 'Abschließen & Senden' : lang === 'it' ? 'Completa & Invia' : 'Complete & Submit')
-                          : (lang === 'de' ? 'Abschließen & Senden' : lang === 'it' ? 'Completa & Invia' : 'Complete & Send')
+                        getText(lang, 'Selbstreflexion abschicken', 'Invia autovalutazione', 'Submit self-reflection')
                       ),
                       
                       // PDF-Button (nur im Normal-Modus)
@@ -26948,10 +26946,10 @@ const renderDashboard = () => {
                       e('span', null,
                         e('strong', { className: 'font-semibold' }, lang === 'de' ? 'Wird automatisch gespeichert. ' : lang === 'it' ? 'Salvataggio automatico. ' : 'Saved automatically. '),
                         lang === 'de'
-                          ? 'Du kannst jederzeit unterbrechen und mit demselben Link weitermachen. Am Ende auf „Abschließen & Senden“ klicken.'
+                          ? 'Du kannst jederzeit unterbrechen und mit demselben Link weitermachen. Am Ende auf „Selbstreflexion abschicken“ klicken.'
                           : lang === 'it'
-                          ? 'Puoi interrompere in qualsiasi momento e continuare con lo stesso link. Alla fine clicca su „Completa & Invia“.'
-                          : 'You can stop at any time and continue with the same link. Click “Complete & Send” at the end.')
+                          ? 'Puoi interrompere in qualsiasi momento e continuare con lo stesso link. Alla fine clicca su „Invia autovalutazione“.'
+                          : 'You can stop at any time and continue with the same link. Click “Submit self-reflection” at the end.')
                     )
                   // === NORMAL-MODUS: Neue einfache Anleitung (kein Link-Kopieren mehr nötig!) ===
                   : e('div', { className: 'bg-nw-green-15 border-2 border-nw-green/40 rounded-xl p-5 mb-4 no-print' },
@@ -26985,10 +26983,10 @@ const renderDashboard = () => {
                             e('li', { className: 'flex items-start gap-2' },
                               e('span', { className: 'bg-ok text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold flex-shrink-0' }, '3'),
                               lang === 'de' 
-                                ? 'Klicke auf "Abschließen & Senden" - fertig!' 
+                                ? 'Klicke auf „Selbstreflexion abschicken“ – fertig!' 
                                 : lang === 'it'
-                                ? 'Clicca su "Completa & Invia" - finito!'
-                                : 'Click "Complete & Send" - done!'
+                                ? 'Clicca su „Invia autovalutazione“ – finito!'
+                                : 'Click “Submit self-reflection” – done!'
                             )
                           ),
                           e('div', { className: 'mt-3 p-3 bg-white/70 border border-nw-green/40 rounded-lg' },
@@ -27082,8 +27080,8 @@ const renderDashboard = () => {
               
               // Formular-Leiste: Abschnitte + Speichern/Senden immer erreichbar
               e(NwFormBar, { lang, offset: isGuestMode ? 52 : 0, actions: [
-                { label: getText(lang, 'Speichern', 'Salva', 'Save'), icon: Save, onClick: () => handleSave('draft'), disabled: isSaving },
-                { label: getText(lang, 'Fertig & senden', 'Fine e invia', 'Done & send'), icon: Send, variant: 'primary', onClick: confirmCompleteAndSend, disabled: isSaving }
+                { label: getText(lang, 'Entwurf speichern', 'Salva bozza', 'Save draft'), icon: Save, onClick: () => handleSave('draft'), disabled: isSaving },
+                { label: getText(lang, 'Abschicken', 'Invia', 'Submit'), icon: Send, variant: 'primary', onClick: confirmCompleteAndSend, disabled: isSaving }
               ] }),
               // === TEIL A: STAMMDATEN ===
               e('div', { className: 'bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid' },
@@ -27418,7 +27416,7 @@ const renderDashboard = () => {
                       'Finora la tua autovalutazione è salvata solo come bozza. Solo inviandola il tuo responsabile la vedrà come ricevuta.',
                       'So far your self-reflection is only saved as a draft. Only after submitting will your manager see it as received.')),
                   e('div', { className: 'mt-4 flex flex-wrap justify-center gap-2' },
-                    e(NwButton, { variant: 'secondary', icon: Save, onClick: () => handleSave('draft'), disabled: isSaving }, getText(lang, 'Als Entwurf speichern', 'Salva come bozza', 'Save as draft')),
+                    e(NwButton, { variant: 'secondary', icon: Save, onClick: () => handleSave('draft'), disabled: isSaving }, getText(lang, 'Entwurf speichern', 'Salva bozza', 'Save draft')),
                     e(NwButton, { variant: 'primary', size: 'lg', icon: Send, onClick: confirmCompleteAndSend, disabled: isSaving }, getText(lang, 'Selbstreflexion abschicken', 'Invia autovalutazione', 'Submit self-reflection'))
                   )
                 )
@@ -27566,7 +27564,7 @@ const renderDashboard = () => {
                         React.createElement('span', { className: 'text-nw-blue font-semibold text-xs' }, '4')
                       ),
                       React.createElement('span', null, 
-                        lang === 'de' ? 'Feedback zur Zusammenarbeit, dann „Abschließen & Senden“' : lang === 'it' ? 'Feedback sulla collaborazione, poi „Completa & Invia“' : 'Feedback on collaboration, then “Complete & Send”'
+                        lang === 'de' ? 'Feedback zur Zusammenarbeit, dann „Selbstreflexion abschicken“' : lang === 'it' ? 'Feedback sulla collaborazione, poi „Invia autovalutazione“' : 'Feedback on collaboration, then “Submit self-reflection”'
                       )
                     )
                   )
@@ -28343,6 +28341,25 @@ const renderDashboard = () => {
             }
             
             const e = React.createElement;
+
+            // Nächster Schritt nach dem Lesen (nur Anzeige): Beurteilung desselben Beurteilungsjahres starten, fortsetzen
+            // oder öffnen. Gleiche Aktion wie in der Team-Übersicht (startTeamAppraisal), nur für eigene Teammitglieder.
+            const nwNext = (() => {
+              const member = selfData.employeeId && teamMembers.find(m => m.id === selfData.employeeId);
+              if (!member) return null;
+              const year = nwCycleYear(selfData) || nwCurrentCycleYear();
+              const st = nwMemberStatus(member, year);
+              const rv = st.reviewDigital;
+              if (!rv && st.reviewPdf) return null; // Beurteilung liegt als unterschriebenes PDF vor
+              const open = !rv || rv.status !== 'completed';
+              return {
+                primary: open,
+                label: !rv ? getText(lang, 'Beurteilung starten', 'Avvia valutazione', 'Start review')
+                  : open ? getText(lang, 'Beurteilung fortsetzen', 'Continua valutazione', 'Continue review')
+                  : getText(lang, 'Beurteilung öffnen', 'Apri valutazione', 'Open review'),
+                go: () => startTeamAppraisal(member.id, rv && rv.period != null && rv.period !== '' ? rv.period : year, rv || null)
+              };
+            })();
             
             // BARS Labels
             const barsLabels = {
@@ -28876,7 +28893,7 @@ const renderDashboard = () => {
                       // PDF Download Button
                       e('button', {
                         onClick: handlePrintSelfReflection,
-                        className: 'px-4 py-2 bg-nw-blue hover:bg-nw-blue rounded-lg text-sm font-medium flex items-center gap-2 transition-colors text-white'
+                        className: (nwNext && nwNext.primary && !hasReturnContext) ? nwBtnClass('secondary', 'lg') : 'px-4 py-2 bg-nw-blue hover:bg-nw-blue rounded-lg text-sm font-medium flex items-center gap-2 transition-colors text-white'
                       },
                         e(Download, { size: 16 }),
                         lang === 'de' ? 'PDF herunterladen' : lang === 'it' ? 'Scarica PDF' : 'Download PDF'
@@ -28919,7 +28936,9 @@ const renderDashboard = () => {
                         }, 
                           lang === 'de' ? 'Übersicht' : lang === 'it' ? 'Panoramica' : 'Overview'
                         )
-                      ) : e('button', {
+                      ) : nwNext ? e(NwButton, { variant: nwNext.primary ? 'primary' : 'secondary', size: 'lg', icon: ClipboardList, onClick: nwNext.go, 'data-testid': 'self-next-step' }, nwNext.label)
+                      // ohne nächsten Schritt (z. B. HR oder fremder Mitarbeiter) wie bisher „Zurück“; sonst genügen „Zurück“ oben und „Zurück zum Team“ unten
+                      : e('button', {
                         onClick: () => {
                           localStorage.removeItem('nw_view_self_assessment');
                           localStorage.removeItem('nw_return_to_appraisal');
@@ -29208,17 +29227,17 @@ const renderDashboard = () => {
                       )
                     );
                   } else {
-                    return e('button', {
+                    return e('div', { className: 'flex flex-wrap items-center justify-center gap-3' }, e('button', {
                       onClick: () => {
                         localStorage.removeItem('nw_view_self_assessment');
                         localStorage.removeItem('nw_return_to_appraisal');
                         setActiveView('teamoverview');
                       },
-                      className: 'px-6 py-3 bg-nw-grey-40 hover:bg-line rounded-card font-semibold text-ink flex items-center gap-2 transition-colors'
+                      className: nwBtnClass('secondary', 'lg')
                     }, 
-                      e(ArrowLeft, { size: 18 }),
+                      e(ArrowLeft, { size: 16, 'aria-hidden': true }),
                       lang === 'de' ? 'Zurück zum Team' : lang === 'it' ? 'Torna al team' : 'Back to Team'
-                    );
+                    ), nwNext && e(NwButton, { variant: nwNext.primary ? 'primary' : 'secondary', size: 'lg', icon: ClipboardList, onClick: nwNext.go }, nwNext.label));
                   }
                 })()
               )

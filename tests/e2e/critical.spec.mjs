@@ -145,8 +145,8 @@ test('Beurteilung anlegen, als Entwurf speichern, ändern, abschließen und nach
   page.on('dialog', (d) => { completionMsg = d.message(); d.accept().catch(() => {}); });
   await page.getByRole('button', { name: /Abschließen/ }).first().click();
   await expect.poll(() => completionMsg).toContain('2 von 2 Zielen ohne Zielerreichung');
-  const confirm = page.getByRole('button', { name: /Ja|Bestätigen|Abschließen/ }).last();
-  if (await confirm.isVisible().catch(() => false)) await confirm.click().catch(() => {});
+  // Angepasst: Hier stand ein Rest aus der Zeit vor dem Dialog („falls noch ein Bestätigen-Knopf sichtbar ist, klicken“).
+  // Die Rückfrage beantwortet der dialog-Listener oben. Der Rest traf nach U4 den gleichnamigen Knopf in der Leiste.
 
   await expect.poll(async () => {
     const d = (await listDocs('teamAppraisals')).filter((x) => field(x, 'employeeId') === 'tm-emil' && field(x, 'type') === 'review');
@@ -411,7 +411,7 @@ test('Bögen: Abschnittsleiste bleibt sichtbar und springt, keine Halo-Warnung v
   await expect(page.getByRole('heading', { name: /^Teil D/ })).toBeInViewport();
   // Leiste nach dem Sprung weiterhin sichtbar, Speichern erreichbar
   await expect(nav).toBeInViewport();
-  await expect(page.getByRole('button', { name: 'Speichern', exact: true })).toBeInViewport();
+  await expect(page.getByTestId('form-bar').getByRole('button', { name: 'Entwurf speichern' })).toBeInViewport(); // angepasst: hieß in der Leiste „Speichern“ (U4)
   // Vorbelegung „alle 3“ ist noch keine Bewertung
   await expect(page.getByText('Möglicher Halo-Effekt')).toHaveCount(0);
 });
@@ -424,7 +424,7 @@ test('Mitarbeiter-Link: Abschnittsleiste unter der Kopfzeile, Spaltenköpfe der 
   await expect(page.getByRole('heading', { name: /^Teil D/ })).toBeInViewport();
   await expect(nav).toBeInViewport();
   await expect(page.getByRole('columnheader', { name: 'Maßnahme' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Fertig & senden' })).toBeInViewport();
+  await expect(page.getByTestId('form-bar').getByRole('button', { name: 'Abschicken', exact: true })).toBeInViewport(); // angepasst: hieß „Fertig & senden“ (U4)
 });
 
 test('Nicht abgeschickte Selbstreflexion: als Entwurf sichtbar und ansehbar, im Dashboard als offener Punkt', async ({ page }) => {
@@ -442,7 +442,7 @@ test('Nicht abgeschickte Selbstreflexion: als Entwurf sichtbar und ansehbar, im 
 test('Mitarbeiter-Link: am Ende des Bogens ein klarer Abschicken-Schritt', async ({ page }) => {
   await openApp(page, '?accessCode=CODE-tm-emil');
   await page.getByRole('button', { name: /Selbstreflexion starten/ }).click();
-  const submit = page.getByRole('button', { name: 'Selbstreflexion abschicken' });
+  const submit = page.getByRole('button', { name: 'Selbstreflexion abschicken' }).last(); // der Knopf im Abschluss-Kasten (im Kopf heißt er jetzt gleich, U4)
   await submit.scrollIntoViewIfNeeded();
   await expect(submit).toBeVisible();
   await expect(page.getByText('Bisher ist deine Selbstreflexion nur als Entwurf gespeichert.')).toBeVisible();
@@ -675,7 +675,7 @@ test('Mitarbeiter-Link: vor dem Abschicken Übersicht der leeren Felder, Abbrech
   const before = await completedSelf();
   await openApp(page, '?accessCode=CODE-tm-emil');
   await page.getByRole('button', { name: /Selbstreflexion starten/ }).click();
-  const submit = page.getByRole('button', { name: 'Selbstreflexion abschicken' });
+  const submit = page.getByRole('button', { name: 'Selbstreflexion abschicken' }).last(); // der Knopf im Abschluss-Kasten (im Kopf heißt er jetzt gleich, U4)
   await submit.scrollIntoViewIfNeeded();
   let message = '';
   page.removeAllListeners('dialog');

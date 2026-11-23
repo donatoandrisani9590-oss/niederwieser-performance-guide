@@ -206,3 +206,62 @@ dass Mitarbeiter nur ihre eigenen, geteilten Unterlagen sehen.
    Ich ändere nichts in der Konsole. Die neuen Regeln spielst du oder eure IT ein.
 4. **Blaze-Tarif** für Phase 4: jetzt, später oder gar nicht. Ohne ihn werden Konten gesperrt statt gelöscht.
 5. **Betriebsrat und Datenschutz:** geklärt oder noch offen. Phase 2 bleibt ausgeschaltet, bis das geklärt ist.
+
+---
+
+## 11. Prüfung: Was fehlt für eine intuitive, idiotensichere Bedienung? (23.11.2026)
+
+Vorgehen: jeden Weg je Rolle im Code und in der Vorschau durchgegangen und geprüft, wo man sich verirren,
+etwas übersehen oder Daten verlieren kann. **P1** = Datenverlust oder falsches Ergebnis möglich,
+**P2** = häufige Verwirrung, **P3** = Komfort.
+Spalte „Freigabe“: *frei* = reine Darstellung, das darf ich ohne Rückfrage umsetzen; *nötig* = berührt
+Geschäftslogik oder Datenmodell, das braucht deine Freigabe.
+
+### Alle Rollen
+
+| # | Befund | Vorschlag | Prio | Freigabe |
+|---|---|---|---|---|
+| A1 | „Mitarbeiter entfernen“ löschte alle Unterlagen aller Jahre nach einem einfachen „Wirklich löschen?“ | **Erledigt:** Folgen werden genannt, der Name muss eingetippt werden, vorher automatische Sicherungsdatei | P1 | erledigt |
+| A2 | Löschen ist endgültig | **Papierkorb** statt Löschen: archivieren und ausblenden, HR kann 90 Tage wiederherstellen | P1 | nötig |
+| A3 | 24 Browser-Rückfragen (`confirm`), Knöpfe nur „OK/Abbrechen“ | Einheitlicher Dialog mit klarer Aktion („Endgültig löschen“, rot) und „Rückgängig“ in der Meldung danach | P2 | frei |
+| A4 | Kein Hinweis bei Verbindungsverlust | Banner „Offline – Änderungen werden gespeichert, sobald du wieder online bist“, Speichern-Knopf bis dahin gesperrt | P2 | frei |
+| A5 | Fachbegriffe ohne Erklärung (GPS, WAS/WIE, BARS, SR-Link) | Kurze Erklärung beim Darüberfahren und Tippen (Glossar) | P3 | frei |
+| A6 | Italienisch und Englisch sind an einigen Stellen unvollständig (nur Deutsch hinterlegt) | Fehlende Texte automatisch finden und nachtragen | P2 | frei |
+
+### Mitarbeiter
+
+| # | Befund | Vorschlag | Prio | Freigabe |
+|---|---|---|---|---|
+| M1 | 14 Selbstreflexionen 2025 blieben unbemerkt als Entwurf liegen | **Erledigt:** Leiste mit „Fertig & senden“, Abschluss-Kasten, Entwürfe für die Führungskraft sichtbar | P1 | erledigt |
+| M2 | Nach dem Abschicken ist das Eingetragene nicht mehr einsehbar; Link verloren = kein Zugang | „Mein Bereich“ mit Anmeldung (Phase 2) | P1 | erteilt |
+| M3 | Beim Abschicken wird nicht gezeigt, was fehlt | Vor dem Senden eine Übersicht: „3 Kompetenzen ohne Kommentar, Teil E leer – trotzdem senden?“ | P2 | frei |
+| M4 | Ziele muss der Mitarbeiter selbst abtippen | Ziele aus der Zielvereinbarung vorbefüllen (setzt Phase 0 voraus: Zugriff des Links auf die eigene Zielvereinbarung) | P2 | erteilt (Phase 0) |
+| M5 | „Geplanter Bonus“ und die GPS-Note „2,00“ vor jeder Eingabe verunsichern | Im Mitarbeiterbogen ausblenden bzw. erst nach dem Ausfüllen zeigen | P2 | nötig (offen) |
+| M6 | Langer Bogen auf dem Handy | Tabellen als Karten, Leiste mit Abschnitten bleibt sichtbar (teilweise erledigt) | P2 | frei |
+
+### Führungskraft
+
+| # | Befund | Vorschlag | Prio | Freigabe |
+|---|---|---|---|---|
+| F1 | „Abschließen“ ist auch bei unvollständiger Beurteilung möglich (Gewichte ≠ 100 %, Erreichung leer) | **Abschluss-Prüfung** mit Liste der Lücken; bei Gewichten ≠ 100 % blockieren | P1 | nötig (Validierung) |
+| F2 | Keine Reihenfolge sichtbar: Selbstreflexion → Beurteilung → Gespräch → Ziele | In jeder Zeile der nächste Schritt hervorgehoben, im Dashboard „Meine offenen Punkte“ (erledigt) | P2 | frei |
+| F3 | Nach „Teilen“ geänderte Beurteilung weicht von der geteilten Fassung ab | Hinweis „Seit dem Teilen geändert – erneut teilen?“ | P2 | frei |
+| F4 | Gesprächs-Merker gilt nicht je Jahr (Datenmodell) | Optionales Feld je Jahr (`meetings[2026]`), alte Daten bleiben | P2 | nötig |
+| F5 | Mitarbeiter ohne E-Mail können nicht eingeladen oder geteilt werden | In der Matrix kennzeichnen, mit „E-Mail ergänzen“ direkt in der Zeile | P2 | frei |
+
+### HR-Admin
+
+| # | Befund | Vorschlag | Prio | Freigabe |
+|---|---|---|---|---|
+| H1 | Keine Benutzerverwaltung | Phase 3 (Rolle, Sperren, Passwort-Reset, Löschen der App-Daten, Export je Person) | P1 | erteilt |
+| H2 | HR-Dashboard mischt alle Jahre | Jahreswähler wie in der Team-Übersicht (Standard: laufendes Jahr, „Alle Jahre“ wählbar) | P1 | frei |
+| H3 | Kein Protokoll, wer was geändert, gelöscht oder geteilt hat | Protokoll-Ansicht (Teilen wird seit Phase 1 schon protokolliert); Löschen und Wiederherstellen ergänzen | P2 | erteilt |
+| H4 | Wiederherstellen aus Backup überschreibt ohne Vorschau der Unterschiede | Vorschau „wird ersetzt / neu“ und Bestätigung mit Anzahl | P2 | frei |
+| H5 | Sicherheitsregeln unbekannt, vermutlich zu offen (Abschnitt 9) | Phase 0 | P1 | erteilt |
+
+### Empfohlene Reihenfolge
+
+1. **Phase 0 (Sicherheit)**, dann H2 und A3/A4: Schutz und Grundvertrauen.
+2. **Phase 3 (Benutzerverwaltung)** und H3: HR arbeitsfähig machen.
+3. **Phase 2 („Mein Bereich“)** mit M2/M4: erst nach Einspielen der Regeln und Klärung mit Betriebsrat und Datenschutz.
+4. Danach F1, A2, F4 (brauchen deine Freigabe) und die restlichen P2/P3-Punkte.

@@ -472,3 +472,22 @@ test('Phase 1 (Schalter aus, Standard): kein Teilen-Knopf', async ({ page }) => 
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Mit Mitarbeiter teilen' })).toHaveCount(0);
 });
+
+test('Mitarbeiter löschen: nur mit eingetipptem Namen, vorher automatische Sicherungsdatei', async ({ page }) => {
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  const remove = async (typed) => {
+    page.removeAllListeners('dialog');
+    page.on('dialog', (d) => (d.type() === 'prompt' ? d.accept(typed) : d.accept()).catch(() => {}));
+    await memberRow(page, 'Emil Probe').getByRole('button', { name: /Weitere Aktionen/ }).click();
+    await page.getByRole('menuitem', { name: 'Entfernen' }).click();
+  };
+  // Falscher Name: nichts gelöscht
+  await remove('Emil');
+  await expect(page.getByText('Name stimmt nicht überein')).toBeVisible();
+  expect((await listDocs('teamMembers')).some((d) => d.name.endsWith('/tm-emil'))).toBe(true);
+  // Richtiger Name: Sicherungsdatei, dann gelöscht
+  const [download] = await Promise.all([page.waitForEvent('download'), remove('Emil Probe')]);
+  expect(download.suggestedFilename()).toMatch(/^Sicherung_Emil_Probe_/);
+  await expect.poll(async () => (await listDocs('teamMembers')).some((d) => d.name.endsWith('/tm-emil')), { timeout: 10000 }).toBe(false);
+});

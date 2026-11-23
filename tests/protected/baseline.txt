@@ -33,8 +33,9 @@ import React, {…} from 'https://esm.sh/react@18.2.0';
 import ReactDOM from 'https://esm.sh/react-dom@18.2.0/client';
 import {…} from 'https://esm.sh/lucide-react@0.292.0';
 
-### firestore (83)
+### firestore (85)
 await db.collection('appraisals').doc(hrEditAppraisal.id).update(updates);
+await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: share ? 'share_with_employee' : 'unshare_with_employee', target: docItem.id, employeeId: member.id, docType: docItem.type || 'review' });
 await db.collection('salaryReviewAccess').doc(docId).delete();
 await db.collection('salaryReviewAccess').doc(docId).set({ email: email.toLowerCase(), role: role, teamMemberIds: teamMemberIds, accessSalary: accessFlags.accessSalary !== false, // Default true accessGoals: accessFlags.accessGoals !== false, // Default true grantedBy: user.email, grantedAt: new Date().toISOString() });
 await db.collection('salaryReviewData').doc('current').set({ budget: budgetToSave || 0, employees: sanitizedEmployees, lastModifiedBy: user.email, lastModifiedAt: new Date().toISOString() });
@@ -51,6 +52,7 @@ await db.collection('teamAppraisals').doc(doc.id).delete();
 await db.collection('teamAppraisals').doc(doc.id).delete();
 await db.collection('teamAppraisals').doc(doc.id).delete();
 await db.collection('teamAppraisals').doc(docId).set(dataToRestore, { merge: false });
+await db.collection('teamAppraisals').doc(docItem.id).update(update);
 await db.collection('teamAppraisals').doc(existingCheck.docId).delete();
 await db.collection('teamAppraisals').doc(firestoreDocId).update(autoSaveData);
 await db.collection('teamAppraisals').doc(firestoreDocId).update(saveData);

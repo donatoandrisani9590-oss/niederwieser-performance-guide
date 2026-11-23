@@ -1009,6 +1009,12 @@
           return nwDateCycleYear(a.createdAt || a.submittedAt) || nwDocYear(a);
         };
         const nwCurrentCycleYear = () => nwDateCycleYear(new Date().toISOString());
+        // Neue Funktionen (Konzept docs/konzept/ROLLEN-UND-FREIGABEN.md) – standardmäßig AUS.
+        // shareWithEmployee: Führungskraft teilt Beurteilung/Zielvereinbarung mit dem Mitarbeiter (Phase 1)
+        // employeeArea: „Mein Bereich“ für Mitarbeiter (Phase 2, erst nach Einspielen der Sicherheitsregeln!)
+        // userAdmin: Benutzerverwaltung für HR (Phase 3)
+        const NW_FEATURES = Object.assign({ shareWithEmployee: false, employeeArea: false, userAdmin: false },
+          (typeof window !== 'undefined' && window.__NW_FEATURES__) || {});
         const NW_SHOW_9BOX = false; // Kalibrierung: GPS-Verteilung (9-Box Grid) – ausgeblendet, siehe renderTeamCalibration
         // Wählbare Beurteilungsjahre: laufendes Jahr plus alle Jahre mit Unterlagen
         // (Zielvereinbarung für Y+1 gehört zum Gespräch im Jahr Y)
@@ -14008,6 +14014,34 @@ Goal 3: 20% weight, 80% achieved → 16 points
           };
           
         // Status je Mitarbeiter und Beurteilungsjahr (gemeinsam für Team-Übersicht und Dashboard; nur lesen)
+        // === TEILEN MIT DEM MITARBEITER (Phase 1) ===
+        // Nur neue, optionale Felder; bestehende Felder bleiben unberührt. Beim Teilen wird eine Lese-Fassung
+        // (sharedSnapshot) gespeichert: Der Mitarbeiter sieht genau das Geteilte, auch wenn später noch
+        // geändert wird. Jede Freigabe und Rücknahme landet im Protokoll (auditLog).
+        const shareWithEmployee = async (member, docItem, share) => {
+          if (!docItem || !docItem.id) return;
+          const label = docItem.type === 'goals' ? getText(lang, 'Zielvereinbarung', 'Accordo obiettivi', 'Goal agreement') : getText(lang, 'Beurteilung', 'Valutazione', 'Review');
+          if (share) {
+            if (!member.email) { showToast(getText(lang, `Für das Teilen braucht ${member.name} eine E-Mail-Adresse.`, `Per condividere serve un'e-mail per ${member.name}.`, `${member.name} needs an email address for sharing.`), 'warning'); return; }
+            if (!confirm(getText(lang,
+              `${label} mit ${member.name} teilen?\n\n${member.name} sieht danach eine schreibgeschützte Fassung im eigenen Bereich. Du kannst das Teilen jederzeit zurücknehmen.`,
+              `Condividere ${label} con ${member.name}?\n\n${member.name} vedrà una versione di sola lettura. Puoi annullare in qualsiasi momento.`,
+              `Share ${label} with ${member.name}?\n\n${member.name} will see a read-only version. You can revoke this at any time.`))) return;
+          } else if (!confirm(getText(lang, `Teilen zurücknehmen? ${member.name} sieht die ${label} danach nicht mehr.`, `Annullare la condivisione? ${member.name} non la vedrà più.`, `Revoke sharing? ${member.name} will no longer see it.`))) return;
+          const now = new Date().toISOString();
+          const { versionHistory, sharedSnapshot, id, ...rest } = docItem;
+          const update = share
+            ? { sharedWithEmployee: true, sharedWithEmployeeAt: now, sharedWithEmployeeBy: (user && user.email) || '', sharedEmployeeEmail: String(member.email).toLowerCase(), sharedSnapshot: JSON.parse(JSON.stringify(rest)) }
+            : { sharedWithEmployee: false, sharedRevokedAt: now, sharedRevokedBy: (user && user.email) || '' };
+          try {
+            await db.collection('teamAppraisals').doc(docItem.id).update(update);
+            await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: share ? 'share_with_employee' : 'unshare_with_employee', target: docItem.id, employeeId: member.id, docType: docItem.type || 'review' });
+            showToast(share ? getText(lang, `${label} mit ${member.name} geteilt`, 'Condiviso', 'Shared') : getText(lang, 'Teilen zurückgenommen', 'Condivisione annullata', 'Sharing revoked'), 'success');
+          } catch (err) {
+            console.error('Teilen fehlgeschlagen:', err);
+            showToast(getText(lang, 'Teilen fehlgeschlagen. Bitte erneut versuchen.', 'Condivisione non riuscita.', 'Sharing failed.'), 'error');
+          }
+        };
         const nwMemberStatus = (member, teamYear) => {
             // Beurteilungsjahr Y: Selbstreflexion und Beurteilung für Y, Zielvereinbarung für Y+1
             // (im Jahresgespräch wird Y beurteilt und werden die Ziele für Y+1 vereinbart).
@@ -15200,6 +15234,12 @@ Best regards`
                             const rv = status.reviewDigital;
                             const gl = status.goalsDigital;
                             const agreedNext = gl ? (gl.goals || []).filter(g => g && g.name && String(g.name).trim()).length : 0;
+                            // Teilen mit dem Mitarbeiter (Schalter shareWithEmployee): nur abgeschlossene Unterlagen
+                            const shareLine = (docItem) => NW_FEATURES.shareWithEmployee && docItem && docItem.status === 'completed' && (docItem.sharedWithEmployee
+                              ? React.createElement('span', { className: 'inline-flex flex-wrap items-center gap-x-2 gap-y-0.5' },
+                                  note(T('Mit Mitarbeiter geteilt', 'Condivisa con il collaboratore', 'Shared with employee') + (docItem.sharedWithEmployeeAt ? ' · ' + fmt(docItem.sharedWithEmployeeAt) : '') + (docItem.employeeAcknowledgedAt ? ' · ' + T('gelesen', 'letta', 'read') + ' ' + fmt(docItem.employeeAcknowledgedAt) : ''), 'ok'),
+                                  linkBtn(T('Teilen zurücknehmen', 'Annulla condivisione', 'Revoke'), () => shareWithEmployee(member, docItem, false)))
+                              : linkBtn(T('Mit Mitarbeiter teilen', 'Condividi con il collaboratore', 'Share with employee'), () => shareWithEmployee(member, docItem, true)));
                             // Bestehende Unterlagen mit ihrem gespeicherten Jahr öffnen (nie überschreiben)
                             const openReview = () => startTeamAppraisal(member.id, rv && rv.period != null && rv.period !== '' ? rv.period : teamYear, rv || null);
                             const openGoals = () => startTeamGoalSetting(member.id, gl && gl.period != null && gl.period !== '' ? gl.period : nextYear, gl || null);
@@ -15228,7 +15268,7 @@ Best regards`
                                   rv && rv.status === 'completed' && linkBtn(T('Als geführt markieren', 'Segna come svolto', 'Mark as held'), () => toggleMeetingDone({ ...member, meetingDone: false })));
                             const reviewCell = rv && rv.status === 'completed'
                               ? cell(React.createElement(NwChip, { tone: 'ok', icon: CheckCircle2 }, T('Abgeschlossen', 'Completata', 'Completed') + (rv.gpsScore ? ' · GPS ' + Number(rv.gpsScore).toFixed(1) : '')),
-                                  act(T('Öffnen', 'Apri', 'Open'), openReview, ClipboardList), meetingLine)
+                                  act(T('Öffnen', 'Apri', 'Open'), openReview, ClipboardList), shareLine(rv), meetingLine)
                               : rv
                               ? cell(React.createElement(NwChip, { tone: 'warn', icon: Edit3 }, T('Entwurf', 'Bozza', 'Draft') + ((rv.updatedAt || rv.createdAt) ? ' · ' + T('gespeichert', 'salvata', 'saved') + ' ' + fmt(rv.updatedAt || rv.createdAt) : '')),
                                   act(T('Fortsetzen', 'Continua', 'Continue'), openReview, ClipboardList, 'primary'), meetingLine)
@@ -15244,7 +15284,7 @@ Best regards`
                             // Zielvereinbarung für das Folgejahr (im selben Gespräch)
                             const goalsCell = gl && gl.status === 'completed'
                               ? cell(React.createElement(NwChip, { tone: 'ok', icon: CheckCircle2 }, `${T('Vereinbart', 'Concordati', 'Agreed')} · ${agreedNext} ${agreedNext === 1 ? T('Ziel', 'obiettivo', 'goal') : T('Ziele', 'obiettivi', 'goals')}`),
-                                  act(T('Öffnen', 'Apri', 'Open'), openGoals, Target))
+                                  act(T('Öffnen', 'Apri', 'Open'), openGoals, Target), shareLine(gl))
                               : gl
                               ? cell(React.createElement(NwChip, { tone: 'warn', icon: Edit3 }, T('Entwurf', 'Bozza', 'Draft') + ((gl.updatedAt || gl.createdAt) ? ' · ' + T('gespeichert', 'salvata', 'saved') + ' ' + fmt(gl.updatedAt || gl.createdAt) : '')),
                                   act(T('Fortsetzen', 'Continua', 'Continue'), openGoals, Target))

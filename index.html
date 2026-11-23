@@ -14006,7 +14006,9 @@ Goal 3: 20% weight, 80% achieved → 16 points
                 appraisalCount: appraisalDocs.length, deletedAt: now, deletedBy: (user && user.email) || '', deletedByUid: (user && user.uid) || '', restoredAt: null });
               for (const d of appraisalDocs) await ref.collection('items').doc(d.id).set({ data: d.data() });
               await ref.update({ status: 'complete' });
-              await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'member_trashed', target: 'trash/' + ref.id, employeeId: memberId, count: appraisalDocs.length });
+              try { // Protokoll: Fehler hier darf die eigentliche Aktion nicht als fehlgeschlagen melden
+                await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'member_trashed', target: 'trash/' + ref.id, employeeId: memberId, count: appraisalDocs.length });
+              } catch (auditErr) { console.warn('Protokoll nicht gespeichert:', auditErr); }
               return true;
             } catch (e) {
               console.error('Papierkorb nicht erreichbar:', e);
@@ -14133,7 +14135,9 @@ Goal 3: 20% weight, 80% achieved → 16 points
             : { sharedWithEmployee: false, sharedRevokedAt: now, sharedRevokedBy: (user && user.email) || '' };
           try {
             await db.collection('teamAppraisals').doc(docItem.id).update(update);
-            await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: share ? 'share_with_employee' : 'unshare_with_employee', target: docItem.id, employeeId: member.id, docType: docItem.type || 'review' });
+            try { // Protokoll: Fehler hier darf die eigentliche Aktion nicht als fehlgeschlagen melden
+              await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: share ? 'share_with_employee' : 'unshare_with_employee', target: docItem.id, employeeId: member.id, docType: docItem.type || 'review' });
+            } catch (auditErr) { console.warn('Protokoll nicht gespeichert:', auditErr); }
             showToast(share ? getText(lang, `${label} mit ${member.name} geteilt`, 'Condiviso', 'Shared') : getText(lang, 'Teilen zurückgenommen', 'Condivisione annullata', 'Sharing revoked'), 'success');
           } catch (err) {
             console.error('Teilen fehlgeschlagen:', err);
@@ -15125,7 +15129,9 @@ Best regards`
               try {
                 const now = new Date().toISOString();
                 await db.collection('teamMembers').doc(member.id).update({ email, emailAddedAt: now, emailAddedBy: (user && user.email) || '' });
-                await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'member_email_added', target: 'teamMembers/' + member.id });
+                try { // Protokoll: Fehler hier darf die eigentliche Aktion nicht als fehlgeschlagen melden
+                  await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'member_email_added', target: 'teamMembers/' + member.id });
+                } catch (auditErr) { console.warn('Protokoll nicht gespeichert:', auditErr); }
                 showToast(getText(lang, `E-Mail für ${member.name} gespeichert`, 'E-mail salvata', 'Email saved'), 'success');
               } catch (e) {
                 console.error('E-Mail speichern fehlgeschlagen:', e);
@@ -17113,7 +17119,9 @@ Best regards`
               await memRef.set(t.member);
               const now = new Date().toISOString();
               await db.collection('trash').doc(t.docId).update({ restoredAt: now, restoredBy: (user && user.email) || '' });
-              await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'member_restored', target: 'trash/' + t.docId, employeeId: t.memberId, count: restored, skipped });
+              try { // Protokoll: Fehler hier darf die eigentliche Aktion nicht als fehlgeschlagen melden
+                await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'member_restored', target: 'trash/' + t.docId, employeeId: t.memberId, count: restored, skipped });
+              } catch (auditErr) { console.warn('Protokoll nicht gespeichert:', auditErr); }
               showToast(getText(lang, `Wiederhergestellt: ${t.memberName} mit ${restored} Unterlagen` + (skipped ? ` (${skipped} gab es schon)` : ''), 'Ripristinato', 'Restored'), 'success');
             } catch (e) {
               console.error('Wiederherstellen fehlgeschlagen:', e);
@@ -17128,7 +17136,9 @@ Best regards`
               const items = await db.collection('trash').doc(t.docId).collection('items').get();
               for (const it of items.docs) await it.ref.delete();
               await db.collection('trash').doc(t.docId).delete();
-              await db.collection('auditLog').add({ at: new Date().toISOString(), by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'trash_purged', target: 'trash/' + t.docId, employeeId: t.memberId });
+              try { // Protokoll: Fehler hier darf die eigentliche Aktion nicht als fehlgeschlagen melden
+                await db.collection('auditLog').add({ at: new Date().toISOString(), by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'trash_purged', target: 'trash/' + t.docId, employeeId: t.memberId });
+              } catch (auditErr) { console.warn('Protokoll nicht gespeichert:', auditErr); }
               showToast(getText(lang, 'Endgültig gelöscht', 'Eliminato definitivamente', 'Deleted permanently'), 'success');
             } catch (e) {
               console.error('Endgültig löschen fehlgeschlagen:', e);
@@ -17174,6 +17184,7 @@ Best regards`
             at: new Date().toISOString(), by: (user && user.email) || '', byUid: (user && user.uid) || '',
             action, target: 'registeredUsers/' + u.docId, targetEmail: u.email || '', ...extra,
           });
+          const hrAuditSafe = async (...args) => { try { await hrAudit(...args); } catch (e) { console.warn('Protokoll nicht gespeichert:', e); } };
           const hrSendPasswordReset = async (u) => {
             if (!u.email) { showToast(getText(lang, 'Für dieses Konto ist keine E-Mail-Adresse hinterlegt.', 'Nessuna e-mail per questo account.', 'No email address for this account.'), 'warning'); return; }
             if (!confirm(getText(lang,
@@ -17181,7 +17192,7 @@ Best regards`
               `Inviare il reset della password a ${u.email}?`, `Send password reset to ${u.email}?`))) return;
             try {
               await auth.sendPasswordResetEmail(u.email);
-              await hrAudit('password_reset_sent', u);
+              await hrAuditSafe('password_reset_sent', u);
               showToast(getText(lang, `Reset-Mail an ${u.email} gesendet`, 'E-mail di reset inviata', 'Reset email sent'), 'success');
             } catch (err) {
               console.error('Passwort-Reset fehlgeschlagen:', err);
@@ -17201,7 +17212,7 @@ Best regards`
               await db.collection('registeredUsers').doc(u.docId).update(lock
                 ? { disabled: true, disabledAt: now, disabledBy: (user && user.email) || '' }
                 : { disabled: false, enabledAt: now, enabledBy: (user && user.email) || '' });
-              await hrAudit(lock ? 'user_disabled' : 'user_enabled', u);
+              await hrAuditSafe(lock ? 'user_disabled' : 'user_enabled', u);
               showToast(lock ? getText(lang, 'Konto gesperrt', 'Account bloccato', 'Account locked') : getText(lang, 'Konto entsperrt', 'Account sbloccato', 'Account unlocked'), 'success');
             } catch (err) {
               console.error('Sperren fehlgeschlagen:', err);
@@ -17217,7 +17228,7 @@ Best regards`
             if (name.length < 3 || !name.includes(' ')) { showToast(getText(lang, 'Bitte Vor- und Nachname eingeben – nichts geändert.', 'Inserisci nome e cognome.', 'Please enter first and last name.'), 'warning'); return; }
             try {
               await db.collection('registeredUsers').doc(u.docId).update({ fullName: name, fullNameChangedAt: new Date().toISOString(), fullNameChangedBy: (user && user.email) || '' });
-              await hrAudit('user_renamed', u, { from: current, to: name });
+              await hrAuditSafe('user_renamed', u, { from: current, to: name });
               showToast(getText(lang, 'Name gespeichert', 'Nome salvato', 'Name saved'), 'success');
             } catch (err) {
               console.error('Umbenennen fehlgeschlagen:', err);

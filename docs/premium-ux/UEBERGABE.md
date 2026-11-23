@@ -432,6 +432,21 @@ Die Seite „GPS Formel“ zeigte „0.00 - 1.50“, das Dashboard „1,00 – 1
 „1.00 – 1.50“, ebenso die Auskunft des HR-Copilot. Geändert ist nur die Anzeige; die Schwellen-Tabelle `RATINGS`,
 mit der die App einem GPS-Wert seine Stufe zuordnet, ist unverändert.
 
+### 20. Absicherung vor dem Start (24.11.2026)
+
+- **Text in HTML-Vorlagen wird maskiert:** 329 Einfügestellen in vier PDF-Vorlagen und im Detail-Fenster des
+  Ziel-Dashboards, dazu zwei Druckfenster. Das erzeugte HTML ist mit den Testdaten vorher und nachher identisch.
+  Neuer Test `tests/e2e/sicherheit.spec.mjs`.
+- **Bogen bleibt nach dem Zwischenspeichern stabil:** Der Schlüssel des offenen Bogens war der gesamte gemerkte Stand.
+  Seit „Entwurf speichern“ im Bogen bleibt (Abschnitt 18), änderte sich dieser Stand beim Speichern; der Bogen wurde
+  beim nächsten Neuzeichnen neu aufgebaut, seither Getipptes ging verloren und die Versionshistorie ließ jede zweite
+  Fassung aus. Der Schlüssel ist jetzt die Identität des Bogens. Ein neuer Test deckt vier Zwischenspeicherungen,
+  Weitertippen, Neuladen und die Historie ab. Der Fehler stammte aus der Umstellung in Abschnitt 18.
+- **Stille Fehlerfälle melden sich:** Termin löschen, Auto-Save und Laden im Mitarbeiter-Bogen, Laden der
+  Selbstreflexion.
+- **Regeln (Vorschlag):** HR-Rechte nur für die Adresse, die auch die App als HR kennt; drei Prüfungen dazu.
+- 101 Tests grün, 78 Ansichten ohne Konsolenfehler, Schutzbereich unverändert.
+
 ## Prüfungen
 
 ```bash
@@ -446,8 +461,8 @@ cd tests && npm test
 cd tests && npm run rules:vorschlag
 ```
 
-Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 96 / 96 grün,
-`npm run rules:vorschlag` 96 / 96 grün.
+Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 101 / 101 grün,
+`npm run rules:vorschlag` 101 / 101 grün.
 
 Die bestehenden Tests mussten für den Dialog nicht umgeschrieben werden: `tests/e2e/fixtures.mjs` meldet jeden
 App-Dialog über dieselben `page.on('dialog')`-Listener wie ein Browser-Fenster.

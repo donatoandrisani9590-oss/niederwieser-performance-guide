@@ -715,6 +715,10 @@ test('Team-Übersicht: ein Entwurf mit Vorgabewert verändert den Ø GPS-Score n
   const ids = await seed();
   await loginTeam(page, USERS.managerA);
   const tile = page.getByTestId('stat-avg-gps');
+  // Erst lesen, wenn alle Beurteilungen geladen sind: Die der geteilten Mitarbeiterin kommt später und ändert den Schnitt
+  await expect(memberRow(page, 'Frieda Geteilt')).toContainText('GPS 3.8');
+  await expect(memberRow(page, 'Clara Beispiel')).toContainText('GPS 3.9');
+  await page.waitForTimeout(500);
   const before = await tile.innerText();
   expect(before).toMatch(/\d\.\d/);
   const now = new Date().toISOString();

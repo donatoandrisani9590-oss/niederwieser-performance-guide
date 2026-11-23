@@ -9,13 +9,13 @@ Dieser Stand ist **ein erster, abgeschlossener Teil**, nicht die ganze Premium-R
 ein falsches Bild erzeugten oder den Ablauf am stärksten störten: der einheitliche Dialog statt Browser-Fenstern,
 der falsche „Überfällig“-Alarm, die Scroll-Position beim Seitenwechsel, Rückmeldungen mit „Rückgängig“ und die
 Team-Übersicht auf dem Handy, einheitliche Knopf-Beschriftungen, der nächste Schritt nach dem Lesen einer
-Selbstreflexion und das Glossar. Offen sind die IT/EN-Texte, die Erklärblöcke im Dashboard und alles, was deine
+Selbstreflexion, das Glossar und ein kompaktes Dashboard. Offen sind die IT/EN-Texte und alles, was deine
 Freigabe braucht.
 
 | Prüfung | Ausgangslage | Jetzt |
 |---|---|---|
-| Automatische Tests (`npm test`) | 57 / 57 grün | **78 / 78 grün** (21 neue in `tests/e2e/premium.spec.mjs`) |
-| Dieselben Tests unter den eingespielten Firestore-Regeln (`npm run rules:vorschlag`) | 57 / 57 grün | **78 / 78 grün** |
+| Automatische Tests (`npm test`) | 57 / 57 grün | **80 / 80 grün** (23 neue in `tests/e2e/premium.spec.mjs`) |
+| Dieselben Tests unter den eingespielten Firestore-Regeln (`npm run rules:vorschlag`) | 57 / 57 grün | **80 / 80 grün** |
 | Schutzbereich (`node tests/protected/fingerprint.mjs`) | unverändert | **unverändert**, Baseline nicht angefasst |
 | Konsolenfehler in den getesteten Abläufen | 0 | 0 |
 | Browser-Fenster (`confirm`/`prompt`/`alert`) | 33 Stellen | 2 Stellen, beide im Schutzbereich |
@@ -164,6 +164,18 @@ Erklärung, Esc blendet sie aus. Für Screenreader hängt die Beschreibung dauer
   (GPS = 50 % WAS + 50 % WIE, bei Führungskräften je 25 % Kern-Kompetenzen und Leadership, BARS = fünf Stufen mit
   Verhaltensankern). **Bitte einmal fachlich gegenlesen**, sie stehen in `index.html` unter `NW_GLOSSARY`.
 
+### 10. Dashboard: Grundlagen einklappbar (U12)
+
+Für Führungskräfte mit Team folgten unter den offenen Punkten rund 2 200 px Erklärblöcke (Willkommen, Werte,
+Performance Kompass, BARS, Jahreszyklus), die es unter „Anleitung“ und „GPS Formel“ ebenfalls gibt. Sie liegen jetzt
+in einem aufklappbaren Bereich „Grundlagen: Werte, GPS und Jahreszyklus“, nach demselben Muster wie der
+Schnellstart-Guide: **offen für neue Nutzer** (nicht angemeldet oder noch kein Team), **eingeklappt für
+Führungskräfte mit Team**. Nichts ist entfernt, der Inhalt ist unverändert. Der Jahreskalender bleibt sichtbar.
+
+| Vorher (3 119 px hoch) | Nachher (861 px hoch) |
+|---|---|
+| ![vorher](screenshots/17-dashboard-gesamt-vorher.png) | ![nachher](screenshots/17-dashboard-gesamt-nachher.png) |
+
 ## Prüfungen
 
 ```bash
@@ -178,8 +190,8 @@ cd tests && npm test
 cd tests && npm run rules:vorschlag
 ```
 
-Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 78 / 78 grün,
-`npm run rules:vorschlag` 78 / 78 grün.
+Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 80 / 80 grün,
+`npm run rules:vorschlag` 80 / 80 grün.
 
 Die bestehenden Tests mussten für den Dialog nicht umgeschrieben werden: `tests/e2e/fixtures.mjs` meldet jeden
 App-Dialog über dieselben `page.on('dialog')`-Listener wie ein Browser-Fenster.
@@ -207,7 +219,7 @@ cd tests && node shots-glossar.mjs
 
 | # | Punkt | Warum noch offen |
 |---|---|---|
-| U12 | Erklärblöcke im Dashboard für Führungskräfte mit Team einklappen | nicht begonnen |
+| U15 | Jahreskalender im Dashboard hebt fest „Q1: Ziele“ hervor, auch im November | beim Prüfen von U12 gefunden, reine Anzeige, noch nicht behoben |
 | U14 | rund 220 Textstellen nur DE/EN, Italienisch zeigt dort Englisch (A6) | groß, eigene Runde |
 
 Nicht vollständig durchgespielt habe ich: PDF-Erzeugung im Browser, Kalibrierung und Ziel-Dashboard im Detail,

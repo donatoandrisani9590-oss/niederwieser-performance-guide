@@ -55,6 +55,13 @@ async function run(tag, useBase) {
   await nav('Dashboard');
   await page.getByText('Meine offenen Punkte').waitFor();
   await shot('03-dashboard-offene-punkte', { clip: { x: 300, y: 0, width: 1140, height: 520 } });
+  // Ganzes Dashboard (vorher lange Erklärblöcke unter den offenen Punkten, nachher eingeklappt)
+  await page.setViewportSize({ width: 1440, height: 5200 });
+  await page.waitForTimeout(600);
+  const dashHeight = await page.evaluate(() => Math.min(5200, Math.ceil(document.querySelector('main > div').getBoundingClientRect().bottom) + 24)); // Höhe des Inhalts, nicht des Fensters
+  await shot('17-dashboard-gesamt', { clip: { x: 290, y: 0, width: 1150, height: dashHeight } });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.waitForTimeout(300);
   // Seitenwechsel: gescrollt eine Selbstreflexion öffnen
   await nav('Team-Übersicht');
   await page.getByText('4 Mitarbeiter').waitFor();

@@ -24469,6 +24469,17 @@ const renderDashboard = () => {
                 )
               ),
               
+              // === GRUNDLAGEN (Willkommen, Werte, Performance Kompass, BARS, Jahreszyklus) – n.Org: erklären, wenn gefragt ===
+              // Gleiches Muster wie der Schnellstart-Guide: offen für neue Nutzer (nicht angemeldet / noch kein Team),
+              // eingeklappt für Führungskräfte mit Team. Nichts entfällt, die Inhalte sind unverändert.
+              React.createElement('details', { className: 'group', 'data-testid': 'dashboard-basics', open: !(user && !user.isAnonymous && teamMembers.length > 0) },
+                React.createElement('summary', { className: 'flex min-h-[46px] cursor-pointer list-none flex-wrap items-center gap-2.5 rounded-card border border-line bg-white px-4 py-2 shadow-card transition-colors hover:bg-nw-blue-06 [&::-webkit-details-marker]:hidden' },
+                  React.createElement(BookOpen, { size: 16, 'aria-hidden': true, className: 'text-nw-blue' }),
+                  React.createElement('h2', { className: 'text-base font-semibold text-nw-blue' }, getText(lang, 'Grundlagen: Werte, GPS und Jahreszyklus', 'Fondamenti: valori, GPS e ciclo annuale', 'Basics: values, GPS and annual cycle')),
+                  React.createElement('span', { className: 'text-xs text-ink-60' }, getText(lang, 'Zum Nachschlagen', 'Da consultare', 'For reference')),
+                  React.createElement(ChevronDown, { size: 16, 'aria-hidden': true, className: 'ml-auto text-ink-60 transition-transform duration-150 group-open:rotate-180' })
+                ),
+                React.createElement('div', { className: 'mt-5 space-y-5' },
               React.createElement('div', { className: "bg-white rounded-xl p-6 shadow-card border border-line" },
                 React.createElement('h2', { className: "text-lg font-semibold mb-4", style: { color: "#243186" } }, t.welcome),
                 React.createElement('p', { className: "mb-6 leading-relaxed text-ink" },
@@ -24869,6 +24880,8 @@ const renderDashboard = () => {
                     )
                   )
                 )
+              )
+                ) // Ende Grundlagen-Inhalt
               )
             );
           };

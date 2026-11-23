@@ -23,6 +23,7 @@ test('Seitenwechsel: jede Ansicht beginnt oben, auch nach Scrollen auf der vorig
   const top = () => page.evaluate(() => document.querySelector('main').scrollTop);
   await nav.getByText('Dashboard', { exact: true }).click();
   await expect(page.getByText('Meine offenen Punkte')).toBeVisible();
+  await page.getByTestId('dashboard-basics').locator('summary').click(); // aufklappen, damit die Seite lang genug zum Scrollen ist (U12)
   await page.evaluate(() => { document.querySelector('main').scrollTop = 900; });
   expect(await top()).toBeGreaterThan(300);
   await nav.getByText('Team-Übersicht', { exact: true }).click();
@@ -407,4 +408,38 @@ test.describe('Handy (390 px): Glossar', () => {
     await page.mouse.click(5, 300);
     await expect(tip).toHaveCount(0);
   });
+});
+
+test('Dashboard: Grundlagen für Führungskräfte mit Team eingeklappt, auf Klick vollständig da', async ({ page, consoleErrors }) => {
+  await loginTeam(page, USERS.managerA);
+  await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByText('Dashboard', { exact: true }).click();
+  await expect(page.getByText('Meine offenen Punkte')).toBeVisible();
+  const basics = page.getByTestId('dashboard-basics');
+  await expect(basics.getByRole('heading', { name: 'Grundlagen: Werte, GPS und Jahreszyklus' })).toBeVisible();
+  // Eingeklappt: die langen Erklärblöcke sind nicht zu sehen, der Jahreskalender bleibt
+  await expect(page.getByText('Performance-Jahreszyklus')).toBeVisible();
+  await expect(page.getByText('Dein Performance Kompass')).toBeHidden();
+  await expect(page.getByText('Wie funktioniert BARS?')).toBeHidden();
+  const collapsed = await page.evaluate(() => document.querySelector('main').scrollHeight);
+  // Aufklappen: alle Inhalte wie bisher
+  await basics.locator('summary').click();
+  for (const text of ['Dein Performance Kompass', 'Wie funktioniert BARS?', 'DER JAHRESZYKLUS IM ÜBERBLICK', 'Fast', 'Fair', 'Personal'])
+    await expect(basics.getByText(text, { exact: true }).first()).toBeVisible();
+  await expect(basics.getByRole('button', { name: 'Kompetenzen ansehen' })).toBeVisible();
+  const open = await page.evaluate(() => document.querySelector('main').scrollHeight);
+  expect(open).toBeGreaterThan(collapsed + 1000); // eingeklappt ist die Seite deutlich kürzer
+  // Per Tastatur bedienbar
+  await basics.locator('summary').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByText('Dein Performance Kompass')).toBeHidden();
+  expect(consoleErrors).toEqual([]);
+});
+
+test('Dashboard: Grundlagen für neue Nutzer (nicht angemeldet) offen', async ({ page }) => {
+  await openApp(page);
+  const basics = page.getByTestId('dashboard-basics');
+  await expect(basics.getByText('Dein Performance Kompass')).toBeVisible();
+  await expect(basics.getByText('Wie funktioniert BARS?')).toBeVisible();
+  await basics.getByRole('button', { name: 'Kompetenzen ansehen' }).click();
+  await expect(page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('button', { name: 'Kompetenzen' })).toHaveAttribute('aria-current', 'page');
 });

@@ -744,3 +744,34 @@ test('Geteilter Mitarbeiter: eingeladene Führungskraft trägt einen Termin ein,
   await expect(memberRow(page, 'Clara Beispiel')).not.toContainText('eingetragen von');
   expect(consoleErrors).toEqual([]);
 });
+
+// „Entwurf speichern“ bleibt im Bogen (S1, Freigabe 23.11.2026). Vorher sprang die App zurück in die Team-Übersicht.
+test('Beurteilung: „Entwurf speichern“ bleibt im Bogen, zweites Speichern überschreibt denselben Entwurf', async ({ page, consoleErrors }) => {
+  await loginTeam(page, USERS.managerA);
+  await memberRow(page, 'Emil Probe').getByRole('button', { name: 'Starten' }).click();
+  const save = page.getByRole('button', { name: 'Entwurf speichern' }).first();
+  const drafts = async () => (await listDocs('teamAppraisals')).filter((d) => field(d, 'employeeId') === 'tm-emil' && field(d, 'type') === 'review');
+  await save.click();
+  await expect(page.getByText(/Beurteilung für Emil Probe als Entwurf gespeichert · \d{2}:\d{2}/)).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId('form-bar')).toBeVisible(); // noch im Bogen
+  await expect(save).toBeEnabled();                          // Knöpfe wieder frei
+  await expect.poll(async () => (await drafts()).length).toBe(1);
+  const first = (await drafts())[0];
+  // Weiterarbeiten und erneut speichern: derselbe Entwurf, kein zweites Dokument, Anlagedatum bleibt
+  const text = page.locator('textarea').first();
+  await text.fill('Zwischenstand aus dem Gespräch');
+  await page.waitForTimeout(1100);
+  await save.click();
+  await expect.poll(async () => field((await drafts())[0], 'updatedAt') !== field(first, 'updatedAt'), { timeout: 15000 }).toBe(true);
+  const after = await drafts();
+  expect(after.length).toBe(1);
+  expect(after[0].name).toBe(first.name);
+  expect(field(after[0], 'createdAt')).toBe(field(first, 'createdAt'));
+  expect(field(after[0], 'status')).toBe('draft');
+  expect(JSON.stringify(after[0].fields)).toContain('Zwischenstand aus dem Gespräch');
+  // Verlassen ohne Rückfrage (nichts Ungespeichertes), die Team-Übersicht zeigt den Entwurf
+  await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByText('Team-Übersicht', { exact: true }).click();
+  await expect(memberRow(page, 'Emil Probe')).toContainText('Entwurf');
+  // Abschließen führt weiterhin zurück
+  expect(consoleErrors).toEqual([]);
+});

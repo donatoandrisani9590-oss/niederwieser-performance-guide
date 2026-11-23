@@ -414,6 +414,18 @@ mit den neuen Regeln würde sie beim Termin-Speichern abgewiesen.
 Zwölf neue Regel-Prüfungen in `tests/rules/pruefen.mjs` und ein Ablauf-Test (95 Tests).
 Offen: Die eingeladene Führungskraft kann sich nicht selbst aus der Teilen-Liste austragen.
 
+### 18. „Entwurf speichern“ bleibt im Bogen (S1; freigegeben am 23.11.2026)
+
+- Entwurf speichern: Der Bogen bleibt offen, die Meldung nennt die Uhrzeit, die Knöpfe sind sofort wieder frei.
+  Abschließen führt wie bisher zurück zur Team-Übersicht. Gilt für Beurteilung und Zielvereinbarung, auch für HR.
+- Der im Browser gemerkte Stand des Bogens (`nw_current_employee`) wird nach dem Speichern auf das eben Gespeicherte
+  gesetzt, damit Versionshistorie, Anlagedatum und ein Neuladen vom neuen Stand ausgehen.
+- **Schutzbereich-Referenz aktualisiert** (mit ausdrücklicher Freigabe): zwei zusätzliche Zugriffe auf denselben
+  Browser-Speicher-Schlüssel (59 statt 57). Kein neuer Schlüssel, keine Änderung an Firestore, Regeln oder Bewertung.
+- Neuer Test: zweimal speichern ergibt genau einen Entwurf mit unverändertem Anlagedatum (96 Tests).
+- Nicht durch Tests belegt: Neuladen der Seite mitten im Bogen und die Versionshistorie nach mehreren
+  Zwischenspeicherungen.
+
 ## Prüfungen
 
 ```bash
@@ -428,8 +440,8 @@ cd tests && npm test
 cd tests && npm run rules:vorschlag
 ```
 
-Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 95 / 95 grün,
-`npm run rules:vorschlag` 95 / 95 grün.
+Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 96 / 96 grün,
+`npm run rules:vorschlag` 96 / 96 grün.
 
 Die bestehenden Tests mussten für den Dialog nicht umgeschrieben werden: `tests/e2e/fixtures.mjs` meldet jeden
 App-Dialog über dieselben `page.on('dialog')`-Listener wie ein Browser-Fenster.

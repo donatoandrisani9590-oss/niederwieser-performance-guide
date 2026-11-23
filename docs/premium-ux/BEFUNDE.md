@@ -38,7 +38,7 @@ Details im [Übergabebericht](UEBERGABE.md).
 
 | # | Rolle | Stelle | Problem | Vorschlag | Was berührt wäre |
 |---|---|---|---|---|---|
-| S1 | Führungskraft | Bogen, Knopf „Speichern“ | Zwischenspeichern wirft zurück in die Team-Übersicht. Wer mitten im Gespräch sichert, muss den Bogen neu öffnen und seine Stelle suchen | „Speichern“ bleibt im Bogen und zeigt „Gespeichert · 14:32“. Verlassen nur über „Abschließen“ oder „Schließen“ | Ablauf nach dem Speichern im Speicher-Handler |
+| S1 ✅ | Führungskraft | Bogen, Knopf „Speichern“ | Zwischenspeichern wirft zurück in die Team-Übersicht. Wer mitten im Gespräch sichert, muss den Bogen neu öffnen und seine Stelle suchen | „Speichern“ bleibt im Bogen und zeigt „Gespeichert · 14:32“. Verlassen nur über „Abschließen“ oder „Schließen“ | Ablauf nach dem Speichern im Speicher-Handler |
 | S2 ✅ | Führungskraft | Team-Übersicht, Kennzahl „Ø GPS-Score“ | Ein eben angelegter Entwurf mit Vorgabewerten (GPS 2,00) zieht den Team-Durchschnitt von 3,8 auf 3,2 | Durchschnitt nur über abgeschlossene Beurteilungen | Kennzahl |
 | S3 ✅ | HR | HR-Dashboard „Fortschritt“ | „150 % Reviews“ bei „Alle Jahre“ (6 Beurteilungen auf 4 Mitarbeiter) | Anzahl statt Prozent, oder Prozent nur bei gewähltem Jahr | Kennzahl |
 | S4 | alle | Anmeldung | Kein „Passwort vergessen?“. Heute geht das nur über HR mit dem Schalter `userAdmin` | Link, der die Reset-Mail von Firebase auslöst | Anmeldung (neuer Auth-Aufruf) |

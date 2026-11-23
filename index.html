@@ -5479,7 +5479,12 @@
               });
               
               try {
-                await onSaveTeam(appraisal);
+                const nwSaved = await onSaveTeam(appraisal);
+                // Entwurf: im Bogen bleiben, Knöpfe wieder freigeben, gemerkten Stand erneuern
+                if (status === 'draft') {
+                  setIsSaving(false);
+                  if (nwSaved) setTeamContext(c => c ? { ...c, appraisalId: nwSaved.id, existingData: nwSaved } : c);
+                }
               } catch (err) {
                 hasUnsavedChanges.current = true; // v92: Dirty-Flag zurücksetzen bei Fehler
                 setIsSaving(false);
@@ -7365,7 +7370,12 @@
               });
               
               try {
-                await onSaveTeam(appraisal);
+                const nwSaved = await onSaveTeam(appraisal);
+                // Entwurf: im Bogen bleiben, Knöpfe wieder freigeben, gemerkten Stand erneuern
+                if (status === 'draft') {
+                  setIsSaving(false);
+                  if (nwSaved) setTeamContext(c => c ? { ...c, appraisalId: nwSaved.id, existingData: nwSaved } : c);
+                }
               } catch (err) {
                 hasUnsavedChanges.current = true; // v92: Dirty-Flag zurücksetzen bei Fehler
                 setIsSaving(false);
@@ -14865,7 +14875,17 @@ Weight more important goals higher!`
                 employeeName: appraisalWithType.employeeName
               });
               
-              localStorage.removeItem('nw_current_employee');
+              // „Entwurf speichern“ bleibt im Bogen (Freigabe 23.11.2026): Der gemerkte Stand wird auf das eben
+              // Gespeicherte gesetzt, damit Versionshistorie und Neuladen vom neuen Stand ausgehen. Abschließen wie bisher.
+              const nwStay = appraisalWithType.status === 'draft';
+              if (nwStay) {
+                try {
+                  const nwCtx = JSON.parse(localStorage.getItem('nw_current_employee') || 'null');
+                  if (nwCtx) localStorage.setItem('nw_current_employee', JSON.stringify({ ...nwCtx, appraisalId: appraisalWithType.id, existingData: appraisalWithType }));
+                } catch (e) { devWarn('Kontext nach Entwurf nicht aktualisiert', e); }
+              } else {
+                localStorage.removeItem('nw_current_employee');
+              }
               
               // Angepasste Meldung je nach Typ
               const typeLabel = appraisalWithType.type === 'goals' 
@@ -14876,8 +14896,10 @@ Weight more important goals higher!`
               const statusLabel = appraisalWithType.status === 'draft'
                 ? (lang === 'de' ? ' als Entwurf gespeichert' : lang === 'it' ? ' salvato come bozza' : ' saved as draft')
                 : (lang === 'de' ? ' abgeschlossen' : lang === 'it' ? ' completato' : ' completed');
-              showToast(typeLabel + nwFor + statusLabel, appraisalWithType.status === 'completed' ? 'success' : 'info'); // v92: Toast statt alert
-              setActiveView(isHRAdmin ? 'hrdashboard' : 'teamoverview');
+              const nwTime = new Date().toLocaleTimeString(lang === 'de' ? 'de-DE' : lang === 'it' ? 'it-IT' : 'en-GB', { hour: '2-digit', minute: '2-digit' });
+              showToast(typeLabel + nwFor + statusLabel + (nwStay ? ' · ' + nwTime : ''), 'success'); // v92: Toast statt alert
+              if (!nwStay) setActiveView(isHRAdmin ? 'hrdashboard' : 'teamoverview');
+              return appraisalWithType;
             } catch (error) {
               console.error('Error saving appraisal:', error);
               addDebugLog('error', `Speichern fehlgeschlagen: ${error.message}`);

@@ -605,7 +605,8 @@ test('Phase 3 (Schalter an): HR-Benutzerverwaltung – Name ändern, Passwort-Re
   // Sperren, HR-Konto nicht sperrbar
   await menu('Bernd Neumann', 'Konto sperren');
   await expect(row('Bernd Neumann')).toContainText('Gesperrt');
-  expect(field(await getDoc(`registeredUsers/${uidB}`), 'disabled')).toBe(true);
+  // Auf das Schreiben warten: Die Zeile zeigt „Gesperrt“ schon, bevor die Datenbank bestätigt hat (einmal rot am 23.11.2026)
+  await expect.poll(async () => field(await getDoc(`registeredUsers/${uidB}`), 'disabled')).toBe(true);
   await menu(USERS.hr.name, 'Konto sperren');
   await expect(page.getByText('HR-Admin-Konten und dein eigenes Konto kannst du nicht sperren.')).toBeVisible();
   // Protokoll, Mitarbeiterdaten unverändert

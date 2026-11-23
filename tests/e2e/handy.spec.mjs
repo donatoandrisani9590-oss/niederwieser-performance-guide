@@ -54,7 +54,7 @@ test('Handy, Mitarbeiter: Link öffnen, starten, abschicken – ohne Überlauf u
   expect(consoleErrors).toEqual([]);
 });
 
-test('Handy, Führungskraft: Beurteilung starten, Kopfknöpfe sauber, Entwurf speichern führt zurück zur Team-Übersicht', async ({ page, consoleErrors }) => {
+test('Handy, Führungskraft: Beurteilung starten, Kopfknöpfe sauber, Entwurf speichern bleibt im Bogen', async ({ page, consoleErrors }) => {
   await loginPhone(page, USERS.managerA);
   await noSideScroll(page);
   const card = page.getByTestId('member-compact-card').filter({ hasText: 'Emil Probe' });
@@ -66,6 +66,11 @@ test('Handy, Führungskraft: Beurteilung starten, Kopfknöpfe sauber, Entwurf sp
   expect(await tidy(page, actions)).toBeGreaterThanOrEqual(3);
   await noSideScroll(page);
   await page.getByRole('button', { name: 'Entwurf speichern' }).first().click();
+  // „Entwurf speichern“ bleibt im Bogen (Freigabe 23.11.2026): Meldung erscheint, zurück geht es über das Menü
+  await expect(page.getByText(/als Entwurf gespeichert/)).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId('form-bar')).toBeVisible();
+  await page.getByRole('button', { name: 'Menü' }).click();
+  await page.getByRole('dialog', { name: 'Navigation' }).getByText('Team-Übersicht', { exact: true }).click();
   await expect(page.getByTestId('member-compact-card').filter({ hasText: 'Emil Probe' })).toContainText('Entwurf', { timeout: 15000 });
   const drafts = (await listDocs('teamAppraisals')).filter((d) => field(d, 'employeeId') === 'tm-emil' && field(d, 'type') === 'review' && field(d, 'status') === 'draft');
   expect(drafts.length).toBe(1);

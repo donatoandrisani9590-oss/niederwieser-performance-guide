@@ -11038,6 +11038,20 @@ Goal 3: 20% weight, 80% achieved → 16 points
             });
             return () => unsubscribe();
           }, [db]);
+
+          // Phase 3 (Schalter userAdmin, standardmäßig aus): Ein von HR gesperrtes Konto wird abgemeldet.
+          // HR-Admins sind ausgenommen, damit sich niemand aus der Verwaltung aussperren kann.
+          useEffect(() => {
+            if (!NW_FEATURES.userAdmin || !db || !user || user.isAnonymous) return;
+            if (HR_ADMIN_EMAILS.includes(String(user.email || '').toLowerCase())) return;
+            const unsub = db.collection('registeredUsers').doc(user.uid).onSnapshot((d) => {
+              if (d.exists && d.data().disabled === true) {
+                showToast(getText(lang, 'Dein Konto ist gesperrt. Bitte wende dich an HR.', 'Il tuo account è bloccato. Rivolgiti a HR.', 'Your account is locked. Please contact HR.'), 'error');
+                auth.signOut().catch(() => {});
+              }
+            }, () => {});
+            return () => unsub();
+          }, [db, user && user.uid]);
           
           // === ACCESS CODE CHECK (für Gast-Modus via Link) ===
           // WICHTIG: Auch eingeloggte User können Selbstreflexion ausfüllen (FK ist auch MA für seinen Vorgesetzten)
@@ -11656,6 +11670,9 @@ Goal 3: 20% weight, 80% achieved → 16 points
           };
           
           // NEU: HR Admin Sub-Tab Navigation
+          const [hrUsers, setHrUsers] = useState([]); // Phase 3: Konten aus registeredUsers (nur HR, Schalter userAdmin)
+          const [hrUsersSearch, setHrUsersSearch] = useState('');
+          const [hrUsersFilter, setHrUsersFilter] = useState('all'); // all | team | noteam | disabled
           const [hrSubTab, setHrSubTab] = useState('overview'); // 'overview', 'calibration', 'rater-bias'
           
           // NEU: State für aufgeklappte Beurteilung in Versions-Tab
@@ -16950,6 +16967,162 @@ Best regards`
               )
             );
           };
+          // ===== Phase 3: Benutzerverwaltung (nur HR, Schalter userAdmin, standardmäßig aus) =====
+          // Ändert nur optionale Felder in registeredUsers (fullName, disabled …) und schreibt jede Aktion ins auditLog.
+          // Rollen werden hier nur angezeigt: Rechte aus einem Datenbankfeld zu vergeben, ist erst mit den
+          // Firestore-Regeln aus Phase 0 sicher.
+          useEffect(() => {
+            if (!NW_FEATURES.userAdmin || !db || !isHRAdmin || activeView !== 'hrdashboard' || hrSubTab !== 'users') return;
+            const unsub = db.collection('registeredUsers').onSnapshot(
+              (snap) => setHrUsers(snap.docs.map(d => ({ docId: d.id, ...d.data() }))),
+              (err) => { console.error('Konten laden fehlgeschlagen:', err); showToast(getText(lang, 'Konten konnten nicht geladen werden.', 'Impossibile caricare gli account.', 'Could not load accounts.'), 'error'); });
+            return () => unsub();
+          }, [db, isHRAdmin, activeView, hrSubTab]);
+          const hrUserName = (u) => u.fullName || u.name || String(u.email || '').split('@')[0] || '–';
+          const hrUserIsAdmin = (u) => HR_ADMIN_EMAILS.includes(String(u.email || '').toLowerCase());
+          const hrUserUid = (u) => u.uid || u.docId;
+          const hrAudit = (action, u, extra = {}) => db.collection('auditLog').add({
+            at: new Date().toISOString(), by: (user && user.email) || '', byUid: (user && user.uid) || '',
+            action, target: 'registeredUsers/' + u.docId, targetEmail: u.email || '', ...extra,
+          });
+          const hrSendPasswordReset = async (u) => {
+            if (!u.email) { showToast(getText(lang, 'Für dieses Konto ist keine E-Mail-Adresse hinterlegt.', 'Nessuna e-mail per questo account.', 'No email address for this account.'), 'warning'); return; }
+            if (!confirm(getText(lang,
+              `Passwort-Reset an ${u.email} senden?\n\n${hrUserName(u)} bekommt eine E-Mail mit einem Link und legt damit selbst ein neues Passwort fest. Das bisherige Passwort gilt bis dahin weiter.`,
+              `Inviare il reset della password a ${u.email}?`, `Send password reset to ${u.email}?`))) return;
+            try {
+              await auth.sendPasswordResetEmail(u.email);
+              await hrAudit('password_reset_sent', u);
+              showToast(getText(lang, `Reset-Mail an ${u.email} gesendet`, 'E-mail di reset inviata', 'Reset email sent'), 'success');
+            } catch (err) {
+              console.error('Passwort-Reset fehlgeschlagen:', err);
+              showToast(getText(lang, 'Reset-Mail konnte nicht gesendet werden. Bitte prüfe die E-Mail-Adresse.', 'Invio non riuscito.', 'Could not send reset email.'), 'error');
+            }
+          };
+          const hrToggleDisabled = async (u) => {
+            const lock = u.disabled !== true;
+            if (lock && (hrUserIsAdmin(u) || hrUserUid(u) === (user && user.uid))) {
+              showToast(getText(lang, 'HR-Admin-Konten und dein eigenes Konto kannst du nicht sperren.', 'Non puoi bloccare account HR o il tuo.', 'You cannot lock HR admin accounts or your own.'), 'warning'); return;
+            }
+            if (!confirm(lock
+              ? getText(lang, `Konto von ${hrUserName(u)} sperren?\n\n${hrUserName(u)} wird abgemeldet und kann sich nicht mehr anmelden. Alle Daten bleiben unverändert erhalten. Du kannst das Konto jederzeit wieder entsperren.`, `Bloccare l'account di ${hrUserName(u)}?`, `Lock ${hrUserName(u)}'s account?`)
+              : getText(lang, `Konto von ${hrUserName(u)} entsperren?`, `Sbloccare l'account di ${hrUserName(u)}?`, `Unlock ${hrUserName(u)}'s account?`))) return;
+            const now = new Date().toISOString();
+            try {
+              await db.collection('registeredUsers').doc(u.docId).update(lock
+                ? { disabled: true, disabledAt: now, disabledBy: (user && user.email) || '' }
+                : { disabled: false, enabledAt: now, enabledBy: (user && user.email) || '' });
+              await hrAudit(lock ? 'user_disabled' : 'user_enabled', u);
+              showToast(lock ? getText(lang, 'Konto gesperrt', 'Account bloccato', 'Account locked') : getText(lang, 'Konto entsperrt', 'Account sbloccato', 'Account unlocked'), 'success');
+            } catch (err) {
+              console.error('Sperren fehlgeschlagen:', err);
+              showToast(getText(lang, 'Änderung fehlgeschlagen. Bitte erneut versuchen.', 'Modifica non riuscita.', 'Change failed.'), 'error');
+            }
+          };
+          const hrRenameUser = async (u) => {
+            const current = u.fullName || u.name || '';
+            const input = prompt(getText(lang, 'Vollständiger Name (Vor- und Nachname):', 'Nome completo (nome e cognome):', 'Full name (first and last name):'), current);
+            if (input === null) return;
+            const name = input.trim().replace(/\s+/g, ' ');
+            if (name === current) return;
+            if (name.length < 3 || !name.includes(' ')) { showToast(getText(lang, 'Bitte Vor- und Nachname eingeben – nichts geändert.', 'Inserisci nome e cognome.', 'Please enter first and last name.'), 'warning'); return; }
+            try {
+              await db.collection('registeredUsers').doc(u.docId).update({ fullName: name, fullNameChangedAt: new Date().toISOString(), fullNameChangedBy: (user && user.email) || '' });
+              await hrAudit('user_renamed', u, { from: current, to: name });
+              showToast(getText(lang, 'Name gespeichert', 'Nome salvato', 'Name saved'), 'success');
+            } catch (err) {
+              console.error('Umbenennen fehlgeschlagen:', err);
+              showToast(getText(lang, 'Änderung fehlgeschlagen. Bitte erneut versuchen.', 'Modifica non riuscita.', 'Change failed.'), 'error');
+            }
+          };
+          const hrExportUser = async (u) => {
+            const uid = hrUserUid(u);
+            const members = allCompanyMembers.filter(m => m.userId === uid);
+            const appraisals = allCompanyAppraisals.filter(a => a.userId === uid || a.managerId === uid);
+            const data = { exportedAt: new Date().toISOString(), exportedBy: (user && user.email) || '', account: u, teamMembers: members, teamAppraisals: appraisals };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `Export_${hrUserName(u).replace(/[^\wÄÖÜäöüß-]+/g, '_')}_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            try { await hrAudit('user_exported', u, { members: members.length, appraisals: appraisals.length }); } catch (e) { console.error(e); }
+            showToast(getText(lang, `Export erstellt: ${members.length} Mitarbeiter, ${appraisals.length} Dokumente`, 'Export creato', 'Export created'), 'success');
+          };
+          const renderHRUsers = () => {
+            const T = (de, it, en) => getText(lang, de, it, en);
+            const rows = hrUsers.map(u => {
+              const uid = hrUserUid(u);
+              const team = allCompanyMembers.filter(m => m.userId === uid).length;
+              return { u, team, role: hrUserIsAdmin(u) ? 'hr' : team > 0 ? 'manager' : 'none' };
+            });
+            const counts = { all: rows.length, team: rows.filter(r => r.team > 0).length, noteam: rows.filter(r => r.team === 0).length, disabled: rows.filter(r => r.u.disabled === true).length };
+            const q = hrUsersSearch.trim().toLowerCase();
+            const shown = rows
+              .filter(r => hrUsersFilter === 'all' || (hrUsersFilter === 'team' && r.team > 0) || (hrUsersFilter === 'noteam' && r.team === 0) || (hrUsersFilter === 'disabled' && r.u.disabled === true))
+              .filter(r => !q || hrUserName(r.u).toLowerCase().includes(q) || String(r.u.email || '').toLowerCase().includes(q))
+              .sort((a, b) => hrUserName(a.u).localeCompare(hrUserName(b.u), 'de'));
+            const roleLabel = (r) => r.role === 'hr' ? T('HR-Admin', 'Admin HR', 'HR admin') : r.role === 'manager' ? T('Führungskraft', 'Responsabile', 'Manager') : T('Konto ohne Team', 'Account senza team', 'Account without team');
+            const fmt = (d) => { if (!d) return '–'; const x = new Date(d && d.toDate ? d.toDate() : d); return isNaN(x) ? '–' : x.toLocaleDateString(lang === 'it' ? 'it-IT' : lang === 'en' ? 'en-GB' : 'de-DE'); };
+            return React.createElement('div', { className: 'space-y-4' },
+              React.createElement(NwPane, null,
+                React.createElement(NwPaneHeader, { title: T('Benutzer', 'Utenti', 'Users') }),
+                React.createElement('div', { className: 'p-4 space-y-3' },
+                  React.createElement('p', { className: 'text-sm text-ink-60' },
+                    T('Alle registrierten Konten. Sperren meldet ab und verhindert die Anmeldung, alle Daten bleiben erhalten. Ein Anmeldekonto endgültig zu löschen ist erst mit dem Blaze-Tarif möglich, bis dahin sperren.',
+                      'Tutti gli account registrati. Bloccare impedisce l\'accesso, i dati restano.',
+                      'All registered accounts. Locking signs out and blocks sign-in; all data is kept.')),
+                  React.createElement('div', { className: 'flex flex-wrap items-end gap-3' },
+                    React.createElement('div', { className: 'min-w-[220px] flex-1' },
+                      React.createElement('label', { htmlFor: 'hr-users-search', className: 'block text-xs font-medium text-ink-60 mb-1' }, T('Suche', 'Cerca', 'Search')),
+                      React.createElement('input', { id: 'hr-users-search', type: 'search', value: hrUsersSearch, onChange: (e) => setHrUsersSearch(e.target.value),
+                        placeholder: T('Name oder E-Mail', 'Nome o e-mail', 'Name or email'),
+                        className: 'w-full px-3 py-2 border rounded-lg text-sm focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150' })
+                    ),
+                    React.createElement(NwSegmented, { ariaLabel: T('Konten filtern', 'Filtra account', 'Filter accounts'), className: 'max-w-full overflow-x-auto', value: hrUsersFilter, onChange: setHrUsersFilter, options: [
+                      { value: 'all', label: T('Alle', 'Tutti', 'All') + ' (' + counts.all + ')' },
+                      { value: 'team', label: T('Mit Team', 'Con team', 'With team') + ' (' + counts.team + ')' },
+                      { value: 'noteam', label: T('Ohne Team', 'Senza team', 'Without team') + ' (' + counts.noteam + ')' },
+                      { value: 'disabled', label: T('Gesperrt', 'Bloccati', 'Locked') + ' (' + counts.disabled + ')' },
+                    ] })
+                  )
+                ),
+                React.createElement('div', { className: 'relative overflow-x-auto' },
+                  React.createElement('table', { className: 'w-full text-sm', 'data-testid': 'hr-users-table' },
+                    React.createElement('thead', null,
+                      React.createElement('tr', { className: 'border-b border-line text-left text-xs text-ink-60' },
+                        [T('Name', 'Nome', 'Name'), T('E-Mail', 'E-mail', 'Email'), T('Rolle', 'Ruolo', 'Role'), T('Team', 'Team', 'Team'), T('Registriert', 'Registrato', 'Registered'), T('Status', 'Stato', 'Status'), ''].map((h, i) =>
+                          React.createElement('th', { key: i, scope: 'col', className: 'px-4 py-2 font-medium' }, h || React.createElement('span', { className: 'sr-only' }, T('Aktionen', 'Azioni', 'Actions'))))
+                      )
+                    ),
+                    React.createElement('tbody', null,
+                      shown.length === 0 && React.createElement('tr', null,
+                        React.createElement('td', { colSpan: 7, className: 'px-4 py-6 text-center text-ink-60' }, T('Keine Konten gefunden.', 'Nessun account trovato.', 'No accounts found.'))),
+                      shown.map(r => React.createElement('tr', { key: r.u.docId, className: 'border-b border-line last:border-0' },
+                        React.createElement('td', { className: 'px-4 py-2 font-medium text-ink' }, hrUserName(r.u)),
+                        React.createElement('td', { className: 'px-4 py-2 text-ink-60 break-all' }, r.u.email || '–'),
+                        React.createElement('td', { className: 'px-4 py-2' }, roleLabel(r)),
+                        React.createElement('td', { className: 'px-4 py-2' }, r.team > 0 ? T(`${r.team} Mitarbeiter`, `${r.team} collaboratori`, `${r.team} employees`) : '–'),
+                        React.createElement('td', { className: 'px-4 py-2 text-ink-60' }, fmt(r.u.createdAt)),
+                        React.createElement('td', { className: 'px-4 py-2' },
+                          r.u.disabled === true
+                            ? React.createElement(NwChip, { tone: 'danger' }, T('Gesperrt', 'Bloccato', 'Locked'))
+                            : React.createElement(NwChip, { tone: 'ok' }, T('Aktiv', 'Attivo', 'Active'))),
+                        React.createElement('td', { className: 'px-4 py-2 text-right' },
+                          React.createElement(NwRowMenu, { label: T(`Aktionen für ${hrUserName(r.u)}`, `Azioni per ${hrUserName(r.u)}`, `Actions for ${hrUserName(r.u)}`) },
+                            React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => hrRenameUser(r.u) }, React.createElement(Edit2, { size: 14, 'aria-hidden': true }), T('Name ändern', 'Modifica nome', 'Edit name')),
+                            React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => hrSendPasswordReset(r.u) }, React.createElement(Mail, { size: 14, 'aria-hidden': true }), T('Passwort-Reset senden', 'Invia reset password', 'Send password reset')),
+                            React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => hrExportUser(r.u) }, React.createElement(Download, { size: 14, 'aria-hidden': true }), T('Daten exportieren', 'Esporta dati', 'Export data')),
+                            React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => hrToggleDisabled(r.u) }, React.createElement(Lock, { size: 14, 'aria-hidden': true }), r.u.disabled === true ? T('Konto entsperren', 'Sblocca account', 'Unlock account') : T('Konto sperren', 'Blocca account', 'Lock account'))
+                          )
+                        )
+                      ))
+                    )
+                  )
+                )
+              )
+            );
+          };
           const renderHRDashboard = () => {
             if (hrDataLoading) {
               return React.createElement('div', { className: 'flex justify-center py-20' },
@@ -17130,8 +17303,19 @@ Best regards`
                 },
                   '💾',
                   getText(lang, 'Backup & Restore', 'Backup & Ripristino', 'Backup & Restore')
+                ),
+                NW_FEATURES.userAdmin && React.createElement('button', {
+                  onClick: () => setHrSubTab('users'),
+                  role: 'tab', 'aria-selected': hrSubTab === 'users', type: 'button',
+                  className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-150 hover:scale-[1.03] active:scale-[.98] ' +
+                    (hrSubTab === 'users' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
+                },
+                  React.createElement(Users, { size: 16 }),
+                  getText(lang, 'Benutzer', 'Utenti', 'Users')
                 )
               ),
+              
+              NW_FEATURES.userAdmin && hrSubTab === 'users' && renderHRUsers(),
               
               // === BACKUP & RESTORE TAB ===
               hrSubTab === 'backup' && React.createElement('div', { className: 'space-y-6' },

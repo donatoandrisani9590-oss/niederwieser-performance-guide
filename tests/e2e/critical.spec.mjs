@@ -515,3 +515,73 @@ test('HR-Dashboard: Jahresfilter, Standard „Alle Jahre“ wie bisher, Daten un
   await expect.poll(count).toBe(all);
   expect(JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields))).toBe(before);
 });
+
+test('Phase 3 (Schalter an): HR-Benutzerverwaltung – Name ändern, Passwort-Reset, Export, Sperren mit Protokoll', async ({ page }) => {
+  await page.addInitScript(() => { window.__NW_FEATURES__ = { userAdmin: true }; });
+  const membersBefore = JSON.stringify((await listDocs('teamMembers')).map((d) => d.fields));
+  await gotoTeamAndLogin(page, USERS.hr);
+  await page.getByText('HR Dashboard', { exact: true }).first().click();
+  await page.getByRole('tab', { name: 'Benutzer' }).click();
+  const row = (name) => page.getByTestId('hr-users-table').getByRole('row').filter({ hasText: name });
+  await expect(row(USERS.managerA.name)).toContainText('Führungskraft');
+  await expect(row(USERS.hr.name)).toContainText('HR-Admin');
+  await expect(row(USERS.managerB.name)).toContainText('Aktiv');
+  const menu = async (name, item) => {
+    await row(name).getByRole('button', { name: /^Aktionen für/ }).click();
+    await page.getByRole('menuitem', { name: item }).click();
+  };
+  page.removeAllListeners('dialog');
+  page.on('dialog', (d) => (d.type() === 'prompt' ? d.accept('Bernd Neumann') : d.accept()).catch(() => {}));
+  const uidB = (await listDocs('registeredUsers')).find((d) => field(d, 'email') === USERS.managerB.email).name.split('/').pop();
+  // Name ändern
+  await menu(USERS.managerB.name, 'Name ändern');
+  await expect.poll(async () => field(await getDoc(`registeredUsers/${uidB}`), 'fullName'), { timeout: 10000 }).toBe('Bernd Neumann');
+  await expect(row('Bernd Neumann')).toBeVisible();
+  // Passwort-Reset: Firebase verschickt die Mail (im Emulator als oobCode sichtbar)
+  await menu('Bernd Neumann', 'Passwort-Reset senden');
+  await expect(page.getByText(`Reset-Mail an ${USERS.managerB.email} gesendet`)).toBeVisible();
+  // Auth-Emulator-Projekt der Tests (siehe resetEmulators)
+  const oob = await (await fetch('http://127.0.0.1:9099/emulator/v1/projects/demo-nw-test/oobCodes')).json();
+  expect(oob.oobCodes.some((c) => c.email === USERS.managerB.email && c.requestType === 'PASSWORD_RESET')).toBe(true);
+  // Export je Person
+  const [download] = await Promise.all([page.waitForEvent('download'), menu(USERS.managerA.name, 'Daten exportieren')]);
+  expect(download.suggestedFilename()).toMatch(/^Export_Anna_Testleiterin_/);
+  // Sperren, HR-Konto nicht sperrbar
+  await menu('Bernd Neumann', 'Konto sperren');
+  await expect(row('Bernd Neumann')).toContainText('Gesperrt');
+  expect(field(await getDoc(`registeredUsers/${uidB}`), 'disabled')).toBe(true);
+  await menu(USERS.hr.name, 'Konto sperren');
+  await expect(page.getByText('HR-Admin-Konten und dein eigenes Konto kannst du nicht sperren.')).toBeVisible();
+  // Protokoll, Mitarbeiterdaten unverändert
+  const log = (await listDocs('auditLog')).map((d) => field(d, 'action'));
+  expect(log).toEqual(expect.arrayContaining(['user_renamed', 'password_reset_sent', 'user_exported', 'user_disabled']));
+  expect(JSON.stringify((await listDocs('teamMembers')).map((d) => d.fields))).toBe(membersBefore);
+});
+
+test('Phase 3 (Schalter an): gesperrtes Konto wird abgemeldet und sieht den Hinweis', async ({ page }) => {
+  await page.addInitScript(() => { window.__NW_FEATURES__ = { userAdmin: true }; });
+  const docB = (await listDocs('registeredUsers')).find((d) => field(d, 'email') === USERS.managerB.email);
+  const uidB = docB.name.split('/').pop();
+  await setDoc(`registeredUsers/${uidB}`, { email: USERS.managerB.email, uid: uidB, fullName: USERS.managerB.name, createdAt: '2025-01-10T00:00:00.000Z', disabled: true });
+  await gotoTeamAndLogin(page, USERS.managerB);
+  await expect(page.getByText('Dein Konto ist gesperrt. Bitte wende dich an HR.')).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('input[type="password"]').first()).toBeVisible();
+});
+
+test('Phase 3 (Schalter aus, Standard): Sperrfeld ohne Wirkung', async ({ page }) => {
+  const docB = (await listDocs('registeredUsers')).find((d) => field(d, 'email') === USERS.managerB.email);
+  const uidB = docB.name.split('/').pop();
+  await setDoc(`registeredUsers/${uidB}`, { email: USERS.managerB.email, uid: uidB, fullName: USERS.managerB.name, createdAt: '2025-01-10T00:00:00.000Z', disabled: true });
+  await gotoTeamAndLogin(page, USERS.managerB);
+  await expect(page.getByRole('button', { name: /Abmelden/ }).first()).toBeVisible({ timeout: 15000 });
+  await page.waitForTimeout(1500);
+  await expect(page.getByText('Dein Konto ist gesperrt.')).toHaveCount(0);
+  await expect(page.locator('input[type="password"]')).toHaveCount(0);
+});
+
+test('Phase 3 (Schalter aus, Standard): kein Benutzer-Reiter im HR-Dashboard', async ({ page }) => {
+  await gotoTeamAndLogin(page, USERS.hr);
+  await page.getByText('HR Dashboard', { exact: true }).first().click();
+  await expect(page.getByRole('tab', { name: 'Backup & Restore' })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Benutzer' })).toHaveCount(0);
+});

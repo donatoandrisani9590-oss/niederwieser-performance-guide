@@ -265,22 +265,44 @@ jetzt eindeutig.
 - **Grün und amber gefüllte Knöpfe sind jetzt blau** (eine Akzentfarbe). Dadurch gibt es Ansichten mit mehr als
   einer gefüllten Hauptaktion; welche davon Nebenaktion wird, ist eine inhaltliche Entscheidung je Ansicht.
 
-**Noch nicht am Designsystem (gemessen, Stand dieses Commits)**
+### 13. n.Org Design System 2.0, Stufe 3: Knöpfe, Felder, Typografie, Muster, Diagramme
+
+Auftrag „Rest umsetzen“. Gleiches Vorgehen wie in Stufe 2: messen, Regel festlegen, automatisch anwenden, Schutzbereich
+und Tests prüfen, je Bereich ein eigener Commit.
+
+| Bereich | Vorher | Nachher | Was |
+|---|---|---|---|
+| Knöpfe im Knopf-Set | 105 von 260 | 139 von 245 | 45 feste Farb- und Icon-Knöpfe auf Variante + Größe; Layout-Klassen bleiben |
+| Eingabefelder | 175 frei gestaltet | 152 von 157 mit System-Fokus | 93 Kastenfelder auf eine Feld-Definition (36 px, dicht 28 px, Touch 44/36 px, Fokus NW-Blau mit Ring); 13 Unterstrich- und 28 Zellenfelder behalten ihr Muster und zeigen jetzt den Fokus (vorher `outline-none` ohne Ersatz) |
+| Schriftgröße 26 px | 106 Stellen | 8 | 67 Kennzahlen auf `t-kpi`, Titel auf `t-hero`, 19 frühere Emoji-Hüllen ohne Schriftgröße |
+| Versalien ohne Overline | 59 | 5 (Tags, eigener Baustein) | 27 auf `eyebrow`; der Rest steht in PDF-Vorlagen |
+| Feste Inline-Farben | 301 Stil-Zeilen | 245 | 56 reine Farbangaben durch Token-Klassen ersetzt; übrig sind berechnete Werte (Breiten, Positionen) und PDF-Bausteine |
+| Reiter im HR-Dashboard | Rahmen je Reiter | ein gleitender Indikator | folgt Wechsel, Umbruch und Größenänderung; eigener Test |
+| Speichern / Abschließen | „…“ | Spinner und „Speichert …“ | |
+| Erfolgs-Toast | fertiger Haken | Haken zeichnet sich (`check-draw`) | |
+| Anmeldefehler | erscheint | erscheint mit einmaligem Shake | |
+| Normalverteilung | Statusfarbe je Notenstufe, Legende zeigte Blau | IST `chart-1`, SOLL `chart-prev`, Linie `chart-target` | Legende stimmt jetzt mit dem Diagramm überein |
+| Kompetenz-Radar | 5 Serien, zwei davon gleich grün, Statusfarben | `chart-1` bis `chart-5` | jede Person unterscheidbar |
+| Emoji-Ziffern | 3 | 0 | „1.“ statt Tastenkappen-Emoji in den Diskussionsfragen |
+
+**Bewusst nicht umgestellt (eigene Muster, kein Knopf bzw. Feld im Sinn des Systems)**
+
+- 106 Knöpfe: Abschnitts-Chips der Formularleiste, Segment-Schalter, Listen- und Kartenzeilen, Reiter, Text-Links,
+  die Start-/Zurück-Pille und zustandsabhängige Klassen (Bewertungsskala). Sie folgen eigenen Bausteinen.
+- Zellenfelder in den Bogen-Tabellen: Der Rahmen ist die Tabellenzelle, so sieht der Bogen wie das Formular aus.
+- Der Speichern-Knopf zeigt keinen „Gespeichert“-Zustand am Knopf, weil der Bogen nach dem Speichern zur
+  Team-Übersicht wechselt (siehe S1). Die Bestätigung trägt der Toast mit dem gezeichneten Haken.
+
+**Weiter offen am Designsystem**
 
 | Bereich | Stand | Warum offen |
 |---|---|---|
-| Knöpfe | 155 von 260 außerhalb des Knopf-Sets | zusammengesetzte Klassen (zustandsabhängig), Reiter, Listenzeilen, runde Icon-Knöpfe: nur einzeln umstellbar |
-| Eingabefelder | 175 frei gestaltet | bereits einheitlich im Aussehen, aber nicht über den Feld-Baustein; Höhe 32/36 px und Touch-Größen fehlen |
-| Schriftgröße 26 px | 106 Stellen | nur für Kennzahlen und Hero-Titel gedacht; jede Stelle braucht die passende Rolle (`t-kpi`, `t-section`, …) |
-| Inline-Stile | 301 | Farben stammen aus der Palette, stehen aber als Wert im Code statt als Token |
-| Deko-Kreise 64–96 px | 12 | Leerzustände nach dem Baustein (36 px) |
-| Versalien ohne Overline-Baustein | 59 | |
-| PDF-Vorlagen | 24 Zeilen mit Emojis | Aussehen der PDFs soll laut `PROTECTED.md` vorher gezeigt werden |
+| PDF-Vorlagen | 24 Zeilen mit Emojis, eigene Stilangaben | Aussehen der PDFs soll laut `PROTECTED.md` vorher gezeigt werden |
 | Schutzbereich | 16 Zeilen mit Symbolzeichen | HR-Reparaturwerkzeug, Rückgabe der Vollständigkeits-Berechnung (Anzeige ist schon auf Icons umgestellt) |
-| Muster | Speichern-Knopf mit Zustandsfolge, Feldfehler mit Schütteln, gleitende Reiter, Tabellen-Strategien, Bögen auf dem Handy | Stufe 3 |
-| Charts im HR-Bereich | Farben aus der Palette, aber ohne `ChartFrame`, Zustände und Zahlenformat | Stufe 4 |
-
-Die Messung lässt sich jederzeit wiederholen; die Regeln der Umstellung stehen in den Commit-Texten.
+| Leerzustände | 12 Kreise mit 48 bis 96 px | Baustein sieht 36 px vor; jede Stelle braucht Satz, Hinweis und ggf. Aktion |
+| Bögen und HR-Dashboard auf dem Handy | nicht überarbeitet | Tabellen-Strategien (Karten statt Spalten) je Tabelle |
+| Diagramme | Farben und Zahlenformat nach System | `ChartFrame` mit Lade-, Leer- und Fehlerzustand fehlt |
+| Eine gefüllte Hauptaktion je Ansicht | mehrere Ansichten mit zwei oder mehr | inhaltliche Entscheidung je Ansicht |
 
 ## Prüfungen
 
@@ -296,8 +318,8 @@ cd tests && npm test
 cd tests && npm run rules:vorschlag
 ```
 
-Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 87 / 87 grün,
-`npm run rules:vorschlag` 87 / 87 grün.
+Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 88 / 88 grün,
+`npm run rules:vorschlag` 88 / 88 grün.
 
 Die bestehenden Tests mussten für den Dialog nicht umgeschrieben werden: `tests/e2e/fixtures.mjs` meldet jeden
 App-Dialog über dieselben `page.on('dialog')`-Listener wie ein Browser-Fenster.
@@ -307,6 +329,7 @@ Angepasste bestehende Tests, jeweils mit Kommentar an der Stelle:
 - Entfernen mit falschem Namen: Der Knopf bleibt gesperrt, die nachträgliche Meldung „Name stimmt nicht überein“
   gibt es dort nicht mehr.
 - Vier Stellen nennen die neuen Knopfnamen (U4).
+- Das Ziel-Dashboard greift die Kennzahl über die Rolle `t-kpi` statt über einzelne Stilklassen.
 - Drei Stellen enthielten einen Rest aus der Zeit vor dem Dialog („falls noch ein Bestätigen-Knopf sichtbar ist,
   klicken“). Er traf nach U4 den gleichnamigen Knopf in der Leiste und ist entfernt; die Rückfrage beantwortet
   der Dialog-Listener.

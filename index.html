@@ -7994,7 +7994,7 @@
                                 <!-- BONUS-BERECHNUNG -->
                                 <div style="margin-top: 15px; padding: 15px; background: #F2F3F8; border: 1px solid #6EBD84; border-radius: 6px;">
                                     <h4 style="font-size: 11pt; font-weight: 700; color: #2F7A48; margin: 0 0 12px 0; display: flex; align-items: center;">
-                                        💰 ${lang === 'de' ? 'Bonus-Berechnung' : lang === 'it' ? 'Calcolo Bonus' : 'Bonus Calculation'}
+                                        ${lang === 'de' ? 'Bonus-Berechnung' : lang === 'it' ? 'Calcolo Bonus' : 'Bonus Calculation'}
                                     </h4>
                                     <table style="width: 100%; border-collapse: collapse; font-size: 9pt;">
                                         <thead>
@@ -8114,7 +8114,7 @@
                                             ? '(WAS 50% + WIE Core 25% + WIE Lead 25%)' 
                                             : '(WAS 50% + WIE Core 50%)')}
                                 </p>
-                                ${goals.length === 0 ? `<p style="font-size: 9pt; color: #F59D24; margin-top: 8px;">⚠️ ${lang === 'de' ? 'Ohne Zielvereinbarung' : lang === 'it' ? 'Senza accordo obiettivi' : 'Without Goal Agreement'}</p>` : ''}
+                                ${goals.length === 0 ? `<p style="font-size: 9pt; color: #F59D24; margin-top: 8px;">${lang === 'de' ? 'Ohne Zielvereinbarung' : lang === 'it' ? 'Senza accordo obiettivi' : 'Without Goal Agreement'}</p>` : ''}
                             </div>
                             
                             <!-- TEIL D: STÄRKEN & ENTWICKLUNG -->
@@ -12935,7 +12935,7 @@ Weight more important goals higher!`
             if (manager) {
               pdfHTML += '<td style="padding: 4px 8px; width: 25%;"><span style="font-size: 8pt; color: #5F6377; text-transform: uppercase;">Führungskraft</span><br/><strong style="color: #1C1F2E;">' + escapeHtml(manager) + '</strong></td>';
             }
-            pdfHTML += '<td style="padding: 4px 8px; width: 25%;"><span style="font-size: 8pt; color: #5F6377; text-transform: uppercase;">Status</span><br/><strong style="color: ' + (appraisal.status === 'completed' ? '#2F7A48' : '#9A6414') + ';">' + (appraisal.status === 'completed' ? '✓ Abgeschlossen' : '✎ Entwurf') + '</strong></td>';
+            pdfHTML += '<td style="padding: 4px 8px; width: 25%;"><span style="font-size: 8pt; color: #5F6377; text-transform: uppercase;">Status</span><br/><strong style="color: ' + (appraisal.status === 'completed' ? '#2F7A48' : '#9A6414') + ';">' + (appraisal.status === 'completed' ? 'Abgeschlossen' : 'Entwurf') + '</strong></td>';
             pdfHTML += '</tr></table></div>';
             
             // === GPS SCORE BOX ===
@@ -12952,7 +12952,7 @@ Weight more important goals higher!`
             // === ZIELE ===
             if (goals.length > 0) {
               pdfHTML += '<div style="margin-bottom: 12px; padding: 10px; border: 1px solid #E6E8F2; border-radius: 4px; page-break-inside: avoid;">';
-              pdfHTML += '<h3 style="font-size: 12pt; margin: 0 0 8px 0; color: #243186; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">🎯 Ziele (WAS-Komponente)</h3>';
+              pdfHTML += '<h3 style="font-size: 12pt; margin: 0 0 8px 0; color: #243186; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">Ziele (WAS-Komponente)</h3>';
               pdfHTML += '<table style="width: 100%; border-collapse: collapse; font-size: 9pt;">';
               pdfHTML += '<thead><tr style="background: #FFFFFF;">';
               pdfHTML += '<th style="border: 1px solid #C9CDE3; padding: 5px; text-align: center; width: 30px;">#</th>';
@@ -12986,7 +12986,7 @@ Weight more important goals higher!`
             
             if (hasAnyCoreScore || Object.keys(coreScores).length > 0) {
               pdfHTML += '<div style="margin-bottom: 12px; padding: 10px; border: 1px solid #E6E8F2; border-radius: 4px; page-break-inside: avoid;">';
-              pdfHTML += '<h3 style="font-size: 12pt; margin: 0 0 8px 0; color: #243186; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">💡 Kernkompetenzen (WIE-Komponente)</h3>';
+              pdfHTML += '<h3 style="font-size: 12pt; margin: 0 0 8px 0; color: #243186; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">Kernkompetenzen (WIE-Komponente)</h3>';
               
               // Score-Übersicht
               pdfHTML += '<table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;"><tr>';
@@ -13034,7 +13034,7 @@ Weight more important goals higher!`
             
             if (hasAnyLeaderScore || (Object.keys(leaderScores).length > 0 && Object.values(leaderScores).some(v => v > 0))) {
               pdfHTML += '<div style="margin-bottom: 12px; padding: 10px; border: 1px solid #E6E8F2; border-radius: 4px; background: #F2F3F8; page-break-inside: avoid;">';
-              pdfHTML += '<h3 style="font-size: 12pt; margin: 0 0 8px 0; color: #243186; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">👔 Führungskompetenzen</h3>';
+              pdfHTML += '<h3 style="font-size: 12pt; margin: 0 0 8px 0; color: #243186; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">Führungskompetenzen</h3>';
               
               // Score-Übersicht
               pdfHTML += '<table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;"><tr>';
@@ -13073,7 +13073,7 @@ Weight more important goals higher!`
             const hasStrengths = formData.strengths1 || formData.strengths2;
             if (hasStrengths) {
               pdfHTML += '<div style="margin-bottom: 12px; padding: 10px; border: 1px solid #E6E8F2; border-radius: 4px; page-break-inside: avoid;">';
-              pdfHTML += '<h3 style="font-size: 12pt; margin: 0 0 8px 0; color: #243186; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">💪 Stärken & Entwicklungsfelder</h3>';
+              pdfHTML += '<h3 style="font-size: 12pt; margin: 0 0 8px 0; color: #243186; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">Stärken & Entwicklungsfelder</h3>';
               pdfHTML += '<table style="width: 100%; border-collapse: collapse;"><tr>';
               pdfHTML += '<td style="width: 50%; vertical-align: top; padding-right: 10px;">';
               pdfHTML += '<div style="background: #F2F3F8; padding: 8px; border-radius: 4px; border-left: 3px solid #2F7A48; min-height: 60px;">';
@@ -13091,7 +13091,7 @@ Weight more important goals higher!`
             // === KARRIERE-KOMMENTAR ===
             if (formData.careerComment || formData.career) {
               pdfHTML += '<div style="margin-bottom: 12px; padding: 10px; border: 1px solid #E6E8F2; border-radius: 4px; background: #F2F3F8; page-break-inside: avoid;">';
-              pdfHTML += '<h3 style="font-size: 11pt; margin: 0 0 5px 0; color: #243186;">🚀 Karriere & Entwicklung</h3>';
+              pdfHTML += '<h3 style="font-size: 11pt; margin: 0 0 5px 0; color: #243186;">Karriere & Entwicklung</h3>';
               pdfHTML += '<p style="margin: 0; font-size: 9pt; color: #1C1F2E; white-space: pre-wrap;">' + escapeHtml(formData.careerComment || formData.career || '') + '</p>';
               pdfHTML += '</div>';
             }
@@ -13110,7 +13110,7 @@ Weight more important goals higher!`
             const hasFeedback = feedbackQuestions.some(q => formData[q.key]);
             if (hasFeedback) {
               pdfHTML += '<div style="margin-bottom: 12px; padding: 10px; border: 1px solid #E6E8F2; border-radius: 4px; page-break-inside: avoid;">';
-              pdfHTML += '<h3 style="font-size: 12pt; margin: 0 0 8px 0; color: #243186; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">💬 Feedback & Anmerkungen</h3>';
+              pdfHTML += '<h3 style="font-size: 12pt; margin: 0 0 8px 0; color: #243186; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">Feedback & Anmerkungen</h3>';
               feedbackQuestions.forEach(q => {
                 const value = formData[q.key];
                 if (value) {
@@ -13130,7 +13130,7 @@ Weight more important goals higher!`
             // === ALLGEMEINES FEEDBACK (für ältere Formulare) ===
             if (formData.feedbackManager || formData.feedback) {
               pdfHTML += '<div style="margin-bottom: 12px; padding: 10px; border: 1px solid #F2F3F8; border-radius: 4px; background: #F2F3F8; page-break-inside: avoid;">';
-              pdfHTML += '<h3 style="font-size: 11pt; margin: 0 0 5px 0; color: #243186;">📝 Feedback Führungskraft</h3>';
+              pdfHTML += '<h3 style="font-size: 11pt; margin: 0 0 5px 0; color: #243186;">Feedback Führungskraft</h3>';
               pdfHTML += '<p style="margin: 0; font-size: 9pt; color: #1C1F2E; white-space: pre-wrap;">' + escapeHtml(formData.feedbackManager || formData.feedback || '') + '</p>';
               pdfHTML += '</div>';
             }
@@ -13259,7 +13259,7 @@ Weight more important goals higher!`
             html += '<td style="width: 30%;"><strong style="color: #5F6377; font-size: 9px; text-transform: uppercase;">Mitarbeiter</strong><br/><span style="font-size: 14px; font-weight: bold;">' + escapeHtml(employeeName) + '</span></td>';
             html += '<td style="width: 25%;"><strong style="color: #5F6377; font-size: 9px; text-transform: uppercase;">Position</strong><br/>' + escapeHtml(position || '–') + '</td>';
             if (manager) html += '<td style="width: 25%;"><strong style="color: #5F6377; font-size: 9px; text-transform: uppercase;">Führungskraft</strong><br/>' + escapeHtml(manager) + '</td>';
-            html += '<td style="width: 20%;"><strong style="color: #5F6377; font-size: 9px; text-transform: uppercase;">Status</strong><br/><span style="color: ' + (appraisal.status === 'completed' ? '#2F7A48' : '#9A6414') + ';">' + (appraisal.status === 'completed' ? '✓ Abgeschlossen' : '✎ Entwurf') + '</span></td>';
+            html += '<td style="width: 20%;"><strong style="color: #5F6377; font-size: 9px; text-transform: uppercase;">Status</strong><br/><span style="color: ' + (appraisal.status === 'completed' ? '#2F7A48' : '#9A6414') + ';">' + (appraisal.status === 'completed' ? 'Abgeschlossen' : 'Entwurf') + '</span></td>';
             html += '</tr></table></div>';
             
             // GPS Score
@@ -13276,7 +13276,7 @@ Weight more important goals higher!`
             // Ziele
             if (goals.length > 0) {
               html += '<div style="margin-bottom: 15px; page-break-inside: avoid;">';
-              html += '<h3 style="color: #243186; margin: 0 0 10px 0; font-size: 14px; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">🎯 Ziele (WAS-Komponente)</h3>';
+              html += '<h3 style="color: #243186; margin: 0 0 10px 0; font-size: 14px; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">Ziele (WAS-Komponente)</h3>';
               html += '<table style="width: 100%; border-collapse: collapse; font-size: 10px;">';
               html += '<tr style="background: #FFFFFF;"><th style="padding: 6px; border: 1px solid #E6E8F2; text-align: center; width: 30px;">#</th><th style="padding: 6px; border: 1px solid #E6E8F2; text-align: left;">Ziel</th><th style="padding: 6px; border: 1px solid #E6E8F2; text-align: center; width: 60px;">Gewicht</th><th style="padding: 6px; border: 1px solid #E6E8F2; text-align: center; width: 70px;">Erreichung</th></tr>';
               goals.forEach((g, i) => {
@@ -13302,7 +13302,7 @@ Weight more important goals higher!`
             const hasAnyCoreScore = coreCompDefs.some(c => getScore(coreScores, c.keys) > 0);
             if (hasAnyCoreScore || Object.keys(coreScores).length > 0) {
               html += '<div style="margin-bottom: 15px; page-break-inside: avoid;">';
-              html += '<h3 style="color: #243186; margin: 0 0 10px 0; font-size: 14px; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">💡 Kernkompetenzen (WIE-Komponente)</h3>';
+              html += '<h3 style="color: #243186; margin: 0 0 10px 0; font-size: 14px; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">Kernkompetenzen (WIE-Komponente)</h3>';
               html += '<table style="width: 100%; margin-bottom: 10px;"><tr>';
               coreCompDefs.forEach(comp => {
                 const score = getScore(coreScores, comp.keys);
@@ -13345,7 +13345,7 @@ Weight more important goals higher!`
             const hasAnyLeaderScore = leaderCompDefs.some(c => getScore(leaderScores, c.keys) > 0);
             if (hasAnyLeaderScore) {
               html += '<div style="margin-bottom: 15px; page-break-inside: avoid; background: #F2F3F8; padding: 10px; border-radius: 4px; border: 1px solid #E6E8F2;">';
-              html += '<h3 style="color: #243186; margin: 0 0 10px 0; font-size: 14px; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">👔 Führungskompetenzen</h3>';
+              html += '<h3 style="color: #243186; margin: 0 0 10px 0; font-size: 14px; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">Führungskompetenzen</h3>';
               html += '<table style="width: 100%; margin-bottom: 10px;"><tr>';
               leaderCompDefs.forEach(comp => {
                 const score = getScore(leaderScores, comp.keys);
@@ -13379,7 +13379,7 @@ Weight more important goals higher!`
             // Stärken & Entwicklungsfelder
             if (formData.strengths1 || formData.strengths2) {
               html += '<div style="margin-bottom: 15px; page-break-inside: avoid;">';
-              html += '<h3 style="color: #243186; margin: 0 0 10px 0; font-size: 14px; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">💪 Stärken & Entwicklungsfelder</h3>';
+              html += '<h3 style="color: #243186; margin: 0 0 10px 0; font-size: 14px; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">Stärken & Entwicklungsfelder</h3>';
               html += '<table style="width: 100%;"><tr>';
               html += '<td style="width: 50%; vertical-align: top; padding-right: 10px;">';
               html += '<div style="background: #F2F3F8; padding: 10px; border-radius: 4px; border-left: 3px solid #2F7A48; min-height: 50px;">';
@@ -13395,7 +13395,7 @@ Weight more important goals higher!`
             // Karriere-Kommentar
             if (formData.careerComment || formData.career) {
               html += '<div style="margin-bottom: 15px; padding: 10px; border: 1px solid #E6E8F2; border-radius: 4px; background: #F2F3F8; page-break-inside: avoid;">';
-              html += '<h4 style="font-size: 12px; margin: 0 0 5px 0; color: #243186;">🚀 Karriere & Entwicklung</h4>';
+              html += '<h4 style="font-size: 12px; margin: 0 0 5px 0; color: #243186;">Karriere & Entwicklung</h4>';
               html += '<p style="margin: 0; font-size: 10px; color: #1C1F2E; white-space: pre-wrap;">' + escapeHtml(formData.careerComment || formData.career) + '</p>';
               html += '</div>';
             }
@@ -13414,7 +13414,7 @@ Weight more important goals higher!`
             const hasFeedback = feedbackQuestions.some(q => formData[q.key]);
             if (hasFeedback) {
               html += '<div style="margin-bottom: 15px; page-break-inside: avoid;">';
-              html += '<h3 style="color: #243186; margin: 0 0 10px 0; font-size: 14px; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">💬 Feedback & Anmerkungen</h3>';
+              html += '<h3 style="color: #243186; margin: 0 0 10px 0; font-size: 14px; border-bottom: 1px solid #E6E8F2; padding-bottom: 5px;">Feedback & Anmerkungen</h3>';
               feedbackQuestions.forEach(q => {
                 const value = formData[q.key];
                 if (value) {
@@ -13434,7 +13434,7 @@ Weight more important goals higher!`
             // Allgemeines Feedback
             if (formData.feedbackManager || formData.feedback) {
               html += '<div style="margin-bottom: 15px; padding: 10px; border: 1px solid #F2F3F8; border-radius: 4px; background: #F2F3F8; page-break-inside: avoid;">';
-              html += '<h4 style="font-size: 12px; margin: 0 0 5px 0; color: #243186;">📝 Feedback Führungskraft</h4>';
+              html += '<h4 style="font-size: 12px; margin: 0 0 5px 0; color: #243186;">Feedback Führungskraft</h4>';
               html += '<p style="margin: 0; font-size: 10px; color: #1C1F2E; white-space: pre-wrap;">' + escapeHtml(formData.feedbackManager || formData.feedback) + '</p>';
               html += '</div>';
             }
@@ -16475,7 +16475,7 @@ Best regards`
                                   ? status.review.status === 'completed'
                                     ? `${lang === 'de' ? 'Abgeschlossen' : lang === 'it' ? 'Completato' : 'Completed'}${status.review.gpsScore ? ` · GPS ${status.review.gpsScore.toFixed(1)}` : ''}`
                                     : `${lang === 'de' ? 'Entwurf gespeichert' : lang === 'it' ? 'Bozza salvata' : 'Draft saved'}`
-                                  : `○ ${lang === 'de' ? 'Noch nicht begonnen' : lang === 'it' ? 'Non ancora iniziato' : 'Not started'}`
+                                  : `${lang === 'de' ? 'Noch nicht begonnen' : lang === 'it' ? 'Non ancora iniziato' : 'Not started'}`
                               ),
                               // CTA
                               React.createElement('div', { className: 'mt-2 pt-2 border-t border-line-2 text-xs font-medium text-center' },
@@ -16557,7 +16557,7 @@ Best regards`
                               React.createElement('div', { className: `text-xs ${status.goals ? 'text-nw-blue' : 'text-ink-60'}` },
                                 status.goals 
                                   ? `${status.goals.goals?.length || 0} ${lang === 'de' ? 'Ziele definiert' : lang === 'it' ? 'obiettivi definiti' : 'goals defined'}`
-                                  : `○ ${lang === 'de' ? 'Noch nicht erstellt' : lang === 'it' ? 'Non ancora creato' : 'Not created'}`
+                                  : `${lang === 'de' ? 'Noch nicht erstellt' : lang === 'it' ? 'Non ancora creato' : 'Not created'}`
                               ),
                               // CTA
                               React.createElement('div', { className: 'mt-2 pt-2 border-t border-line-2 text-xs font-medium text-center' },
@@ -17262,7 +17262,7 @@ Best regards`
                       className: 'px-2 py-1 rounded-full text-xs font-medium ' + (userRole.role === 'hr_admin' ? 'bg-nw-blue-12 text-nw-blue' : userRole.role === 'executive' ? 'bg-nw-blue-12 text-nw-blue' : 'bg-white border border-warn/30 text-warn')
                     }, userRole.role === 'hr_admin' ? 'HR Admin' : userRole.role === 'executive' ? 'Executive' : 'Manager'),
                     salaryReviewPendingSave && React.createElement('span', { className: 'text-ok text-xs animate-pulse' }, 
-                      lang === 'de' ? '● Speichert...' : lang === 'it' ? '● Salvataggio...' : '● Saving...')
+                      lang === 'de' ? 'Speichert …' : lang === 'it' ? 'Salvataggio …' : 'Saving …')
                   ),
                   isHRAdmin && React.createElement('div', { className: 'flex items-center gap-2' },
                     React.createElement('span', { className: 'text-sm text-ink-60' }, 'Budget:'),
@@ -17336,7 +17336,7 @@ Best regards`
                       '(' + (lang === 'de' ? 'Klicken zum ' : lang === 'it' ? 'Clicca per ' : 'Click to ') + 
                       (showRecTable ? (lang === 'de' ? 'Schließen' : lang === 'it' ? 'chiudere' : 'close') : (lang === 'de' ? 'Öffnen' : lang === 'it' ? 'aprire' : 'open')) + ')')
                   ),
-                  React.createElement('span', { className: 'text-ink-60 text-lg' }, showRecTable ? '▲' : '▼')
+                  React.createElement(ChevronDown, { size: 18, 'aria-hidden': true, className: 'shrink-0 text-ink-60 transition-transform duration-fast ' + (showRecTable ? 'rotate-180' : '') })
                 ),
                 showRecTable && React.createElement('div', { className: 'px-4 pb-4 border-t bg-white' },
                   React.createElement('table', { className: 'w-full text-sm mt-3' },
@@ -19144,7 +19144,7 @@ Best regards`
                     if (totalCount < 3) {
                       return [{
                         type: 'info',
-                        icon: 'ℹ️',
+                        icon: React.createElement(Info, { size: 18, 'aria-hidden': true }),
                         title: getText(lang, 'Zu wenige Datenpunkte', 'Dati insufficienti', 'Insufficient Data'),
                         message: getText(lang, 
                           'Für eine aussagekräftige Verteilungsanalyse werden mindestens 3 Bewertungen benötigt.',
@@ -19199,7 +19199,7 @@ Best regards`
                     if (centralDiff > 20) {
                       analyses.push({
                         type: 'info',
-                        icon: 'ℹ️',
+                        icon: React.createElement(Info, { size: 18, 'aria-hidden': true }),
                         title: getText(lang, 'Tendenz zur Mitte erkannt (Central Tendency)', 'Tendenza centrale rilevata', 'Central Tendency Detected'),
                         message: getText(lang, 
                           `Die Bewertungen konzentrieren sich stark auf den Durchschnitt (Note 3): ${middleIST.toFixed(0)}% statt erwarteter ${middleSOLL.toFixed(0)}% (+${centralDiff.toFixed(0)} Prozentpunkte). Trau dich, stärkere Differenzierungen vorzunehmen, um High-Performer klarer zu identifizieren und Entwicklungsbedarf sichtbar zu machen.`,
@@ -19765,7 +19765,7 @@ Best regards`
                     // === INFO-BOX ===
                     React.createElement('div', { className: 'bg-panel rounded-card p-4 border border-line' },
                       React.createElement('div', { className: 'flex items-start gap-3' },
-                        React.createElement('span', { className: 'text-xl' }, 'ℹ️'),
+                        React.createElement('span', { className: 'mt-0.5 inline-flex shrink-0 text-nw-blue' }, React.createElement(Info, { size: 18, 'aria-hidden': true })),
                         React.createElement('div', null,
                           React.createElement('p', { className: 'text-sm text-ink font-medium' }, 
                             getText(lang, 'Hinweis: Keine erzwungene Verteilung', 'Nota: Nessuna distribuzione forzata', 'Note: No Forced Distribution')
@@ -25167,7 +25167,7 @@ const renderDashboard = () => {
                       React.createElement('p', { className: 'text-sm text-ok bg-nw-green-15 px-3 py-1 rounded-full inline-block mb-3' }, '' + step.goal),
                       React.createElement('ul', { className: 'space-y-1 text-ink-60' },
                         step.items.map((item, i) => React.createElement('li', { key: i, className: 'flex items-start gap-2' },
-                          React.createElement('span', { className: 'text-ok mt-1' }, '▸'), item
+                          React.createElement('span', { 'aria-hidden': true, className: 'mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-nw-green' }), item
                         ))
                       ),
                       step.tip && React.createElement('div', { className: 'mt-3 p-3 bg-nw-blue-06 border border-nw-blue-25 rounded-lg text-sm text-nw-blue' }, '' + step.tip),
@@ -26986,7 +26986,7 @@ const renderDashboard = () => {
                       <p style="font-size: 10pt; color: rgba(255,255,255,0.7); margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 2px;">SELF-ASSESSMENT GPS</p>
                       <p style="font-size: 52pt; font-weight: 900; margin: 10px 0; color: white;">${finalGPS.toFixed(2)}</p>
                       <p style="font-size: 10pt; color: #6EBD84; font-weight: 600; margin: 10px 0 0 0;">${gpsFormulaText}</p>
-                      ${noGoalsMode ? `<p style="font-size: 9pt; color: #F59D24; margin-top: 8px;">⚠️ ${lang === 'de' ? 'Ohne Zielvereinbarung' : 'Senza accordo obiettivi'}</p>` : ''}
+                      ${noGoalsMode ? `<p style="font-size: 9pt; color: #F59D24; margin-top: 8px;">${lang === 'de' ? 'Ohne Zielvereinbarung' : 'Senza accordo obiettivi'}</p>` : ''}
                     </div>
                     
                     <!-- TEIL D: STÄRKEN & ENTWICKLUNG -->
@@ -29024,7 +29024,7 @@ const renderDashboard = () => {
                               </table>
                             </div>
                             ` : `<div style="background: #FBF1DD; border: 1px solid #F59D24; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px;">
-                              <p style="color: #9B2C22; font-size: 9pt; margin: 0;">⚠️ ${t.noGoals} – GPS wird nur aus Kompetenzen berechnet.</p>
+                              <p style="color: #9B2C22; font-size: 9pt; margin: 0;">${t.noGoals} – GPS wird nur aus Kompetenzen berechnet.</p>
                             </div>`}
                             
                             <!-- TEIL C.1: KERN-KOMPETENZEN -->
@@ -29122,7 +29122,7 @@ const renderDashboard = () => {
                               <div style="display: flex; gap: 15px;">
                                 <!-- Stärken -->
                                 <div style="flex: 1; background: #F2F3F8; border: 1px solid #6EBD84; border-radius: 6px; padding: 12px;">
-                                  <h4 style="margin: 0 0 8px 0; font-size: 10pt; color: #2F7A48; font-weight: 600;">✓ ${lang === 'de' ? 'Meine Stärken' : lang === 'it' ? 'I miei punti di forza' : 'My Strengths'}</h4>
+                                  <h4 style="margin: 0 0 8px 0; font-size: 10pt; color: #2F7A48; font-weight: 600;">${lang === 'de' ? 'Meine Stärken' : lang === 'it' ? 'I miei punti di forza' : 'My Strengths'}</h4>
                                   ${formData.strengths1 ? `<p style="margin: 0 0 6px 0; font-size: 8pt; color: #1C1F2E; background: white; padding: 6px 8px; border-radius: 4px;">${formatComment(formData.strengths1)}</p>` : ''}
                                   ${formData.strengths2 ? `<p style="margin: 0 0 6px 0; font-size: 8pt; color: #1C1F2E; background: white; padding: 6px 8px; border-radius: 4px;">${formatComment(formData.strengths2)}</p>` : ''}
                                   ${!formData.strengths1 && !formData.strengths2 ? `<p style="margin: 0; font-size: 8pt; color: #8B8FA1; font-style: italic;">${lang === 'de' ? getText(lang, 'Keine Angabe', 'Non specificato', 'Not specified') : lang === 'it' ? 'Nessuna indicazione' : 'No data'}</p>` : ''}

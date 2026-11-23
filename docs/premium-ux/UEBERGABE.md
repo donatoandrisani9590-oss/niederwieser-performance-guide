@@ -293,11 +293,26 @@ und Tests prüfen, je Bereich ein eigener Commit.
 - Der Speichern-Knopf zeigt keinen „Gespeichert“-Zustand am Knopf, weil der Bogen nach dem Speichern zur
   Team-Übersicht wechselt (siehe S1). Die Bestätigung trägt der Toast mit dem gezeichneten Haken.
 
+**PDFs ohne Emojis (am 23.11.2026 gezeigt und freigegeben)**
+
+21 Vorlagenzeilen: Emojis vor den Abschnittstiteln, „✓“/„✎“ am Status, Warn-Emoji an „Ohne Zielvereinbarung“ und der
+Haken vor „Meine Stärken“ entfallen. Inhalt, Zahlen, Reihenfolge und Layout sind gleich. Der Haken in den
+Auswahl-Chips bleibt, weil er im Druck die gewählte Option kennzeichnet.
+
+![HR-Export vorher und nachher](pdf-entwurf/hr-export-vorher-nachher.png)
+
+Echte PDFs zum Vergleich: [vorher](pdf-entwurf/hr-export-vorher.pdf), [nachher](pdf-entwurf/hr-export-nachher.pdf).
+Neu erzeugen: `cd tests && node shots-pdf.mjs <alte-index.html> <zielordner>` (Vorschau muss laufen).
+Nicht als PDF erzeugt und angesehen: Selbstreflexion sowie der Bonus-Block und der Hinweis ohne Ziele im Bogen
+(kommen in den Testdaten nicht vor).
+
+Dazu acht Symbolzeichen in der Oberfläche durch Icons ersetzt („ℹ️“, „○“, „●“, „▲/▼“, „▸“).
+
 **Weiter offen am Designsystem**
 
 | Bereich | Stand | Warum offen |
 |---|---|---|
-| PDF-Vorlagen | 24 Zeilen mit Emojis, eigene Stilangaben | Aussehen der PDFs soll laut `PROTECTED.md` vorher gezeigt werden |
+| PDF-Vorlagen | eigene Stilangaben (Farben als Werte) | Emojis sind entfernt (siehe unten); die Stilangaben bleiben, weil html2pdf feste Werte braucht |
 | Schutzbereich | 16 Zeilen mit Symbolzeichen | HR-Reparaturwerkzeug, Rückgabe der Vollständigkeits-Berechnung (Anzeige ist schon auf Icons umgestellt) |
 | Leerzustände | 12 Kreise mit 48 bis 96 px | Baustein sieht 36 px vor; jede Stelle braucht Satz, Hinweis und ggf. Aktion |
 | Bögen und HR-Dashboard auf dem Handy | nicht überarbeitet | Tabellen-Strategien (Karten statt Spalten) je Tabelle |

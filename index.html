@@ -1026,15 +1026,16 @@
         // Abschluss-Prüfung (freigegeben 23.11.2026): vor „Abschließen“ Lücken nennen. Bei Zielgewichten ungleich
         // 100 % ist Abschließen gesperrt, als Entwurf speichern bleibt immer möglich. Gibt true zurück, wenn
         // abgeschlossen werden darf. kind: 'review' | 'goals'.
-        const nwConfirmCompletion = ({ lang, kind, goals, devItems }) => {
+        const nwConfirmCompletion = async ({ lang, kind, goals, devItems }) => {
           const L = (de, it, en) => getText(lang, de, it, en);
           const named = (goals || []).filter(g => String(g.name || '').trim());
           const weighted = (goals || []).filter(g => (parseFloat(g.weight) || 0) > 0);
           const total = weighted.reduce((sum, g) => sum + (parseFloat(g.weight) || 0), 0);
           if (named.length > 0 && Math.abs(total - 100) > 0.5) {
-            alert(L(`Abschließen noch nicht möglich: Die Zielgewichte ergeben ${total} % statt 100 %.\n\nBitte die Gewichte anpassen. Als Entwurf speichern geht jederzeit.`,
-              `Impossibile completare: i pesi degli obiettivi sommano ${total} % invece di 100 %.\n\nAdatta i pesi. Puoi sempre salvare come bozza.`,
-              `Cannot complete yet: goal weights add up to ${total} % instead of 100 %.\n\nPlease adjust the weights. Saving as draft is always possible.`));
+            await nwAlert({
+              title: L('Abschließen noch nicht möglich', 'Impossibile completare', 'Cannot complete yet'),
+              text: L(`Die Zielgewichte ergeben ${total} % statt 100 %.`, `I pesi degli obiettivi sommano ${total} % invece di 100 %.`, `Goal weights add up to ${total} % instead of 100 %.`),
+              note: L('Bitte die Gewichte anpassen. Als Entwurf speichern geht jederzeit.', 'Adatta i pesi. Puoi sempre salvare come bozza.', 'Please adjust the weights. Saving as draft is always possible.') });
             return false;
           }
           const gaps = [];
@@ -1047,11 +1048,12 @@
           }
           if (Array.isArray(devItems) && !devItems.some(d => String(d.measure || d.name || '').trim())) gaps.push(L('Keine Entwicklungsmaßnahme', 'Nessuna misura di sviluppo', 'No development measure'));
           const label = kind === 'goals' ? L('Zielvereinbarung', 'Accordo obiettivi', 'Goal agreement') : L('Beurteilung', 'Valutazione', 'Review');
-          return confirm(gaps.length
-            ? L(`${label} abschließen?\n\nNoch offen:\n• ${gaps.join('\n• ')}\n\nOK = trotzdem abschließen · Abbrechen = weiter bearbeiten`,
-                `Completare ${label}?\n\nAncora aperto:\n• ${gaps.join('\n• ')}\n\nOK = completa comunque · Annulla = continua`,
-                `Complete ${label}?\n\nStill open:\n• ${gaps.join('\n• ')}\n\nOK = complete anyway · Cancel = keep editing`)
-            : L(`${label} jetzt abschließen?`, `Completare ora ${label}?`, `Complete ${label} now?`));
+          return nwConfirm({
+            title: L(`${label} abschließen?`, `Completare ${label}?`, `Complete ${label}?`),
+            text: gaps.length ? L('Noch offen:', 'Ancora aperto:', 'Still open:') : undefined,
+            items: gaps,
+            okLabel: gaps.length ? L('Trotzdem abschließen', 'Completa comunque', 'Complete anyway') : L('Abschließen', 'Completa', 'Complete'),
+            cancelLabel: L('Weiter bearbeiten', 'Continua a modificare', 'Keep editing') });
         };
         // Beurteilungsjahr, zu dem ein Dokument gehört (Zielvereinbarung Y+1 wird im Jahr Y vereinbart)
         const nwDocCycle = (ap) => nwIsGoalDoc(ap) ? String(Number(nwDocYear(ap)) - 1) : nwCycleYear(ap);
@@ -1128,6 +1130,119 @@
             }, o.icon && React.createElement(o.icon, { size: 13, 'aria-hidden': true }), o.label))
           );
 
+
+        // ============================================
+        // EINHEITLICHER DIALOG (n.Org Modal) statt Browser-confirm / -prompt / -alert
+        // ============================================
+        // Nur Darstellung: Die aufrufende Logik bekommt wie bisher Ja/Nein bzw. die Eingabe zurück, jetzt als Promise.
+        //   await nwConfirm({ title, text, items, note, okLabel, cancelLabel, danger }) → true | false
+        //   await nwPrompt({ title, text, label, value, placeholder, type, match, okLabel, danger }) → Text | null
+        //   await nwAlert({ title, text, items, okLabel }) → undefined
+        // match: „OK“ wird erst aktiv, wenn die Eingabe diesem Text entspricht (Namen eintippen vor dem Entfernen).
+        // Esc und Klick neben den Dialog brechen ab, Enter im Eingabefeld bestätigt. Fokusfalle und Fokus-Rückgabe
+        // übernimmt der zentrale Helfer oben (oberstes „fixed inset-0“).
+        const nwDialog = (opts) => new Promise((resolve) => {
+          const o = opts || {};
+          const kind = o.kind || 'confirm';
+          const lg = (document.documentElement.lang || 'de').slice(0, 2);
+          const L = (de, it, en) => lg === 'it' ? it : lg === 'en' ? en : de;
+          const el = (tag, cls, txt) => { const n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
+          const uid = 'nwdlg-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+          const cancelValue = kind === 'prompt' ? null : kind === 'alert' ? undefined : false;
+
+          const overlay = el('div', 'no-print fixed inset-0 z-50 grid place-items-center bg-ink/30 p-4 animate-fade-in');
+          overlay.setAttribute('data-nw-dialog', kind);
+          const panel = el('div', 'max-h-[90vh] w-full max-w-md animate-pop-in overflow-auto rounded-xl bg-white p-5 shadow-float outline-none');
+          panel.setAttribute('role', o.danger || kind === 'alert' ? 'alertdialog' : 'dialog');
+          panel.setAttribute('aria-modal', 'true');
+          panel.setAttribute('aria-labelledby', uid + '-t');
+          panel.tabIndex = -1;
+
+          const head = el('div', 'flex items-start gap-3');
+          const badge = el('span', 'mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-semibold '
+            + (o.danger ? 'bg-danger-bg text-danger' : kind === 'alert' ? 'border border-warn/30 bg-white text-warn' : 'bg-nw-blue-06 text-nw-blue'),
+            o.danger || kind === 'alert' ? '!' : kind === 'prompt' ? '✎' : '?');
+          badge.setAttribute('aria-hidden', 'true');
+          const body = el('div', 'min-w-0 flex-1');
+          body.setAttribute('data-nw-body', '');
+          const title = el('h3', 'text-md font-semibold text-nw-blue', o.title || '');
+          title.id = uid + '-t';
+          body.appendChild(title);
+          if (o.text) {
+            const p = el('p', 'mt-1 whitespace-pre-line break-words text-sm text-ink-60', o.text);
+            p.id = uid + '-d';
+            panel.setAttribute('aria-describedby', uid + '-d');
+            body.appendChild(p);
+          }
+          if (o.items && o.items.length) {
+            const ul = el('ul', 'mt-2.5 space-y-1 rounded-lg bg-panel px-3 py-2 text-sm text-ink');
+            o.items.forEach((it) => { const li = el('li', 'flex gap-2'); const dot = el('span', 'text-ink-60', '•'); dot.setAttribute('aria-hidden', 'true'); li.appendChild(dot); li.appendChild(el('span', 'min-w-0 break-words', it)); ul.appendChild(li); });
+            body.appendChild(ul);
+          }
+          if (o.note) body.appendChild(el('p', 'mt-2.5 whitespace-pre-line text-xs text-ink-60', o.note));
+
+          let input = null;
+          const wanted = o.match != null ? String(o.match).trim().toLowerCase() : null;
+          if (kind === 'prompt') {
+            const label = el('label', 'dlg-label', o.label || '');
+            label.setAttribute('for', uid + '-i');
+            input = el('input', 'dlg-input');
+            input.id = uid + '-i';
+            input.type = o.type || 'text';
+            input.value = o.value || '';
+            input.autocomplete = 'off';
+            if (o.placeholder) input.placeholder = o.placeholder;
+            body.appendChild(label);
+            body.appendChild(input);
+          }
+          head.appendChild(badge);
+          head.appendChild(body);
+
+          const row = el('div', 'mt-5 flex flex-wrap items-center justify-end gap-2');
+          const cancel = kind === 'alert' ? null : el('button', nwBtnClass('ghost', 'lg'), o.cancelLabel || L('Abbrechen', 'Annulla', 'Cancel'));
+          if (cancel) { cancel.type = 'button'; cancel.setAttribute('data-nw-cancel', ''); row.appendChild(cancel); }
+          const ok = el('button', nwBtnClass(o.danger ? 'danger-primary' : 'primary', 'lg'), o.okLabel || (kind === 'alert' ? L('Verstanden', 'Ho capito', 'Got it') : L('Bestätigen', 'Conferma', 'Confirm')));
+          ok.type = 'button';
+          ok.setAttribute('data-nw-ok', '');
+          row.appendChild(ok);
+          panel.appendChild(head);
+          panel.appendChild(row);
+          overlay.appendChild(panel);
+
+          let done = false;
+          const close = (result) => {
+            if (done) return;
+            done = true;
+            overlay.style.pointerEvents = 'none';
+            overlay.className = overlay.className.replace('animate-fade-in', 'animate-fade-out');
+            panel.className = panel.className.replace('animate-pop-in', 'animate-pop-out');
+            setTimeout(() => overlay.remove(), 130); // per Timer statt animationend: schließt auch bei reduzierter Bewegung
+            resolve(result);
+          };
+          const syncOk = () => { if (wanted !== null) ok.disabled = String(input.value).trim().toLowerCase() !== wanted || wanted === ''; };
+          if (input) { input.addEventListener('input', syncOk); syncOk(); }
+          ok.addEventListener('click', () => { if (!ok.disabled) close(kind === 'prompt' ? input.value : kind === 'alert' ? undefined : true); });
+          if (cancel) cancel.addEventListener('click', () => close(cancelValue));
+          overlay.addEventListener('mousedown', (ev) => { if (ev.target === overlay) close(cancelValue); });
+          overlay.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape') { ev.preventDefault(); ev.stopPropagation(); close(cancelValue); }
+            else if (ev.key === 'Enter' && input && ev.target === input) { ev.preventDefault(); ok.click(); }
+          });
+          document.body.appendChild(overlay);
+          // Startfokus: Eingabefeld, sonst bei endgültigen Aktionen „Abbrechen“ (Enter löscht nie versehentlich), sonst die Hauptaktion
+          (input || (o.danger && cancel) || ok).focus({ preventScroll: true });
+          if (input && input.value) input.select();
+        });
+        const nwConfirm = (o) => nwDialog({ ...o, kind: 'confirm' });
+        const nwPrompt = (o) => nwDialog({ ...o, kind: 'prompt' });
+        const nwAlert = (o) => nwDialog({ ...o, kind: 'alert' });
+        // Ältere Rückfragetexte („Frage?\n\nErklärung“) in Titel und Text zerlegen; Zier-Emojis am Anfang entfallen
+        const nwFromText = (msg, extra) => {
+          const parts = String(msg || '').replace(/^[^\p{L}\p{N}"„]+/u, '').split(/\n\s*\n/);
+          const one = parts.length === 1 && parts[0].match(/^([\s\S]*[.!])\s+([^.!?]+\?)$/);
+          if (one) return { title: one[2], text: one[1], ...(extra || {}) };
+          return { title: parts[0], text: parts.slice(1).join('\n\n') || undefined, ...(extra || {}) };
+        };
 
         // ============================================
         // REACT ERROR BOUNDARY
@@ -4991,8 +5106,12 @@
               }
             };
             
-            const handleCancelTeam = () => {
-              if (confirm(lang === 'de' ? 'Abbrechen? Änderungen gehen verloren.' : lang === 'it' ? 'Annullare? Le modifiche andranno perse.' : 'Cancel? Changes will be lost.')) {
+            const handleCancelTeam = async () => {
+              if (await nwConfirm({ danger: true,
+                title: getText(lang, 'Bogen schließen?', 'Chiudere il modulo?', 'Close the form?'),
+                text: getText(lang, 'Nicht gespeicherte Änderungen gehen verloren.', 'Le modifiche non salvate andranno perse.', 'Unsaved changes will be lost.'),
+                okLabel: getText(lang, 'Schließen ohne Speichern', 'Chiudi senza salvare', 'Close without saving'),
+                cancelLabel: getText(lang, 'Weiter bearbeiten', 'Continua a modificare', 'Keep editing') })) {
                 hasUnsavedChanges.current = false; // v92
                 localStorage.removeItem('nw_current_employee');
                 if (onCancel) onCancel();
@@ -5758,7 +5877,7 @@
                             className: nwBtnClass('secondary', 'lg') + ' w-full'
                           }, isSaving ? '⏳ ...' : '💾 ' + (lang === 'de' ? 'Als Entwurf' : lang === 'it' ? 'Bozza' : 'Save Draft')),
                           e('button', {
-                            onClick: () => { if (nwConfirmCompletion({ lang, kind: 'goals', goals, devItems: devGoals })) handleSaveTeamAppraisal('completed'); },
+                            onClick: async () => { if (await nwConfirmCompletion({ lang, kind: 'goals', goals, devItems: devGoals })) handleSaveTeamAppraisal('completed'); },
                             type: 'button',
                             disabled: isSaving,
                             className: nwBtnClass('primary', 'lg') + ' w-full'
@@ -5786,7 +5905,7 @@
                         teamContext?.existingData?.versionHistory && teamContext.existingData.versionHistory.length > 0 
                           ? e('select', {
                               className: 'flex-1 min-w-[200px] p-2 border border-warn rounded-lg bg-white text-sm',
-                              onChange: (ev) => {
+                              onChange: async (ev) => {
                                 const idx = parseInt(ev.target.value);
                                 if (idx >= 0 && teamContext.existingData.versionHistory[idx]) {
                                   const version = teamContext.existingData.versionHistory[idx];
@@ -5794,7 +5913,7 @@
                                     ? `Version vom ${new Date(version.savedAt).toLocaleString('de-DE')} wiederherstellen?\n\nGPS: ${(version.gpsScore || 0).toFixed(2)}\nZiele: ${(version.goals || []).length}\n\nAchtung: Aktuelle Eingaben werden überschrieben!`
                                     : `Restore version from ${new Date(version.savedAt).toLocaleString()}?\n\nGPS: ${(version.gpsScore || 0).toFixed(2)}\nGoals: ${(version.goals || []).length}\n\nWarning: Current inputs will be overwritten!`;
                                   
-                                  if (confirm(confirmMsg)) {
+                                  if ((await nwConfirm(nwFromText(confirmMsg, { danger: true, okLabel: getText(lang, 'Version wiederherstellen', 'Ripristina versione', 'Restore version') })))) {
                                     devLog('📚 Restoring version:', version);
                                     
                                     if (version.goals && Array.isArray(version.goals)) {
@@ -5880,7 +5999,7 @@
                 // Formular-Leiste: Abschnitte + Speichern/Abschließen immer erreichbar
                 e(NwFormBar, { lang, actions: teamButtonsVisible && teamContext ? [
                   { label: getText(lang, 'Speichern', 'Salva', 'Save'), icon: Save, onClick: () => handleSaveTeamAppraisal('draft'), disabled: isSaving },
-                  { label: getText(lang, 'Fertig & abschließen', 'Fine e completa', 'Done & complete'), icon: CheckCircle2, variant: 'primary', onClick: () => { if (nwConfirmCompletion({ lang, kind: 'goals', goals, devItems: devGoals })) handleSaveTeamAppraisal('completed'); }, disabled: isSaving }
+                  { label: getText(lang, 'Fertig & abschließen', 'Fine e completa', 'Done & complete'), icon: CheckCircle2, variant: 'primary', onClick: async () => { if (await nwConfirmCompletion({ lang, kind: 'goals', goals, devItems: devGoals })) handleSaveTeamAppraisal('completed'); }, disabled: isSaving }
                 ] : [] }),
                 e('div', { className: "bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid" },
                     e('h3', { className: "text-lg font-semibold text-nw-blue mb-4 border-b pb-2" }, t.partA),
@@ -6013,13 +6132,13 @@
                         // Button: Alle als Entwicklungsziele übernehmen
                         linkedReview.devPlan?.filter(d => d.measure).length > 0 && e('button', {
                             className: 'flex items-center gap-2 px-4 py-2 bg-warn text-white rounded-lg hover:bg-warn transition-colors text-sm font-medium',
-                            onClick: () => {
+                            onClick: async () => {
                                 const confirmMsg = lang === 'de' 
                                     ? 'Alle Entwicklungsmaßnahmen aus der Beurteilung als neue Entwicklungsziele übernehmen?' 
                                     : lang === 'it' 
                                         ? 'Trasferire tutte le misure di sviluppo dalla valutazione come nuovi obiettivi di sviluppo?'
                                         : 'Transfer all development measures from the review as new development goals?';
-                                if (confirm(confirmMsg)) {
+                                if ((await nwConfirm(nwFromText(confirmMsg, { okLabel: getText(lang, 'Übernehmen', 'Trasferisci', 'Transfer') })))) {
                                     const newDevGoals = linkedReview.devPlan.filter(d => d.measure).map((d, idx) => ({
                                         id: Date.now() + idx,
                                         name: d.measure,
@@ -6701,13 +6820,13 @@
                 };
               });
             };
-            const applyAgreementGoals = () => {
+            const applyAgreementGoals = async () => {
               if (!linkedGoalAgreement) return;
               const hasExisting = goals.some(g => (g.name || '').trim());
-              if (hasExisting && !confirm(getText(lang,
+              if (hasExisting && !(await nwConfirm(nwFromText(getText(lang,
                 'Die Ziele dieser Beurteilung werden durch die Ziele aus der Zielvereinbarung ersetzt. Bereits bewertete gleichnamige Ziele behalten ihre Erreichung. Fortfahren?',
                 'Gli obiettivi di questa valutazione saranno sostituiti da quelli dell\'accordo. Gli obiettivi con lo stesso nome mantengono il raggiungimento. Continuare?',
-                'The goals of this review will be replaced by the goals from the goal agreement. Goals with the same name keep their achievement. Continue?'))) return;
+                'The goals of this review will be replaced by the goals from the goal agreement. Goals with the same name keep their achievement. Continue?'), { okLabel: getText(lang, 'Ziele ersetzen', 'Sostituisci obiettivi', 'Replace goals') })))) return;
               const rows = agreementGoalsAsRows(linkedGoalAgreement);
               hasUnsavedChanges.current = true;
               setGoals(rows);
@@ -6874,8 +6993,12 @@
             };
             
             // === TEAM CANCEL HANDLER ===
-            const handleCancelTeam = () => {
-              if (confirm(lang === 'de' ? 'Abbrechen? Änderungen gehen verloren.' : lang === 'it' ? 'Annullare? Le modifiche andranno perse.' : 'Cancel? Changes will be lost.')) {
+            const handleCancelTeam = async () => {
+              if (await nwConfirm({ danger: true,
+                title: getText(lang, 'Bogen schließen?', 'Chiudere il modulo?', 'Close the form?'),
+                text: getText(lang, 'Nicht gespeicherte Änderungen gehen verloren.', 'Le modifiche non salvate andranno perse.', 'Unsaved changes will be lost.'),
+                okLabel: getText(lang, 'Schließen ohne Speichern', 'Chiudi senza salvare', 'Close without saving'),
+                cancelLabel: getText(lang, 'Weiter bearbeiten', 'Continua a modificare', 'Keep editing') })) {
                 hasUnsavedChanges.current = false; // v92
                 localStorage.removeItem('nw_current_employee');
                 if (onCancel) onCancel();
@@ -7337,7 +7460,7 @@
                 setCareerChecks(newChecks);
             };
 
-            const handleDownloadPDF = () => {
+            const handleDownloadPDF = async () => {
                 if (!window.html2pdf) {
                     showToast(getText(lang, "PDF-Bibliothek nicht geladen. Bitte Seite neu laden.", "Libreria PDF non caricata. Ricaricare la pagina.", "PDF library not loaded. Please reload the page."), "error");
                     return;
@@ -7369,12 +7492,12 @@
                 const totalTextLength = totalFeedbackLength + coreCommentLength + leadCommentLength;
                 
                 if (totalTextLength > 8000) {
-                    const proceed = confirm(lang === 'de' 
+                    const proceed = await nwConfirm(nwFromText(lang === 'de' 
                         ? `⚠️ Arbeitsrechtlicher Hinweis\n\nDas Dokument enthält sehr viel Text (${Math.round(totalTextLength/1000)}k Zeichen).\n\nBei extrem langen Texten können Seitenumbrüche problematisch sein – Text könnte abgeschnitten werden.\n\n✓ Prüfe das PDF nach dem Download auf Vollständigkeit\n✓ Formuliere ggf. prägnanter\n\nTrotzdem fortfahren?`
                         : lang === 'it'
                         ? `⚠️ Avviso legale\n\nIl documento contiene molto testo (${Math.round(totalTextLength/1000)}k caratteri).\n\nCon testi molto lunghi, le interruzioni di pagina possono causare problemi – il testo potrebbe essere tagliato.\n\n✓ Verifichi il PDF dopo il download\n✓ Formuli in modo più conciso se necessario\n\nContinuare comunque?`
                         : `⚠️ Legal Notice\n\nDocument contains a lot of text (${Math.round(totalTextLength/1000)}k characters).\n\nWith very long texts, page breaks may cause issues – text could be cut off.\n\n✓ Check the PDF for completeness after download\n✓ Consider more concise wording\n\nProceed anyway?`
-                    );
+                    , { okLabel: getText(lang, 'PDF trotzdem erstellen', 'Crea comunque il PDF', 'Create PDF anyway') }));
                     if (!proceed) return;
                 }
                 
@@ -8246,7 +8369,7 @@
                             className: nwBtnClass('secondary', 'lg') + ' w-full'
                           }, isSaving ? '⏳ ...' : '💾 ', isSaving ? '' : (lang === 'de' ? 'Entwurf speichern' : lang === 'it' ? 'Salva bozza' : 'Save Draft')),
                           e('button', {
-                            onClick: () => { if (nwConfirmCompletion({ lang, kind: 'review', goals, devItems: devPlan })) handleSaveTeamAppraisal('completed'); },
+                            onClick: async () => { if (await nwConfirmCompletion({ lang, kind: 'review', goals, devItems: devPlan })) handleSaveTeamAppraisal('completed'); },
                             type: 'button',
                             disabled: isSaving,
                             className: nwBtnClass('primary', 'lg') + ' w-full'
@@ -8505,7 +8628,7 @@
                 // Formular-Leiste: Abschnitte + Speichern/Abschließen immer erreichbar
                 e(NwFormBar, { lang, actions: teamButtonsVisible && teamContext ? [
                   { label: getText(lang, 'Speichern', 'Salva', 'Save'), icon: Save, onClick: () => handleSaveTeamAppraisal('draft'), disabled: isSaving },
-                  { label: getText(lang, 'Fertig & abschließen', 'Fine e completa', 'Done & complete'), icon: CheckCircle2, variant: 'primary', onClick: () => { if (nwConfirmCompletion({ lang, kind: 'review', goals, devItems: devPlan })) handleSaveTeamAppraisal('completed'); }, disabled: isSaving }
+                  { label: getText(lang, 'Fertig & abschließen', 'Fine e completa', 'Done & complete'), icon: CheckCircle2, variant: 'primary', onClick: async () => { if (await nwConfirmCompletion({ lang, kind: 'review', goals, devItems: devPlan })) handleSaveTeamAppraisal('completed'); }, disabled: isSaving }
                 ] : [] }),
                 e('div', { className: "bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid" },
                     e('h3', { className: "text-lg font-semibold text-nw-blue mb-4 border-b pb-2" }, t.partA),
@@ -8659,7 +8782,7 @@
                         e('button', { 
                           type: 'button',
                           className: 'text-sm bg-nw-blue hover:bg-nw-blue-90 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow-card font-semibold',
-                          onClick: () => {
+                          onClick: async () => {
                             // Warnung wenn bereits Ziele existieren
                             const hasExistingGoals = goals.length > 0 && goals.some(g => g.name?.trim());
                             
@@ -8670,7 +8793,7 @@
                                 ? `Hai già ${goals.length} obiettivo/i. Saranno SOSTITUITI con i ${linkedSelfAssessment.goals.length} obiettivi dell'autovalutazione. Continuare?`
                                 : `You have ${goals.length} goal(s). These will be REPLACED with the ${linkedSelfAssessment.goals.length} goals from self-reflection. Continue?`;
                               
-                              if (!confirm(confirmMsg)) return;
+                              if (!(await nwConfirm(nwFromText(confirmMsg, { okLabel: getText(lang, 'Ziele ersetzen', 'Sostituisci obiettivi', 'Replace goals') })))) return;
                             }
                             
                             // ERSETZE alle Ziele (nicht hinzufügen!)
@@ -10667,18 +10790,22 @@ Goal 3: 20% weight, 80% achieved → 16 points
             window.scrollTo(0, 0);
           }, [activeView, competencyArea]);
           // Formulare: vor dem Verlassen nachfragen (nicht gespeicherte Eingaben)
-          const confirmLeaveForm = () => !(activeView === 'formular' || activeView === 'zielvereinbarung') ||
-            confirm(getText(lang, 'Formular verlassen? Nicht gespeicherte Eingaben gehen verloren.', 'Lasciare il modulo? Le modifiche non salvate andranno perse.', 'Leave the form? Unsaved input will be lost.'));
-          const goBack = () => {
-            if (!navHistory.length || !confirmLeaveForm()) return;
+          const confirmLeaveForm = async () => !(activeView === 'formular' || activeView === 'zielvereinbarung') ||
+            await nwConfirm({ danger: true,
+              title: getText(lang, 'Formular verlassen?', 'Lasciare il modulo?', 'Leave the form?'),
+              text: getText(lang, 'Nicht gespeicherte Eingaben gehen verloren.', 'Le modifiche non salvate andranno perse.', 'Unsaved input will be lost.'),
+              okLabel: getText(lang, 'Verlassen ohne Speichern', 'Esci senza salvare', 'Leave without saving'),
+              cancelLabel: getText(lang, 'Im Formular bleiben', 'Resta nel modulo', 'Stay in the form') });
+          const goBack = async () => {
+            if (!navHistory.length || !(await confirmLeaveForm())) return;
             const last = navHistory[navHistory.length - 1];
             navRef.current = { ...navRef.current, skip: true };
             setNavHistory(h => h.slice(0, -1));
             setActiveView(last.view);
             setCompetencyArea(last.area);
           };
-          const goHome = () => {
-            if (activeView === 'dashboard' || !confirmLeaveForm()) return;
+          const goHome = async () => {
+            if (activeView === 'dashboard' || !(await confirmLeaveForm())) return;
             setActiveView('dashboard');
           };
           const [detailAreaContext, setDetailAreaContext] = useState('admin'); // Für Detailansicht
@@ -11940,7 +12067,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
             if (!restoreData || !db || !isHRAdmin) return;
             
             const confirmMsg = `ACHTUNG: Dies wird ${restoreData.data.teamAppraisals.length} Beurteilungen wiederherstellen/überschreiben!\n\nBackup vom: ${restoreData.exportedAt}\n\nFortfahren?`;
-            if (!confirm(confirmMsg)) return;
+            if (!(await nwConfirm(nwFromText(confirmMsg, { danger: true, okLabel: 'Wiederherstellen' })))) return;
             
             try {
               let restored = 0;
@@ -11974,7 +12101,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
             }
             
             const confirmMsg = `Diese Funktion erstellt für ALLE ${allCompanyAppraisals.length} Beurteilungen eine initiale Version als Sicherung.\n\nDies sollte einmalig ausgeführt werden, um bestehende Daten zu sichern.\n\nFortfahren?`;
-            if (!confirm(confirmMsg)) return;
+            if (!(await nwConfirm(nwFromText(confirmMsg, { okLabel: 'Versionen anlegen' })))) return;
             
             try {
               let updated = 0;
@@ -14033,10 +14160,16 @@ Goal 3: 20% weight, 80% achieved → 16 points
             // Idiotensicher: Folgen klar benennen, Namen eintippen lassen, vorher automatisch sichern.
             const nwMember = teamMembers.find(m => m.id === id) || {};
             const nwDocs = teamAppraisals.filter(a => a.employeeId === id);
-            const nwTyped = prompt(getText(lang,
-              `Mitarbeiter entfernen\n\n${nwMember.name || 'Dieser Mitarbeiter'} und alle ${nwDocs.length} Unterlagen (Selbstreflexionen, Beurteilungen, Zielvereinbarungen aller Jahre) verschwinden aus der App und kommen in den Papierkorb. HR kann sie von dort wiederherstellen.\n\nVorher wird automatisch eine Sicherungsdatei heruntergeladen.\n\nZum Bestätigen den Namen eintippen:`,
-              `ATTENZIONE – eliminazione definitiva\n\n${nwMember.name || ''} e tutti i ${nwDocs.length} documenti verranno eliminati.\n\nPer confermare digita il nome:`,
-              `WARNING – permanent deletion\n\n${nwMember.name || ''} and all ${nwDocs.length} documents will be deleted.\n\nType the name to confirm:`));
+            const nwTyped = await nwPrompt({ danger: true,
+              title: getText(lang, `${nwMember.name || 'Mitarbeiter'} entfernen?`, `Rimuovere ${nwMember.name || 'il collaboratore'}?`, `Remove ${nwMember.name || 'this employee'}?`),
+              text: getText(lang,
+                `${nwMember.name || 'Dieser Mitarbeiter'} und alle ${nwDocs.length} Unterlagen (Selbstreflexionen, Beurteilungen, Zielvereinbarungen aller Jahre) verschwinden aus der App und kommen in den Papierkorb. HR kann sie von dort wiederherstellen.`,
+                `${nwMember.name || 'Il collaboratore'} e tutti i ${nwDocs.length} documenti (autovalutazioni, valutazioni, accordi sugli obiettivi di tutti gli anni) spariscono dall'app e finiscono nel cestino. HR può ripristinarli da lì.`,
+                `${nwMember.name || 'This employee'} and all ${nwDocs.length} documents (self-reflections, reviews, goal agreements of all years) disappear from the app and go to the trash. HR can restore them from there.`),
+              note: getText(lang, 'Vorher wird automatisch eine Sicherungsdatei heruntergeladen.', 'Prima viene scaricato automaticamente un file di backup.', 'A backup file is downloaded automatically first.'),
+              label: getText(lang, `Zum Bestätigen den Namen eintippen: ${nwMember.name || ''}`, `Per confermare digita il nome: ${nwMember.name || ''}`, `Type the name to confirm: ${nwMember.name || ''}`),
+              match: nwMember.name || '',
+              okLabel: getText(lang, 'In den Papierkorb', 'Sposta nel cestino', 'Move to trash') });
             const nwConfirmed = nwTyped !== null && String(nwTyped).trim().toLowerCase() === String(nwMember.name || '').trim().toLowerCase() && String(nwMember.name || '').trim() !== '';
             if (nwTyped !== null && !nwConfirmed) showToast(getText(lang, 'Name stimmt nicht überein – nichts gelöscht.', 'Il nome non corrisponde – nulla eliminato.', 'Name does not match – nothing deleted.'), 'warning');
             if (nwConfirmed) {
@@ -14057,10 +14190,11 @@ Goal 3: 20% weight, 80% achieved → 16 points
                 // Papierkorb (Freigabe 23.11.2026): erst vollständig ablegen, dann löschen. Klappt das Ablegen
                 // nicht, wird nur nach ausdrücklicher Bestätigung endgültig gelöscht.
                 const nwTrashed = await nwMoveToTrash(nwMember, id, appraisalsSnapshot.docs);
-                if (!nwTrashed && !confirm(getText(lang,
-                  'Der Papierkorb ist gerade nicht erreichbar.\n\nOK = trotzdem endgültig löschen (die Sicherungsdatei wurde heruntergeladen) · Abbrechen = nichts löschen',
-                  'Il cestino non è raggiungibile.\n\nOK = elimina definitivamente · Annulla = non eliminare nulla',
-                  'The trash is not reachable.\n\nOK = delete permanently anyway · Cancel = delete nothing'))) {
+                if (!nwTrashed && !(await nwConfirm({ danger: true,
+                  title: getText(lang, 'Der Papierkorb ist gerade nicht erreichbar', 'Il cestino non è raggiungibile', 'The trash is not reachable'),
+                  text: getText(lang, 'Die Sicherungsdatei wurde heruntergeladen. Ohne Papierkorb lässt sich das Entfernen in der App nicht zurücknehmen.', 'Il file di backup è stato scaricato. Senza cestino la rimozione non può essere annullata nell\'app.', 'The backup file has been downloaded. Without the trash the removal cannot be undone in the app.'),
+                  okLabel: getText(lang, 'Trotzdem endgültig löschen', 'Elimina comunque', 'Delete permanently anyway'),
+                  cancelLabel: getText(lang, 'Nichts löschen', 'Non eliminare nulla', 'Delete nothing') }))) {
                   showToast(getText(lang, 'Nichts gelöscht.', 'Nulla eliminato.', 'Nothing deleted.'), 'info');
                   return;
                 }
@@ -14135,11 +14269,11 @@ Goal 3: 20% weight, 80% achieved → 16 points
           const label = docItem.type === 'goals' ? getText(lang, 'Zielvereinbarung', 'Accordo obiettivi', 'Goal agreement') : getText(lang, 'Beurteilung', 'Valutazione', 'Review');
           if (share) {
             if (!member.email) { showToast(getText(lang, `Für das Teilen braucht ${member.name} eine E-Mail-Adresse.`, `Per condividere serve un'e-mail per ${member.name}.`, `${member.name} needs an email address for sharing.`), 'warning'); return; }
-            if (!confirm(getText(lang,
+            if (!(await nwConfirm(nwFromText(getText(lang,
               `${label} mit ${member.name} teilen?\n\n${member.name} sieht danach eine schreibgeschützte Fassung im eigenen Bereich. Du kannst das Teilen jederzeit zurücknehmen.`,
               `Condividere ${label} con ${member.name}?\n\n${member.name} vedrà una versione di sola lettura. Puoi annullare in qualsiasi momento.`,
-              `Share ${label} with ${member.name}?\n\n${member.name} will see a read-only version. You can revoke this at any time.`))) return;
-          } else if (!confirm(getText(lang, `Teilen zurücknehmen? ${member.name} sieht die ${label} danach nicht mehr.`, `Annullare la condivisione? ${member.name} non la vedrà più.`, `Revoke sharing? ${member.name} will no longer see it.`))) return;
+              `Share ${label} with ${member.name}?\n\n${member.name} will see a read-only version. You can revoke this at any time.`), { okLabel: getText(lang, 'Teilen', 'Condividi', 'Share') })))) return;
+          } else if (!(await nwConfirm(nwFromText(getText(lang, `Teilen zurücknehmen? ${member.name} sieht die ${label} danach nicht mehr.`, `Annullare la condivisione? ${member.name} non la vedrà più.`, `Revoke sharing? ${member.name} will no longer see it.`), { okLabel: getText(lang, 'Teilen zurücknehmen', 'Annulla condivisione', 'Revoke sharing') })))) return;
           const now = new Date().toISOString();
           const { versionHistory, sharedSnapshot, id, ...rest } = docItem;
           const update = share
@@ -14506,13 +14640,13 @@ Best regards`
                   .get();
                 
                 if (!existingSnapshot.empty) {
-                  const confirmOverwrite = confirm(
+                  const confirmOverwrite = await nwConfirm(nwFromText(
                     lang === 'de' 
                       ? `⚠️ Es existiert bereits eine ${label}-PDF für ${currentPeriod}.\n\nMöchtest du sie ersetzen?`
                       : lang === 'it'
                       ? `⚠️ Esiste già un PDF ${label} per ${currentPeriod}.\n\nVuoi sostituirlo?`
                       : `⚠️ A ${label} PDF already exists for ${currentPeriod}.\n\nReplace it?`
-                  );
+                  , { danger: true, okLabel: getText(lang, 'PDF ersetzen', 'Sostituisci PDF', 'Replace PDF') }));
                   
                   if (!confirmOverwrite) {
                     devLog('❌ Upload abgebrochen durch Benutzer');
@@ -14648,13 +14782,13 @@ Best regards`
               const label = docTypeLabels[docType]?.[lang] || docTypeLabels[docType]?.en || docType;
               
               // Sicherheitsabfrage
-              const confirmed = confirm(
+              const confirmed = await nwConfirm(nwFromText(
                 lang === 'de'
                   ? `⚠️ ${label}-PDF für "${member.name}" wirklich löschen?\n\nDiese Aktion kann nicht rückgängig gemacht werden.`
                   : lang === 'it'
                   ? `⚠️ Eliminare davvero il PDF ${label} per "${member.name}"?\n\nQuesta azione non può essere annullata.`
                   : `⚠️ Really delete ${label} PDF for "${member.name}"?\n\nThis action cannot be undone.`
-              );
+              , { danger: true, okLabel: getText(lang, 'PDF löschen', 'Elimina PDF', 'Delete PDF') }));
               
               if (!confirmed) return;
               
@@ -15082,7 +15216,7 @@ Best regards`
             // Termin löschen
             const deleteScheduleDate = async () => {
               if (!scheduleModalMember) return;
-              if (!confirm(lang === 'de' ? 'Termin wirklich löschen?' : 'Really delete appointment?')) return;
+              if (!(await nwConfirm({ danger: true, title: getText(lang, 'Termin löschen?', 'Eliminare l\'appuntamento?', 'Delete appointment?'), text: scheduleModalMember.name || undefined, okLabel: getText(lang, 'Termin löschen', 'Elimina appuntamento', 'Delete appointment') }))) return;
               
               try {
                 await db.collection('teamMembers').doc(scheduleModalMember.id).update({ 
@@ -15131,7 +15265,7 @@ Best regards`
             // Fehlende E-Mail-Adresse nachtragen (nur ergänzen, eine vorhandene Adresse wird nie überschrieben)
             const addMemberEmail = async (member) => {
               if (String(member.email || '').trim()) return;
-              const input = prompt(getText(lang, `E-Mail-Adresse von ${member.name}:`, `Indirizzo e-mail di ${member.name}:`, `Email address of ${member.name}:`), '');
+              const input = await nwPrompt({ title: getText(lang, `E-Mail-Adresse von ${member.name}`, `Indirizzo e-mail di ${member.name}`, `Email address of ${member.name}`), text: getText(lang, 'Damit kannst du den Selbstreflexions-Link per E-Mail senden.', 'Così puoi inviare il link di autovalutazione via e-mail.', 'This lets you send the self-reflection link by email.'), label: getText(lang, 'E-Mail-Adresse', 'Indirizzo e-mail', 'Email address'), type: 'email', placeholder: 'name@firma.de', okLabel: getText(lang, 'Speichern', 'Salva', 'Save') });
               if (input === null) return;
               const email = input.trim().toLowerCase();
               if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -15173,12 +15307,10 @@ Best regards`
             const removeMemberFromView = async (member, isOwner) => { 
                                 if (isOwner) {
                                   // Eigener MA: Komplett löschen
-                                  if (confirm(`"${member.name}" ${lang === 'de' ? 'entfernen' : 'remove'}?`)) {
-                                    deleteTeamMember(member.id);
-                                  }
+                                  deleteTeamMember(member.id); // fragt selbst nach (Name eintippen), eine zweite Rückfrage davor entfällt
                                 } else {
                                   // Geteilter MA: Nur Verknüpfung entfernen (aus sharedWith Array)
-                                  if (confirm(`${lang === 'de' ? 'Geteilten Mitarbeiter aus deiner Ansicht entfernen' : 'Remove shared employee from your view'}?`)) {
+                                  if (await nwConfirm({ danger: true, title: getText(lang, `${member.name} aus deiner Ansicht entfernen?`, `Rimuovere ${member.name} dalla tua vista?`, `Remove ${member.name} from your view?`), text: getText(lang, 'Der Mitarbeiter und alle Unterlagen bleiben bei der anderen Führungskraft erhalten. Nur die Freigabe für dich endet.', 'Il collaboratore e tutti i documenti restano presso l\'altro responsabile. Termina solo la condivisione con te.', 'The employee and all documents stay with the other manager. Only the sharing with you ends.'), okLabel: getText(lang, 'Aus meiner Ansicht entfernen', 'Rimuovi dalla mia vista', 'Remove from my view') })) {
                                     try {
                                       const currentShared = member.sharedWith || [];
                                       const newShared = currentShared.filter(email => email.toLowerCase() !== user?.email?.toLowerCase());
@@ -16580,9 +16712,9 @@ Best regards`
               return { baseSalary, currentBonus, totalCurrent, salaryIncrease, newBaseSalary, newBonusAmount, totalIncrease, totalNew };
             };
             
-            const removeFromReview = (empId) => {
+            const removeFromReview = async (empId) => {
               const confirmMsg = lang === 'de' ? 'Mitarbeiter aus der Gehaltsrunde entfernen?' : lang === 'it' ? 'Rimuovere il dipendente dalla revisione salariale?' : 'Remove employee from salary review?';
-              if (confirm(confirmMsg)) {
+              if ((await nwConfirm(nwFromText(confirmMsg, { danger: true, okLabel: getText(lang, 'Entfernen', 'Rimuovi', 'Remove') })))) {
                 const updatedEmployees = compEmployees.filter(e => e.id !== empId);
                 setCompEmployees(updatedEmployees);
                 triggerAutoSave(compBudget, updatedEmployees);
@@ -17120,7 +17252,7 @@ Best regards`
             return () => unsub();
           }, [db, isHRAdmin, activeView, hrSubTab]);
           const hrRestoreTrash = async (t) => {
-            if (!confirm(getText(lang, `${t.memberName || 'Mitarbeiter'} mit ${t.appraisalCount || 0} Unterlagen wiederherstellen?\n\nDer Mitarbeiter erscheint wieder im Team der bisherigen Führungskraft.`, `Ripristinare ${t.memberName}?`, `Restore ${t.memberName}?`))) return;
+            if (!(await nwConfirm(nwFromText(getText(lang, `${t.memberName || 'Mitarbeiter'} mit ${t.appraisalCount || 0} Unterlagen wiederherstellen?\n\nDer Mitarbeiter erscheint wieder im Team der bisherigen Führungskraft.`, `Ripristinare ${t.memberName}?`, `Restore ${t.memberName}?`), { okLabel: getText(lang, 'Wiederherstellen', 'Ripristina', 'Restore') })))) return;
             try {
               const memRef = db.collection('teamMembers').doc(t.memberId);
               if ((await memRef.get()).exists) { showToast(getText(lang, 'Diesen Mitarbeiter gibt es bereits – nichts wiederhergestellt.', 'Il collaboratore esiste già – nulla ripristinato.', 'Employee already exists – nothing restored.'), 'warning'); return; }
@@ -17144,7 +17276,12 @@ Best regards`
             }
           };
           const hrPurgeTrash = async (t) => {
-            const typed = prompt(getText(lang, `Endgültig löschen\n\n${t.memberName} und ${t.appraisalCount || 0} Unterlagen werden aus dem Papierkorb unwiderruflich gelöscht.\n\nZum Bestätigen den Namen eintippen:`, `Eliminare definitivamente ${t.memberName}? Digita il nome:`, `Delete ${t.memberName} permanently? Type the name:`));
+            const typed = await nwPrompt({ danger: true,
+              title: getText(lang, `${t.memberName || 'Eintrag'} endgültig löschen?`, `Eliminare definitivamente ${t.memberName || ''}?`, `Delete ${t.memberName || 'entry'} permanently?`),
+              text: getText(lang, `${t.memberName} und ${t.appraisalCount || 0} Unterlagen werden aus dem Papierkorb unwiderruflich gelöscht.`, `${t.memberName} e ${t.appraisalCount || 0} documenti verranno eliminati definitivamente dal cestino.`, `${t.memberName} and ${t.appraisalCount || 0} documents will be irrevocably deleted from the trash.`),
+              label: getText(lang, `Zum Bestätigen den Namen eintippen: ${t.memberName || ''}`, `Per confermare digita il nome: ${t.memberName || ''}`, `Type the name to confirm: ${t.memberName || ''}`),
+              match: t.memberName || '',
+              okLabel: getText(lang, 'Endgültig löschen', 'Elimina definitivamente', 'Delete permanently') });
             if (typed === null) return;
             if (String(typed).trim().toLowerCase() !== String(t.memberName || '').trim().toLowerCase() || !String(t.memberName || '').trim()) { showToast(getText(lang, 'Name stimmt nicht überein – nichts gelöscht.', 'Il nome non corrisponde – nulla eliminato.', 'Name does not match – nothing deleted.'), 'warning'); return; }
             try {
@@ -17202,9 +17339,9 @@ Best regards`
           const hrAuditSafe = async (...args) => { try { await hrAudit(...args); } catch (e) { console.warn('Protokoll nicht gespeichert:', e); } };
           const hrSendPasswordReset = async (u) => {
             if (!u.email) { showToast(getText(lang, 'Für dieses Konto ist keine E-Mail-Adresse hinterlegt.', 'Nessuna e-mail per questo account.', 'No email address for this account.'), 'warning'); return; }
-            if (!confirm(getText(lang,
+            if (!(await nwConfirm(nwFromText(getText(lang,
               `Passwort-Reset an ${u.email} senden?\n\n${hrUserName(u)} bekommt eine E-Mail mit einem Link und legt damit selbst ein neues Passwort fest. Das bisherige Passwort gilt bis dahin weiter.`,
-              `Inviare il reset della password a ${u.email}?`, `Send password reset to ${u.email}?`))) return;
+              `Inviare il reset della password a ${u.email}?`, `Send password reset to ${u.email}?`), { okLabel: getText(lang, 'Reset-Mail senden', 'Invia e-mail di reset', 'Send reset email') })))) return;
             try {
               await auth.sendPasswordResetEmail(u.email);
               await hrAuditSafe('password_reset_sent', u);
@@ -17219,9 +17356,9 @@ Best regards`
             if (lock && (hrUserIsAdmin(u) || hrUserUid(u) === (user && user.uid))) {
               showToast(getText(lang, 'HR-Admin-Konten und dein eigenes Konto kannst du nicht sperren.', 'Non puoi bloccare account HR o il tuo.', 'You cannot lock HR admin accounts or your own.'), 'warning'); return;
             }
-            if (!confirm(lock
+            if (!(await nwConfirm(nwFromText(lock
               ? getText(lang, `Konto von ${hrUserName(u)} sperren?\n\n${hrUserName(u)} wird abgemeldet und kann sich nicht mehr anmelden. Alle Daten bleiben unverändert erhalten. Du kannst das Konto jederzeit wieder entsperren.`, `Bloccare l'account di ${hrUserName(u)}?`, `Lock ${hrUserName(u)}'s account?`)
-              : getText(lang, `Konto von ${hrUserName(u)} entsperren?`, `Sbloccare l'account di ${hrUserName(u)}?`, `Unlock ${hrUserName(u)}'s account?`))) return;
+              : getText(lang, `Konto von ${hrUserName(u)} entsperren?`, `Sbloccare l'account di ${hrUserName(u)}?`, `Unlock ${hrUserName(u)}'s account?`), { danger: lock, okLabel: lock ? getText(lang, 'Konto sperren', 'Blocca account', 'Lock account') : getText(lang, 'Konto entsperren', 'Sblocca account', 'Unlock account') })))) return;
             const now = new Date().toISOString();
             try {
               await db.collection('registeredUsers').doc(u.docId).update(lock
@@ -17236,7 +17373,7 @@ Best regards`
           };
           const hrRenameUser = async (u) => {
             const current = u.fullName || u.name || '';
-            const input = prompt(getText(lang, 'Vollständiger Name (Vor- und Nachname):', 'Nome completo (nome e cognome):', 'Full name (first and last name):'), current);
+            const input = await nwPrompt({ title: getText(lang, 'Name ändern', 'Modifica nome', 'Change name'), text: u.email || undefined, label: getText(lang, 'Vollständiger Name (Vor- und Nachname)', 'Nome completo (nome e cognome)', 'Full name (first and last name)'), value: current, okLabel: getText(lang, 'Speichern', 'Salva', 'Save') });
             if (input === null) return;
             const name = input.trim().replace(/\s+/g, ' ');
             if (name === current) return;
@@ -17644,7 +17781,7 @@ Best regards`
                           ),
                           React.createElement('button', {
                             onClick: async () => {
-                              if (confirm('Diese einzelne Beurteilung wiederherstellen?\n\n' + (a.employeeName || a.formData?.employee || 'Unbekannt'))) {
+                              if ((await nwConfirm(nwFromText('Diese einzelne Beurteilung wiederherstellen?\n\n' + (a.employeeName || a.formData?.employee || 'Unbekannt'), { okLabel: 'Wiederherstellen' })))) {
                                 const success = await restoreAppraisalFromBackup(a);
                                 if (success) showToast('Wiederhergestellt!', 'success');
                               }
@@ -17784,12 +17921,12 @@ Best regards`
                               `• ${a.employeeName || a.formData?.employee || 'Unbekannt'} (${a.type || 'review'}) - GPS: ${(a.gpsScore || 0).toFixed(2)}`
                             ).join('\n');
                             
-                            const action = confirm(
+                            const action = await nwConfirm(nwFromText(
                               `🗄️ LEGACY DATEN GEFUNDEN!\n\n` +
                               `${legacyData.length} Einträge in der alten Collection:\n\n` +
                               `${summary.substring(0, 1500)}${summary.length > 1500 ? '\n... und weitere' : ''}\n\n` +
                               `Möchtest du diese Daten als Backup-JSON exportieren?`
-                            );
+                            , { okLabel: 'Als JSON exportieren' }));
                             
                             if (action) {
                               const exportData = {
@@ -25911,7 +26048,7 @@ const renderDashboard = () => {
             
             // Vor dem Abschicken: kurze Übersicht, was noch leer ist (alles freiwillig, Abschicken bleibt möglich).
             // Ruft danach unverändert handleCompleteAndSend auf.
-            const confirmCompleteAndSend = () => {
+            const confirmCompleteAndSend = async () => {
               if (!formData.employee?.trim()) return handleCompleteAndSend(); // Name fehlt: Hinweis kommt vom Handler
               const empty = (v) => !String(v == null ? '' : v).trim();
               const open = [];
@@ -25923,13 +26060,15 @@ const renderDashboard = () => {
               if (!devPlan.some(d => !empty(d.measure))) open.push(getText(lang, 'Entwicklungsmaßnahmen', 'Misure di sviluppo', 'Development measures'));
               if (empty(formData.wishesNextYear)) open.push(getText(lang, 'Wünsche für das nächste Jahr', 'Desideri per il prossimo anno', 'Wishes for next year'));
               if (empty(formData.feedbackManager)) open.push(getText(lang, 'Feedback an die Führungskraft', 'Feedback al responsabile', 'Feedback to manager'));
-              const msg = open.length
-                ? getText(lang,
-                    'Selbstreflexion abschicken?\n\nNoch leer (alles freiwillig):\n• ' + open.join('\n• ') + '\n\nOK = jetzt abschicken · Abbrechen = weiter ausfüllen',
-                    'Inviare l\'autovalutazione?\n\nAncora vuoto (facoltativo):\n• ' + open.join('\n• ') + '\n\nOK = invia ora · Annulla = continua',
-                    'Submit self-reflection?\n\nStill empty (all optional):\n• ' + open.join('\n• ') + '\n\nOK = submit now · Cancel = keep filling in')
-                : getText(lang, 'Selbstreflexion jetzt abschicken? Deine Führungskraft sieht sie danach.', 'Inviare ora l\'autovalutazione?', 'Submit self-reflection now?');
-              if (!confirm(msg)) return;
+              const sendNow = await nwConfirm({
+                title: getText(lang, 'Selbstreflexion abschicken?', 'Inviare l\'autovalutazione?', 'Submit self-reflection?'),
+                text: open.length
+                  ? getText(lang, 'Noch leer (alles freiwillig):', 'Ancora vuoto (facoltativo):', 'Still empty (all optional):')
+                  : getText(lang, 'Deine Führungskraft sieht sie danach.', 'Dopo l\'invio il tuo responsabile la vedrà.', 'Your manager will see it afterwards.'),
+                items: open,
+                okLabel: getText(lang, 'Jetzt abschicken', 'Invia ora', 'Submit now'),
+                cancelLabel: getText(lang, 'Weiter ausfüllen', 'Continua a compilare', 'Keep filling in') });
+              if (!sendNow) return;
               return handleCompleteAndSend();
             };
             
@@ -27513,13 +27652,13 @@ const renderDashboard = () => {
                 const existingCheck = await checkExistingSelfAssessment(db, guestEmployee.id, currentPeriod);
                 
                 if (existingCheck.exists) {
-                  const confirmOverwrite = confirm(
+                  const confirmOverwrite = await nwConfirm(nwFromText(
                     lang === 'de' 
                       ? `⚠️ Es existiert bereits eine Selbstreflexion für ${currentPeriod}.\n\nEingereicht am: ${new Date(existingCheck.data.submittedAt || existingCheck.data.createdAt).toLocaleDateString('de-DE')}\n\nMöchtest du sie überschreiben?`
                       : lang === 'it'
                       ? `⚠️ Esiste già un'autovalutazione per ${currentPeriod}.\n\nInviata il: ${new Date(existingCheck.data.submittedAt || existingCheck.data.createdAt).toLocaleDateString('it-IT')}\n\nVuoi sovrascriverla?`
                       : `⚠️ A self-reflection already exists for ${currentPeriod}.\n\nSubmitted on: ${new Date(existingCheck.data.submittedAt || existingCheck.data.createdAt).toLocaleDateString('en-GB')}\n\nDo you want to overwrite it?`
-                  );
+                  , { danger: true, okLabel: getText(lang, 'Überschreiben', 'Sovrascrivi', 'Overwrite') }));
                   
                   if (!confirmOverwrite) {
                     setIsSaving(false);
@@ -28009,18 +28148,18 @@ const renderDashboard = () => {
                     
                     // Mitte: Skip-Button MIT VALIDIERUNG (nur wenn nicht auf Schritt 4)
                     currentStep < 4 && React.createElement('button', {
-                      onClick: () => {
+                      onClick: async () => {
                         // === NEU: Validierungs-Warnung beim Skip ===
                         const hasContent = Object.values(selfCoreScores).some(v => v !== 3) || 
                                           guestFormData.strengths1 || guestFormData.strengths2;
                         if (!hasContent) {
-                          const proceed = confirm(
+                          const proceed = await nwConfirm(nwFromText(
                             lang === 'de' 
                               ? 'Du hast noch keine Kompetenzen bewertet oder Stärken/Entwicklungsfelder eingetragen. Trotzdem zum Absenden springen?'
                               : lang === 'it'
                               ? 'Non hai ancora valutato le competenze o inserito punti di forza/aree di sviluppo. Procedere comunque all\'invio?'
                               : 'You have not yet rated competencies or entered strengths/development areas. Skip to submit anyway?'
-                          );
+                          , { okLabel: getText(lang, 'Zum Absenden springen', 'Vai all\'invio', 'Skip to submit') }));
                           if (!proceed) return;
                         }
                         setCurrentStep(4);

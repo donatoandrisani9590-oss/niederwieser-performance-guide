@@ -1,6 +1,6 @@
 // Kritische Wege: Anmeldung, Daten laden, Datensatz anlegen/ändern/speichern, nach Neuladen wiederfinden.
 // Läuft nur gegen den Firebase-Emulator mit synthetischen Testdaten (siehe fixtures.mjs / seed.mjs).
-import { test, expect, openApp } from './fixtures.mjs';
+import { test, expect, openApp, manualDialogs } from './fixtures.mjs';
 import { seed, USERS, ACCESS_CODE, YEAR, PREV_YEAR, NEXT_YEAR, listDocs, getDoc, setDoc } from './seed.mjs';
 
 const field = (doc, name) => {
@@ -487,9 +487,22 @@ test('Mitarbeiter löschen: nur mit eingetipptem Namen, vorher automatische Sich
     await memberRow(page, 'Emil Probe').getByRole('button', { name: /Weitere Aktionen/ }).click();
     await page.getByRole('menuitem', { name: 'Entfernen' }).click();
   };
-  // Falscher Name: nichts gelöscht
-  await remove('Emil');
-  await expect(page.getByText('Name stimmt nicht überein')).toBeVisible();
+  // Falscher Name: Der Knopf bleibt gesperrt, nichts gelöscht.
+  // (Angepasst: Früher kam nach dem Browser-Fenster die Meldung „Name stimmt nicht überein“. Der neue Dialog
+  // lässt „In den Papierkorb“ erst zu, wenn der Name stimmt.)
+  manualDialogs(page, true);
+  await memberRow(page, 'Emil Probe').getByRole('button', { name: /Weitere Aktionen/ }).click();
+  await page.getByRole('menuitem', { name: 'Entfernen' }).click();
+  const dlg = page.locator('[data-nw-dialog]');
+  await expect(dlg).toContainText('Emil Probe entfernen?');
+  await expect(dlg).toContainText('Papierkorb');
+  await dlg.locator('input').fill('Emil');
+  await expect(dlg.locator('[data-nw-ok]')).toBeDisabled();
+  await dlg.locator('input').press('Enter'); // Enter bestätigt nicht, solange der Name nicht stimmt
+  await expect(dlg).toBeVisible();
+  await dlg.locator('[data-nw-cancel]').click();
+  await expect(dlg).toHaveCount(0);
+  manualDialogs(page, false);
   expect((await listDocs('teamMembers')).some((d) => d.name.endsWith('/tm-emil'))).toBe(true);
   // Richtiger Name: Sicherungsdatei, dann gelöscht
   const [download] = await Promise.all([page.waitForEvent('download'), remove('Emil Probe')]);

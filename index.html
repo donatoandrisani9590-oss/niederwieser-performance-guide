@@ -1842,7 +1842,7 @@
                     ),
 
                     // Tabs
-                    React.createElement('div', { className: 'mb-5 flex h-9 gap-0.5 rounded-lg bg-nw-blue-12 p-[3px]', role: 'tablist' },
+                    React.createElement('div', { className: 'mb-5 flex h-9 coarse:h-11 gap-0.5 rounded-lg bg-nw-blue-12 p-[3px]', role: 'tablist' },
                         React.createElement('button', {
                             onClick: () => { setIsLogin(true); setError(''); },
                             role: 'tab', 'aria-selected': isLogin, type: 'button',
@@ -8851,7 +8851,7 @@
                         ),
                         e('button', {
                           onClick: () => setShowSelfAssessmentHint(false),
-                          className: 'text-traffic-amber hover:text-warn transition-colors'
+                          className: 'text-warn hover:text-warn transition-colors'
                         }, e(X, { size: 18 }))
                       )
                     ),
@@ -9559,7 +9559,7 @@
                         coreList.map(item => renderCompetencyCard(item, setCoreList, coreList, false))
                     ),
                     
-                    e('button', { onClick: () => addItem(coreList, setCoreList, {name:'', weight:20, rating:3, comment:''}), className: "no-print mt-3 text-xs flex items-center gap-1 text-ok" }, e(PlusCircle, {size:14}), t.addComp)
+                    e('button', { onClick: () => addItem(coreList, setCoreList, {name:'', weight:20, rating:3, comment:''}), className: "no-print mt-3 text-xs flex items-center gap-1 text-ok coarse:py-2.5" }, e(PlusCircle, {size:14}), t.addComp)
                 ),
                 isManager && e('div', { className: "bg-white p-4 md:p-8 rounded-card shadow-card border border-line-2 break-inside-avoid" },
                     e('div', { className: "flex justify-between items-center mb-4 border-b pb-2" },
@@ -9584,7 +9584,7 @@
                         leadList.map(item => renderCompetencyCard(item, setLeadList, leadList, true))
                     ),
                     
-                    e('button', { onClick: () => addItem(leadList, setLeadList, {name:'', weight:20, rating:3, comment:''}), className: "no-print mt-3 text-xs flex items-center gap-1 text-ok" }, e(PlusCircle, {size:14}), t.addComp)
+                    e('button', { onClick: () => addItem(leadList, setLeadList, {name:'', weight:20, rating:3, comment:''}), className: "no-print mt-3 text-xs flex items-center gap-1 text-ok coarse:py-2.5" }, e(PlusCircle, {size:14}), t.addComp)
                 ),
                 e('div', { className: "bg-white p-8 rounded-card shadow-card border border-line-2 break-inside-avoid" },
                     e('h3', { className: "text-lg font-semibold text-nw-blue mb-4 border-b pb-2" }, nwGloss(t.partC3, lang)),
@@ -17369,16 +17369,12 @@ Best regards`
               // EMPFEHLUNGSTABELLE - aufklappbar mit Hinweis
               React.createElement('div', { className: 'bg-nw-blue-06 rounded-card shadow-card border overflow-hidden' },
                 React.createElement('button', { 
-                  className: 'w-full px-4 py-3 flex items-center justify-between hover:bg-white/50 transition-colors',
+                  className: 'w-full px-4 py-3 flex items-center justify-between gap-3 text-left hover:bg-white/50 transition-colors',
+                  type: 'button', 'aria-expanded': showRecTable,
                   onClick: () => setShowRecTable(!showRecTable)
                 }, 
-                  React.createElement('div', { className: 'flex items-center gap-2' },
-                    React.createElement('span', { className: 'font-semibold text-ink' }, 
-                      lang === 'de' ? 'Empfohlene Erhöhungen nach GPS' : lang === 'it' ? 'Aumenti raccomandati per GPS' : 'Recommended Increases by GPS'),
-                    React.createElement('span', { className: 'text-xs text-ink-60 ml-2' }, 
-                      '(' + (lang === 'de' ? 'Klicken zum ' : lang === 'it' ? 'Clicca per ' : 'Click to ') + 
-                      (showRecTable ? (lang === 'de' ? 'Schließen' : lang === 'it' ? 'chiudere' : 'close') : (lang === 'de' ? 'Öffnen' : lang === 'it' ? 'aprire' : 'open')) + ')')
-                  ),
+                  React.createElement('span', { className: 'font-semibold text-ink' }, 
+                    lang === 'de' ? 'Empfohlene Erhöhungen nach GPS' : lang === 'it' ? 'Aumenti raccomandati per GPS' : 'Recommended Increases by GPS'),
                   React.createElement(ChevronDown, { size: 18, 'aria-hidden': true, className: 'shrink-0 text-ink-60 transition-transform duration-fast ' + (showRecTable ? 'rotate-180' : '') })
                 ),
                 showRecTable && React.createElement('div', { className: 'px-4 pb-4 border-t bg-white' },
@@ -18696,7 +18692,7 @@ Best regards`
                         return React.createElement('div', { key: appraisal.id || idx, className: 'border-b last:border-b-0' },
                           // Appraisal Header Row
                           React.createElement('div', { 
-                            className: 'px-6 py-4 flex items-center justify-between hover:bg-panel cursor-pointer',
+                            className: 'px-4 py-4 sm:px-6 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 hover:bg-panel cursor-pointer',
                             onClick: () => setExpandedVersionAppraisal(isExpanded ? null : appraisal.id)
                           },
                             React.createElement('div', { className: 'flex items-center gap-4' },
@@ -18872,55 +18868,54 @@ Best regards`
                 },
                   // Modal Header
                   React.createElement('div', { 
-                    className: 'p-6 text-white',
-                    style: { background: '#F59D24' }
+                    className: 'border-b border-line bg-white p-6'
                   },
                     React.createElement('div', { className: 'flex items-center justify-between' },
                       React.createElement('div', null,
                         React.createElement('h2', { className: 'text-lg font-semibold flex items-center gap-2 text-nw-blue' },
-                          React.createElement(Clock, { size: 24 }),
+                          React.createElement(Clock, { size: 18, 'aria-hidden': true }),
                           getText(lang, 'Versions-Details', 'Dettagli versione', 'Version Details')
                         ),
-                        React.createElement('p', { className: 'text-white/80 mt-1' },
+                        React.createElement('p', { className: 'text-sm text-ink-60 mt-1' },
                           hrVersionDetailModal.employeeName + ' · ' +
                           new Date(hrVersionDetailModal.version.savedAt).toLocaleString('de-DE', {
                             weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
                           })
                         ),
-                        hrVersionDetailModal.managerName && React.createElement('p', { className: 'text-white/60 text-sm mt-1' },
+                        hrVersionDetailModal.managerName && React.createElement('p', { className: 'text-ink-60 text-sm mt-1' },
                           'FK: ' + hrVersionDetailModal.managerName
                         )
                       ),
                       React.createElement('button', {
                         onClick: () => setHrVersionDetailModal(null),
-                        className: 'p-2 rounded-full bg-white/20 hover:bg-white/30'
-                      }, React.createElement(X, { size: 24 }))
+                        type: 'button', 'aria-label': getText(lang, 'Schließen', 'Chiudi', 'Close'), className: nwBtnClass('ghost', 'md', true)
+                      }, React.createElement(X, { size: 18, 'aria-hidden': true }))
                     ),
                     // Score Cards
                     React.createElement('div', { className: 'flex gap-3 mt-4' },
-                      React.createElement('div', { className: 'bg-white/20 rounded-lg px-4 py-2' },
+                      React.createElement('div', { className: 'bg-panel rounded-lg px-4 py-2' },
                         React.createElement('div', { className: 't-kpi' }, 
                           (hrVersionDetailModal.version.gpsScore || 0).toFixed(2)
                         ),
-                        React.createElement('div', { className: 'text-xs text-white/70' }, 'GPS')
+                        React.createElement('div', { className: 'text-xs text-ink-60' }, 'GPS')
                       ),
-                      React.createElement('div', { className: 'bg-white/20 rounded-lg px-4 py-2' },
+                      React.createElement('div', { className: 'bg-panel rounded-lg px-4 py-2' },
                         React.createElement('div', { className: 't-kpi' }, 
                           (hrVersionDetailModal.version.wasScore || 0).toFixed(2)
                         ),
-                        React.createElement('div', { className: 'text-xs text-white/70' }, 'WAS')
+                        React.createElement('div', { className: 'text-xs text-ink-60' }, 'WAS')
                       ),
-                      React.createElement('div', { className: 'bg-white/20 rounded-lg px-4 py-2' },
+                      React.createElement('div', { className: 'bg-panel rounded-lg px-4 py-2' },
                         React.createElement('div', { className: 't-kpi' }, 
                           (hrVersionDetailModal.version.wieCoreScore || 0).toFixed(2)
                         ),
-                        React.createElement('div', { className: 'text-xs text-white/70' }, 'WIE Core')
+                        React.createElement('div', { className: 'text-xs text-ink-60' }, 'WIE Core')
                       ),
-                      hrVersionDetailModal.version.wieLeaderScore > 0 && React.createElement('div', { className: 'bg-white/20 rounded-lg px-4 py-2' },
+                      hrVersionDetailModal.version.wieLeaderScore > 0 && React.createElement('div', { className: 'bg-panel rounded-lg px-4 py-2' },
                         React.createElement('div', { className: 't-kpi' }, 
                           hrVersionDetailModal.version.wieLeaderScore.toFixed(2)
                         ),
-                        React.createElement('div', { className: 'text-xs text-white/70' }, 'WIE Leader')
+                        React.createElement('div', { className: 'text-xs text-ink-60' }, 'WIE Leader')
                       )
                     )
                   ),
@@ -20255,7 +20250,7 @@ Best regards`
                                 }`,
                                 style: { width: `${barWidth}%` }
                               },
-                                React.createElement('span', { className: 'absolute right-2 top-1/2 -translate-y-1/2 text-sm font-semibold tabular-nums text-white' },
+                                React.createElement('span', { className: 'absolute right-2 top-1/2 -translate-y-1/2 text-sm font-semibold tabular-nums text-ink' },
                                   ms.avgGPS.toFixed(2)
                                 )
                               ),
@@ -25359,7 +25354,7 @@ const renderDashboard = () => {
                     // Hinweis zur Selbsteinschätzung im Gespräch
                     React.createElement('div', { className: "bg-white border border-line shadow-card border border-warn/50 rounded-lg p-4 mt-4" },
                       React.createElement('div', { className: "flex items-start gap-3" },
-                        React.createElement(AlertCircle, { size: 20, className: "text-traffic-amber flex-shrink-0 mt-0.5" }),
+                        React.createElement(AlertCircle, { size: 20, className: "text-warn flex-shrink-0 mt-0.5" }),
                         React.createElement('p', { className: "text-warn-bg text-sm" }, introData.selfAssessmentNote)
                       )
                     ),
@@ -27310,7 +27305,7 @@ const renderDashboard = () => {
                     ),
                     
                     // Status-Anzeige
-                    saveStatus && e('div', { className: 'text-center font-medium ' + (saveStatus.includes('firebase') ? 'text-ok' : 'text-traffic-amber') }, 
+                    saveStatus && e('div', { className: 'text-center font-medium ' + (saveStatus.includes('firebase') ? 'text-ok' : 'text-warn') }, 
                       saveStatus === 'firebase_completed' 
                         ? (isGuestMode 
                             ? (lang === 'de' ? 'Erfolgreich an deine Führungskraft gesendet!' : 'Inviato con successo al tuo responsabile!')
@@ -27723,7 +27718,7 @@ const renderDashboard = () => {
                     e('thead', { className: 'bg-panel text-left' }, e('tr', null, e('th', { className: 'p-2 border' }, t.devMeasure || t.measure), e('th', { className: 'p-2 border w-32' }, t.devResponsible || t.responsible), e('th', { className: 'p-2 border w-28' }, t.devDeadline || t.deadline), e('th', { className: 'p-2 border w-10 no-print' }, ''))),
                     e('tbody', null, devPlan.map(d => renderDevRow(d)))
                   ),
-                  e('button', { onClick: () => addItem(devPlan, setDevPlan, { measure: '', responsible: '', deadline: '' }), className: 'no-print mt-3 text-xs flex items-center gap-1 text-ok' }, e(PlusCircle, { size: 14 }), ' ', t.addDev)
+                  e('button', { onClick: () => addItem(devPlan, setDevPlan, { measure: '', responsible: '', deadline: '' }), className: 'no-print mt-3 text-xs flex items-center gap-1 text-ok coarse:py-2.5' }, e(PlusCircle, { size: 14 }), ' ', t.addDev)
                 )
               ),
               
@@ -28599,7 +28594,7 @@ const renderDashboard = () => {
                     ),
                     React.createElement('button', {
                       onClick: () => setShowDuplicateWarning(false),
-                      className: 'text-traffic-amber hover:text-warn'
+                      className: 'text-warn hover:text-warn'
                     }, React.createElement(X, { size: 18 }))
                   )
                 ),
@@ -29705,15 +29700,14 @@ const renderDashboard = () => {
                 },
                   React.createElement('button', {
                     onClick: () => setActiveView('guestWelcome'),
-                    className: 'flex items-center gap-2 text-ink-60 hover:text-ink transition-colors'
+                    type: 'button', className: nwBtnClass('ghost', 'md') + ' -ml-2'
                   },
-                    React.createElement(ArrowLeft, { size: 20 }),
+                    React.createElement(ArrowLeft, { size: 16, 'aria-hidden': true }),
                     lang === 'de' ? 'Zurück' : lang === 'it' ? 'Indietro' : 'Back'
                   ),
-                  React.createElement('div', { className: 'text-center' },
-                    React.createElement('span', { className: 'font-semibold text-nw-blue' }, guestEmployee.name),
-                    React.createElement('span', { className: 'text-ink-60 mx-2' }, '•'),
-                    React.createElement('span', { className: 'text-ink-60 text-sm' }, 
+                  React.createElement('div', { className: 'min-w-0 text-center leading-tight' },
+                    React.createElement('span', { className: 'block truncate text-sm font-semibold text-nw-blue' }, guestEmployee.name),
+                    React.createElement('span', { className: 'block text-xs text-ink-60' }, 
                       lang === 'de' ? 'Selbstreflexion' : lang === 'it' ? 'Autovalutazione' : 'Self-Reflection'
                     )
                   ),

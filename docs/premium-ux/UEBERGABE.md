@@ -335,6 +335,42 @@ Die App verschickt weiterhin nichts selbst und speichert dabei nichts. Der E-Mai
 Adresse, sagt der Dialog das. Ein echter Ein-Klick-Versand aus der App bräuchte einen Mail-Dienst auf dem Server
 (neue Infrastruktur, Zugangsdaten, neue Datenzugriffe) und ist eine Entscheidung des Auftraggebers.
 
+### 15. Vollprüfung vor der Freigabe (23.11.2026)
+
+Vorgehen: neues Prüfskript `tests/audit.mjs` öffnet jede Ansicht je Rolle (ohne Anmeldung, Führungskraft, HR,
+Mitarbeiter-Link) am Desktop (1440 px) und am Handy (390 px, Touch), insgesamt 39 Ansichten je Größe. Es misst
+Konsolenfehler, seitlichen Überlauf, abgeschnittene Texte, zu kleine Tippflächen, Bedienelemente ohne Namen und
+„undefined“/„NaN“ im Text und speichert Bilder. Dazu Sichtprüfung der Bilder.
+
+Ergebnis der Messung: keine Konsolenfehler, kein Absturz, kein „undefined“/„NaN“ in allen Ansichten.
+
+| Gefunden | Behoben |
+|---|---|
+| Handy: Kopfknöpfe der Bögen überlappten, Abschnittsleiste auf einen halben Chip gequetscht | Knöpfe untereinander, Leiste zweizeilig |
+| Handy: Mitarbeiter-Bogen ließ sich 30 px seitlich verschieben (Tabellen ragten heraus) | Tabellen scrollen in eigener Hülle |
+| Handy: Banner der Selbstreflexion, Bonuszeile, Gewichtsfeld („100“ abgeschnitten), Salary-Kopf, Versionenliste gequetscht | brechen sauber um |
+| Handy: 49 Arten zu kleiner Tippflächen (Zeilen-Knöpfe 28 px, Text-Links 14 px, Menüeinträge 30 px) | Touch-Höhen ab 36 px, übrig sind 27 Arten knapp darunter oder Sonderfälle (siehe unten) |
+| HR: orange Fläche in „Versionen“ und im Detaildialog, rote Karte in „Backup“ ohne Fehler | ruhige weiße Karten |
+| Rater-Bias: Zahl dunkel auf Grün (durch die Kennzahl-Rolle entstanden), Wert im Balken weiß auf Grau | lesbar |
+| Salary Review: Beschriftung dunkel auf grüner Budget-Füllung | Leiste schmal, Beschriftung darunter |
+| Jahreskalender hob im November „Q1“ hervor (U15) | Phase des aktuellen Monats |
+| Flaggen-Emojis (Sprachwahl im Mitarbeiter-Link, Standort-Filter) | Text |
+| Überschrift „GPS -Vorschau“ zerfiel | Glossar-Baustein liefert eine Spanne |
+| Anleitung nannte Knöpfe, die es nicht mehr gibt („Review“, „Termin“, „Ziele“, „E-Mail-Button“) | heutige Namen (nur Deutsch) |
+| Knöpfe und Felder ohne Namen für Screenreader (Dialog schließen, Zugriff entfernen, Status-Filter) | benannt |
+| Hinweis „Nutze die Seitenleiste links“ stand auch am Handy | „Nutze das Menü“ |
+
+Neu: `tests/e2e/handy.spec.mjs` mit drei Abläufen am Handy (Mitarbeiter schickt ab, Führungskraft speichert Entwurf,
+HR-Ansichten): kein Überlauf, keine überlappenden Knöpfe, Tippflächen ab 36 px.
+
+**Nach der Prüfung weiter offen (Darstellung)**
+
+- Handy: Segment-Schalter 34 px, Lösch-Icons in den Bogen-Tabellen 16 bis 24 px, Bewertungs-Auswahl ohne
+  Screenreader-Namen, Schließen-Knopf im HR-Detaildialog ragt 2 px heraus.
+- Handy: HR-Liste und Salary-Tabelle scrollen seitlich statt als Karten.
+- Italienisch und Englisch: Anleitung nennt noch alte Knopfnamen; rund 220 Textstellen fehlen (U14).
+- HR: Die Beurteilungsliste steht weiter unter jedem Reiter (S6, braucht Freigabe).
+
 ## Prüfungen
 
 ```bash
@@ -349,8 +385,8 @@ cd tests && npm test
 cd tests && npm run rules:vorschlag
 ```
 
-Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 89 / 89 grün,
-`npm run rules:vorschlag` 89 / 89 grün.
+Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 92 / 92 grün,
+`npm run rules:vorschlag` 92 / 92 grün.
 
 Die bestehenden Tests mussten für den Dialog nicht umgeschrieben werden: `tests/e2e/fixtures.mjs` meldet jeden
 App-Dialog über dieselben `page.on('dialog')`-Listener wie ein Browser-Fenster.
@@ -379,7 +415,6 @@ cd tests && node shots-glossar.mjs
 
 | # | Punkt | Warum noch offen |
 |---|---|---|
-| U15 | Jahreskalender im Dashboard hebt fest „Q1: Ziele“ hervor, auch im November | beim Prüfen von U12 gefunden, reine Anzeige, noch nicht behoben |
 | U14 | rund 220 Textstellen nur DE/EN, Italienisch zeigt dort Englisch (A6) | groß, eigene Runde |
 
 Nicht vollständig durchgespielt habe ich: PDF-Erzeugung im Browser, Kalibrierung und Ziel-Dashboard im Detail,

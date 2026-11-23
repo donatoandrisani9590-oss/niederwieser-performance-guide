@@ -13,7 +13,7 @@ Kennzahlen, wartet auf deine Freigabe.
 
 ## A. Ohne Schutzbereich (wichtigste zuerst)
 
-**Stand 23.11.2026:** erledigt sind U1 bis U12. Offen sind U14 und U15.
+**Stand 23.11.2026:** erledigt sind U1 bis U12 und U15. Offen ist U14.
 Details im [Übergabebericht](UEBERGABE.md).
 
 | # | Rolle | Stelle | Problem | Vorschlag | Prio | Aufwand |
@@ -30,7 +30,7 @@ Details im [Übergabebericht](UEBERGABE.md).
 | U10 ✅ | alle | Fachbegriffe GPS, WAS, WIE, BARS | Ohne Erklärung an Kennzahlen und Chips (A5 in §11) | Kurze Erklärung beim Darüberfahren und bei Tastaturfokus, einheitlicher Baustein | P3 | M |
 | U11 ✅ | Führungskraft | Selbstreflexion ansehen | Drei „Zurück“-Knöpfe, aber kein nächster Schritt | Ein „Zurück zum Team“, dazu „Beurteilung starten/fortsetzen“ als Hauptaktion | P2 | S |
 | U12 ✅ | Führungskraft | Dashboard unter der Falz | Für Führungskräfte mit Team folgen lange Erklärblöcke (Werte, Kompass, BARS, Jahreszyklus), die es in „Anleitung“ und „GPS Formel“ schon gibt | Wie der Schnellstart-Guide einklappbar, offen für neue Nutzer. Nichts wird entfernt | P3 | S |
-| U15 | Führungskraft | Dashboard, Jahreskalender | Der aktuelle Monat ist markiert, hervorgehoben ist aber fest „Q1: Ziele“, auch im November | Die Phase hervorheben, in der der aktuelle Monat liegt (Q1, Q2–Q3, Q4) | P3 | S |
+| U15 ✅ | Führungskraft | Dashboard, Jahreskalender | Der aktuelle Monat ist markiert, hervorgehoben ist aber fest „Q1: Ziele“, auch im November | Die Phase hervorheben, in der der aktuelle Monat liegt (Q1, Q2–Q3, Q4) | P3 | S |
 | U13 (kein Befund) | Mitarbeiter | Willkommensseite des Links | Knopf „Zurück zur App“: Nachgeprüft, er erscheint schon heute nur für angemeldete Führungskräfte. Ich hatte ihn gesehen, weil ich im selben Browser noch angemeldet war | nichts zu tun | – | – |
 | U14 | IT, EN | rund 220 Textstellen | Nur Deutsch und Englisch hinterlegt, Italienisch zeigt dann Englisch. Der Lösch-Dialog nennt auf IT/EN noch „endgültig“, obwohl es den Papierkorb gibt (A6 in §11) | Sichtbarste Stellen zuerst (Dialoge, Toasts, Matrix), Rest als Liste für eine eigene Runde | P2 | L |
 

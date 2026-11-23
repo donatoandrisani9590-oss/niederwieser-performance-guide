@@ -222,7 +222,7 @@ Geschäftslogik oder Datenmodell, das braucht deine Freigabe.
 | # | Befund | Vorschlag | Prio | Freigabe |
 |---|---|---|---|---|
 | A1 | „Mitarbeiter entfernen“ löschte alle Unterlagen aller Jahre nach einem einfachen „Wirklich löschen?“ | **Erledigt:** Folgen werden genannt, der Name muss eingetippt werden, vorher automatische Sicherungsdatei | P1 | erledigt |
-| A2 | Löschen ist endgültig | **Papierkorb** statt Löschen: archivieren und ausblenden, HR kann 90 Tage wiederherstellen | P1 | nötig |
+| A2 | Löschen ist endgültig | **Erledigt (Freigabe 23.11.2026):** „Entfernen“ legt Mitarbeiter und alle Unterlagen zuerst vollständig im Papierkorb ab (`trash/{id}` + `items`), erst dann wird gelöscht. Ist der Papierkorb nicht erreichbar, wird nur nach ausdrücklicher Bestätigung endgültig gelöscht. HR: Reiter „Papierkorb“ mit „Wiederherstellen“ (überschreibt nie Vorhandenes) und „Endgültig löschen“ (Name eintippen). Kein automatisches Ablaufdatum (bräuchte einen Server) | P1 | erledigt |
 | A3 | 24 Browser-Rückfragen (`confirm`), Knöpfe nur „OK/Abbrechen“ | Einheitlicher Dialog mit klarer Aktion („Endgültig löschen“, rot) und „Rückgängig“ in der Meldung danach | P2 | frei |
 | A4 | Kein Hinweis bei Verbindungsverlust | **Erledigt:** Hinweis auf jeder Seite (auch beim Mitarbeiter-Link), Meldung sobald die Verbindung wieder da ist. Speichern-Knöpfe bleiben unverändert | P2 | erledigt |
 | A5 | Fachbegriffe ohne Erklärung (GPS, WAS/WIE, BARS, SR-Link) | Kurze Erklärung beim Darüberfahren und Tippen (Glossar) | P3 | frei |
@@ -243,11 +243,11 @@ Geschäftslogik oder Datenmodell, das braucht deine Freigabe.
 
 | # | Befund | Vorschlag | Prio | Freigabe |
 |---|---|---|---|---|
-| F1 | „Abschließen“ ist auch bei unvollständiger Beurteilung möglich (Gewichte ≠ 100 %, Erreichung leer) | **Abschluss-Prüfung** mit Liste der Lücken; bei Gewichten ≠ 100 % blockieren | P1 | nötig (Validierung) |
+| F1 | „Abschließen“ ist auch bei unvollständiger Beurteilung möglich (Gewichte ≠ 100 %, Erreichung leer) | **Erledigt (Freigabe 23.11.2026):** Lückenliste vor dem Abschließen (Beurteilung und Zielvereinbarung); bei Zielgewichten ≠ 100 % gesperrt, Entwurf bleibt möglich | P1 | erledigt |
 | F2 | Keine Reihenfolge sichtbar: Selbstreflexion → Beurteilung → Gespräch → Ziele | In jeder Zeile der nächste Schritt hervorgehoben, im Dashboard „Meine offenen Punkte“ (erledigt) | P2 | frei |
 | F3 | Nach „Teilen“ geänderte Beurteilung weicht von der geteilten Fassung ab | Hinweis „Seit dem Teilen geändert – erneut teilen?“ | P2 | frei |
-| F4 | Gesprächs-Merker gilt nicht je Jahr (Datenmodell) | Optionales Feld je Jahr (`meetings[2026]`), alte Daten bleiben | P2 | nötig |
-| F5 | Mitarbeiter ohne E-Mail können nicht eingeladen oder geteilt werden | **Teilweise erledigt:** Kennzeichnung „Keine E-Mail“ in der Matrix. „E-Mail ergänzen“ in der Zeile wäre eine neue Speicherfunktion für ein bestehendes Feld, dafür brauche ich ein kurzes OK | P2 | nötig |
+| F4 | Gesprächs-Merker gilt nicht je Jahr (Datenmodell) | **Erledigt (Freigabe 23.11.2026):** optionales Feld `meetingsByYear.<Jahr>`; alte Felder werden weiter geschrieben, der Vorjahres-Haken wird vor dem Überschreiben gesichert | P2 | erledigt |
+| F5 | Mitarbeiter ohne E-Mail können nicht eingeladen oder geteilt werden | **Erledigt (Freigabe 23.11.2026):** Kennzeichnung „Keine E-Mail“ und „E-Mail ergänzen“ direkt in der Zeile (nur leere Adresse, Format geprüft, protokolliert) | P2 | erledigt |
 
 ### HR-Admin
 

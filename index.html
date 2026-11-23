@@ -11700,6 +11700,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
           };
           
           // NEU: HR Admin Sub-Tab Navigation
+          const [hrTrash, setHrTrash] = useState([]); // Papierkorb (nur HR)
           const [hrUsers, setHrUsers] = useState([]); // Phase 3: Konten aus registeredUsers (nur HR, Schalter userAdmin)
           const [hrUsersSearch, setHrUsersSearch] = useState('');
           const [hrUsersFilter, setHrUsersFilter] = useState('all'); // all | team | noteam | disabled
@@ -13992,6 +13993,26 @@ Goal 3: 20% weight, 80% achieved → 16 points
             return lang === 'de' ? 'gerade eben' : lang === 'it' ? 'poco fa' : 'just now';
           };
           
+          // Papierkorb: trash/{id} (Kopf) + trash/{id}/items/{appraisalId} (je Unterlage ein Dokument, damit nichts an
+          // der Größengrenze scheitert). Kopf erst nach allen Einträgen auf 'complete'. Gibt true zurück, wenn alles abgelegt ist.
+          const nwMoveToTrash = async (member, memberId, appraisalDocs) => {
+            try {
+              const { id: _ignore, ...stateData } = member || {};
+              const memberSnap = await db.collection('teamMembers').doc(memberId).get(); // exakte Kopie aus der Datenbank
+              const memberData = memberSnap.exists ? memberSnap.data() : stateData;
+              const ref = db.collection('trash').doc();
+              const now = new Date().toISOString();
+              await ref.set({ kind: 'teamMember', status: 'pending', memberId, memberName: member.name || '', member: memberData,
+                appraisalCount: appraisalDocs.length, deletedAt: now, deletedBy: (user && user.email) || '', deletedByUid: (user && user.uid) || '', restoredAt: null });
+              for (const d of appraisalDocs) await ref.collection('items').doc(d.id).set({ data: d.data() });
+              await ref.update({ status: 'complete' });
+              await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'member_trashed', target: 'trash/' + ref.id, employeeId: memberId, count: appraisalDocs.length });
+              return true;
+            } catch (e) {
+              console.error('Papierkorb nicht erreichbar:', e);
+              return false;
+            }
+          };
           const deleteTeamMember = async (id) => {
             if (!user || !db) return;
             
@@ -13999,7 +14020,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
             const nwMember = teamMembers.find(m => m.id === id) || {};
             const nwDocs = teamAppraisals.filter(a => a.employeeId === id);
             const nwTyped = prompt(getText(lang,
-              `ACHTUNG – endgültig löschen\n\n${nwMember.name || 'Dieser Mitarbeiter'} und alle ${nwDocs.length} Unterlagen (Selbstreflexionen, Beurteilungen, Zielvereinbarungen aller Jahre) werden unwiderruflich gelöscht.\n\nVorher wird automatisch eine Sicherungsdatei heruntergeladen.\n\nZum Bestätigen den Namen eintippen:`,
+              `Mitarbeiter entfernen\n\n${nwMember.name || 'Dieser Mitarbeiter'} und alle ${nwDocs.length} Unterlagen (Selbstreflexionen, Beurteilungen, Zielvereinbarungen aller Jahre) verschwinden aus der App und kommen in den Papierkorb. HR kann sie von dort wiederherstellen.\n\nVorher wird automatisch eine Sicherungsdatei heruntergeladen.\n\nZum Bestätigen den Namen eintippen:`,
               `ATTENZIONE – eliminazione definitiva\n\n${nwMember.name || ''} e tutti i ${nwDocs.length} documenti verranno eliminati.\n\nPer confermare digita il nome:`,
               `WARNING – permanent deletion\n\n${nwMember.name || ''} and all ${nwDocs.length} documents will be deleted.\n\nType the name to confirm:`));
             const nwConfirmed = nwTyped !== null && String(nwTyped).trim().toLowerCase() === String(nwMember.name || '').trim().toLowerCase() && String(nwMember.name || '').trim() !== '';
@@ -14014,20 +14035,30 @@ Goal 3: 20% weight, 80% achieved → 16 points
                   a.download = `Sicherung_${String(nwMember.name || id).replace(/[^\wäöüÄÖÜß-]+/g, '_')}_${new Date().toISOString().slice(0, 10)}.json`;
                   document.body.appendChild(a); a.click(); a.remove();
                 } catch (e) { console.warn('Sicherung konnte nicht erstellt werden', e); }
-                // Lösche Mitarbeiter
-                await db.collection('teamMembers').doc(id).delete();
-                
-                // Lösche zugehörige Appraisals
+                // Zugehörige Appraisals (gleiche Abfrage wie bisher, nur vor dem Löschen)
                 const appraisalsSnapshot = await db.collection('teamAppraisals')
                   .where('userId', '==', user.uid)
                   .where('employeeId', '==', id)
                   .get();
+                // Papierkorb (Freigabe 23.11.2026): erst vollständig ablegen, dann löschen. Klappt das Ablegen
+                // nicht, wird nur nach ausdrücklicher Bestätigung endgültig gelöscht.
+                const nwTrashed = await nwMoveToTrash(nwMember, id, appraisalsSnapshot.docs);
+                if (!nwTrashed && !confirm(getText(lang,
+                  'Der Papierkorb ist gerade nicht erreichbar.\n\nOK = trotzdem endgültig löschen (die Sicherungsdatei wurde heruntergeladen) · Abbrechen = nichts löschen',
+                  'Il cestino non è raggiungibile.\n\nOK = elimina definitivamente · Annulla = non eliminare nulla',
+                  'The trash is not reachable.\n\nOK = delete permanently anyway · Cancel = delete nothing'))) {
+                  showToast(getText(lang, 'Nichts gelöscht.', 'Nulla eliminato.', 'Nothing deleted.'), 'info');
+                  return;
+                }
+                // Lösche Mitarbeiter
+                await db.collection('teamMembers').doc(id).delete();
                 
                 const batch = db.batch();
                 appraisalsSnapshot.docs.forEach(doc => {
                   batch.delete(doc.ref);
                 });
                 await batch.commit();
+                if (nwTrashed) showToast(getText(lang, `${nwMember.name || 'Mitarbeiter'} ist im Papierkorb. HR kann wiederherstellen.`, 'Spostato nel cestino.', 'Moved to trash.'), 'success');
               } catch (error) {
                 console.error('Error deleting team member:', error);
                 showToast(lang === 'de' ? 'Fehler beim Löschen' : lang === 'it' ? 'Errore durante eliminazione' : 'Error deleting', 'error');
@@ -17059,6 +17090,83 @@ Best regards`
               (err) => { console.error('Konten laden fehlgeschlagen:', err); showToast(getText(lang, 'Konten konnten nicht geladen werden.', 'Impossibile caricare gli account.', 'Could not load accounts.'), 'error'); });
             return () => unsub();
           }, [db, isHRAdmin, activeView, hrSubTab]);
+          // ===== Papierkorb (Freigabe 23.11.2026): HR sieht entfernte Mitarbeiter und stellt sie wieder her =====
+          useEffect(() => {
+            if (!db || !isHRAdmin || activeView !== 'hrdashboard' || hrSubTab !== 'trash') return;
+            const unsub = db.collection('trash').onSnapshot(
+              (snap) => setHrTrash(snap.docs.map(d => ({ docId: d.id, ...d.data() }))),
+              (err) => { console.error('Papierkorb laden fehlgeschlagen:', err); showToast(getText(lang, 'Papierkorb konnte nicht geladen werden.', 'Impossibile caricare il cestino.', 'Could not load trash.'), 'error'); });
+            return () => unsub();
+          }, [db, isHRAdmin, activeView, hrSubTab]);
+          const hrRestoreTrash = async (t) => {
+            if (!confirm(getText(lang, `${t.memberName || 'Mitarbeiter'} mit ${t.appraisalCount || 0} Unterlagen wiederherstellen?\n\nDer Mitarbeiter erscheint wieder im Team der bisherigen Führungskraft.`, `Ripristinare ${t.memberName}?`, `Restore ${t.memberName}?`))) return;
+            try {
+              const memRef = db.collection('teamMembers').doc(t.memberId);
+              if ((await memRef.get()).exists) { showToast(getText(lang, 'Diesen Mitarbeiter gibt es bereits – nichts wiederhergestellt.', 'Il collaboratore esiste già – nulla ripristinato.', 'Employee already exists – nothing restored.'), 'warning'); return; }
+              const items = await db.collection('trash').doc(t.docId).collection('items').get();
+              let restored = 0, skipped = 0;
+              for (const it of items.docs) {
+                const ref = db.collection('teamAppraisals').doc(it.id);
+                if ((await ref.get()).exists) { skipped++; continue; } // nie etwas Vorhandenes überschreiben
+                await ref.set(it.data().data); restored++;
+              }
+              await memRef.set(t.member);
+              const now = new Date().toISOString();
+              await db.collection('trash').doc(t.docId).update({ restoredAt: now, restoredBy: (user && user.email) || '' });
+              await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'member_restored', target: 'trash/' + t.docId, employeeId: t.memberId, count: restored, skipped });
+              showToast(getText(lang, `Wiederhergestellt: ${t.memberName} mit ${restored} Unterlagen` + (skipped ? ` (${skipped} gab es schon)` : ''), 'Ripristinato', 'Restored'), 'success');
+            } catch (e) {
+              console.error('Wiederherstellen fehlgeschlagen:', e);
+              showToast(getText(lang, 'Wiederherstellen fehlgeschlagen. Bitte erneut versuchen.', 'Ripristino non riuscito.', 'Restore failed.'), 'error');
+            }
+          };
+          const hrPurgeTrash = async (t) => {
+            const typed = prompt(getText(lang, `Endgültig löschen\n\n${t.memberName} und ${t.appraisalCount || 0} Unterlagen werden aus dem Papierkorb unwiderruflich gelöscht.\n\nZum Bestätigen den Namen eintippen:`, `Eliminare definitivamente ${t.memberName}? Digita il nome:`, `Delete ${t.memberName} permanently? Type the name:`));
+            if (typed === null) return;
+            if (String(typed).trim().toLowerCase() !== String(t.memberName || '').trim().toLowerCase() || !String(t.memberName || '').trim()) { showToast(getText(lang, 'Name stimmt nicht überein – nichts gelöscht.', 'Il nome non corrisponde – nulla eliminato.', 'Name does not match – nothing deleted.'), 'warning'); return; }
+            try {
+              const items = await db.collection('trash').doc(t.docId).collection('items').get();
+              for (const it of items.docs) await it.ref.delete();
+              await db.collection('trash').doc(t.docId).delete();
+              await db.collection('auditLog').add({ at: new Date().toISOString(), by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'trash_purged', target: 'trash/' + t.docId, employeeId: t.memberId });
+              showToast(getText(lang, 'Endgültig gelöscht', 'Eliminato definitivamente', 'Deleted permanently'), 'success');
+            } catch (e) {
+              console.error('Endgültig löschen fehlgeschlagen:', e);
+              showToast(getText(lang, 'Löschen fehlgeschlagen.', 'Eliminazione non riuscita.', 'Delete failed.'), 'error');
+            }
+          };
+          const renderHRTrash = () => {
+            const T = (de, it, en) => getText(lang, de, it, en);
+            const fmt = (d) => { if (!d) return '–'; const x = new Date(d); return isNaN(x) ? '–' : x.toLocaleDateString(lang === 'it' ? 'it-IT' : lang === 'en' ? 'en-GB' : 'de-DE'); };
+            const rows = hrTrash.filter(t => t.kind === 'teamMember' && t.status === 'complete').sort((a, b) => String(b.deletedAt || '').localeCompare(String(a.deletedAt || '')));
+            return React.createElement(NwPane, null,
+              React.createElement(NwPaneHeader, { title: T('Papierkorb', 'Cestino', 'Trash') }),
+              React.createElement('p', { className: 'px-4 pt-3 text-sm text-ink-60' }, T('Entfernte Mitarbeiter mit allen Unterlagen. „Wiederherstellen“ legt sie unverändert wieder an und überschreibt nie etwas Vorhandenes.', 'Collaboratori rimossi con tutti i documenti.', 'Removed employees with all documents.')),
+              React.createElement('div', { className: 'relative overflow-x-auto p-4' },
+                React.createElement('table', { className: 'w-full text-sm', 'data-testid': 'hr-trash-table' },
+                  React.createElement('thead', null, React.createElement('tr', { className: 'border-b border-line text-left text-xs text-ink-60' },
+                    [T('Mitarbeiter', 'Collaboratore', 'Employee'), T('Unterlagen', 'Documenti', 'Documents'), T('Entfernt am', 'Rimosso il', 'Removed on'), T('Entfernt von', 'Rimosso da', 'Removed by'), T('Status', 'Stato', 'Status'), ''].map((h, i) =>
+                      React.createElement('th', { key: i, scope: 'col', className: 'px-3 py-2 font-medium' }, h || React.createElement('span', { className: 'sr-only' }, T('Aktionen', 'Azioni', 'Actions')))))),
+                  React.createElement('tbody', null,
+                    rows.length === 0 && React.createElement('tr', null, React.createElement('td', { colSpan: 6, className: 'px-3 py-6 text-center text-ink-60' }, T('Der Papierkorb ist leer.', 'Il cestino è vuoto.', 'Trash is empty.'))),
+                    rows.map(t => React.createElement('tr', { key: t.docId, className: 'border-b border-line last:border-0' },
+                      React.createElement('td', { className: 'px-3 py-2 font-medium text-ink' }, t.memberName || '–'),
+                      React.createElement('td', { className: 'px-3 py-2' }, t.appraisalCount || 0),
+                      React.createElement('td', { className: 'px-3 py-2 text-ink-60' }, fmt(t.deletedAt)),
+                      React.createElement('td', { className: 'px-3 py-2 text-ink-60 break-all' }, t.deletedBy || '–'),
+                      React.createElement('td', { className: 'px-3 py-2' }, t.restoredAt
+                        ? React.createElement(NwChip, { tone: 'ok' }, T('Wiederhergestellt ', 'Ripristinato ', 'Restored ') + fmt(t.restoredAt))
+                        : React.createElement(NwChip, { tone: 'neutral' }, T('Im Papierkorb', 'Nel cestino', 'In trash'))),
+                      React.createElement('td', { className: 'px-3 py-2 text-right whitespace-nowrap' },
+                        !t.restoredAt && React.createElement(NwButton, { size: 'sm', variant: 'secondary', onClick: () => hrRestoreTrash(t) }, T('Wiederherstellen', 'Ripristina', 'Restore')),
+                        ' ',
+                        React.createElement(NwButton, { size: 'sm', variant: 'ghost', onClick: () => hrPurgeTrash(t) }, T('Endgültig löschen', 'Elimina definitivamente', 'Delete permanently')))
+                    ))
+                  )
+                )
+              )
+            );
+          };
           const hrUserName = (u) => u.fullName || u.name || String(u.email || '').split('@')[0] || '–';
           const hrUserIsAdmin = (u) => HR_ADMIN_EMAILS.includes(String(u.email || '').toLowerCase());
           const hrUserUid = (u) => u.uid || u.docId;
@@ -17385,6 +17493,15 @@ Best regards`
                   '💾',
                   getText(lang, 'Backup & Restore', 'Backup & Ripristino', 'Backup & Restore')
                 ),
+                React.createElement('button', {
+                  onClick: () => setHrSubTab('trash'),
+                  role: 'tab', 'aria-selected': hrSubTab === 'trash', type: 'button',
+                  className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-150 hover:scale-[1.03] active:scale-[.98] ' +
+                    (hrSubTab === 'trash' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
+                },
+                  React.createElement(Trash2, { size: 16 }),
+                  getText(lang, 'Papierkorb', 'Cestino', 'Trash')
+                ),
                 NW_FEATURES.userAdmin && React.createElement('button', {
                   onClick: () => setHrSubTab('users'),
                   role: 'tab', 'aria-selected': hrSubTab === 'users', type: 'button',
@@ -17397,6 +17514,7 @@ Best regards`
               ),
               
               NW_FEATURES.userAdmin && hrSubTab === 'users' && renderHRUsers(),
+              hrSubTab === 'trash' && renderHRTrash(),
               
               // === BACKUP & RESTORE TAB ===
               hrSubTab === 'backup' && React.createElement('div', { className: 'space-y-6' },

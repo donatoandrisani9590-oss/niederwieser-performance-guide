@@ -34,9 +34,12 @@ import React, {…} from 'https://esm.sh/react@18.2.0';
 import ReactDOM from 'https://esm.sh/react-dom@18.2.0/client';
 import {…} from 'https://esm.sh/lucide-react@0.292.0';
 
-### firestore (92)
+### firestore (107)
 await db.collection('appraisals').doc(hrEditAppraisal.id).update(updates);
+await db.collection('auditLog').add({ at: new Date().toISOString(), by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'trash_purged', target: 'trash/' + t.docId, employeeId: t.memberId });
 await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'member_email_added', target: 'teamMembers/' + member.id });
+await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'member_restored', target: 'trash/' + t.docId, employeeId: t.memberId, count: restored, skipped });
+await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'member_trashed', target: 'trash/' + ref.id, employeeId: memberId, count: appraisalDocs.length });
 await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: share ? 'share_with_employee' : 'unshare_with_employee', target: docItem.id, employeeId: member.id, docType: docItem.type || 'review' });
 await db.collection('registeredUsers').doc(u.docId).update(lock ? { disabled: true, disabledAt: now, disabledBy: (user && user.email) || '' } : { disabled: false, enabledAt: now, enabledBy: (user && user.email) || '' });
 await db.collection('registeredUsers').doc(u.docId).update({ fullName: name, fullNameChangedAt: new Date().toISOString(), fullNameChangedBy: (user && user.email) || '' });
@@ -71,6 +74,8 @@ await db.collection('teamMembers').doc(member.id).update({ email, emailAddedAt: 
 await db.collection('teamMembers').doc(member.id).update({ sharedWith: newShared });
 await db.collection('teamMembers').doc(scheduleModalMember.id).update({ scheduledAt: null, scheduledSource: null, meetingDone: null // Auch meetingDone zurücksetzen });
 await db.collection('teamMembers').doc(scheduleModalMember.id).update({ scheduledAt: parsed.toISOString(), scheduledSource: 'manual' // Markiere als "manuell gesetzt" });
+await db.collection('trash').doc(t.docId).delete();
+await db.collection('trash').doc(t.docId).update({ restoredAt: now, restoredBy: (user && user.email) || '' });
 await storage.ref(docData.storagePath).delete();
 await window.db.collection('registeredUsers').doc(userCredential.user.uid).set({ email: email.toLowerCase(), createdAt: new Date().toISOString(), uid: userCredential.user.uid });
 await window.db.collection('registeredUsers').doc(userCredential.user.uid).set({ email: email.toLowerCase(), fullName: fullName.trim(), // v92: Name mitspeichern createdAt: new Date().toISOString(), uid: userCredential.user.uid });
@@ -91,10 +96,18 @@ const existingSnapshot = await db.collection('teamMembers') .where('userId', '==
 const fallbackSnapshot = await db.collection('teamAppraisals') .where('employeeId', '==', employeeId) .orderBy('createdAt', 'desc') .limit(5) .get();
 const fallbackSnapshot = await db.collection('teamAppraisals') .where('employeeId', '==', member.id) .where('period', '==', currentPeriod) .where('isPdfUpload', '==', true) .get();
 const hrAudit = (action, u, extra = {}) => db.collection('auditLog').add({ at: new Date().toISOString(), by: (user && user.email) || '', byUid: (user && user.uid) || '', action, target: 'registeredUsers/' + u.docId, targetEmail: u.email || '', ...extra, });
+const items = await db.collection('trash').doc(t.docId).collection('items').get();
+const items = await db.collection('trash').doc(t.docId).collection('items').get();
+const items = await db.collection('trash').doc(t.docId).collection('items').get();
+const items = await db.collection('trash').doc(t.docId).collection('items').get();
+const memRef = db.collection('teamMembers').doc(t.memberId);
 const memberRef = await db.collection('teamMembers').add({ userId: user.uid, ownerEmail: user.email || '', // NEU: E-Mail des Eigentümers speichern für Sharing-Anzeige name: data.name, position: data.position, email: data.email || '', department: data.department || '', accessCode: accessCode, createdAt: new Date().toISOString(), invitedAt: null, // Wird erst beim Einladen/Link-Erstellen gesetzt lastReminderAt: null });
 const memberRef = db.collection('teamMembers').doc(appraisalWithType.employeeId);
+const memberSnap = await db.collection('teamMembers').doc(memberId).get();
 const membersSnap = await db.collection('teamMembers').get();
 const pendingSnapshot = await db.collection('teamAppraisals') .where('pendingForEmail', '==', userEmail) .where('pendingStatus', '==', 'pending_claim') .get();
+const ref = db.collection('teamAppraisals').doc(it.id);
+const ref = db.collection('trash').doc();
 const reviewSnapshot = await db.collection('teamAppraisals') .where('employeeId', '==', employeeId) .where('type', '==', 'review') .orderBy('createdAt', 'desc') .limit(1) .get();
 const salaryAccessSnap = await db.collection('salaryReviewAccess').get();
 const salaryDataSnap = await db.collection('salaryReviewData').get();
@@ -114,6 +127,7 @@ const unsub = db.collection('salaryReviewAccess').onSnapshot(snap => { const acc
 const unsub = db.collection('salaryReviewHistory') .orderBy('changedAt', 'desc') .limit(500) .onSnapshot(snap => { const history = snap.docs.map(d => ({ id: d.id, ...d.data() })); setSalaryReviewHistory(history); devLog('📜 Salary Review History geladen:', history.length); }, err => { console.error('Salary Review History Error:', err); });
 const unsub = db.collection('teamAppraisals') .where('employeeId', '==', memberId) .onSnapshot((snapshot) => { // Entferne alte Einträge für diesen Mitarbeiter sharedAppraisals = sharedAppraisals.filter(a => a.employeeId !== memberId); // Füge neue hinzu const newAppraisals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), _isOwner: false, _sharedMember: true })); sharedAppraisals = [...sharedAppraisals, ...newAppraisals]; // Kombiniere alle Quellen combineAndSetAppraisals(); devLog(`✅ Appraisals für ${memberId}:`, newAppraisals.length); }, (err) => { console.warn(`⚠️ Fehler beim Laden von Appraisals für ${memberId}:`, err); });
 const unsub = db.collection('teamAppraisals') .where('employeeId', '==', memberId) .onSnapshot(async (snapshot) => { // Finde Dokumente die NICHT bereits in ownedAppraisals sind const missingAppraisals = snapshot.docs .filter(doc => !ownedAppraisals.some(a => a.id === doc.id)) .map(doc => ({ id: doc.id, ...doc.data(), _isOwner: true, _foundViaEmployeeId: true // Markierung für Debugging })); if (missingAppraisals.length > 0) { devLog(`⚠️ Gefunden via employeeId (${memberId}):`, missingAppraisals.length, 'Dokumente mit falscher userId'); // === AUTO-REPAIR: Korrigiere die falschen userId/managerId === for (const appraisal of missingAppraisals) { try { // Nur reparieren wenn userId wirklich falsch ist if (appraisal.userId !== user.uid) { devLog(` 🔧 Auto-Repair für Dokument`); devLog(' userId aktualisiert'); await db.collection('teamAppraisals').doc(appraisal.id).update({ userId: user.uid, managerId: user.uid, _autoRepairedAt: new Date().toISOString(), _autoRepairedUserIdFrom: appraisal.userId || 'MISSING', _autoRepairedBy: 'manager_fallback_query' }); devLog(' ✅ Repariert!'); } } catch (err) { console.warn(` ❌ Reparatur fehlgeschlagen:`, err.message); } } } // Entferne alte Einträge für diesen Mitarbeiter employeeBasedAppraisals = employeeBasedAppraisals.filter(a => a.employeeId !== memberId); // Füge gefundene hinzu (die noch nicht in ownedAppraisals sind) const newAppraisals = snapshot.docs .filter(doc => !ownedAppraisals.some(a => a.id === doc.id)) .map(doc => ({ id: doc.id, ...doc.data(), _isOwner: true, _foundViaEmployeeId: true })); employeeBasedAppraisals = [...employeeBasedAppraisals, ...newAppraisals]; combineAndSetAppraisals(); }, (err) => { console.warn(`Fallback-Query Fehler für ${memberId}:`, err); });
+const unsub = db.collection('trash').onSnapshot( (snap) => setHrTrash(snap.docs.map(d => ({ docId: d.id, ...d.data() }))), (err) => { console.error('Papierkorb laden fehlgeschlagen:', err); showToast(getText(lang, 'Papierkorb konnte nicht geladen werden.', 'Impossibile caricare il cestino.', 'Could not load trash.'), 'error'); });
 const unsub1 = db.collection('teamAppraisals').onSnapshot(snap => { const data = snap.docs.map(d => ({ id: d.id, ...d.data() })); setAllCompanyAppraisals(data); devLog('📊', isHRAdmin ? 'HR Admin' : 'Invited User', ':', data.length, 'Beurteilungen geladen'); }, err => console.error('Appraisals error:', err));
 const unsub2 = db.collection('teamMembers').onSnapshot(snap => { const data = snap.docs.map(d => ({ id: d.id, ...d.data() })); setAllCompanyMembers(data); setHRDataLoading(false); devLog('👥', isHRAdmin ? 'HR Admin' : 'Invited User', ':', data.length, 'Mitarbeiter geladen'); }, err => { console.error('Members error:', err); setHRDataLoading(false); });
 const unsubByEmail = db.collection('teamAppraisals') .where('employeeEmail', '==', employeeEmail) .onSnapshot( (snapshot) => { devLog('📡 Snapshot by employeeEmail:', snapshot.docs.length, 'docs'); processSelfAssessments(snapshot.docs); }, (err) => console.error('❌ Listener error (by Email):', err) );
@@ -123,6 +137,7 @@ db.collection('salaryReviewData').doc('current').get() .then(doc => { if (doc.ex
 db.collection('teamMembers') .where('userId', '==', user.uid) .get() .then(snap => { if (snap.docs.length > 0) { ownedMembers = snap.docs.map(doc => ({ id: doc.id, ...doc.data(), accessCode: doc.data().accessCode || 'pending', _isOwner: true })); updateCombinedMembers(); } }) .catch(e => console.error('Retry Fehler:', e));
 db.collection('teamMembers').doc(currentMember.id).update(updateData) .then(() => { devLog('✅ Firestore Update erfolgreich'); // Lokalen State aktualisieren setTeamMembers(prev => prev.map(m => m.id === currentMember.id ? { ...m, sharedWith: newSharedWith } : m )); // Link generieren (einfach - nur App-URL, FK2 muss sich einloggen) const baseUrl = window.location.origin + window.location.pathname; setShareModalLink(baseUrl); setShareModalStep(2); devLog('✅ Teilen erfolgreich'); }) .catch((err) => { console.error('❌ Firestore Fehler:', err); showToast(lang === 'de' ? 'Fehler beim Speichern' : 'Error saving', 'error'); });
 db.collection('teamMembers').where('userId', '==', user.uid).get() .then(snap => addDebugLog('success', `Firebase OK: ${snap.size} Mitglieder gefunden`)) .catch(err => addDebugLog('error', `Firebase Fehler: ${err.message}`));
+for (const d of appraisalDocs) await ref.collection('items').doc(d.id).set({ data: d.data() });
 pdfSource = await storage.ref(pdfData.storagePath).getDownloadURL();
 pdfSource = await storage.ref(status.selfPdf.storagePath).getDownloadURL();
 unsubOwned = db.collection('teamAppraisals') .where('userId', '==', user.uid) .onSnapshot((snapshot) => { ownedAppraisals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), _isOwner: true })); // Kombiniere alle Quellen und dedupliziere combineAndSetAppraisals(); // Cache für AppraisalForm (Selbstreflexion-Verknüpfung) localStorage.setItem('nw_team_appraisals_cache', JSON.stringify([...ownedAppraisals, ...employeeBasedAppraisals, ...sharedAppraisals])); }, (error) => { console.error('Firestore teamAppraisals error:', error); });

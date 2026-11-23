@@ -495,6 +495,40 @@ test('Mitarbeiter löschen: nur mit eingetipptem Namen, vorher automatische Sich
   const [download] = await Promise.all([page.waitForEvent('download'), remove('Emil Probe')]);
   expect(download.suggestedFilename()).toMatch(/^Sicherung_Emil_Probe_/);
   await expect.poll(async () => (await listDocs('teamMembers')).some((d) => d.name.endsWith('/tm-emil')), { timeout: 10000 }).toBe(false);
+  // Vorher vollständig im Papierkorb abgelegt
+  const trash = (await listDocs('trash')).filter((d) => field(d, 'memberId') === 'tm-emil');
+  expect(trash).toHaveLength(1);
+  expect(field(trash[0], 'status')).toBe('complete');
+  const items = await listDocs(trash[0].name.split('/documents/')[1] + '/items');
+  expect(items.map((d) => d.name.split('/').pop()).sort()).toEqual(['ap-emil-goals', 'ap-emil-goals-next']);
+});
+
+test('Papierkorb: HR stellt einen entfernten Mitarbeiter mit allen Unterlagen unverändert wieder her', async ({ page }) => {
+  const memberBefore = JSON.stringify((await getDoc('teamMembers/tm-emil')).fields);
+  const docsBefore = JSON.stringify((await listDocs('teamAppraisals')).filter((d) => field(d, 'employeeId') === 'tm-emil').map((d) => [d.name, d.fields]).sort());
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  page.removeAllListeners('dialog');
+  page.on('dialog', (d) => (d.type() === 'prompt' ? d.accept('Emil Probe') : d.accept()).catch(() => {}));
+  await memberRow(page, 'Emil Probe').getByRole('button', { name: /Weitere Aktionen/ }).click();
+  await Promise.all([page.waitForEvent('download'), page.getByRole('menuitem', { name: 'Entfernen' }).click()]);
+  await expect(page.getByText('Emil Probe ist im Papierkorb')).toBeVisible();
+  await expect.poll(async () => (await getDoc('teamMembers/tm-emil')) === null, { timeout: 10000 }).toBe(true);
+  // HR: Papierkorb → Wiederherstellen
+  await page.getByText('Abmelden').first().click();
+  await expect(page.getByText('Abmelden')).toHaveCount(0);
+  await page.reload();
+  await gotoTeamAndLogin(page, USERS.hr);
+  await page.getByText('HR Dashboard', { exact: true }).first().click();
+  await page.getByRole('tab', { name: 'Papierkorb' }).click();
+  const row = page.getByTestId('hr-trash-table').getByRole('row').filter({ hasText: 'Emil Probe' });
+  await expect(row).toContainText('Im Papierkorb');
+  await row.getByRole('button', { name: 'Wiederherstellen' }).click();
+  await expect(row).toContainText('Wiederhergestellt');
+  expect(JSON.stringify((await getDoc('teamMembers/tm-emil')).fields)).toBe(memberBefore);
+  expect(JSON.stringify((await listDocs('teamAppraisals')).filter((d) => field(d, 'employeeId') === 'tm-emil').map((d) => [d.name, d.fields]).sort())).toBe(docsBefore);
+  const log = (await listDocs('auditLog')).map((d) => field(d, 'action'));
+  expect(log).toEqual(expect.arrayContaining(['member_trashed', 'member_restored']));
 });
 
 test('HR-Dashboard: Jahresfilter, Standard „Alle Jahre“ wie bisher, Daten unverändert', async ({ page }) => {

@@ -27620,10 +27620,10 @@ const renderDashboard = () => {
                 ),
                 
                 // Ziele-Tabelle (nur wenn noGoalsMode = false)
-                !noGoalsMode && e('table', { className: 'w-full text-sm' },
+                !noGoalsMode && e('div', { className: 'overflow-x-auto' }, e('table', { className: 'w-full text-sm' },
                   e('thead', { className: 'bg-panel text-left' }, e('tr', null, e('th', { className: 'p-2 border' }, t.goalName), e('th', { className: 'p-2 border w-20' }, t.weight), e('th', { className: 'p-2 border w-24' }, t.achievement), e('th', { className: 'p-2 border w-20' }, 'BARS'), e('th', { className: 'p-2 border w-10 no-print' }, ''))),
                   e('tbody', null, goals.map(g => renderGoalRow(g)))
-                ),
+                )),
                 !noGoalsMode && e('button', { onClick: () => addItem(goals, setGoals, { name: '', weight: 0, achievement: 0 }), className: 'no-print mt-3 text-xs flex items-center gap-1 text-nw-blue coarse:py-2.5' }, e(PlusCircle, { size: 14 }), ' ', t.addGoal),
                 !noGoalsMode && totalGoalWeight !== 100 && goals.length > 0 && e('div', { className: 'mt-3 text-sm p-3 rounded-lg bg-warn-bg text-ink-60 border border-warn/30 no-print' }, t.totalWeight + ': ' + totalGoalWeight + '% (' + t.shouldBe100 + ')'),
                 
@@ -27663,10 +27663,10 @@ const renderDashboard = () => {
                   e('h3', { className: 'text-lg font-semibold text-nw-blue' }, nwGloss(t.partC, lang)),
                   e('span', { className: 'bg-nw-green-15 text-ok px-2 py-1 rounded-lg text-xs font-semibold' }, 'Score: ' + wieCoreScore.toFixed(2))
                 ),
-                e('table', { className: 'w-full text-sm' },
+                e('div', { className: 'overflow-x-auto' }, e('table', { className: 'w-full text-sm' },
                   e('thead', { className: 'bg-panel text-left' }, e('tr', null, e('th', { className: 'p-2 border' }, t.compName), e('th', { className: 'p-2 border w-24' }, t.rating), e('th', { className: 'p-2 border' }, t.comment))),
                   e('tbody', null, coreList.map(c => renderCompRow(c, coreList, setCoreList)))
-                )
+                ))
               ),
               
               // === TEIL C.2: LEADERSHIP-KOMPETENZEN (nur wenn isManager) ===
@@ -27675,10 +27675,10 @@ const renderDashboard = () => {
                   e('h3', { className: 'text-lg font-semibold text-ok' }, t.partCLead),
                   e('span', { className: 'bg-nw-green-15 text-ok px-2 py-1 rounded-lg text-xs font-semibold' }, 'Score: ' + wieLeadScore.toFixed(2))
                 ),
-                e('table', { className: 'w-full text-sm' },
+                e('div', { className: 'overflow-x-auto' }, e('table', { className: 'w-full text-sm' },
                   e('thead', { className: 'bg-panel text-left' }, e('tr', null, e('th', { className: 'p-2 border' }, t.compName), e('th', { className: 'p-2 border w-24' }, t.rating), e('th', { className: 'p-2 border' }, t.comment))),
                   e('tbody', null, leadList.map(c => renderCompRow(c, leadList, setLeadList)))
-                )
+                ))
               ),
               
               // === HALO-EFFEKT WARNUNG ===
@@ -27714,10 +27714,10 @@ const renderDashboard = () => {
                 e('div', { className: 'mb-6' }, e('label', { className: 'block text-sm font-semibold mb-1 text-ink' }, t.strengthsPersonal), e('textarea', { value: formData.strengths2, onChange: (ev) => handleFormChange('strengths2', ev.target.value), className: 'rounded-lg border border-line bg-white text-ink placeholder:text-ink-60 px-3 py-2 text-sm leading-normal transition-[border-color,box-shadow] duration-fast focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none w-full resize-none', rows: 3 })),
                 e('div', null,
                   e('label', { className: 'block text-sm font-semibold mb-2 text-ink' }, t.devPlanTitle || t.development),
-                  e('table', { className: 'w-full text-sm' },
+                  e('div', { className: 'overflow-x-auto' }, e('table', { className: 'w-full text-sm' },
                     e('thead', { className: 'bg-panel text-left' }, e('tr', null, e('th', { className: 'p-2 border' }, t.devMeasure || t.measure), e('th', { className: 'p-2 border w-32' }, t.devResponsible || t.responsible), e('th', { className: 'p-2 border w-28' }, t.devDeadline || t.deadline), e('th', { className: 'p-2 border w-10 no-print' }, ''))),
                     e('tbody', null, devPlan.map(d => renderDevRow(d)))
-                  ),
+                  )),
                   e('button', { onClick: () => addItem(devPlan, setDevPlan, { measure: '', responsible: '', deadline: '' }), className: 'no-print mt-3 text-xs flex items-center gap-1 text-ok coarse:py-2.5' }, e(PlusCircle, { size: 14 }), ' ', t.addDev)
                 )
               ),

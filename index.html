@@ -922,7 +922,7 @@
             className: 'rounded-card border border-line bg-white px-4 py-3.5 text-left shadow-card ' + (onClick ? ' transition-transform duration-150 hover:-translate-y-0.5' : '')
           },
             React.createElement('div', { className: 'flex items-center gap-1.5 eyebrow' },
-              icon && React.createElement(icon, { size: 12, 'aria-hidden': true }), label),
+              icon && React.createElement(icon, { size: 12, 'aria-hidden': true }), React.createElement('span', { className: 'min-w-0' }, label)), // ein Element: Begriffe mit Erklärung zerfallen sonst in Flex-Teile mit Abstand
             React.createElement('div', { className: 'mt-2 flex items-baseline gap-2' },
               React.createElement('span', { className: 'text-xl font-semibold tracking-[-.02em] tnum ' + (tone === 'warn' ? 'text-warn' : tone === 'danger' ? 'text-danger' : tone === 'ok' ? 'text-ok' : 'text-nw-blue') }, value)),
             hint && React.createElement('div', { className: 'mt-1 text-xs text-ink-60' }, hint)
@@ -1262,6 +1262,153 @@
           const one = parts.length === 1 && parts[0].match(/^([\s\S]*[.!])\s+([^.!?]+\?)$/);
           if (one) return { title: one[2], text: one[1], ...(extra || {}) };
           return { title: parts[0], text: parts.slice(1).join('\n\n') || undefined, ...(extra || {}) };
+        };
+
+        // ============================================
+        // GLOSSAR (A5 aus §11): Fachbegriffe beim Darüberfahren, Antippen und per Tastatur erklären
+        // ============================================
+        // Nur Anzeige. Die Texte fassen zusammen, was die App an anderer Stelle (Dashboard, „GPS Formel“) schon sagt:
+        // GPS = 50 % WAS + 50 % WIE, BARS = Verhaltensanker in fünf Stufen. An der Bewertung ändert das nichts.
+        const NW_GLOSSARY = {
+          GPS: {
+            title: { de: 'GPS: Global Performance Score', it: 'GPS: Global Performance Score', en: 'GPS: Global Performance Score' },
+            text: {
+              de: 'Gesamtwert der Beurteilung auf der Skala 1 bis 5. Er setzt sich aus 50 % WAS (Zielerreichung) und 50 % WIE (Kompetenzen) zusammen. Ohne Ziele zählen nur die Kompetenzen.',
+              it: 'Punteggio complessivo della valutazione su una scala da 1 a 5: 50 % COSA (raggiungimento obiettivi) e 50 % COME (competenze). Senza obiettivi contano solo le competenze.',
+              en: 'Overall score of the review on a scale from 1 to 5: 50% WHAT (goal achievement) and 50% HOW (competencies). Without goals only the competencies count.'
+            }
+          },
+          WAS: {
+            title: { de: 'WAS: Ziele & Ergebnisse', it: 'COSA: Obiettivi & Risultati', en: 'WHAT: Goals & Results' },
+            text: {
+              de: 'Was wurde erreicht? Die gewichtete Erreichung der vereinbarten Ziele. Zählt 50 % im GPS.',
+              it: 'Che cosa è stato raggiunto? Il raggiungimento ponderato degli obiettivi concordati. Vale il 50 % del GPS.',
+              en: 'What was achieved? The weighted achievement of the agreed goals. Counts 50% of the GPS.'
+            }
+          },
+          WIE: {
+            title: { de: 'WIE: Verhalten & Kompetenzen', it: 'COME: Comportamento & Competenze', en: 'HOW: Behavior & Competencies' },
+            text: {
+              de: 'Wie wurde es erreicht? Die Bewertung der Kompetenzen auf der BARS-Skala. Zählt 50 % im GPS, bei Führungskräften je 25 % Kern-Kompetenzen und Leadership.',
+              it: 'Come è stato raggiunto? La valutazione delle competenze sulla scala BARS. Vale il 50 % del GPS, per i responsabili 25 % competenze chiave e 25 % leadership.',
+              en: 'How was it achieved? The rating of the competencies on the BARS scale. Counts 50% of the GPS, for managers 25% core competencies and 25% leadership.'
+            }
+          },
+          BARS: {
+            title: { de: 'BARS: Behaviorally Anchored Rating Scales', it: 'BARS: Behaviorally Anchored Rating Scales', en: 'BARS: Behaviorally Anchored Rating Scales' },
+            text: {
+              de: 'Verhaltensanker: Jede Stufe von 1 bis 5 ist mit beobachtbarem Verhalten beschrieben. Bewertet wird Verhalten, nicht Persönlichkeit. Stufe 3 ist die Baseline.',
+              it: 'Ancore comportamentali: ogni livello da 1 a 5 è descritto con comportamenti osservabili. Si valuta il comportamento, non la personalità. Il livello 3 è la baseline.',
+              en: 'Behavioral anchors: each level from 1 to 5 is described by observable behavior. We rate behavior, not personality. Level 3 is the baseline.'
+            }
+          }
+        };
+        // In IT/EN heißen WAS/WIE in der App COSA/COME bzw. WHAT/HOW
+        const NW_GLOSS_ALIAS = { GPS: 'GPS', BARS: 'BARS', WAS: 'WAS', COSA: 'WAS', WHAT: 'WAS', WIE: 'WIE', COME: 'WIE', HOW: 'WIE' };
+        const nwGlossLang = (lang) => lang === 'it' ? 'it' : lang === 'en' ? 'en' : 'de';
+        // Beschreibung für Screenreader: dauerhaft (unsichtbar) im Dokument, per aria-describedby am Begriff
+        const nwGlossDescId = (key, lang) => {
+          const l = nwGlossLang(lang);
+          let box = document.getElementById('nw-glossary');
+          if (!box) { box = document.createElement('div'); box.id = 'nw-glossary'; box.hidden = true; document.body.appendChild(box); }
+          const id = 'nw-gloss-' + key;
+          let el = document.getElementById(id);
+          if (!el) { el = document.createElement('span'); el.id = id; box.appendChild(el); }
+          const txt = NW_GLOSSARY[key].title[l] + '. ' + NW_GLOSSARY[key].text[l];
+          if (el.textContent !== txt) el.textContent = txt;
+          return id;
+        };
+        // Sichtbare Erklärung: ein schwebendes Kärtchen am Dokument (wird von keinem scrollenden Rahmen abgeschnitten).
+        let nwGlossOpen = null;
+        let nwGlossTimer = null;
+        const nwGlossHide = () => {
+          clearTimeout(nwGlossTimer);
+          if (!nwGlossOpen) return;
+          const o = nwGlossOpen;
+          nwGlossOpen = null;
+          o.cleanup();
+          o.el.remove();
+        };
+        // Beim Verlassen kurz warten: So kann der Zeiger auf das Kärtchen hinüberfahren, ohne dass es verschwindet
+        const nwGlossLeave = () => { clearTimeout(nwGlossTimer); nwGlossTimer = setTimeout(nwGlossHide, 180); };
+        const nwGlossShow = (anchor, key, lang) => {
+          clearTimeout(nwGlossTimer);
+          if (nwGlossOpen && nwGlossOpen.anchor === anchor) return;
+          nwGlossHide();
+          const l = nwGlossLang(lang);
+          const g = NW_GLOSSARY[key];
+          const tip = document.createElement('div');
+          tip.setAttribute('role', 'tooltip');
+          tip.setAttribute('data-nw-gloss', key);
+          tip.className = 'no-print fixed z-50 w-[260px] max-w-[calc(100vw-16px)] animate-fade-in rounded-lg border border-line bg-white p-2.5 text-left shadow-float';
+          const head = document.createElement('div');
+          head.className = 'text-xs font-semibold normal-case tracking-normal text-nw-blue';
+          head.textContent = g.title[l];
+          const body = document.createElement('div');
+          body.className = 'mt-1 text-2xs font-normal normal-case leading-relaxed tracking-normal text-ink-60';
+          body.textContent = g.text[l];
+          tip.appendChild(head);
+          tip.appendChild(body);
+          document.body.appendChild(tip);
+          const place = () => {
+            if (!anchor.isConnected) { nwGlossHide(); return; }
+            const r = anchor.getBoundingClientRect();
+            const w = tip.offsetWidth || 260, h = tip.offsetHeight || 0;
+            const left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), Math.max(8, window.innerWidth - w - 8));
+            const below = r.bottom + 6;
+            const top = (below + h > window.innerHeight - 8 && r.top - 6 - h >= 8) ? r.top - 6 - h : below;
+            tip.style.left = Math.round(left) + 'px';
+            tip.style.top = Math.round(top) + 'px';
+          };
+          place();
+          // Tailwind erzeugt die Stile im Browser kurz nach dem Einfügen: nachziehen, sobald die Größe feststeht
+          const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(place) : null;
+          if (ro) ro.observe(tip);
+          const onScroll = () => nwGlossHide();
+          const onKey = (ev) => { if (ev.key === 'Escape') nwGlossHide(); };
+          const onDown = (ev) => { if (!anchor.contains(ev.target) && !tip.contains(ev.target)) nwGlossHide(); };
+          const onMove = () => { if (!anchor.isConnected) nwGlossHide(); }; // Begriff ist verschwunden (Seitenwechsel)
+          const keep = () => clearTimeout(nwGlossTimer);
+          tip.addEventListener('mouseenter', keep);
+          tip.addEventListener('mouseleave', nwGlossLeave);
+          window.addEventListener('scroll', onScroll, true);
+          document.addEventListener('keydown', onKey, true);
+          document.addEventListener('mousedown', onDown, true);
+          document.addEventListener('mousemove', onMove, { passive: true });
+          nwGlossOpen = { el: tip, anchor, cleanup: () => {
+            if (ro) ro.disconnect();
+            window.removeEventListener('scroll', onScroll, true);
+            document.removeEventListener('keydown', onKey, true);
+            document.removeEventListener('mousedown', onDown, true);
+            document.removeEventListener('mousemove', onMove);
+          } };
+        };
+        // Begriff mit Erklärung: gepunktet unterstrichen, per Maus, Antippen und Tab erreichbar, Esc blendet aus
+        const NwTerm = ({ term, lang, children }) => {
+          const key = NW_GLOSS_ALIAS[term];
+          if (!key) return children || term;
+          return React.createElement('span', {
+            tabIndex: 0, 'data-nw-term': key,
+            ref: (node) => { if (node) node.setAttribute('aria-describedby', nwGlossDescId(key, lang)); },
+            className: 'cursor-help rounded-sm underline decoration-dotted decoration-1 underline-offset-[3px]',
+            onMouseEnter: (ev) => nwGlossShow(ev.currentTarget, key, lang),
+            onMouseLeave: nwGlossLeave,
+            onFocus: (ev) => nwGlossShow(ev.currentTarget, key, lang),
+            onBlur: nwGlossHide,
+            onClick: (ev) => nwGlossShow(ev.currentTarget, key, lang)
+          }, children || term);
+        };
+        // Text mit Fachbegriffen: erstes Vorkommen je Begriff bekommt die Erklärung, der Wortlaut bleibt gleich
+        const nwGloss = (text, lang) => {
+          const parts = String(text == null ? '' : text).split(/\b(GPS|BARS|WAS|WIE|COSA|COME|WHAT|HOW)\b/);
+          if (parts.length === 1) return text;
+          const seen = {};
+          return parts.map((part, i) => {
+            const key = i % 2 === 1 ? NW_GLOSS_ALIAS[part] : null;
+            if (!key || seen[key]) return part;
+            seen[key] = true;
+            return React.createElement(NwTerm, { key: i, term: part, lang });
+          });
         };
 
         // ============================================
@@ -8264,7 +8411,7 @@
                     
                     // BARS Beschreibung
                     description && e('div', { className: 'mb-3 p-3 bg-panel rounded-lg border border-line' },
-                        e('p', { className: 'text-xs text-ink-60 font-medium mb-1' }, 'BARS'),
+                        e('p', { className: 'text-xs text-ink-60 font-medium mb-1' }, nwGloss('BARS', lang)),
                         e('p', { className: 'text-sm text-ink italic' }, description)
                     ),
                     
@@ -8744,7 +8891,7 @@
                 ),
                 e('div', { className: "bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid" },
                     e('div', { className: "flex justify-between items-center mb-4 border-b pb-2" },
-                        e('h3', { className: "text-lg font-semibold text-nw-blue" }, t.partB),
+                        e('h3', { className: "text-lg font-semibold text-nw-blue" }, nwGloss(t.partB, lang)),
                         e('span', { className: "bg-nw-blue-12 text-nw-blue px-2 py-1 rounded-lg text-xs font-semibold" }, 
                             goals.length > 0 ? `Score: ${wasScore.toFixed(2)}` : (lang === 'de' ? 'Keine Ziele (nur WIE)' : lang === 'it' ? 'Nessun obiettivo (solo COME)' : 'No goals (HOW only)')
                         )
@@ -9190,7 +9337,7 @@
                 
                 e('div', { className: "bg-white p-4 md:p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid" },
                     e('div', { className: "flex justify-between items-center mb-4 border-b pb-2" },
-                        e('h3', { className: "text-lg font-semibold text-nw-blue" }, t.partC),
+                        e('h3', { className: "text-lg font-semibold text-nw-blue" }, nwGloss(t.partC, lang)),
                         e('span', { className: "bg-nw-green-15 text-ok px-2 py-1 rounded-lg text-xs font-semibold" }, `Score: ${wieCoreScore.toFixed(2)}`)
                     ),
                     
@@ -9239,7 +9386,7 @@
                     e('button', { onClick: () => addItem(leadList, setLeadList, {name:'', weight:20, rating:3, comment:''}), className: "no-print mt-3 text-xs flex items-center gap-1 text-ok" }, e(PlusCircle, {size:14}), t.addComp)
                 ),
                 e('div', { className: "bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid" },
-                    e('h3', { className: "text-lg font-semibold text-nw-blue mb-4 border-b pb-2" }, t.partC3),
+                    e('h3', { className: "text-lg font-semibold text-nw-blue mb-4 border-b pb-2" }, nwGloss(t.partC3, lang)),
                     e('div', { className: "bg-panel p-6 rounded-xl text-center border border-line" },
                         e('div', { className: "text-sm text-ink-60 uppercase tracking-widest mb-2" }, "Final GPS"),
                         e('div', { className: "text-2xl font-semibold text-ink" }, finalGPS.toFixed(2)),
@@ -10832,6 +10979,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
             const main = document.querySelector('main');
             if (main) main.scrollTop = 0;
             window.scrollTo(0, 0);
+            nwGlossHide();
           }, [activeView, competencyArea]);
           // Formulare: vor dem Verlassen nachfragen (nicht gespeicherte Eingaben)
           const confirmLeaveForm = async () => !(activeView === 'formular' || activeView === 'zielvereinbarung') ||
@@ -15487,7 +15635,7 @@ Best regards`
                   label: overdueAppointments.length > 0 ? getText(lang, 'Gespräche überfällig', 'Colloqui scaduti', 'Meetings overdue') : getText(lang, 'Gespräche diese Woche', 'Colloqui questa settimana', 'Meetings this week'),
                   value: overdueAppointments.length > 0 ? overdueAppointments.length : appointmentsThisWeek.length,
                   tone: overdueAppointments.length > 0 ? 'danger' : undefined }),
-                React.createElement(NwStatCard, { icon: TrendingUp, label: lang === 'de' ? 'Ø GPS-Score' : 'Avg GPS Score', value: avgGPS || '—', tone: avgGPS ? (avgGPS >= 3 ? 'ok' : 'warn') : undefined })
+                React.createElement(NwStatCard, { icon: TrendingUp, label: nwGloss(lang === 'de' ? 'Ø GPS-Score' : 'Avg GPS Score', lang), value: avgGPS || '—', tone: avgGPS ? (avgGPS >= 3 ? 'ok' : 'warn') : undefined })
               ),
               
               // (Hilfe-Hinweis entfällt: HR-Copilot steht dauerhaft in der Seitenleiste und unten rechts – n.Org: erklären, wenn gefragt)
@@ -21450,9 +21598,9 @@ Best regards`
                         React.createElement('th', { className: 'px-4 py-3 text-left font-semibold' }, getText(lang, 'Mitarbeiter', 'Collaboratore', 'Employee')),
                         React.createElement('th', { className: 'px-4 py-3 text-left font-semibold' }, getText(lang, 'Führungskraft', 'Manager', 'Manager')),
                         React.createElement('th', { className: 'px-4 py-3 text-left font-semibold' }, getText(lang, 'Typ', 'Tipo', 'Type')),
-                        React.createElement('th', { className: 'px-4 py-3 text-center font-semibold' }, 'GPS'),
-                        React.createElement('th', { className: 'px-4 py-3 text-center font-semibold' }, getText(lang, 'WAS', 'COSA', 'WHAT')),
-                        React.createElement('th', { className: 'px-4 py-3 text-center font-semibold' }, getText(lang, 'WIE', 'COME', 'HOW')),
+                        React.createElement('th', { className: 'px-4 py-3 text-center font-semibold' }, nwGloss('GPS', lang)),
+                        React.createElement('th', { className: 'px-4 py-3 text-center font-semibold' }, nwGloss(getText(lang, 'WAS', 'COSA', 'WHAT'), lang)),
+                        React.createElement('th', { className: 'px-4 py-3 text-center font-semibold' }, nwGloss(getText(lang, 'WIE', 'COME', 'HOW'), lang)),
                         React.createElement('th', { className: 'px-4 py-3 text-left font-semibold' }, 'Status'),
                         React.createElement('th', { className: 'px-4 py-3 text-left font-semibold' }, getText(lang, 'Datum', 'Data', 'Date')),
                         React.createElement('th', { className: 'px-4 py-3 text-center font-semibold' }, getText(lang, 'Aktionen', 'Azioni', 'Actions'))
@@ -27198,7 +27346,7 @@ const renderDashboard = () => {
               // === TEIL B: ZIELERREICHUNG (WAS) ===
               e('div', { className: 'bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid' },
                 e('div', { className: 'flex justify-between items-center mb-4 border-b pb-2' },
-                  e('h3', { className: 'text-lg font-semibold text-nw-blue' }, t.partB),
+                  e('h3', { className: 'text-lg font-semibold text-nw-blue' }, nwGloss(t.partB, lang)),
                   e('span', { className: 'bg-nw-blue-12 text-nw-blue px-2 py-1 rounded-lg text-xs font-semibold' }, goals.length > 0 ? 'Score: ' + wasScore.toFixed(2) : (lang === 'de' ? 'Keine Ziele' : 'Nessun obiettivo'))
                 ),
                 
@@ -27267,7 +27415,7 @@ const renderDashboard = () => {
               // === TEIL C: KERN-KOMPETENZEN ===
               e('div', { className: 'bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid' },
                 e('div', { className: 'flex justify-between items-center mb-4 border-b pb-2' },
-                  e('h3', { className: 'text-lg font-semibold text-nw-blue' }, t.partC),
+                  e('h3', { className: 'text-lg font-semibold text-nw-blue' }, nwGloss(t.partC, lang)),
                   e('span', { className: 'bg-nw-green-15 text-ok px-2 py-1 rounded-lg text-xs font-semibold' }, 'Score: ' + wieCoreScore.toFixed(2))
                 ),
                 e('table', { className: 'w-full text-sm' },
@@ -27301,7 +27449,7 @@ const renderDashboard = () => {
               
               // === TEIL C.3: GPS ===
               e('div', { className: 'bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid' },
-                e('h3', { className: 'text-lg font-semibold text-nw-blue mb-4 border-b pb-2' }, t.partC3),
+                e('h3', { className: 'text-lg font-semibold text-nw-blue mb-4 border-b pb-2' }, nwGloss(t.partC3, lang)),
                 e('div', { className: 'bg-panel p-6 rounded-xl text-center border border-line' },
                   e('div', { className: 'text-sm text-ink-60 uppercase tracking-widest mb-2' }, 'Final GPS'),
                   e('div', { className: 'text-2xl font-semibold text-ink' }, finalGPS.toFixed(2)),
@@ -28958,7 +29106,7 @@ const renderDashboard = () => {
               e('div', { className: 'bg-white rounded-xl shadow-float border border-line-2 p-6' },
                 e('h3', { className: 'font-semibold text-lg text-nw-blue mb-4 flex items-center gap-2' },
                   e(Calculator, { size: 20, className: 'text-nw-blue' }),
-                  lang === 'de' ? 'GPS-Vorschau (Selbsteinschätzung)' : 'GPS Preview (Self-Assessment)'
+                  nwGloss(lang === 'de' ? 'GPS-Vorschau (Selbsteinschätzung)' : 'GPS Preview (Self-Assessment)', lang)
                 ),
                 e('div', { className: 'grid grid-cols-2 md:grid-cols-4 gap-4' },
                   // WAS - zeige Prozent UND 5er-Skala

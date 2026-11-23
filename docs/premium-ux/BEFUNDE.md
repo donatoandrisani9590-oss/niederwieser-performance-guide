@@ -13,7 +13,7 @@ Kennzahlen, wartet auf deine Freigabe.
 
 ## A. Ohne Schutzbereich (wichtigste zuerst)
 
-**Stand 23.11.2026:** erledigt sind U1 bis U9 und U11. Offen sind U10, U12, U14.
+**Stand 23.11.2026:** erledigt sind U1 bis U11. Offen sind U12 und U14.
 Details im [Übergabebericht](UEBERGABE.md).
 
 | # | Rolle | Stelle | Problem | Vorschlag | Prio | Aufwand |
@@ -27,7 +27,7 @@ Details im [Übergabebericht](UEBERGABE.md).
 | U7 ✅ | Führungskraft | Nutzerkarte unten links | „Anna Te…“ und „Führungskr…“ abgeschnitten, weil „Abmelden“ als Text daneben steht | Abmelden als Icon-Knopf mit Beschriftung beim Darüberfahren, Name und Rolle voll lesbar | P3 | S |
 | U8 ✅ | HR | HR-Dashboard, Reiter | Fünf Reiter mit Emojis (🔔 ⚖️ 🕸️ 📋 💾), vier mit Icons. Kennzahl-Titel „⚠ ÜBERFÄLLIG!“ | Durchgehend Icons, ruhige Titel | P3 | S |
 | U9 ✅ | Führungskraft | Team-Übersicht mit Schalter `shareWithEmployee` | Nach dem Teilen geänderte Beurteilung weicht still von der geteilten Fassung ab (F3 in §11) | Hinweis „Seit dem Teilen geändert“ mit „Erneut teilen“ (ruft die vorhandene Teilen-Funktion auf) | P2 | S |
-| U10 | alle | Fachbegriffe GPS, WAS, WIE, BARS | Ohne Erklärung an Kennzahlen und Chips (A5 in §11) | Kurze Erklärung beim Darüberfahren und bei Tastaturfokus, einheitlicher Baustein | P3 | M |
+| U10 ✅ | alle | Fachbegriffe GPS, WAS, WIE, BARS | Ohne Erklärung an Kennzahlen und Chips (A5 in §11) | Kurze Erklärung beim Darüberfahren und bei Tastaturfokus, einheitlicher Baustein | P3 | M |
 | U11 ✅ | Führungskraft | Selbstreflexion ansehen | Drei „Zurück“-Knöpfe, aber kein nächster Schritt | Ein „Zurück zum Team“, dazu „Beurteilung starten/fortsetzen“ als Hauptaktion | P2 | S |
 | U12 | Führungskraft | Dashboard unter der Falz | Für Führungskräfte mit Team folgen lange Erklärblöcke (Werte, Kompass, BARS, Jahreszyklus), die es in „Anleitung“ und „GPS Formel“ schon gibt | Wie der Schnellstart-Guide einklappbar, offen für neue Nutzer. Nichts wird entfernt | P3 | S |
 | U13 (kein Befund) | Mitarbeiter | Willkommensseite des Links | Knopf „Zurück zur App“: Nachgeprüft, er erscheint schon heute nur für angemeldete Führungskräfte. Ich hatte ihn gesehen, weil ich im selben Browser noch angemeldet war | nichts zu tun | – | – |

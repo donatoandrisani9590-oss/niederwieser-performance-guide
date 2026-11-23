@@ -321,3 +321,90 @@ test('Selbstreflexion ansehen: bei abgeschlossener Beurteilung „Beurteilung ö
   await expect(page.getByTestId('self-next-step')).toHaveText('Beurteilung öffnen');
   await expect(page.getByRole('button', { name: 'PDF herunterladen' })).toBeVisible();
 });
+
+test('Glossar: „GPS“ an der Kennzahl erklärt sich beim Darüberfahren und per Tastatur, Esc blendet aus', async ({ page, consoleErrors }) => {
+  await loginTeam(page, USERS.managerA);
+  const term = page.locator('main [data-nw-term="GPS"]').first();
+  const tip = page.locator('[data-nw-gloss]');
+  await expect(term).toHaveText('GPS');
+  await expect(tip).toHaveCount(0);
+  await term.hover();
+  await expect(tip).toBeVisible();
+  await expect(tip).toContainText('Global Performance Score');
+  await expect(tip).toContainText('50 % WAS (Zielerreichung) und 50 % WIE (Kompetenzen)');
+  // Der Zeiger kann auf das Kärtchen hinüberfahren, ohne dass es verschwindet
+  await tip.hover();
+  await page.waitForTimeout(400);
+  await expect(tip).toBeVisible();
+  await page.mouse.move(5, 5);
+  await expect(tip).toHaveCount(0);
+  // Tastatur: Fokus zeigt, Esc blendet aus
+  await term.focus();
+  await expect(tip).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(tip).toHaveCount(0);
+  // Screenreader: Beschreibung hängt dauerhaft am Begriff
+  const described = await term.evaluate((el) => document.getElementById(el.getAttribute('aria-describedby')).textContent);
+  expect(described).toContain('Global Performance Score');
+  expect(consoleErrors).toEqual([]);
+});
+
+test('Glossar im Bogen: Überschriften behalten ihren Wortlaut, WAS/WIE/GPS/BARS sind erklärt, die Abschnittsleiste bleibt', async ({ page }) => {
+  await loginTeam(page, USERS.managerA);
+  await memberRow(page, 'Emil Probe').getByRole('button', { name: 'Starten', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Teil B: Zielerreichung (WAS) – 50% Gewichtung' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Teil C: Kern-Kompetenzen (WIE)' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Teil C.3: Global Performance Score (GPS)' })).toBeVisible();
+  for (const key of ['WAS', 'WIE', 'GPS', 'BARS']) await expect(page.locator(`main [data-nw-term="${key}"]`).first()).toBeAttached();
+  const nav = page.getByRole('navigation', { name: 'Abschnitte des Bogens' });
+  for (const code of ['A', 'B', 'C', 'C.3', 'D']) await expect(nav.getByRole('button', { name: code, exact: true })).toBeVisible();
+  const wie = page.locator('main [data-nw-term="WIE"]').first();
+  await wie.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300);
+  await wie.hover();
+  const tip = page.locator('[data-nw-gloss="WIE"]');
+  await expect(tip).toContainText('WIE: Verhalten & Kompetenzen');
+  const box = await tip.boundingBox();
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.y).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(1440);
+  expect(box.y + box.height).toBeLessThanOrEqual(900);
+  // Seitenwechsel räumt ein offenes Kärtchen weg
+  manualDialogs(page, true);
+  await page.getByRole('button', { name: 'Home', exact: true }).click();
+  await page.locator('[data-nw-ok]').click();
+  await expect(page.locator('[data-nw-gloss]')).toHaveCount(0);
+});
+
+test('Glossar auf Italienisch: COSA und COME mit italienischer Erklärung', async ({ page }) => {
+  await loginTeam(page, USERS.managerA);
+  await page.getByRole('radio', { name: 'IT' }).click();
+  await page.getByRole('row').filter({ hasText: 'Emil Probe' }).getByRole('button', { name: 'Avvia', exact: true }).click();
+  const cosa = page.locator('main [data-nw-term="WAS"]').first();
+  await expect(cosa).toHaveText('COSA');
+  await cosa.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300);
+  await cosa.hover();
+  await expect(page.locator('[data-nw-gloss="WAS"]')).toContainText('COSA: Obiettivi & Risultati');
+  await expect(page.locator('[data-nw-gloss="WAS"]')).toContainText('Vale il 50 % del GPS');
+});
+
+test.describe('Handy (390 px): Glossar', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  test('Antippen zeigt die Erklärung ganz im Bild, Antippen daneben blendet sie aus', async ({ page }) => {
+    await openApp(page, '?accessCode=CODE-tm-emil');
+    await page.getByRole('button', { name: /Selbstreflexion starten/ }).click();
+    const was = page.locator('[data-nw-term="WAS"]').first();
+    await was.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400);
+    await was.tap();
+    const tip = page.locator('[data-nw-gloss="WAS"]');
+    await expect(tip).toBeVisible();
+    const box = await tip.boundingBox();
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(390);
+    await page.getByRole('heading', { name: /^Teil A/ }).tap({ force: true }).catch(() => {});
+    await page.mouse.click(5, 300);
+    await expect(tip).toHaveCount(0);
+  });
+});

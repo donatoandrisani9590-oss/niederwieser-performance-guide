@@ -8,13 +8,14 @@ Draft-PR auf `feature/rollen-und-freigaben`
 Dieser Stand ist **ein erster, abgeschlossener Teil**, nicht die ganze Premium-Runde. Erledigt sind die Punkte, die
 ein falsches Bild erzeugten oder den Ablauf am stärksten störten: der einheitliche Dialog statt Browser-Fenstern,
 der falsche „Überfällig“-Alarm, die Scroll-Position beim Seitenwechsel, Rückmeldungen mit „Rückgängig“ und die
-Team-Übersicht auf dem Handy, einheitliche Knopf-Beschriftungen und der nächste Schritt nach dem Lesen einer
-Selbstreflexion. Offen sind das Glossar, die IT/EN-Texte und alles, was deine Freigabe braucht.
+Team-Übersicht auf dem Handy, einheitliche Knopf-Beschriftungen, der nächste Schritt nach dem Lesen einer
+Selbstreflexion und das Glossar. Offen sind die IT/EN-Texte, die Erklärblöcke im Dashboard und alles, was deine
+Freigabe braucht.
 
 | Prüfung | Ausgangslage | Jetzt |
 |---|---|---|
-| Automatische Tests (`npm test`) | 57 / 57 grün | **74 / 74 grün** (17 neue in `tests/e2e/premium.spec.mjs`) |
-| Dieselben Tests unter den eingespielten Firestore-Regeln (`npm run rules:vorschlag`) | 57 / 57 grün | **74 / 74 grün** |
+| Automatische Tests (`npm test`) | 57 / 57 grün | **78 / 78 grün** (21 neue in `tests/e2e/premium.spec.mjs`) |
+| Dieselben Tests unter den eingespielten Firestore-Regeln (`npm run rules:vorschlag`) | 57 / 57 grün | **78 / 78 grün** |
 | Schutzbereich (`node tests/protected/fingerprint.mjs`) | unverändert | **unverändert**, Baseline nicht angefasst |
 | Konsolenfehler in den getesteten Abläufen | 0 | 0 |
 | Browser-Fenster (`confirm`/`prompt`/`alert`) | 33 Stellen | 2 Stellen, beide im Schutzbereich |
@@ -145,6 +146,24 @@ abgeschlossen ist, „Beurteilung öffnen“ als Nebenaktion. „Zurück“ oben
 Der Knopf ruft dieselbe Funktion auf wie „Starten“/„Fortsetzen“ in der Team-Übersicht. Er erscheint nur bei eigenen
 Teammitgliedern; HR und der Weg aus einer Beurteilung heraus („← Beurteilung“) sind unverändert.
 
+### 9. Glossar: GPS, WAS, WIE, BARS erklären sich selbst (U10, A5 aus §11)
+
+Die vier Fachbegriffe sind gepunktet unterstrichen. Beim Darüberfahren, Antippen oder per Tab erscheint eine kurze
+Erklärung, Esc blendet sie aus. Für Screenreader hängt die Beschreibung dauerhaft am Begriff.
+
+| An der Kennzahl | Im Bogen |
+|---|---|
+| ![Kennzahl](screenshots/15-glossar-kennzahl-nachher.png) | ![Bogen](screenshots/16-glossar-bogen-nachher.png) |
+
+- **Wo:** Kennzahl „Ø GPS-Score“ in der Team-Übersicht, die Überschriften von Teil B, C und C.3 in Beurteilung und
+  Selbstreflexion, „BARS“ in der Zieltabelle, „GPS-Vorschau“ in „Selbstreflexion ansehen“ und die Spaltenköpfe
+  GPS, WAS, WIE der HR-Tabelle. Bewusst nicht an jedem Chip, damit die Seite ruhig bleibt.
+- **Wortlaut der Überschriften unverändert.** Die Abschnittsleiste liest sie weiter wie bisher.
+- **Sprachen:** auf Italienisch COSA/COME, auf Englisch WHAT/HOW, jeweils mit eigener Erklärung.
+- **Inhalt:** Die vier Texte fassen zusammen, was die App im Dashboard und unter „GPS Formel“ schon sagt
+  (GPS = 50 % WAS + 50 % WIE, bei Führungskräften je 25 % Kern-Kompetenzen und Leadership, BARS = fünf Stufen mit
+  Verhaltensankern). **Bitte einmal fachlich gegenlesen**, sie stehen in `index.html` unter `NW_GLOSSARY`.
+
 ## Prüfungen
 
 ```bash
@@ -159,8 +178,8 @@ cd tests && npm test
 cd tests && npm run rules:vorschlag
 ```
 
-Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 74 / 74 grün,
-`npm run rules:vorschlag` 74 / 74 grün.
+Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 78 / 78 grün,
+`npm run rules:vorschlag` 78 / 78 grün.
 
 Die bestehenden Tests mussten für den Dialog nicht umgeschrieben werden: `tests/e2e/fixtures.mjs` meldet jeden
 App-Dialog über dieselben `page.on('dialog')`-Listener wie ein Browser-Fenster.
@@ -180,11 +199,14 @@ Vorher-Nachher-Bilder neu erzeugen (Vorschau muss laufen):
 cd tests && node shots-premium.mjs <pfad-zur-alten-index.html>
 ```
 
+```bash
+cd tests && node shots-glossar.mjs
+```
+
 ## Was offen bleibt (ohne Schutzbereich)
 
 | # | Punkt | Warum noch offen |
 |---|---|---|
-| U10 | Erklärungen für GPS, WAS, WIE, BARS beim Darüberfahren (A5) | nicht begonnen |
 | U12 | Erklärblöcke im Dashboard für Führungskräfte mit Team einklappen | nicht begonnen |
 | U14 | rund 220 Textstellen nur DE/EN, Italienisch zeigt dort Englisch (A6) | groß, eigene Runde |
 

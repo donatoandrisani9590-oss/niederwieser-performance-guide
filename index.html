@@ -5970,7 +5970,7 @@
                     e('td', { className: "p-2 border text-center no-print w-10 align-top" }, 
                         e('button', { 
                             onClick: () => removeItem(goals, setGoals, item.id), 
-                            className: "text-danger hover:text-danger hover:bg-danger-bg p-1 rounded-lg transition-colors",
+                            className: "inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-transparent text-danger border-transparent hover:bg-danger-bg h-7 w-7 rounded-ctl coarse:h-11 coarse:w-11",
                             title: lang === 'de' ? 'Ziel entfernen' : lang === 'it' ? 'Rimuovi obiettivo' : 'Remove goal'
                         }, e(Trash2, { size: 16 }))
                     )
@@ -5993,7 +5993,7 @@
                         ),
                         e('button', { 
                             onClick: () => removeItem(goals, setGoals, item.id), 
-                            className: 'text-danger hover:text-danger hover:bg-danger-bg p-1.5 rounded-lg transition-colors',
+                            className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-transparent text-danger border-transparent hover:bg-danger-bg h-8 w-8 rounded-lg coarse:h-11 coarse:w-11',
                             title: lang === 'de' ? 'Ziel entfernen' : lang === 'it' ? 'Rimuovi obiettivo' : 'Remove goal'
                         }, e(Trash2, { size: 18 }))
                     ),
@@ -8453,7 +8453,7 @@
                             }` }, barsScore),
                             e('button', { 
                                 onClick: () => removeItem(goals, setGoals, item.id), 
-                                className: 'text-danger hover:text-danger hover:bg-danger-bg p-1.5 rounded-lg transition-colors',
+                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-transparent text-danger border-transparent hover:bg-danger-bg h-8 w-8 rounded-lg coarse:h-11 coarse:w-11',
                                 title: lang === 'de' ? 'Ziel entfernen' : lang === 'it' ? 'Rimuovi obiettivo' : 'Remove goal'
                             }, e(Trash2, { size: 18 }))
                         )
@@ -8763,7 +8763,7 @@
                               const baseUrl = window.location.href.split('?')[0];
                               window.open(baseUrl + '?view=viewSelfAssessment', '_blank', 'noopener');
                             },
-                            className: 'px-3 py-1.5 bg-ok text-white rounded-lg text-xs font-semibold hover:bg-ok transition-[color,background-color,border-color,opacity,box-shadow,transform] flex items-center gap-1.5 shadow-card'
+                            className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent h-7 px-2.5 text-xs gap-1.5 rounded-ctl coarse:h-9'
                           }, 
                             e(Eye, { size: 14 }),
                             e(ExternalLink, { size: 10, className: 'opacity-70' }),
@@ -8773,7 +8773,7 @@
                           e('button', {
                             onClick: () => (teamContext?.employee?.id || teamContext?.employee?.email) && refreshLinkedSelfAssessment(teamContext.employee.id, teamContext.employee.email),
                             disabled: isRefreshingSelf,
-                            className: 'p-1.5 bg-nw-green-15 text-ok rounded-lg hover:bg-nw-green-15 transition-colors disabled:opacity-50',
+                            className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-8 w-8 rounded-lg coarse:h-11 coarse:w-11',
                             title: lang === 'de' ? 'Aktualisieren' : lang === 'it' ? 'Aggiorna' : 'Refresh'
                           }, 
                             isRefreshingSelf ? e(Loader2, { size: 14, className: 'animate-spin' }) : e(RefreshCw, { size: 14 })
@@ -8781,7 +8781,7 @@
                           // Schließen-Button
                           e('button', {
                             onClick: () => setShowSelfAssessmentHint(false),
-                            className: 'p-1.5 text-ok hover:text-ok hover:bg-nw-green-15 rounded-lg transition-colors',
+                            className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue h-8 w-8 rounded-lg coarse:h-11 coarse:w-11',
                             title: lang === 'de' ? 'Ausblenden' : lang === 'it' ? 'Nascondi' : 'Hide'
                           }, e(X, { size: 14 }))
                         )
@@ -8851,7 +8851,7 @@
                             const competencyUrl = baseUrl + '?view=competencies';
                             window.open(competencyUrl, '_blank', 'noopener,noreferrer');
                           },
-                          className: 'px-4 py-2 bg-nw-blue text-white rounded-card text-sm font-semibold hover:bg-nw-blue transition-[color,background-color,border-color,opacity,box-shadow,transform] shadow-card hover:shadow-float flex items-center gap-2'
+                          className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10'
                         },
                           e(ExternalLink, { size: 14 }),
                           lang === 'de' ? 'Kompetenzen öffnen' : lang === 'it' ? 'Apri competenze' : 'Open Competencies'
@@ -8865,7 +8865,7 @@
                               showToast(lang === 'de' ? 'Link kopiert!' : lang === 'it' ? 'Link copiato!' : 'Link copied!', 'success');
                             });
                           },
-                          className: 'px-4 py-2 bg-white text-nw-blue border border-nw-blue-25 rounded-card text-sm font-medium hover:bg-nw-blue-06 transition-[color,background-color,border-color,opacity,box-shadow,transform] flex items-center gap-2'
+                          className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10'
                         },
                           e(Copy, { size: 14 }),
                           lang === 'de' ? 'Link kopieren' : lang === 'it' ? 'Copia link' : 'Copy Link'
@@ -11014,7 +11014,7 @@ Weight more important goals higher!`
                 // Reset Button
                 React.createElement('button', {
                   onClick: resetChat,
-                  className: 'w-8 h-8 rounded-card bg-nw-grey-40 hover:bg-line flex items-center justify-center transition-colors',
+                  className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-8 w-8 rounded-lg coarse:h-11 coarse:w-11',
                   title: lang === 'de' ? 'Chat zurücksetzen' : lang === 'it' ? 'Resetta chat' : 'Reset chat'
                 },
                   React.createElement(RotateCcw, { size: 14, className: 'text-ink-60' })
@@ -11022,7 +11022,7 @@ Weight more important goals higher!`
                 // Close Button
                 React.createElement('button', {
                   onClick: () => setIsOpen(false),
-                  className: 'w-8 h-8 rounded-card bg-nw-grey-40 hover:bg-line flex items-center justify-center transition-colors'
+                  className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-8 w-8 rounded-lg coarse:h-11 coarse:w-11'
                 },
                   React.createElement(X, { size: 16, className: 'text-ink-60' })
                 )
@@ -11098,7 +11098,7 @@ Weight more important goals higher!`
                   React.createElement('button', {
                     onClick: handleSend,
                     disabled: !inputValue.trim(),
-                    className: 'w-10 h-10 rounded-card bg-nw-blue text-white flex items-center justify-center hover:bg-nw-blue-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                    className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent h-9 w-9 rounded-lg coarse:h-11 coarse:w-11'
                   },
                     React.createElement(Send, { size: 18 })
                   )
@@ -16176,7 +16176,7 @@ Best regards`
                             // Entfernen-Button: Für eigene MA = Löschen, für geteilte MA = Verknüpfung entfernen
                             React.createElement('button', {
                               onClick: () => removeMemberFromView(member, isOwner),
-                              className: 'w-8 h-8 rounded-lg flex items-center justify-center bg-nw-grey-40 text-ink-60 hover:bg-danger-bg hover:text-danger transition-[color,background-color,border-color,opacity,box-shadow,transform]',
+                              className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-8 w-8 rounded-lg coarse:h-11 coarse:w-11',
                               title: isOwner 
                                 ? (lang === 'de' ? 'Entfernen' : 'Remove')
                                 : (lang === 'de' ? 'Aus meiner Ansicht entfernen' : 'Remove from my view')
@@ -16308,7 +16308,7 @@ Best regards`
                                   // Löschen-Button
                                   React.createElement('button', {
                                     onClick: (e) => { e.stopPropagation(); handleDeletePdf(member, 'self'); },
-                                    className: 'p-1 bg-danger text-white rounded-lg hover:bg-danger transition-[color,background-color,border-color,opacity,box-shadow,transform]',
+                                    className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-danger text-white border-transparent hover:bg-[#82241C] h-7 w-7 rounded-ctl coarse:h-11 coarse:w-11',
                                     title: lang === 'de' ? 'PDF löschen' : lang === 'it' ? 'Elimina PDF' : 'Delete PDF'
                                   }, React.createElement(Trash2, { size: 10 }))
                                 ),
@@ -16471,12 +16471,12 @@ Best regards`
                                 ),
                                 React.createElement('button', {
                                   onClick: (e) => { e.stopPropagation(); openPdfInNewTab(status.reviewPdf, status.reviewPdf.pdfFileName); },
-                                  className: 'p-1.5 bg-nw-blue text-white rounded-lg hover:bg-nw-blue transition-[color,background-color,border-color,opacity,box-shadow,transform]',
+                                  className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent h-8 w-8 rounded-lg coarse:h-11 coarse:w-11',
                                   title: lang === 'de' ? 'Ansehen' : lang === 'it' ? 'Visualizza' : 'View'
                                 }, React.createElement(Eye, { size: 12 })),
                                 React.createElement('button', {
                                   onClick: (e) => { e.stopPropagation(); handleDeletePdf(member, 'review'); },
-                                  className: 'p-1.5 bg-danger text-white rounded-lg hover:bg-danger transition-[color,background-color,border-color,opacity,box-shadow,transform]',
+                                  className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-danger text-white border-transparent hover:bg-[#82241C] h-8 w-8 rounded-lg coarse:h-11 coarse:w-11',
                                   title: lang === 'de' ? 'Löschen' : lang === 'it' ? 'Elimina' : 'Delete'
                                 }, React.createElement(Trash2, { size: 12 }))
                               ),
@@ -16551,12 +16551,12 @@ Best regards`
                                 ),
                                 React.createElement('button', {
                                   onClick: (e) => { e.stopPropagation(); openPdfInNewTab(status.goalsPdf, status.goalsPdf.pdfFileName); },
-                                  className: 'p-1.5 bg-nw-blue text-white rounded-lg hover:bg-nw-blue transition-[color,background-color,border-color,opacity,box-shadow,transform]',
+                                  className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent h-8 w-8 rounded-lg coarse:h-11 coarse:w-11',
                                   title: lang === 'de' ? 'Ansehen' : lang === 'it' ? 'Visualizza' : 'View'
                                 }, React.createElement(Eye, { size: 12 })),
                                 React.createElement('button', {
                                   onClick: (e) => { e.stopPropagation(); handleDeletePdf(member, 'goals'); },
-                                  className: 'p-1.5 bg-danger text-white rounded-lg hover:bg-danger transition-[color,background-color,border-color,opacity,box-shadow,transform]',
+                                  className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-danger text-white border-transparent hover:bg-[#82241C] h-8 w-8 rounded-lg coarse:h-11 coarse:w-11',
                                   title: lang === 'de' ? 'Löschen' : lang === 'it' ? 'Elimina' : 'Delete'
                                 }, React.createElement(Trash2, { size: 12 }))
                               ),
@@ -16661,7 +16661,7 @@ Best regards`
                     // Löschen (nur wenn Termin existiert)
                     scheduleModalMember?.scheduledAt && React.createElement('button', {
                       onClick: deleteScheduleDate,
-                      className: 'flex-1 py-3 rounded-card font-semibold text-danger bg-danger-bg hover:bg-danger-bg transition-colors'
+                      className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-9 px-3.5 text-base gap-2 rounded-lg coarse:h-11 flex-1'
                     }, lang === 'de' ? 'Löschen' : lang === 'it' ? 'Elimina' : 'Delete'),
                     
                     // Speichern
@@ -17404,7 +17404,7 @@ Best regards`
                     setCompEmployees(imported);
                     triggerAutoSave(compBudget, imported);
                   },
-                  className: 'px-3 py-1.5 bg-nw-blue text-white rounded-lg text-sm font-medium hover:bg-nw-blue-90'
+                  className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10'
                 }, lang === 'de' ? 'Import aus Reviews' : lang === 'it' ? 'Importa da Reviews' : 'Import from Reviews'),
                 React.createElement('span', { className: 'text-ink-60 text-xs' }, 
                   visibleEmployees.length + ' ' + (lang === 'de' ? 'von' : lang === 'it' ? 'di' : 'of') + ' ' + compEmployees.length)
@@ -17629,7 +17629,7 @@ Best regards`
                   React.createElement('div', { className: 'flex gap-2' },
                     React.createElement('button', { 
                       onClick: () => setShowSalaryReviewInviteModal(false), 
-                      className: 'flex-1 py-2 border rounded-lg hover:bg-panel transition-colors' 
+                      className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10 flex-1' 
                     }, lang === 'de' ? 'Abbrechen' : 'Cancel'),
                     React.createElement('button', { 
                       onClick: async () => { 
@@ -17646,7 +17646,7 @@ Best regards`
                         const success = await addSalaryReviewAccess(email, role, [], { accessSalary, accessGoals }); 
                         if (success) setShowSalaryReviewInviteModal(false); 
                       }, 
-                      className: 'flex-1 py-2 bg-ok text-white rounded-lg font-medium hover:bg-ok transition-colors' 
+                      className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10 flex-1' 
                     }, lang === 'de' ? 'Einladen' : 'Invite')
                   )
                 )
@@ -18207,7 +18207,7 @@ Best regards`
                                 if (success) showToast('Wiederhergestellt!', 'success');
                               }
                             },
-                            className: 'px-3 py-1 bg-nw-blue-12 text-nw-blue rounded-lg text-xs hover:bg-nw-blue-25'
+                            className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-7 px-2.5 text-xs gap-1.5 rounded-ctl coarse:h-9'
                           }, 'Wiederherstellen')
                         )
                       ),
@@ -18226,7 +18226,7 @@ Best regards`
                     }, 'ALLE Beurteilungen wiederherstellen'),
                     React.createElement('button', {
                       onClick: () => { setRestoreData(null); setRestorePreview([]); },
-                      className: 'px-6 py-3 bg-line text-ink rounded-lg font-medium hover:bg-nw-grey'
+                      className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-9 px-3.5 text-base gap-2 rounded-lg coarse:h-11'
                     }, 'Abbrechen')
                   )
                 ),
@@ -18371,7 +18371,7 @@ Best regards`
                           showToast('Fehler beim Durchsuchen', 'error');
                         }
                       },
-                      className: 'px-6 py-3 bg-nw-blue text-white rounded-lg font-medium hover:bg-nw-blue-90 flex items-center gap-2'
+                      className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent h-9 px-3.5 text-base gap-2 rounded-lg coarse:h-11'
                     },
                       'Legacy "appraisals" Collection durchsuchen'
                     )
@@ -18744,7 +18744,7 @@ Best regards`
                                                 managerName: appraisal.managerName
                                               });
                                             },
-                                            className: 'px-3 py-2 bg-nw-grey-40 text-ink rounded-lg text-sm font-medium hover:bg-line flex items-center gap-1'
+                                            className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10'
                                           },
                                             React.createElement(Eye, { size: 14 }),
                                             getText(lang, 'Details', 'Dettagli', 'Details')
@@ -18768,7 +18768,7 @@ Best regards`
                                               a.click();
                                               URL.revokeObjectURL(url);
                                             },
-                                            className: 'px-3 py-2 bg-nw-blue-12 text-nw-blue rounded-lg text-sm font-medium hover:bg-nw-blue-25 flex items-center gap-1'
+                                            className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10'
                                           },
                                             React.createElement(Download, { size: 14 }),
                                             'JSON'
@@ -19059,7 +19059,7 @@ Best regards`
                         a.click();
                         URL.revokeObjectURL(url);
                       },
-                      className: 'px-4 py-2 bg-nw-blue text-white rounded-lg font-medium hover:bg-nw-blue flex items-center gap-2'
+                      className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10'
                     },
                       React.createElement(Download, { size: 16 }),
                       getText(lang, 'Als JSON exportieren', 'Esporta JSON', 'Export as JSON')
@@ -20072,7 +20072,7 @@ Best regards`
                               const top25 = sorted.slice(0, Math.ceil(sorted.length * 0.25));
                               setHrRaterBiasSelectedEmployees(new Set(top25));
                             },
-                            className: 'px-3 py-1.5 text-xs bg-nw-green-15 text-ok rounded-lg hover:bg-nw-green-15 font-medium'
+                            className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-7 px-2.5 text-xs gap-1.5 rounded-ctl coarse:h-9'
                           }, '' + getText(lang, 'Top 25%', 'Top 25%', 'Top 25%')),
                           React.createElement('button', {
                             onClick: () => {
@@ -20085,13 +20085,13 @@ Best regards`
                               const bottom25 = sorted.slice(0, Math.ceil(sorted.length * 0.25));
                               setHrRaterBiasSelectedEmployees(new Set(bottom25));
                             },
-                            className: 'px-3 py-1.5 text-xs bg-white border border-warn/30 text-warn rounded-lg hover:bg-warn-bg font-medium'
+                            className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-7 px-2.5 text-xs gap-1.5 rounded-ctl coarse:h-9'
                           }, '' + getText(lang, 'Bottom 25%', 'Bottom 25%', 'Bottom 25%')),
                           React.createElement('button', {
                             onClick: () => {
                               setHrRaterBiasSelectedEmployees(new Set());
                             },
-                            className: 'px-3 py-1.5 text-xs bg-nw-grey-40 text-ink-60 rounded-lg hover:bg-line font-medium'
+                            className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-7 px-2.5 text-xs gap-1.5 rounded-ctl coarse:h-9'
                           }, '' + getText(lang, 'Keine', 'Nessuno', 'None'))
                         )
                       )
@@ -22129,13 +22129,13 @@ Best regards`
                   React.createElement('div', { className: 'border-t p-4 flex justify-between items-center' },
                     React.createElement('button', {
                       onClick: () => { setHrDeleteConfirm(hrViewAppraisal); setHrViewAppraisal(null); },
-                      className: 'px-4 py-2 bg-danger-bg text-danger rounded-card hover:bg-danger-bg font-medium flex items-center gap-2'
+                      className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10'
                     }, React.createElement(Trash2, { size: 16 }), getText(lang, 'Löschen', 'Elimina', 'Delete')),
                     React.createElement('div', { className: 'flex gap-2' },
                       // PDF Export Button
                       React.createElement('button', {
                         onClick: () => exportHRAppraisalAsPDF(hrViewAppraisal),
-                        className: 'px-4 py-2 bg-nw-green-15 text-ok rounded-card hover:bg-nw-green-15 font-medium flex items-center gap-2'
+                        className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10'
                       }, React.createElement(Download, { size: 16 }), getText(lang, 'PDF', 'PDF', 'PDF')),
                       // Print Button
                       React.createElement('button', {
@@ -22377,7 +22377,7 @@ Best regards`
                   React.createElement('div', { className: 'border-t border-line p-4 flex justify-end gap-3' },
                     React.createElement('button', {
                       onClick: () => setHrEditAppraisal(null),
-                      className: 'px-4 py-2 text-ink-60 hover:bg-nw-grey-40 rounded-lg transition-colors'
+                      className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10'
                     }, getText(lang, 'Abbrechen', 'Annulla', 'Cancel')),
                     React.createElement('button', {
                       onClick: async () => {
@@ -23968,7 +23968,7 @@ Best regards`
                                       setCalibrationNotes(newNotes);
                                       setEditingNoteId(null);
                                     },
-                                    className: "px-3 py-1 text-xs text-danger hover:bg-danger-bg rounded-lg"
+                                    className: "inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-transparent text-danger border-transparent hover:bg-danger-bg h-7 px-2.5 text-xs gap-1.5 rounded-ctl coarse:h-9"
                                   }, lang === 'de' ? 'Löschen' : lang === 'it' ? 'Elimina' : 'Delete')
                                 )
                               )
@@ -27954,7 +27954,7 @@ const renderDashboard = () => {
                     // URL bereinigen
                     window.history.replaceState({}, document.title, window.location.pathname);
                   },
-                  className: 'w-full mt-3 bg-nw-grey-40 text-ink py-3 rounded-card font-medium hover:bg-line transition-[color,background-color,border-color,opacity,box-shadow,transform] flex items-center justify-center gap-2'
+                  className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-9 px-3.5 text-base gap-2 rounded-lg coarse:h-11 w-full mt-3'
                 },
                   React.createElement(ArrowLeft, { size: 18 }),
                   lang === 'de' ? 'Zurück zur App' : lang === 'it' ? 'Torna all\'app' : 'Back to App'
@@ -28193,7 +28193,7 @@ const renderDashboard = () => {
                           // URL bereinigen
                           window.history.replaceState({}, document.title, window.location.pathname);
                         },
-                        className: 'w-full bg-nw-blue text-white py-3 rounded-card font-semibold hover:bg-nw-blue-90 transition-[color,background-color,border-color,opacity,box-shadow,transform] flex items-center justify-center gap-2'
+                        className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent h-9 px-3.5 text-base gap-2 rounded-lg coarse:h-11 w-full'
                       },
                         React.createElement(ArrowLeft, { size: 18 }),
                         lang === 'de' ? 'Zurück zur App' : lang === 'it' ? 'Torna all\'app' : 'Back to App'
@@ -28588,7 +28588,7 @@ const renderDashboard = () => {
                         }
                         setCurrentStep(4);
                       },
-                      className: 'hidden sm:flex items-center gap-2 px-4 py-2 bg-nw-blue-06 text-nw-blue border border-nw-blue-25 rounded-lg text-sm font-medium hover:bg-nw-blue-12 transition-colors'
+                      className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10 hidden sm:flex'
                     },
                       React.createElement(ChevronRight, { size: 16 }),
                       lang === 'de' ? 'Zum Absenden' : lang === 'it' ? 'Vai all\'invio' : 'Skip to Submit'
@@ -28647,7 +28647,7 @@ const renderDashboard = () => {
                     // Zurück Button
                     currentStep > 1 && React.createElement('button', {
                       onClick: () => setCurrentStep(prev => prev - 1),
-                      className: 'flex-1 py-3 px-6 border border-line text-ink rounded-card font-medium hover:bg-panel transition-colors'
+                      className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue h-9 px-3.5 text-base gap-2 rounded-lg coarse:h-11 flex-1'
                     }, lang === 'de' ? 'Zurück' : lang === 'it' ? 'Indietro' : 'Back'),
                     
                     // Weiter / Absenden Button
@@ -29268,7 +29268,7 @@ const renderDashboard = () => {
                             }
                             localStorage.removeItem('nw_return_to_appraisal');
                           },
-                          className: 'px-4 py-2 bg-nw-blue hover:bg-nw-blue-90 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors text-white'
+                          className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10'
                         }, 
                           e(ArrowLeft, { size: 16 }),
                           lang === 'de' ? 'Beurteilung' : lang === 'it' ? 'Valutazione' : 'Appraisal'
@@ -29280,7 +29280,7 @@ const renderDashboard = () => {
                             localStorage.removeItem('nw_return_to_appraisal');
                             setActiveView('teamoverview');
                           },
-                          className: 'px-4 py-2 bg-nw-blue-06 hover:bg-nw-blue-12 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors'
+                          className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10'
                         }, 
                           lang === 'de' ? 'Übersicht' : lang === 'it' ? 'Panoramica' : 'Overview'
                         )
@@ -29292,7 +29292,7 @@ const renderDashboard = () => {
                           localStorage.removeItem('nw_return_to_appraisal');
                           setActiveView('teamoverview');
                         },
-                        className: 'px-4 py-2 bg-nw-blue-06 hover:bg-nw-blue-12 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors'
+                        className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10'
                       }, 
                         e(ArrowLeft, { size: 16 }),
                         lang === 'de' ? 'Zurück' : lang === 'it' ? 'Indietro' : 'Back'
@@ -29557,7 +29557,7 @@ const renderDashboard = () => {
                           }
                           localStorage.removeItem('nw_return_to_appraisal');
                         },
-                        className: 'px-6 py-3 bg-nw-blue hover:bg-nw-blue-90 rounded-card font-semibold text-white flex items-center gap-2 transition-colors shadow-card'
+                        className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-nw-blue text-white hover:bg-nw-blue-90 border-transparent h-9 px-3.5 text-base gap-2 rounded-lg coarse:h-11'
                       }, 
                         e(ArrowLeft, { size: 18 }),
                         lang === 'de' ? 'Zurück zur Beurteilung' : lang === 'it' ? 'Torna alla valutazione' : 'Back to Appraisal'
@@ -29569,7 +29569,7 @@ const renderDashboard = () => {
                           localStorage.removeItem('nw_return_to_appraisal');
                           setActiveView('teamoverview');
                         },
-                        className: 'px-6 py-3 bg-nw-grey-40 hover:bg-line rounded-card font-semibold text-ink flex items-center gap-2 transition-colors'
+                        className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-9 px-3.5 text-base gap-2 rounded-lg coarse:h-11'
                       }, 
                         lang === 'de' ? 'Zur Übersicht' : lang === 'it' ? 'Alla panoramica' : 'To Overview'
                       )
@@ -29838,7 +29838,7 @@ const renderDashboard = () => {
                 !importStatus && React.createElement('div', { className: 'p-6 border-t border-line bg-panel flex gap-3' },
                   React.createElement('button', {
                     onClick: () => { setShowImportModal(false); setImportData(null); },
-                    className: 'flex-1 py-3 rounded-card font-medium text-ink-60 bg-white border border-line hover:bg-nw-grey-40 transition-colors'
+                    className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-9 px-3.5 text-base gap-2 rounded-lg coarse:h-11 flex-1'
                   }, lang === 'de' ? 'Abbrechen' : lang === 'it' ? 'Annulla' : 'Cancel'),
                   React.createElement('button', {
                     onClick: importSelfAssessment,
@@ -29927,7 +29927,7 @@ const renderDashboard = () => {
                 React.createElement('div', { className: 'p-6 border-t border-line bg-panel flex gap-3' },
                   React.createElement('button', {
                     onClick: () => { setShowPendingModal(false); setPendingSelfAssessments([]); },
-                    className: 'flex-1 py-3 rounded-card font-medium text-ink-60 bg-white border border-line hover:bg-nw-grey-40 transition-colors'
+                    className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-fast hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 h-9 px-3.5 text-base gap-2 rounded-lg coarse:h-11 flex-1'
                   }, lang === 'de' ? 'Später' : lang === 'it' ? 'Più tardi' : 'Later'),
                   React.createElement('button', {
                     onClick: claimPendingSelfAssessments,

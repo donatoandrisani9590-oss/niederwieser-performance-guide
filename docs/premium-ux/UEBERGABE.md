@@ -426,6 +426,12 @@ Offen: Die eingeladene Führungskraft kann sich nicht selbst aus der Teilen-List
 - Nicht durch Tests belegt: Neuladen der Seite mitten im Bogen und die Versionshistorie nach mehreren
   Zwischenspeicherungen.
 
+### 19. GPS-Hilfetabelle: unterste Stufe ab 1.00 (freigegeben am 23.11.2026)
+
+Die Seite „GPS Formel“ zeigte „0.00 - 1.50“, das Dashboard „1,00 – 1,50“. Jetzt zeigt die Hilfetabelle
+„1.00 – 1.50“, ebenso die Auskunft des HR-Copilot. Geändert ist nur die Anzeige; die Schwellen-Tabelle `RATINGS`,
+mit der die App einem GPS-Wert seine Stufe zuordnet, ist unverändert.
+
 ## Prüfungen
 
 ```bash

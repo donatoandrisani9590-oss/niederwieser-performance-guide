@@ -2050,6 +2050,10 @@
         // === v92: USER DISPLAY NAME HELPER ===
         // Erzeugt einen lesbaren Anzeigenamen aus Firebase User-Objekt
         // Fallback-Kette: displayName → Email formatiert → 'Manager'
+        // Maskiert Text für das Einsetzen in HTML (PDF-Vorlagen, Detail-Fenster). Ohne das würde Text aus den Bögen,
+        // etwa ein Kommentar der Selbstreflexion, beim Erzeugen eines PDFs als HTML ausgeführt (Audit 23.11.2026, S2).
+        const NW_ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+        const nwEsc = (v) => v == null ? '' : String(v).replace(/[&<>"']/g, (c) => NW_ESC_MAP[c]);
         const getUserDisplayName = (user) => {
           if (!user) return '';
           // 1. Firebase displayName (gesetzt via updateProfile)
@@ -5744,41 +5748,41 @@
                               </div>
                               <div style="text-align: right;">
                                 <p style="font-size: 8pt; color: #5F6377; margin: 0;">Dokumentdatum</p>
-                                <p style="font-size: 10pt; font-weight: 600; margin: 2px 0 0 0;">${formatDate(formData.date)}</p>
+                                <p style="font-size: 10pt; font-weight: 600; margin: 2px 0 0 0;">${nwEsc(formatDate(formData.date))}</p>
                               </div>
                             </div>
                             
                             <!-- DOKUMENTTITEL -->
                             <div style="text-align: center; margin-bottom: 25px;">
-                              <h2 style="color: #243186; font-size: 20pt; margin: 0 0 5px 0; font-weight: 700;">${lang === 'de' ? 'Zielvereinbarung' : lang === 'it' ? 'Accordo sugli Obiettivi' : 'Goal Agreement'}</h2>
+                              <h2 style="color: #243186; font-size: 20pt; margin: 0 0 5px 0; font-weight: 700;">${nwEsc(lang === 'de' ? 'Zielvereinbarung' : lang === 'it' ? 'Accordo sugli Obiettivi' : 'Goal Agreement')}</h2>
                               <p style="color: #6EBD84; font-size: 11pt; margin: 0; font-weight: 600;">Annual Performance Review | Strategie 2035</p>
                             </div>
                             
                             <!-- TEIL A: GESPRÄCHSDATEN -->
                             <div style="margin-bottom: 20px; page-break-inside: avoid;">
                               <div style="background: #243186; color: white; padding: 8px 15px; border-radius: 4px 4px 0 0;">
-                                <h3 style="font-size: 11pt; margin: 0; font-weight: 600;">${t.partA || 'Teil A: Gesprächsdaten'}</h3>
+                                <h3 style="font-size: 11pt; margin: 0; font-weight: 600;">${nwEsc(t.partA || 'Teil A: Gesprächsdaten')}</h3>
                               </div>
                               <table style="width: 100%; border-collapse: collapse; border: 1px solid #E6E8F2; border-top: none;">
                                 <tr>
                                   <td style="padding: 10px 15px; width: 25%; background: #FFFFFF; border-right: 1px solid #E6E8F2; border-bottom: 1px solid #E6E8F2;">
-                                    <span style="font-size: 8pt; color: #5F6377; text-transform: uppercase; letter-spacing: 0.5px;">${t.employee || 'Mitarbeiter:in'}</span>
+                                    <span style="font-size: 8pt; color: #5F6377; text-transform: uppercase; letter-spacing: 0.5px;">${nwEsc(t.employee || 'Mitarbeiter:in')}</span>
                                   </td>
-                                  <td style="padding: 10px 15px; width: 25%; font-weight: 600; border-right: 1px solid #E6E8F2; border-bottom: 1px solid #E6E8F2;">${formData.employee || '–'}</td>
+                                  <td style="padding: 10px 15px; width: 25%; font-weight: 600; border-right: 1px solid #E6E8F2; border-bottom: 1px solid #E6E8F2;">${nwEsc(formData.employee || '–')}</td>
                                   <td style="padding: 10px 15px; width: 25%; background: #FFFFFF; border-right: 1px solid #E6E8F2; border-bottom: 1px solid #E6E8F2;">
-                                    <span style="font-size: 8pt; color: #5F6377; text-transform: uppercase; letter-spacing: 0.5px;">${t.manager || 'Führungskraft'}</span>
+                                    <span style="font-size: 8pt; color: #5F6377; text-transform: uppercase; letter-spacing: 0.5px;">${nwEsc(t.manager || 'Führungskraft')}</span>
                                   </td>
-                                  <td style="padding: 10px 15px; width: 25%; font-weight: 600; border-bottom: 1px solid #E6E8F2;">${formData.manager || '–'}</td>
+                                  <td style="padding: 10px 15px; width: 25%; font-weight: 600; border-bottom: 1px solid #E6E8F2;">${nwEsc(formData.manager || '–')}</td>
                                 </tr>
                                 <tr>
                                   <td style="padding: 10px 15px; background: #FFFFFF; border-right: 1px solid #E6E8F2;">
-                                    <span style="font-size: 8pt; color: #5F6377; text-transform: uppercase; letter-spacing: 0.5px;">${t.position || 'Position'}</span>
+                                    <span style="font-size: 8pt; color: #5F6377; text-transform: uppercase; letter-spacing: 0.5px;">${nwEsc(t.position || 'Position')}</span>
                                   </td>
-                                  <td style="padding: 10px 15px; font-weight: 600; border-right: 1px solid #E6E8F2;">${formData.position || '–'}</td>
+                                  <td style="padding: 10px 15px; font-weight: 600; border-right: 1px solid #E6E8F2;">${nwEsc(formData.position || '–')}</td>
                                   <td style="padding: 10px 15px; background: #FFFFFF; border-right: 1px solid #E6E8F2;">
-                                    <span style="font-size: 8pt; color: #5F6377; text-transform: uppercase; letter-spacing: 0.5px;">${t.date || 'Gesprächsdatum'}</span>
+                                    <span style="font-size: 8pt; color: #5F6377; text-transform: uppercase; letter-spacing: 0.5px;">${nwEsc(t.date || 'Gesprächsdatum')}</span>
                                   </td>
-                                  <td style="padding: 10px 15px; font-weight: 600;">${formatDate(formData.date)}</td>
+                                  <td style="padding: 10px 15px; font-weight: 600;">${nwEsc(formatDate(formData.date))}</td>
                                 </tr>
                               </table>
                             </div>
@@ -5786,32 +5790,32 @@
                             <!-- ZIELDEFINITION -->
                             <div style="margin-bottom: 20px; page-break-inside: avoid;">
                               <div style="background: #2F7A48; color: white; padding: 8px 15px; border-radius: 4px 4px 0 0; display: flex; justify-content: space-between; align-items: center;">
-                                <h3 style="font-size: 11pt; margin: 0; font-weight: 600;">${lang === 'de' ? 'Zieldefinition' : lang === 'it' ? 'Definizione degli Obiettivi' : 'Goal Definition'}</h3>
-                                ${plannedBonusNum > 0 ? `<span style="font-size: 9pt; font-weight: 600; background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 4px;">${lang === 'de' ? 'Geplanter Bonus bei 100%' : lang === 'it' ? 'Bonus previsto al 100%' : 'Planned Bonus at 100%'}: ${Number(plannedBonusNum).toLocaleString('de-DE')} €</span>` : ''}
+                                <h3 style="font-size: 11pt; margin: 0; font-weight: 600;">${nwEsc(lang === 'de' ? 'Zieldefinition' : lang === 'it' ? 'Definizione degli Obiettivi' : 'Goal Definition')}</h3>
+                                ${plannedBonusNum > 0 ? `<span style="font-size: 9pt; font-weight: 600; background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 4px;">${nwEsc(lang === 'de' ? 'Geplanter Bonus bei 100%' : lang === 'it' ? 'Bonus previsto al 100%' : 'Planned Bonus at 100%')}: ${nwEsc(Number(plannedBonusNum).toLocaleString('de-DE'))} €</span>` : ''}
                               </div>
                               <table style="width: 100%; border-collapse: collapse; border: 1px solid #E6E8F2; border-top: none;">
                                 <thead>
                                   <tr style="background: #F2F3F8;">
-                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #2F7A48; width: ${plannedBonusNum > 0 ? '35%' : '40%'};">${t.goalName || 'Zielbezeichnung'}</th>
-                                    <th style="padding: 10px 15px; text-align: center; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #2F7A48; width: 12%;">${t.weight || 'Gewicht'} %</th>
-                                    ${plannedBonusNum > 0 ? `<th style="padding: 10px 15px; text-align: center; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #2F7A48; width: 13%; color: #2F7A48;">${lang === 'de' ? 'Bonus €' : 'Bonus €'}</th>` : ''}
-                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #2F7A48; width: ${plannedBonusNum > 0 ? '40%' : '45%'};">${lang === 'de' ? 'Zielwert / Beschreibung' : 'Target / Description'}</th>
+                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #2F7A48; width: ${nwEsc(plannedBonusNum > 0 ? '35%' : '40%')};">${nwEsc(t.goalName || 'Zielbezeichnung')}</th>
+                                    <th style="padding: 10px 15px; text-align: center; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #2F7A48; width: 12%;">${nwEsc(t.weight || 'Gewicht')} %</th>
+                                    ${plannedBonusNum > 0 ? `<th style="padding: 10px 15px; text-align: center; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #2F7A48; width: 13%; color: #2F7A48;">${nwEsc(lang === 'de' ? 'Bonus €' : 'Bonus €')}</th>` : ''}
+                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #2F7A48; width: ${nwEsc(plannedBonusNum > 0 ? '40%' : '45%')};">${nwEsc(lang === 'de' ? 'Zielwert / Beschreibung' : 'Target / Description')}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   ${goals.length > 0 && goals.some(g => g.name) ? goals.map((g, idx) => {
                                     const goalBonus = plannedBonusNum > 0 ? Math.round(plannedBonusNum * (parseFloat(g.weight) || 0) / 100) : 0;
                                     return `
-                                    <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF'};">
-                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${g.name || '–'}</td>
-                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; text-align: center; font-weight: 700; color: #2F7A48;">${g.weight || 0}%</td>
-                                      ${plannedBonusNum > 0 ? `<td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; text-align: center; font-weight: 600; color: #2F7A48; background: ${idx % 2 === 0 ? '#F2F3F8' : '#F2F3F8'};">${goalBonus > 0 ? Number(goalBonus).toLocaleString('de-DE') + ' €' : '–'}</td>` : ''}
-                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top; white-space: pre-wrap;">${g.target || '–'}</td>
+                                    <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF')};">
+                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${nwEsc(g.name || '–')}</td>
+                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; text-align: center; font-weight: 700; color: #2F7A48;">${nwEsc(g.weight || 0)}%</td>
+                                      ${plannedBonusNum > 0 ? `<td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; text-align: center; font-weight: 600; color: #2F7A48; background: ${nwEsc(idx % 2 === 0 ? '#F2F3F8' : '#F2F3F8')};">${nwEsc(goalBonus > 0 ? Number(goalBonus).toLocaleString('de-DE') + ' €' : '–')}</td>` : ''}
+                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top; white-space: pre-wrap;">${nwEsc(g.target || '–')}</td>
                                     </tr>`;
                                   }).join('') : `
                                     <tr>
-                                      <td colspan="${plannedBonusNum > 0 ? '4' : '3'}" style="padding: 20px 15px; text-align: center; color: #8B8FA1; font-style: italic;">
-                                        ${lang === 'de' ? 'Noch keine Ziele definiert' : 'No goals defined yet'}
+                                      <td colspan="${nwEsc(plannedBonusNum > 0 ? '4' : '3')}" style="padding: 20px 15px; text-align: center; color: #8B8FA1; font-style: italic;">
+                                        ${nwEsc(lang === 'de' ? 'Noch keine Ziele definiert' : 'No goals defined yet')}
                                       </td>
                                     </tr>
                                   `}
@@ -5822,32 +5826,32 @@
                             <!-- ENTWICKLUNGSZIELE (devGoals - aktuelle Daten) -->
                             <div style="margin-bottom: 20px; page-break-inside: avoid;">
                               <div style="background: #243186; color: white; padding: 8px 15px; border-radius: 4px 4px 0 0;">
-                                <h3 style="font-size: 11pt; margin: 0; font-weight: 600;">${lang === 'de' ? 'Entwicklungsziele' : lang === 'it' ? 'Obiettivi di Sviluppo' : 'Development Goals'}</h3>
+                                <h3 style="font-size: 11pt; margin: 0; font-weight: 600;">${nwEsc(lang === 'de' ? 'Entwicklungsziele' : lang === 'it' ? 'Obiettivi di Sviluppo' : 'Development Goals')}</h3>
                               </div>
                               <div style="padding: 10px 15px; background: #F2F3F8; border: 1px solid #E6E8F2; border-top: none;">
-                                <p style="font-size: 9pt; color: #243186; margin: 0;">${lang === 'de' ? 'Persönliche und fachliche Weiterentwicklung (nicht GPS-relevant)' : lang === 'it' ? 'Crescita personale e professionale (non rilevante per GPS)' : 'Personal and professional development (not GPS-relevant)'}</p>
+                                <p style="font-size: 9pt; color: #243186; margin: 0;">${nwEsc(lang === 'de' ? 'Persönliche und fachliche Weiterentwicklung (nicht GPS-relevant)' : lang === 'it' ? 'Crescita personale e professionale (non rilevante per GPS)' : 'Personal and professional development (not GPS-relevant)')}</p>
                               </div>
                               <table style="width: 100%; border-collapse: collapse; border: 1px solid #E6E8F2; border-top: none;">
                                 <thead>
                                   <tr style="background: #F2F3F8;">
-                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #243186; width: 30%;">${lang === 'de' ? 'Entwicklungsziel' : lang === 'it' ? 'Obiettivo sviluppo' : 'Development Goal'}</th>
-                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #243186; width: 15%;">${lang === 'de' ? 'Kategorie' : lang === 'it' ? 'Categoria' : 'Category'}</th>
-                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #243186; width: 35%;">${lang === 'de' ? 'Erfolgskriterium' : lang === 'it' ? 'Criterio di successo' : 'Success Criteria'}</th>
-                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #243186; width: 20%;">${lang === 'de' ? 'Bis wann' : lang === 'it' ? 'Entro quando' : 'Deadline'}</th>
+                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #243186; width: 30%;">${nwEsc(lang === 'de' ? 'Entwicklungsziel' : lang === 'it' ? 'Obiettivo sviluppo' : 'Development Goal')}</th>
+                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #243186; width: 15%;">${nwEsc(lang === 'de' ? 'Kategorie' : lang === 'it' ? 'Categoria' : 'Category')}</th>
+                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #243186; width: 35%;">${nwEsc(lang === 'de' ? 'Erfolgskriterium' : lang === 'it' ? 'Criterio di successo' : 'Success Criteria')}</th>
+                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #243186; width: 20%;">${nwEsc(lang === 'de' ? 'Bis wann' : lang === 'it' ? 'Entro quando' : 'Deadline')}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   ${devGoals.length > 0 && devGoals.some(d => d.name) ? devGoals.map((d, idx) => `
-                                    <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF'};">
-                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top; white-space: pre-wrap;">${d.name || '–'}</td>
-                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${d.category === 'skill' ? (lang === 'de' ? 'Fachlich' : lang === 'it' ? 'Tecnico' : 'Skill') : d.category === 'leadership' ? (lang === 'de' ? 'Führung' : lang === 'it' ? 'Leadership' : 'Leadership') : d.category === 'personal' ? (lang === 'de' ? 'Persönlich' : lang === 'it' ? 'Personale' : 'Personal') : (d.category || '–')}</td>
-                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top; white-space: pre-wrap;">${d.target || '–'}</td>
-                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${d.deadline ? formatDate(d.deadline) : '–'}</td>
+                                    <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF')};">
+                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top; white-space: pre-wrap;">${nwEsc(d.name || '–')}</td>
+                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${nwEsc(d.category === 'skill' ? (lang === 'de' ? 'Fachlich' : lang === 'it' ? 'Tecnico' : 'Skill') : d.category === 'leadership' ? (lang === 'de' ? 'Führung' : lang === 'it' ? 'Leadership' : 'Leadership') : d.category === 'personal' ? (lang === 'de' ? 'Persönlich' : lang === 'it' ? 'Personale' : 'Personal') : (d.category || '–'))}</td>
+                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top; white-space: pre-wrap;">${nwEsc(d.target || '–')}</td>
+                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${nwEsc(d.deadline ? formatDate(d.deadline) : '–')}</td>
                                     </tr>
                                   `).join('') : `
                                     <tr>
                                       <td colspan="4" style="padding: 20px 15px; text-align: center; color: #8B8FA1; font-style: italic;">
-                                        ${lang === 'de' ? 'Noch keine Entwicklungsziele definiert' : lang === 'it' ? 'Nessun obiettivo di sviluppo definito' : 'No development goals defined yet'}
+                                        ${nwEsc(lang === 'de' ? 'Noch keine Entwicklungsziele definiert' : lang === 'it' ? 'Nessun obiettivo di sviluppo definito' : 'No development goals defined yet')}
                                       </td>
                                     </tr>
                                   `}
@@ -5866,22 +5870,22 @@
                             <!-- D.2 ENTWICKLUNGSMASSNAHMEN (aus Leistungsbeurteilung) -->
                             <div style="margin-bottom: 20px; page-break-inside: avoid;">
                               <div style="background: #9B2C22; color: white; padding: 8px 15px; border-radius: 4px 4px 0 0;">
-                                <h3 style="font-size: 11pt; margin: 0; font-weight: 600;">${lang === 'de' ? 'Entwicklungsmaßnahmen (aus Leistungsbeurteilung)' : lang === 'it' ? 'Misure di sviluppo (dalla valutazione)' : 'Development Measures (from Performance Review)'}</h3>
+                                <h3 style="font-size: 11pt; margin: 0; font-weight: 600;">${nwEsc(lang === 'de' ? 'Entwicklungsmaßnahmen (aus Leistungsbeurteilung)' : lang === 'it' ? 'Misure di sviluppo (dalla valutazione)' : 'Development Measures (from Performance Review)')}</h3>
                               </div>
                               <table style="width: 100%; border-collapse: collapse; border: 1px solid #E6E8F2; border-top: none;">
                                 <thead>
                                   <tr style="background: #F2F3F8;">
-                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #9A6414; width: 50%;">${t.measure || 'Maßnahme'}</th>
-                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #9A6414; width: 30%;">${t.responsible || 'Verantwortlich'}</th>
-                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #9A6414; width: 20%;">${t.deadline || 'Umsetzung bis'}</th>
+                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #9A6414; width: 50%;">${nwEsc(t.measure || 'Maßnahme')}</th>
+                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #9A6414; width: 30%;">${nwEsc(t.responsible || 'Verantwortlich')}</th>
+                                    <th style="padding: 10px 15px; text-align: left; font-weight: 700; font-size: 9pt; border-bottom: 2px solid #9A6414; width: 20%;">${nwEsc(t.deadline || 'Umsetzung bis')}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   ${currentDevPlan.filter(d => d.measure).map((d, idx) => `
-                                    <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF'};">
-                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top; white-space: pre-wrap;">${d.measure || '–'}</td>
-                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${d.responsible || '–'}</td>
-                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${d.deadline ? formatDate(d.deadline) : '–'}</td>
+                                    <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF')};">
+                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top; white-space: pre-wrap;">${nwEsc(d.measure || '–')}</td>
+                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${nwEsc(d.responsible || '–')}</td>
+                                      <td style="padding: 10px 15px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${nwEsc(d.deadline ? formatDate(d.deadline) : '–')}</td>
                                     </tr>
                                   `).join('')}
                                 </tbody>
@@ -5893,20 +5897,20 @@
                             <!-- TEIL G: UNTERSCHRIFTEN -->
                             <div style="margin-top: 30px; page-break-inside: avoid;">
                               <div style="background: #243186; color: white; padding: 8px 15px; border-radius: 4px 4px 0 0;">
-                                <h3 style="font-size: 11pt; margin: 0; font-weight: 600;">${t.partH || 'Teil G: Unterschriften & Einverständnis'}</h3>
+                                <h3 style="font-size: 11pt; margin: 0; font-weight: 600;">${nwEsc(t.partH || 'Teil G: Unterschriften & Einverständnis')}</h3>
                               </div>
                               <div style="border: 1px solid #E6E8F2; border-top: none; padding: 30px 20px;">
                                 <p style="font-size: 9pt; color: #5F6377; margin: 0 0 30px 0; text-align: center;">
-                                  ${lang === 'de' ? 'Mit unseren Unterschriften bestätigen wir die gemeinsame Vereinbarung der oben genannten Ziele.' : 'With our signatures, we confirm the mutual agreement of the above-mentioned goals.'}
+                                  ${nwEsc(lang === 'de' ? 'Mit unseren Unterschriften bestätigen wir die gemeinsame Vereinbarung der oben genannten Ziele.' : 'With our signatures, we confirm the mutual agreement of the above-mentioned goals.')}
                                 </p>
                                 <div style="display: flex; justify-content: space-around; margin-top: 40px;">
                                   <div style="width: 40%; text-align: center;">
                                     <div style="border-bottom: 2px solid #1C1F2E; height: 40px; margin-bottom: 10px;"></div>
-                                    <p style="font-size: 9pt; color: #5F6377; margin: 0;">${t.employee || 'Mitarbeiter:in (Name, Vorname)'}</p>
+                                    <p style="font-size: 9pt; color: #5F6377; margin: 0;">${nwEsc(t.employee || 'Mitarbeiter:in (Name, Vorname)')}</p>
                                   </div>
                                   <div style="width: 40%; text-align: center;">
                                     <div style="border-bottom: 2px solid #1C1F2E; height: 40px; margin-bottom: 10px;"></div>
-                                    <p style="font-size: 9pt; color: #5F6377; margin: 0;">${t.manager || 'Führungskraft (Name, Vorname)'}</p>
+                                    <p style="font-size: 9pt; color: #5F6377; margin: 0;">${nwEsc(t.manager || 'Führungskraft (Name, Vorname)')}</p>
                                   </div>
                                 </div>
                               </div>
@@ -7936,42 +7940,42 @@
                                     <p style="color: #6EBD84; font-size: 8pt; margin: 2px 0 0 0; font-weight: 600; letter-spacing: 1.5px;">FLEXIBLE FOOD PACKAGING</p>
                                 </div>
                                 <div style="text-align: right; flex-shrink: 0; padding-left: 10px;">
-                                    <p style="font-size: 8pt; color: #5F6377; margin: 0;">Dok.: ${currentDate}</p>
-                                    <p style="font-size: 8pt; color: #5F6377; margin: 2px 0 0 0;">${lang === 'de' ? 'Periode' : lang === 'it' ? 'Periodo' : 'Period'}: ${formattedPeriod}</p>
+                                    <p style="font-size: 8pt; color: #5F6377; margin: 0;">Dok.: ${nwEsc(currentDate)}</p>
+                                    <p style="font-size: 8pt; color: #5F6377; margin: 2px 0 0 0;">${nwEsc(lang === 'de' ? 'Periode' : lang === 'it' ? 'Periodo' : 'Period')}: ${nwEsc(formattedPeriod)}</p>
                                 </div>
                             </div>
                             
                             <!-- DOCUMENT TITLE -->
                             <div style="background: #243186; color: white; padding: 15px 20px; margin-bottom: 20px; border-radius: 4px;">
-                                <h2 style="margin: 0; font-size: 16pt; font-weight: 600;">${t.headerTitle}</h2>
-                                <p style="margin: 5px 0 0 0; font-size: 11pt; opacity: 0.9;">${t.headerSubtitle}</p>
+                                <h2 style="margin: 0; font-size: 16pt; font-weight: 600;">${nwEsc(t.headerTitle)}</h2>
+                                <p style="margin: 5px 0 0 0; font-size: 11pt; opacity: 0.9;">${nwEsc(t.headerSubtitle)}</p>
                             </div>
                             
                             <!-- TEIL A: STAMMDATEN -->
                             <div style="margin-bottom: 20px; page-break-inside: avoid;">
                                 <div style="background: #FFFFFF; padding: 8px 12px; border-left: 4px solid #243186; margin-bottom: 10px;">
-                                    <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${t.partA}</h3>
+                                    <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${nwEsc(t.partA)}</h3>
                                 </div>
                                 <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                                     <tr>
                                         <td style="padding: 8px 10px; width: 22%; background: #F2F3F8; border: 1px solid #E6E8F2;">
-                                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${t.employee}</span>
+                                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${nwEsc(t.employee)}</span>
                                         </td>
-                                        <td style="padding: 8px 10px; width: 28%; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${formData.employee || '–'}</td>
+                                        <td style="padding: 8px 10px; width: 28%; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${nwEsc(formData.employee || '–')}</td>
                                         <td style="padding: 8px 10px; width: 22%; background: #F2F3F8; border: 1px solid #E6E8F2;">
-                                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${t.manager}</span>
+                                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${nwEsc(t.manager)}</span>
                                         </td>
-                                        <td style="padding: 8px 10px; width: 28%; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${formData.manager || '–'}</td>
+                                        <td style="padding: 8px 10px; width: 28%; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${nwEsc(formData.manager || '–')}</td>
                                     </tr>
                                     <tr>
                                         <td style="padding: 8px 10px; background: #F2F3F8; border: 1px solid #E6E8F2;">
-                                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${t.position}</span>
+                                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${nwEsc(t.position)}</span>
                                         </td>
-                                        <td style="padding: 8px 10px; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${formData.position || '–'}</td>
+                                        <td style="padding: 8px 10px; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${nwEsc(formData.position || '–')}</td>
                                         <td style="padding: 8px 10px; background: #F2F3F8; border: 1px solid #E6E8F2;">
-                                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${t.profile}</span>
+                                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${nwEsc(t.profile)}</span>
                                         </td>
-                                        <td style="padding: 8px 10px; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${profileShort}</td>
+                                        <td style="padding: 8px 10px; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${nwEsc(profileShort)}</td>
                                     </tr>
                                 </table>
                             </div>
@@ -7979,31 +7983,31 @@
                             <!-- TEIL B: ZIELERREICHUNG -->
                             <div style="margin-bottom: 20px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; padding: 8px 12px; border-left: 4px solid #243186; margin-bottom: 10px;">
-                                    <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${t.partB}</h3>
+                                    <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${nwEsc(t.partB)}</h3>
                                     <span style="background: #E6E8F2; color: #243186; padding: 4px 12px; border-radius: 20px; font-size: 10pt; font-weight: 700;">
-                                        Score: ${wasScore.toFixed(2)}
+                                        Score: ${nwEsc(wasScore.toFixed(2))}
                                     </span>
                                 </div>
                                 <table style="width: 100%; border-collapse: collapse; font-size: 9pt; table-layout: fixed;">
                                     <thead>
                                         <tr style="background: #243186; color: white;">
-                                            <th style="padding: 8px; text-align: left; font-weight: 600;">${t.goalName}</th>
-                                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 65px;">${t.weight}</th>
-                                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 75px;">${t.achievement}</th>
+                                            <th style="padding: 8px; text-align: left; font-weight: 600;">${nwEsc(t.goalName)}</th>
+                                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 65px;">${nwEsc(t.weight)}</th>
+                                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 75px;">${nwEsc(t.achievement)}</th>
                                             <th style="padding: 8px; text-align: center; font-weight: 600; width: 50px;">BARS</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         ${goals.map((g, idx) => `
-                                            <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF'}; page-break-inside: avoid;">
-                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; vertical-align: top; word-wrap: break-word; white-space: pre-wrap;">${g.name || '–'}</td>
-                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; font-weight: 600; vertical-align: top;">${g.weight}%</td>
+                                            <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF')}; page-break-inside: avoid;">
+                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; vertical-align: top; word-wrap: break-word; white-space: pre-wrap;">${nwEsc(g.name || '–')}</td>
+                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; font-weight: 600; vertical-align: top;">${nwEsc(g.weight)}%</td>
                                                 <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; vertical-align: top;">
-                                                    <span style="background: ${g.achievement >= 100 ? '#E8F5EC' : g.achievement >= 70 ? '#FBF1DD' : '#FBECEA'}; color: ${g.achievement >= 100 ? '#2F7A48' : g.achievement >= 70 ? '#9A6414' : '#9B2C22'}; padding: 2px 8px; border-radius: 10px; font-weight: 600;">
-                                                        ${g.achievement}%
+                                                    <span style="background: ${nwEsc(g.achievement >= 100 ? '#E8F5EC' : g.achievement >= 70 ? '#FBF1DD' : '#FBECEA')}; color: ${nwEsc(g.achievement >= 100 ? '#2F7A48' : g.achievement >= 70 ? '#9A6414' : '#9B2C22')}; padding: 2px 8px; border-radius: 10px; font-weight: 600;">
+                                                        ${nwEsc(g.achievement)}%
                                                     </span>
                                                 </td>
-                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; font-weight: 700; font-size: 11pt; vertical-align: top;">${getBarsScore(g.achievement)}</td>
+                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; font-weight: 700; font-size: 11pt; vertical-align: top;">${nwEsc(getBarsScore(g.achievement))}</td>
                                             </tr>
                                         `).join('')}
                                     </tbody>
@@ -8013,44 +8017,44 @@
                                 <!-- BONUS-BERECHNUNG -->
                                 <div style="margin-top: 15px; padding: 15px; background: #F2F3F8; border: 1px solid #6EBD84; border-radius: 6px;">
                                     <h4 style="font-size: 11pt; font-weight: 700; color: #2F7A48; margin: 0 0 12px 0; display: flex; align-items: center;">
-                                        ${lang === 'de' ? 'Bonus-Berechnung' : lang === 'it' ? 'Calcolo Bonus' : 'Bonus Calculation'}
+                                        ${nwEsc(lang === 'de' ? 'Bonus-Berechnung' : lang === 'it' ? 'Calcolo Bonus' : 'Bonus Calculation')}
                                     </h4>
                                     <table style="width: 100%; border-collapse: collapse; font-size: 9pt;">
                                         <thead>
                                             <tr style="background: rgba(47, 122, 72, 0.1);">
-                                                <th style="padding: 8px; text-align: left; color: #2F7A48; font-weight: 600;">${lang === 'de' ? 'Ziel' : lang === 'it' ? 'Obiettivo' : 'Goal'}</th>
-                                                <th style="padding: 8px; text-align: center; color: #2F7A48; font-weight: 600; width: 60px;">${lang === 'de' ? 'Gewicht' : lang === 'it' ? 'Peso' : 'Weight'}</th>
-                                                <th style="padding: 8px; text-align: right; color: #2F7A48; font-weight: 600; width: 80px;">${lang === 'de' ? 'Anteil' : lang === 'it' ? 'Quota' : 'Share'}</th>
-                                                <th style="padding: 8px; text-align: center; color: #2F7A48; font-weight: 600; width: 70px;">${lang === 'de' ? 'Erreicht' : lang === 'it' ? 'Raggiunto' : 'Achieved'}</th>
-                                                <th style="padding: 8px; text-align: right; color: #2F7A48; font-weight: 600; width: 90px;">${lang === 'de' ? 'Auszahlung' : lang === 'it' ? 'Pagamento' : 'Payout'}</th>
+                                                <th style="padding: 8px; text-align: left; color: #2F7A48; font-weight: 600;">${nwEsc(lang === 'de' ? 'Ziel' : lang === 'it' ? 'Obiettivo' : 'Goal')}</th>
+                                                <th style="padding: 8px; text-align: center; color: #2F7A48; font-weight: 600; width: 60px;">${nwEsc(lang === 'de' ? 'Gewicht' : lang === 'it' ? 'Peso' : 'Weight')}</th>
+                                                <th style="padding: 8px; text-align: right; color: #2F7A48; font-weight: 600; width: 80px;">${nwEsc(lang === 'de' ? 'Anteil' : lang === 'it' ? 'Quota' : 'Share')}</th>
+                                                <th style="padding: 8px; text-align: center; color: #2F7A48; font-weight: 600; width: 70px;">${nwEsc(lang === 'de' ? 'Erreicht' : lang === 'it' ? 'Raggiunto' : 'Achieved')}</th>
+                                                <th style="padding: 8px; text-align: right; color: #2F7A48; font-weight: 600; width: 90px;">${nwEsc(lang === 'de' ? 'Auszahlung' : lang === 'it' ? 'Pagamento' : 'Payout')}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             ${bonusPerGoal.map((b, idx) => `
                                                 <tr style="border-top: 1px solid #E8F5EC;">
-                                                    <td style="padding: 8px; color: #1C1F2E;">${b.goalName || (lang === 'de' ? 'Ziel' : lang === 'it' ? 'Obiettivo' : 'Goal') + ' ' + (idx + 1)}</td>
-                                                    <td style="padding: 8px; text-align: center; color: #5F6377;">${b.weight}%</td>
-                                                    <td style="padding: 8px; text-align: right; color: #5F6377;">${formatGermanNumber(b.goalBonus.toFixed(0))} €</td>
+                                                    <td style="padding: 8px; color: #1C1F2E;">${nwEsc(b.goalName || (lang === 'de' ? 'Ziel' : lang === 'it' ? 'Obiettivo' : 'Goal') + ' ' + (idx + 1))}</td>
+                                                    <td style="padding: 8px; text-align: center; color: #5F6377;">${nwEsc(b.weight)}%</td>
+                                                    <td style="padding: 8px; text-align: right; color: #5F6377;">${nwEsc(formatGermanNumber(b.goalBonus.toFixed(0)))} €</td>
                                                     <td style="padding: 8px; text-align: center;">
-                                                        <span style="padding: 2px 6px; border-radius: 10px; font-size: 8pt; font-weight: 600; background: ${b.achievement >= 100 ? '#E8F5EC' : b.achievement >= 70 ? '#FBF1DD' : '#FBECEA'}; color: ${b.achievement >= 100 ? '#2F7A48' : b.achievement >= 70 ? '#9A6414' : '#9B2C22'};">
-                                                            ${b.achievement}%
+                                                        <span style="padding: 2px 6px; border-radius: 10px; font-size: 8pt; font-weight: 600; background: ${nwEsc(b.achievement >= 100 ? '#E8F5EC' : b.achievement >= 70 ? '#FBF1DD' : '#FBECEA')}; color: ${nwEsc(b.achievement >= 100 ? '#2F7A48' : b.achievement >= 70 ? '#9A6414' : '#9B2C22')};">
+                                                            ${nwEsc(b.achievement)}%
                                                         </span>
                                                     </td>
-                                                    <td style="padding: 8px; text-align: right; font-weight: 700; color: #2F7A48;">${formatGermanNumber(b.payout.toFixed(0))} €</td>
+                                                    <td style="padding: 8px; text-align: right; font-weight: 700; color: #2F7A48;">${nwEsc(formatGermanNumber(b.payout.toFixed(0)))} €</td>
                                                 </tr>
                                             `).join('')}
                                         </tbody>
                                     </table>
                                     <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px; margin-top: 12px; border-top: 2px solid #6EBD84;">
                                         <div>
-                                            <span style="font-size: 9pt; color: #2F7A48;">${lang === 'de' ? 'Geplanter Bonus:' : lang === 'it' ? 'Bonus previsto:' : 'Planned Bonus:'}</span>
-                                            <span style="font-weight: 700; margin-left: 5px;">${formatGermanNumber(plannedBonusNum.toFixed(0))} €</span>
+                                            <span style="font-size: 9pt; color: #2F7A48;">${nwEsc(lang === 'de' ? 'Geplanter Bonus:' : lang === 'it' ? 'Bonus previsto:' : 'Planned Bonus:')}</span>
+                                            <span style="font-weight: 700; margin-left: 5px;">${nwEsc(formatGermanNumber(plannedBonusNum.toFixed(0)))} €</span>
                                         </div>
                                         <div style="text-align: right;">
-                                            <div style="font-size: 8pt; color: #2F7A48;">${lang === 'de' ? 'Tatsächliche Auszahlung' : lang === 'it' ? 'Pagamento effettivo' : 'Actual Payout'}</div>
-                                            <div style="font-size: 18pt; font-weight: 900; color: #2F7A48;">${formatGermanNumber(totalBonusPayout.toFixed(0))} €</div>
-                                            <div style="font-size: 8pt; font-weight: 600; color: ${bonusPayoutPercentage >= 100 ? '#2F7A48' : bonusPayoutPercentage >= 70 ? '#9A6414' : '#9B2C22'};">
-                                                (${bonusPayoutPercentage.toFixed(1)}% ${lang === 'de' ? 'vom Zielbonus' : lang === 'it' ? 'del target' : 'of target bonus'})
+                                            <div style="font-size: 8pt; color: #2F7A48;">${nwEsc(lang === 'de' ? 'Tatsächliche Auszahlung' : lang === 'it' ? 'Pagamento effettivo' : 'Actual Payout')}</div>
+                                            <div style="font-size: 18pt; font-weight: 900; color: #2F7A48;">${nwEsc(formatGermanNumber(totalBonusPayout.toFixed(0)))} €</div>
+                                            <div style="font-size: 8pt; font-weight: 600; color: ${nwEsc(bonusPayoutPercentage >= 100 ? '#2F7A48' : bonusPayoutPercentage >= 70 ? '#9A6414' : '#9B2C22')};">
+                                                (${nwEsc(bonusPayoutPercentage.toFixed(1))}% ${nwEsc(lang === 'de' ? 'vom Zielbonus' : lang === 'it' ? 'del target' : 'of target bonus')})
                                             </div>
                                         </div>
                                     </div>
@@ -8061,27 +8065,27 @@
                             <!-- TEIL C: WIE-KOMPETENZEN (CORE) -->
                             <div style="margin-bottom: 20px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; padding: 8px 12px; border-left: 4px solid #6EBD84; margin-bottom: 10px;">
-                                    <h3 style="font-size: 12pt; margin: 0; color: #2F7A48; font-weight: 600;">${t.partC}</h3>
+                                    <h3 style="font-size: 12pt; margin: 0; color: #2F7A48; font-weight: 600;">${nwEsc(t.partC)}</h3>
                                     <span style="background: #E8F5EC; color: #2F7A48; padding: 4px 12px; border-radius: 20px; font-size: 10pt; font-weight: 700;">
-                                        Score: ${wieCoreScore.toFixed(2)}
+                                        Score: ${nwEsc(wieCoreScore.toFixed(2))}
                                     </span>
                                 </div>
                                 <table style="width: 100%; border-collapse: collapse; font-size: 9pt; table-layout: fixed;">
                                     <thead>
                                         <tr style="background: #2F7A48; color: white;">
-                                            <th style="padding: 8px; text-align: left; font-weight: 600; width: 30%;">${t.compName}</th>
-                                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 60px;">${t.rating}</th>
-                                            <th style="padding: 8px; text-align: left; font-weight: 600;">${t.comment}</th>
+                                            <th style="padding: 8px; text-align: left; font-weight: 600; width: 30%;">${nwEsc(t.compName)}</th>
+                                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 60px;">${nwEsc(t.rating)}</th>
+                                            <th style="padding: 8px; text-align: left; font-weight: 600;">${nwEsc(t.comment)}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         ${coreList.map((c, idx) => `
-                                            <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#F2F3F8'}; page-break-inside: avoid;">
-                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-weight: 500; vertical-align: top;">${getTranslatedCompNamePDF(c.id)}</td>
+                                            <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#F2F3F8')}; page-break-inside: avoid;">
+                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-weight: 500; vertical-align: top;">${nwEsc(getTranslatedCompNamePDF(c.id))}</td>
                                                 <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; vertical-align: top;">
-                                                    <span style="display: inline-block; width: 24px; height: 24px; line-height: 24px; background: #2F7A48; color: white; border-radius: 50%; font-weight: 700; font-size: 10pt;">${c.rating}</span>
+                                                    <span style="display: inline-block; width: 24px; height: 24px; line-height: 24px; background: #2F7A48; color: white; border-radius: 50%; font-weight: 700; font-size: 10pt;">${nwEsc(c.rating)}</span>
                                                 </td>
-                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-size: 9pt; color: #5F6377; vertical-align: top; word-wrap: break-word; white-space: pre-wrap;">${c.comment || '–'}</td>
+                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-size: 9pt; color: #5F6377; vertical-align: top; word-wrap: break-word; white-space: pre-wrap;">${nwEsc(c.comment || '–')}</td>
                                             </tr>
                                         `).join('')}
                                     </tbody>
@@ -8092,27 +8096,27 @@
                             <!-- TEIL C: WIE-KOMPETENZEN (LEADERSHIP) -->
                             <div style="margin-bottom: 20px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; padding: 8px 12px; border-left: 4px solid #2F7A48; margin-bottom: 10px;">
-                                    <h3 style="font-size: 12pt; margin: 0; color: #2F7A48; font-weight: 600;">${t.partCLead}</h3>
+                                    <h3 style="font-size: 12pt; margin: 0; color: #2F7A48; font-weight: 600;">${nwEsc(t.partCLead)}</h3>
                                     <span style="background: #E8F5EC; color: #2F7A48; padding: 4px 12px; border-radius: 20px; font-size: 10pt; font-weight: 700;">
-                                        Score: ${wieLeadScore.toFixed(2)}
+                                        Score: ${nwEsc(wieLeadScore.toFixed(2))}
                                     </span>
                                 </div>
                                 <table style="width: 100%; border-collapse: collapse; font-size: 9pt; table-layout: fixed;">
                                     <thead>
                                         <tr style="background: #2F7A48; color: white;">
-                                            <th style="padding: 8px; text-align: left; font-weight: 600; width: 30%;">${t.compName}</th>
-                                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 60px;">${t.rating}</th>
-                                            <th style="padding: 8px; text-align: left; font-weight: 600;">${t.comment}</th>
+                                            <th style="padding: 8px; text-align: left; font-weight: 600; width: 30%;">${nwEsc(t.compName)}</th>
+                                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 60px;">${nwEsc(t.rating)}</th>
+                                            <th style="padding: 8px; text-align: left; font-weight: 600;">${nwEsc(t.comment)}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         ${leadList.map((l, idx) => `
-                                            <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#F2F3F8'}; page-break-inside: avoid;">
-                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-weight: 500; vertical-align: top;">${getTranslatedCompNamePDF(l.id)}</td>
+                                            <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#F2F3F8')}; page-break-inside: avoid;">
+                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-weight: 500; vertical-align: top;">${nwEsc(getTranslatedCompNamePDF(l.id))}</td>
                                                 <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; vertical-align: top;">
-                                                    <span style="display: inline-block; width: 24px; height: 24px; line-height: 24px; background: #2F7A48; color: white; border-radius: 50%; font-weight: 700; font-size: 10pt;">${l.rating}</span>
+                                                    <span style="display: inline-block; width: 24px; height: 24px; line-height: 24px; background: #2F7A48; color: white; border-radius: 50%; font-weight: 700; font-size: 10pt;">${nwEsc(l.rating)}</span>
                                                 </td>
-                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-size: 9pt; color: #5F6377; vertical-align: top; word-wrap: break-word; white-space: pre-wrap;">${l.comment || '–'}</td>
+                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-size: 9pt; color: #5F6377; vertical-align: top; word-wrap: break-word; white-space: pre-wrap;">${nwEsc(l.comment || '–')}</td>
                                             </tr>
                                         `).join('')}
                                     </tbody>
@@ -8123,48 +8127,48 @@
                             <!-- GPS ERGEBNIS -->
                             <div style="margin-bottom: 20px; padding: 25px; background: #243186; border-radius: 8px; text-align: center; page-break-inside: avoid;">
                                 <p style="font-size: 10pt; color: rgba(255,255,255,0.7); margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 2px;">FINAL GPS</p>
-                                <p style="font-size: 52pt; font-weight: 900; margin: 10px 0; color: white;">${finalGPS.toFixed(2)}</p>
+                                <p style="font-size: 52pt; font-weight: 900; margin: 10px 0; color: white;">${nwEsc(finalGPS.toFixed(2))}</p>
                                 <p style="font-size: 10pt; color: #6EBD84; font-weight: 600; margin: 10px 0 0 0;">
-                                    ${goals.length === 0 || totalGoalWeight === 0
+                                    ${nwEsc(goals.length === 0 || totalGoalWeight === 0
                                         ? (isManager 
                                             ? (lang === 'de' ? '(100% WIE: 50% Kern + 50% Leadership)' : lang === 'it' ? '(100% COME: 50% Core + 50% Leadership)' : '(100% HOW: 50% Core + 50% Leadership)')
                                             : (lang === 'de' ? '(100% WIE: Kern-Kompetenzen)' : lang === 'it' ? '(100% COME: Competenze Core)' : '(100% HOW: Core Competencies)'))
                                         : (isManager 
                                             ? '(WAS 50% + WIE Core 25% + WIE Lead 25%)' 
-                                            : '(WAS 50% + WIE Core 50%)')}
+                                            : '(WAS 50% + WIE Core 50%)'))}
                                 </p>
-                                ${goals.length === 0 ? `<p style="font-size: 9pt; color: #F59D24; margin-top: 8px;">${lang === 'de' ? 'Ohne Zielvereinbarung' : lang === 'it' ? 'Senza accordo obiettivi' : 'Without Goal Agreement'}</p>` : ''}
+                                ${goals.length === 0 ? `<p style="font-size: 9pt; color: #F59D24; margin-top: 8px;">${nwEsc(lang === 'de' ? 'Ohne Zielvereinbarung' : lang === 'it' ? 'Senza accordo obiettivi' : 'Without Goal Agreement')}</p>` : ''}
                             </div>
                             
                             <!-- TEIL D: STÄRKEN & ENTWICKLUNG -->
                             <div style="margin-bottom: 20px;">
                                 <div style="background: #FFFFFF; padding: 8px 12px; border-left: 4px solid #243186; margin-bottom: 10px;">
-                                    <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${t.partD}</h3>
+                                    <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${nwEsc(t.partD)}</h3>
                                 </div>
                                 <div style="margin-bottom: 15px;">
-                                    <p style="font-weight: 600; margin: 0 0 5px 0; font-size: 10pt; color: #1C1F2E;">${t.strengthsProfessional}</p>
-                                    <div style="padding: 10px 12px; border: 1px solid #E6E8F2; border-radius: 4px; background: #FFFFFF; min-height: 40px; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; font-size: 10pt; line-height: 1.4;">${formData.strengths1 || '–'}</div>
+                                    <p style="font-weight: 600; margin: 0 0 5px 0; font-size: 10pt; color: #1C1F2E;">${nwEsc(t.strengthsProfessional)}</p>
+                                    <div style="padding: 10px 12px; border: 1px solid #E6E8F2; border-radius: 4px; background: #FFFFFF; min-height: 40px; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; font-size: 10pt; line-height: 1.4;">${nwEsc(formData.strengths1 || '–')}</div>
                                 </div>
                                 <div style="margin-bottom: 15px;">
-                                    <p style="font-weight: 600; margin: 0 0 5px 0; font-size: 10pt; color: #1C1F2E;">${t.strengthsPersonal}</p>
-                                    <div style="padding: 10px 12px; border: 1px solid #E6E8F2; border-radius: 4px; background: #FFFFFF; min-height: 40px; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; font-size: 10pt; line-height: 1.4;">${formData.strengths2 || '–'}</div>
+                                    <p style="font-weight: 600; margin: 0 0 5px 0; font-size: 10pt; color: #1C1F2E;">${nwEsc(t.strengthsPersonal)}</p>
+                                    <div style="padding: 10px 12px; border: 1px solid #E6E8F2; border-radius: 4px; background: #FFFFFF; min-height: 40px; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap; font-size: 10pt; line-height: 1.4;">${nwEsc(formData.strengths2 || '–')}</div>
                                 </div>
                                 
-                                <p style="font-weight: 600; margin: 15px 0 8px 0; font-size: 11pt; color: #243186;">${t.development}</p>
+                                <p style="font-weight: 600; margin: 15px 0 8px 0; font-size: 11pt; color: #243186;">${nwEsc(t.development)}</p>
                                 <table style="width: 100%; border-collapse: collapse; font-size: 9pt; table-layout: fixed;">
                                     <thead>
                                         <tr style="background: #243186; color: white;">
-                                            <th style="padding: 8px; text-align: left; font-weight: 600;">${t.measure}</th>
-                                            <th style="padding: 8px; text-align: left; font-weight: 600; width: 120px;">${t.responsible}</th>
-                                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 85px;">${t.deadline}</th>
+                                            <th style="padding: 8px; text-align: left; font-weight: 600;">${nwEsc(t.measure)}</th>
+                                            <th style="padding: 8px; text-align: left; font-weight: 600; width: 120px;">${nwEsc(t.responsible)}</th>
+                                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 85px;">${nwEsc(t.deadline)}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         ${devPlan.map((d, idx) => `
-                                            <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF'}; page-break-inside: avoid;">
-                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap;">${d.measure || '–'}</td>
-                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${d.responsible || '–'}</td>
-                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; vertical-align: top;">${d.deadline || '–'}</td>
+                                            <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF')}; page-break-inside: avoid;">
+                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; white-space: pre-wrap;">${nwEsc(d.measure || '–')}</td>
+                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${nwEsc(d.responsible || '–')}</td>
+                                                <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; vertical-align: top;">${nwEsc(d.deadline || '–')}</td>
                                             </tr>
                                         `).join('')}
                                     </tbody>
@@ -8174,25 +8178,25 @@
                             <!-- TEIL E: KARRIEREPERSPEKTIVEN -->
                             <div style="margin-bottom: 20px; page-break-inside: avoid;">
                                 <div style="background: #FFFFFF; padding: 8px 12px; border-left: 4px solid #243186; margin-bottom: 10px;">
-                                    <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${t.partE}</h3>
+                                    <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${nwEsc(t.partE)}</h3>
                                 </div>
-                                <p style="font-size: 9pt; color: #5F6377; margin-bottom: 8px;">${t.careerIntro}</p>
+                                <p style="font-size: 9pt; color: #5F6377; margin-bottom: 8px;">${nwEsc(t.careerIntro)}</p>
                                 <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
                                     ${t.careerOptions.map((opt, i) => careerChecks[i] ? `
-                                        <span style="padding: 6px 12px; background: #E8F5EC; border: 1px solid #6EBD84; border-radius: 20px; font-size: 9pt; color: #2F7A48;">✓ ${opt}</span>
-                                    ` : '').join('') || `<span style="font-size: 9pt; color: #8B8FA1; font-style: italic;">${lang === 'de' ? 'Keine Auswahl getroffen' : lang === 'it' ? 'Nessuna selezione' : 'No selection made'}</span>`}
+                                        <span style="padding: 6px 12px; background: #E8F5EC; border: 1px solid #6EBD84; border-radius: 20px; font-size: 9pt; color: #2F7A48;">✓ ${nwEsc(opt)}</span>
+                                    ` : '').join('') || `<span style="font-size: 9pt; color: #8B8FA1; font-style: italic;">${nwEsc(lang === 'de' ? 'Keine Auswahl getroffen' : lang === 'it' ? 'Nessuna selezione' : 'No selection made')}</span>`}
                                 </div>
                                 <div style="padding: 10px 12px; border: 1px solid #E6E8F2; border-radius: 4px; background: #FFFFFF; font-size: 9pt; word-wrap: break-word; white-space: pre-wrap; min-height: 40px;">
-                                    ${formData.careerComment || `<span style="color: #8B8FA1; font-style: italic;">${lang === 'de' ? 'Kein Kommentar' : lang === 'it' ? 'Nessun commento' : 'No comment'}</span>`}
+                                    ${formData.careerComment ? nwEsc(formData.careerComment) : `<span style="color: #8B8FA1; font-style: italic;">${nwEsc(lang === 'de' ? 'Kein Kommentar' : lang === 'it' ? 'Nessun commento' : 'No comment')}</span>`}
                                 </div>
                             </div>
                             
                             <!-- TEIL F: FEEDBACK -->
                             <div style="margin-bottom: 20px;">
                                 <div style="background: #FFFFFF; padding: 8px 12px; border-left: 4px solid #243186; margin-bottom: 10px;">
-                                    <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${t.partF}</h3>
+                                    <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${nwEsc(t.partF)}</h3>
                                 </div>
-                                <p style="font-size: 9pt; color: #5F6377; margin-bottom: 12px;">${t.feedbackIntro}</p>
+                                <p style="font-size: 9pt; color: #5F6377; margin-bottom: 12px;">${nwEsc(t.feedbackIntro)}</p>
                                 
                                 ${[
                                     { q: t.feedbackQ1, a: formData.feedbackQ1 },
@@ -8206,26 +8210,26 @@
                                     // Erlaube Seitenumbruch bei langen Antworten (>200 Zeichen)
                                     const isLongText = (item.a || '').length > 200;
                                     return `
-                                    <div style="margin-bottom: 10px; ${isLongText ? '' : 'page-break-inside: avoid;'}">
-                                        <p style="font-weight: 600; margin: 0 0 4px 0; font-size: 9pt; color: #1C1F2E; page-break-after: avoid;">${item.q}</p>
-                                        <div style="padding: 8px 10px; border: 1px solid #E6E8F2; border-radius: 4px; background: #FFFFFF; font-size: 9pt; min-height: 20px; word-wrap: break-word; white-space: pre-wrap; overflow-wrap: break-word; orphans: 3; widows: 3;">${item.a || '–'}</div>
+                                    <div style="margin-bottom: 10px; ${nwEsc(isLongText ? '' : 'page-break-inside: avoid;')}">
+                                        <p style="font-weight: 600; margin: 0 0 4px 0; font-size: 9pt; color: #1C1F2E; page-break-after: avoid;">${nwEsc(item.q)}</p>
+                                        <div style="padding: 8px 10px; border: 1px solid #E6E8F2; border-radius: 4px; background: #FFFFFF; font-size: 9pt; min-height: 20px; word-wrap: break-word; white-space: pre-wrap; overflow-wrap: break-word; orphans: 3; widows: 3;">${nwEsc(item.a || '–')}</div>
                                     </div>
                                 `}).join('')}
                             </div>
                             
                             <!-- TEIL H: UNTERSCHRIFTEN (niemals umbrechen) -->
                             <div style="margin-top: 30px; padding: 20px; border: 2px solid #243186; border-radius: 6px; page-break-inside: avoid; break-inside: avoid;">
-                                <h3 style="font-size: 12pt; margin: 0 0 25px 0; color: #243186; font-weight: 600; text-align: center;">${t.partH}</h3>
+                                <h3 style="font-size: 12pt; margin: 0 0 25px 0; color: #243186; font-weight: 600; text-align: center;">${nwEsc(t.partH)}</h3>
                                 <div style="display: flex; justify-content: space-between; margin-top: 40px;">
                                     <div style="width: 42%; text-align: center;">
                                         <div style="border-bottom: 2px solid #1C1F2E; height: 60px;"></div>
-                                        <p style="margin: 8px 0 0 0; font-size: 9pt; color: #5F6377;">${t.employee}</p>
-                                        <p style="margin: 2px 0 0 0; font-size: 8pt; color: #8B8FA1;">${lang === 'de' ? 'Datum, Unterschrift' : lang === 'it' ? 'Data, Firma' : 'Date, Signature'}</p>
+                                        <p style="margin: 8px 0 0 0; font-size: 9pt; color: #5F6377;">${nwEsc(t.employee)}</p>
+                                        <p style="margin: 2px 0 0 0; font-size: 8pt; color: #8B8FA1;">${nwEsc(lang === 'de' ? 'Datum, Unterschrift' : lang === 'it' ? 'Data, Firma' : 'Date, Signature')}</p>
                                     </div>
                                     <div style="width: 42%; text-align: center;">
                                         <div style="border-bottom: 2px solid #1C1F2E; height: 60px;"></div>
-                                        <p style="margin: 8px 0 0 0; font-size: 9pt; color: #5F6377;">${t.manager}</p>
-                                        <p style="margin: 2px 0 0 0; font-size: 8pt; color: #8B8FA1;">${lang === 'de' ? 'Datum, Unterschrift' : lang === 'it' ? 'Data, Firma' : 'Date, Signature'}</p>
+                                        <p style="margin: 8px 0 0 0; font-size: 9pt; color: #5F6377;">${nwEsc(t.manager)}</p>
+                                        <p style="margin: 2px 0 0 0; font-size: 8pt; color: #8B8FA1;">${nwEsc(lang === 'de' ? 'Datum, Unterschrift' : lang === 'it' ? 'Data, Firma' : 'Date, Signature')}</p>
                                     </div>
                                 </div>
                             </div>
@@ -8233,10 +8237,10 @@
                             <!-- FOOTER -->
                             <div style="margin-top: 30px; padding-top: 10px; border-top: 1px solid #E6E8F2; text-align: center;">
                                 <p style="font-size: 8pt; color: #8B8FA1; margin: 0;">
-                                    Niederwieser Group | ${lang === 'de' ? 'Performance Management System' : lang === 'it' ? 'Sistema di Gestione delle Performance' : 'Performance Management System'} | ${currentDate}
+                                    Niederwieser Group | ${nwEsc(lang === 'de' ? 'Performance Management System' : lang === 'it' ? 'Sistema di Gestione delle Performance' : 'Performance Management System')} | ${nwEsc(currentDate)}
                                 </p>
                                 <p style="font-size: 7pt; color: #C9CDE3; margin: 3px 0 0 0;">
-                                    ${lang === 'de' ? 'Dieses Dokument ist vertraulich und nur für den internen Gebrauch bestimmt.' : lang === 'it' ? 'Questo documento è riservato e destinato esclusivamente all\'uso interno.' : 'This document is confidential and intended for internal use only.'}
+                                    ${nwEsc(lang === 'de' ? 'Dieses Dokument ist vertraulich und nur für den internen Gebrauch bestimmt.' : lang === 'it' ? 'Questo documento è riservato e destinato esclusivamente all\'uso interno.' : 'This document is confidential and intended for internal use only.')}
                                 </p>
                             </div>
                         `;
@@ -13470,7 +13474,7 @@ Weight more important goals higher!`
               return;
             }
             
-            printWindow.document.write('<!DOCTYPE html><html><head><title>' + docType + ' - ' + employeeName + '</title>');
+            printWindow.document.write('<!DOCTYPE html><html><head><title>' + nwEsc(docType) + ' - ' + nwEsc(employeeName) + '</title>');
             printWindow.document.write('<style>@media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } @page { margin: 12mm; size: A4; } } body { margin: 0; }</style>');
             printWindow.document.write('</head><body>');
             printWindow.document.write(html);
@@ -15361,8 +15365,8 @@ Best regards`
                 const newWindow = window.open('', '_blank');
                 if (newWindow) {
                   newWindow.document.write(
-                    '<html><head><title>' + (fileName || 'PDF') + '</title></head>' +
-                    '<body style="margin:0;"><embed width="100%" height="100%" src="' + pdfSource + '" type="application/pdf"></body></html>'
+                    '<html><head><title>' + nwEsc(fileName || 'PDF') + '</title></head>' +
+                    '<body style="margin:0;"><embed width="100%" height="100%" src="' + nwEsc(pdfSource) + '" type="application/pdf"></body></html>'
                   );
                 } else {
                   // Fallback: Download
@@ -21606,10 +21610,10 @@ Best regards`
                           onClick: () => {
                             // Zeige Modal mit Zieldetails
                             const goalsHtml = (ga.goals || []).map((g, i) => 
-                              `<tr class="border-b"><td class="p-2 text-sm">${i+1}</td><td class="p-2 text-sm">${g.name || '-'}</td><td class="p-2 text-sm">${g.target || '-'}</td><td class="p-2 text-sm text-center">${g.weight || 0}%</td></tr>`
+                              `<tr class="border-b"><td class="p-2 text-sm">${nwEsc(i+1)}</td><td class="p-2 text-sm">${nwEsc(g.name || '-')}</td><td class="p-2 text-sm">${nwEsc(g.target || '-')}</td><td class="p-2 text-sm text-center">${nwEsc(g.weight || 0)}%</td></tr>`
                             ).join('');
                             const devGoalsHtml = (ga.devGoals || []).map((g, i) => 
-                              `<tr class="border-b"><td class="p-2 text-sm">${i+1}</td><td class="p-2 text-sm">${g.name || '-'}</td><td class="p-2 text-sm">${g.category || '-'}</td><td class="p-2 text-sm">${g.deadline ? new Date(g.deadline).toLocaleDateString('de-DE') : '-'}</td></tr>`
+                              `<tr class="border-b"><td class="p-2 text-sm">${nwEsc(i+1)}</td><td class="p-2 text-sm">${nwEsc(g.name || '-')}</td><td class="p-2 text-sm">${nwEsc(g.category || '-')}</td><td class="p-2 text-sm">${nwEsc(g.deadline ? new Date(g.deadline).toLocaleDateString('de-DE') : '-')}</td></tr>`
                             ).join('');
                             const modal = document.createElement('div');
                             modal.className = 'fixed inset-0 bg-ink/30 flex items-center justify-center z-50 p-4';
@@ -21617,34 +21621,34 @@ Best regards`
                               <div class="bg-white rounded-xl shadow-float max-w-3xl w-full max-h-[90vh] overflow-auto">
                                 <div class="p-6 border-b bg-panel flex justify-between items-center sticky top-0">
                                   <div>
-                                    <h3 class="text-xl font-semibold text-ink">${ga.employeeName || ga.formData?.employee || 'Unbekannt'}</h3>
-                                    <p class="text-sm text-ink-60">${ga.formData?.position || ''}</p>
+                                    <h3 class="text-xl font-semibold text-ink">${nwEsc(ga.employeeName || ga.formData?.employee || 'Unbekannt')}</h3>
+                                    <p class="text-sm text-ink-60">${nwEsc(ga.formData?.position || '')}</p>
                                   </div>
                                   <button onclick="this.closest('.fixed').remove()" class="text-ink-60 hover:text-ink-60 text-2xl">&times;</button>
                                 </div>
                                 <div class="p-6 space-y-6">
                                   <div>
-                                    <h4 class="font-semibold text-ink mb-3">${lang === 'de' ? 'Leistungsziele (GPS-relevant)' : lang === 'it' ? 'Obiettivi di performance (rilevanti GPS)' : 'Performance Goals (GPS-relevant)'}</h4>
+                                    <h4 class="font-semibold text-ink mb-3">${nwEsc(lang === 'de' ? 'Leistungsziele (GPS-relevant)' : lang === 'it' ? 'Obiettivi di performance (rilevanti GPS)' : 'Performance Goals (GPS-relevant)')}</h4>
                                     ${ga.goals?.length > 0 ? `
                                       <table class="w-full border">
-                                        <thead class="bg-nw-grey-40"><tr><th class="p-2 text-left text-xs">#</th><th class="p-2 text-left text-xs">${lang === 'de' ? 'Ziel' : 'Goal'}</th><th class="p-2 text-left text-xs">${lang === 'de' ? 'Messbar' : 'Measurable'}</th><th class="p-2 text-center text-xs">${lang === 'de' ? 'Gewichtung' : 'Weight'}</th></tr></thead>
+                                        <thead class="bg-nw-grey-40"><tr><th class="p-2 text-left text-xs">#</th><th class="p-2 text-left text-xs">${nwEsc(lang === 'de' ? 'Ziel' : 'Goal')}</th><th class="p-2 text-left text-xs">${nwEsc(lang === 'de' ? 'Messbar' : 'Measurable')}</th><th class="p-2 text-center text-xs">${nwEsc(lang === 'de' ? 'Gewichtung' : 'Weight')}</th></tr></thead>
                                         <tbody>${goalsHtml}</tbody>
                                       </table>
-                                      <p class="text-sm text-ink-60 mt-2">${lang === 'de' ? 'Gesamtgewichtung' : 'Total weight'}: ${(ga.goals || []).reduce((s, g) => s + (parseFloat(g.weight) || 0), 0)}%</p>
-                                    ` : `<p class="text-ink-60 text-sm">${lang === 'de' ? 'Keine Leistungsziele definiert' : 'No performance goals defined'}</p>`}
+                                      <p class="text-sm text-ink-60 mt-2">${nwEsc(lang === 'de' ? 'Gesamtgewichtung' : 'Total weight')}: ${nwEsc((ga.goals || []).reduce((s, g) => s + (parseFloat(g.weight) || 0), 0))}%</p>
+                                    ` : `<p class="text-ink-60 text-sm">${nwEsc(lang === 'de' ? 'Keine Leistungsziele definiert' : 'No performance goals defined')}</p>`}
                                   </div>
                                   ${ga.devGoals?.length > 0 ? `
                                   <div>
-                                    <h4 class="font-semibold text-nw-blue mb-3">${lang === 'de' ? 'Entwicklungsziele (nicht GPS-relevant)' : lang === 'it' ? 'Obiettivi di sviluppo (non GPS-rilevanti)' : 'Development Goals (not GPS-relevant)'}</h4>
+                                    <h4 class="font-semibold text-nw-blue mb-3">${nwEsc(lang === 'de' ? 'Entwicklungsziele (nicht GPS-relevant)' : lang === 'it' ? 'Obiettivi di sviluppo (non GPS-rilevanti)' : 'Development Goals (not GPS-relevant)')}</h4>
                                     <table class="w-full border">
-                                      <thead class="bg-nw-blue-06"><tr><th class="p-2 text-left text-xs">#</th><th class="p-2 text-left text-xs">${lang === 'de' ? 'Entwicklungsziel' : 'Development Goal'}</th><th class="p-2 text-left text-xs">${lang === 'de' ? 'Kategorie' : 'Category'}</th><th class="p-2 text-left text-xs">${lang === 'de' ? 'Bis wann' : 'Deadline'}</th></tr></thead>
+                                      <thead class="bg-nw-blue-06"><tr><th class="p-2 text-left text-xs">#</th><th class="p-2 text-left text-xs">${nwEsc(lang === 'de' ? 'Entwicklungsziel' : 'Development Goal')}</th><th class="p-2 text-left text-xs">${nwEsc(lang === 'de' ? 'Kategorie' : 'Category')}</th><th class="p-2 text-left text-xs">${nwEsc(lang === 'de' ? 'Bis wann' : 'Deadline')}</th></tr></thead>
                                       <tbody>${devGoalsHtml}</tbody>
                                     </table>
                                   </div>
                                   ` : ''}
                                   <div class="text-xs text-ink-60 pt-4 border-t">
-                                    ${lang === 'de' ? 'Zuletzt aktualisiert' : 'Last updated'}: ${new Date(ga.updatedAt || ga.createdAt).toLocaleString('de-DE')}
-                                    ${ga.status === 'completed' ? ` · <span class="text-ok">${lang === 'de' ? 'Abgeschlossen' : 'Completed'}</span>` : ` · <span class="text-warn">${lang === 'de' ? 'Entwurf' : 'Draft'}</span>`}
+                                    ${nwEsc(lang === 'de' ? 'Zuletzt aktualisiert' : 'Last updated')}: ${nwEsc(new Date(ga.updatedAt || ga.createdAt).toLocaleString('de-DE'))}
+                                    ${ga.status === 'completed' ? ` · <span class="text-ok">${nwEsc(lang === 'de' ? 'Abgeschlossen' : 'Completed')}</span>` : ` · <span class="text-warn">${nwEsc(lang === 'de' ? 'Entwurf' : 'Draft')}</span>`}
                                   </div>
                                 </div>
                               </div>
@@ -26921,42 +26925,42 @@ const renderDashboard = () => {
                         <p style="color: #6EBD84; font-size: 8pt; margin: 2px 0 0 0; font-weight: 600; letter-spacing: 1.5px;">FLEXIBLE FOOD PACKAGING</p>
                       </div>
                       <div style="text-align: right; flex-shrink: 0; padding-left: 10px;">
-                        <p style="font-size: 8pt; color: #5F6377; margin: 0;">Dok.: ${currentDate}</p>
-                        <p style="font-size: 8pt; color: #5F6377; margin: 2px 0 0 0;">${lang === 'de' ? 'Periode' : lang === 'it' ? 'Periodo' : 'Period'}: ${period}</p>
+                        <p style="font-size: 8pt; color: #5F6377; margin: 0;">Dok.: ${nwEsc(currentDate)}</p>
+                        <p style="font-size: 8pt; color: #5F6377; margin: 2px 0 0 0;">${nwEsc(lang === 'de' ? 'Periode' : lang === 'it' ? 'Periodo' : 'Period')}: ${nwEsc(period)}</p>
                       </div>
                     </div>
                     
                     <!-- DOCUMENT TITLE -->
                     <div style="background: #2F7A48; color: white; padding: 15px 20px; margin-bottom: 20px; border-radius: 4px;">
-                      <h2 style="margin: 0; font-size: 16pt; font-weight: 600;">${lang === 'de' ? 'Selbstreflexionsbogen' : lang === 'it' ? 'Modulo di Autovalutazione' : 'Self-Reflection Form'}</h2>
-                      <p style="margin: 5px 0 0 0; font-size: 11pt; opacity: 0.9;">${lang === 'de' ? 'Mitarbeiter-Selbsteinschätzung' : lang === 'it' ? 'Autovalutazione del Collaboratore' : 'Employee Self-Assessment'} | ${t.headerSubtitle || 'Strategie 2035'}</p>
+                      <h2 style="margin: 0; font-size: 16pt; font-weight: 600;">${nwEsc(lang === 'de' ? 'Selbstreflexionsbogen' : lang === 'it' ? 'Modulo di Autovalutazione' : 'Self-Reflection Form')}</h2>
+                      <p style="margin: 5px 0 0 0; font-size: 11pt; opacity: 0.9;">${nwEsc(lang === 'de' ? 'Mitarbeiter-Selbsteinschätzung' : lang === 'it' ? 'Autovalutazione del Collaboratore' : 'Employee Self-Assessment')} | ${nwEsc(t.headerSubtitle || 'Strategie 2035')}</p>
                     </div>
                     
                     <!-- TEIL A: STAMMDATEN -->
                     <div style="margin-bottom: 20px; page-break-inside: avoid;">
                       <div style="background: #FFFFFF; padding: 8px 12px; border-left: 4px solid #243186; margin-bottom: 10px;">
-                        <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${t.partA}</h3>
+                        <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${nwEsc(t.partA)}</h3>
                       </div>
                       <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <tr>
                           <td style="padding: 8px 10px; width: 22%; background: #F2F3F8; border: 1px solid #E6E8F2;">
-                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${t.employee}</span>
+                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${nwEsc(t.employee)}</span>
                           </td>
-                          <td style="padding: 8px 10px; width: 28%; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${formData.employee || '–'}</td>
+                          <td style="padding: 8px 10px; width: 28%; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${nwEsc(formData.employee || '–')}</td>
                           <td style="padding: 8px 10px; width: 22%; background: #F2F3F8; border: 1px solid #E6E8F2;">
-                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${t.manager}</span>
+                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${nwEsc(t.manager)}</span>
                           </td>
-                          <td style="padding: 8px 10px; width: 28%; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${formData.manager || '–'}</td>
+                          <td style="padding: 8px 10px; width: 28%; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${nwEsc(formData.manager || '–')}</td>
                         </tr>
                         <tr>
                           <td style="padding: 8px 10px; background: #F2F3F8; border: 1px solid #E6E8F2;">
-                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${t.position}</span>
+                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${nwEsc(t.position)}</span>
                           </td>
-                          <td style="padding: 8px 10px; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${formData.position || '–'}</td>
+                          <td style="padding: 8px 10px; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${nwEsc(formData.position || '–')}</td>
                           <td style="padding: 8px 10px; background: #F2F3F8; border: 1px solid #E6E8F2;">
-                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${t.profile || 'Profil / Rolle'}</span>
+                            <span style="font-size: 7pt; color: #5F6377; text-transform: uppercase;">${nwEsc(t.profile || 'Profil / Rolle')}</span>
                           </td>
-                          <td style="padding: 8px 10px; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${profileShort}</td>
+                          <td style="padding: 8px 10px; border: 1px solid #E6E8F2; font-weight: 600; font-size: 9pt;">${nwEsc(profileShort)}</td>
                         </tr>
                       </table>
                     </div>
@@ -26965,31 +26969,31 @@ const renderDashboard = () => {
                     ${!noGoalsMode && goals && goals.length > 0 ? `
                     <div style="margin-bottom: 20px;">
                       <div style="display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; padding: 8px 12px; border-left: 4px solid #243186; margin-bottom: 10px;">
-                        <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${t.partB || 'Teil B: Zielerreichung (WAS) – 50% Gewichtung'}</h3>
+                        <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${nwEsc(t.partB || 'Teil B: Zielerreichung (WAS) – 50% Gewichtung')}</h3>
                         <span style="background: #E6E8F2; color: #243186; padding: 4px 12px; border-radius: 20px; font-size: 10pt; font-weight: 700;">
-                          Score: ${wasScore.toFixed(2)}
+                          Score: ${nwEsc(wasScore.toFixed(2))}
                         </span>
                       </div>
                       <table style="width: 100%; border-collapse: collapse; font-size: 9pt; table-layout: fixed;">
                         <thead>
                           <tr style="background: #243186; color: white;">
-                            <th style="padding: 8px; text-align: left; font-weight: 600;">${t.goalName || 'Zielbezeichnung'}</th>
-                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 70px;">${lang === 'de' ? 'Gewicht %' : 'Peso %'}</th>
-                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 80px;">${lang === 'de' ? 'Erreichung %' : 'Raggiunto %'}</th>
+                            <th style="padding: 8px; text-align: left; font-weight: 600;">${nwEsc(t.goalName || 'Zielbezeichnung')}</th>
+                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 70px;">${nwEsc(lang === 'de' ? 'Gewicht %' : 'Peso %')}</th>
+                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 80px;">${nwEsc(lang === 'de' ? 'Erreichung %' : 'Raggiunto %')}</th>
                             <th style="padding: 8px; text-align: center; font-weight: 600; width: 55px;">BARS</th>
                           </tr>
                         </thead>
                         <tbody>
                           ${goals.map((g, idx) => `
-                            <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF'};">
-                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2;">${g.name || '–'}</td>
-                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center;">${g.weight}%</td>
+                            <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF')};">
+                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2;">${nwEsc(g.name || '–')}</td>
+                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center;">${nwEsc(g.weight)}%</td>
                               <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center;">
-                                <span style="padding: 2px 8px; border-radius: 10px; font-weight: 600; background: ${(g.achievement || 0) >= 100 ? '#E8F5EC' : (g.achievement || 0) >= 80 ? '#FBF1DD' : '#FBECEA'}; color: ${(g.achievement || 0) >= 100 ? '#2F7A48' : (g.achievement || 0) >= 80 ? '#9A6414' : '#9B2C22'};">
-                                  ${g.achievement || 0}%
+                                <span style="padding: 2px 8px; border-radius: 10px; font-weight: 600; background: ${nwEsc((g.achievement || 0) >= 100 ? '#E8F5EC' : (g.achievement || 0) >= 80 ? '#FBF1DD' : '#FBECEA')}; color: ${nwEsc((g.achievement || 0) >= 100 ? '#2F7A48' : (g.achievement || 0) >= 80 ? '#9A6414' : '#9B2C22')};">
+                                  ${nwEsc(g.achievement || 0)}%
                                 </span>
                               </td>
-                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; font-weight: 700;">${getBarsScore(g.achievement || 0)}</td>
+                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; font-weight: 700;">${nwEsc(getBarsScore(g.achievement || 0))}</td>
                             </tr>
                           `).join('')}
                         </tbody>
@@ -27000,27 +27004,27 @@ const renderDashboard = () => {
                     <!-- TEIL C: KERN-KOMPETENZEN -->
                     <div style="margin-bottom: 20px;">
                       <div style="display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; padding: 8px 12px; border-left: 4px solid #6EBD84; margin-bottom: 10px;">
-                        <h3 style="font-size: 12pt; margin: 0; color: #2F7A48; font-weight: 600;">${t.partC}</h3>
+                        <h3 style="font-size: 12pt; margin: 0; color: #2F7A48; font-weight: 600;">${nwEsc(t.partC)}</h3>
                         <span style="background: #E8F5EC; color: #2F7A48; padding: 4px 12px; border-radius: 20px; font-size: 10pt; font-weight: 700;">
-                          Score: ${wieCoreScore.toFixed(2)}
+                          Score: ${nwEsc(wieCoreScore.toFixed(2))}
                         </span>
                       </div>
                       <table style="width: 100%; border-collapse: collapse; font-size: 9pt; table-layout: fixed;">
                         <thead>
                           <tr style="background: #2F7A48; color: white;">
-                            <th style="padding: 8px; text-align: left; font-weight: 600; width: 30%;">${t.compName}</th>
-                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 60px;">${t.rating}</th>
-                            <th style="padding: 8px; text-align: left; font-weight: 600;">${t.comment}</th>
+                            <th style="padding: 8px; text-align: left; font-weight: 600; width: 30%;">${nwEsc(t.compName)}</th>
+                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 60px;">${nwEsc(t.rating)}</th>
+                            <th style="padding: 8px; text-align: left; font-weight: 600;">${nwEsc(t.comment)}</th>
                           </tr>
                         </thead>
                         <tbody>
                           ${coreList.map((c, idx) => `
-                            <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#F2F3F8'}; page-break-inside: avoid;">
-                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-weight: 500; vertical-align: top;">${getTranslatedCompName(c.id)}</td>
+                            <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#F2F3F8')}; page-break-inside: avoid;">
+                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-weight: 500; vertical-align: top;">${nwEsc(getTranslatedCompName(c.id))}</td>
                               <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; vertical-align: top;">
-                                <span style="display: inline-block; width: 24px; height: 24px; line-height: 24px; background: #2F7A48; color: white; border-radius: 50%; font-weight: 700; font-size: 10pt;">${c.rating}</span>
+                                <span style="display: inline-block; width: 24px; height: 24px; line-height: 24px; background: #2F7A48; color: white; border-radius: 50%; font-weight: 700; font-size: 10pt;">${nwEsc(c.rating)}</span>
                               </td>
-                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-size: 9pt; color: #5F6377; vertical-align: top; word-wrap: break-word; white-space: pre-wrap;">${c.comment || '–'}</td>
+                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-size: 9pt; color: #5F6377; vertical-align: top; word-wrap: break-word; white-space: pre-wrap;">${nwEsc(c.comment || '–')}</td>
                             </tr>
                           `).join('')}
                         </tbody>
@@ -27031,27 +27035,27 @@ const renderDashboard = () => {
                     ${isManager && leadList && leadList.length > 0 ? `
                     <div style="margin-bottom: 20px;">
                       <div style="display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; padding: 8px 12px; border-left: 4px solid #2F7A48; margin-bottom: 10px;">
-                        <h3 style="font-size: 12pt; margin: 0; color: #2F7A48; font-weight: 600;">${t.partCLead || 'Teil C.2: Leadership-Kompetenzen'}</h3>
+                        <h3 style="font-size: 12pt; margin: 0; color: #2F7A48; font-weight: 600;">${nwEsc(t.partCLead || 'Teil C.2: Leadership-Kompetenzen')}</h3>
                         <span style="background: #E8F5EC; color: #2F7A48; padding: 4px 12px; border-radius: 20px; font-size: 10pt; font-weight: 700;">
-                          Score: ${wieLeadScore.toFixed(2)}
+                          Score: ${nwEsc(wieLeadScore.toFixed(2))}
                         </span>
                       </div>
                       <table style="width: 100%; border-collapse: collapse; font-size: 9pt; table-layout: fixed;">
                         <thead>
                           <tr style="background: #2F7A48; color: white;">
-                            <th style="padding: 8px; text-align: left; font-weight: 600; width: 30%;">${t.compName}</th>
-                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 60px;">${t.rating}</th>
-                            <th style="padding: 8px; text-align: left; font-weight: 600;">${t.comment}</th>
+                            <th style="padding: 8px; text-align: left; font-weight: 600; width: 30%;">${nwEsc(t.compName)}</th>
+                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 60px;">${nwEsc(t.rating)}</th>
+                            <th style="padding: 8px; text-align: left; font-weight: 600;">${nwEsc(t.comment)}</th>
                           </tr>
                         </thead>
                         <tbody>
                           ${leadList.map((l, idx) => `
-                            <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#F2F3F8'}; page-break-inside: avoid;">
-                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-weight: 500; vertical-align: top;">${getTranslatedCompName(l.id)}</td>
+                            <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#F2F3F8')}; page-break-inside: avoid;">
+                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-weight: 500; vertical-align: top;">${nwEsc(getTranslatedCompName(l.id))}</td>
                               <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; vertical-align: top;">
-                                <span style="display: inline-block; width: 24px; height: 24px; line-height: 24px; background: #2F7A48; color: white; border-radius: 50%; font-weight: 700; font-size: 10pt;">${l.rating}</span>
+                                <span style="display: inline-block; width: 24px; height: 24px; line-height: 24px; background: #2F7A48; color: white; border-radius: 50%; font-weight: 700; font-size: 10pt;">${nwEsc(l.rating)}</span>
                               </td>
-                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-size: 9pt; color: #5F6377; vertical-align: top; word-wrap: break-word; white-space: pre-wrap;">${l.comment || '–'}</td>
+                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; font-size: 9pt; color: #5F6377; vertical-align: top; word-wrap: break-word; white-space: pre-wrap;">${nwEsc(l.comment || '–')}</td>
                             </tr>
                           `).join('')}
                         </tbody>
@@ -27062,41 +27066,41 @@ const renderDashboard = () => {
                     <!-- GPS ERGEBNIS - Cyan statt Blau für Unterscheidung -->
                     <div style="margin-bottom: 20px; padding: 25px; background: #2F7A48; border-radius: 8px; text-align: center; page-break-inside: avoid;">
                       <p style="font-size: 10pt; color: rgba(255,255,255,0.7); margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 2px;">SELF-ASSESSMENT GPS</p>
-                      <p style="font-size: 52pt; font-weight: 900; margin: 10px 0; color: white;">${finalGPS.toFixed(2)}</p>
-                      <p style="font-size: 10pt; color: #6EBD84; font-weight: 600; margin: 10px 0 0 0;">${gpsFormulaText}</p>
-                      ${noGoalsMode ? `<p style="font-size: 9pt; color: #F59D24; margin-top: 8px;">${lang === 'de' ? 'Ohne Zielvereinbarung' : 'Senza accordo obiettivi'}</p>` : ''}
+                      <p style="font-size: 52pt; font-weight: 900; margin: 10px 0; color: white;">${nwEsc(finalGPS.toFixed(2))}</p>
+                      <p style="font-size: 10pt; color: #6EBD84; font-weight: 600; margin: 10px 0 0 0;">${nwEsc(gpsFormulaText)}</p>
+                      ${noGoalsMode ? `<p style="font-size: 9pt; color: #F59D24; margin-top: 8px;">${nwEsc(lang === 'de' ? 'Ohne Zielvereinbarung' : 'Senza accordo obiettivi')}</p>` : ''}
                     </div>
                     
                     <!-- TEIL D: STÄRKEN & ENTWICKLUNG -->
                     <div style="margin-bottom: 20px;">
                       <div style="background: #FFFFFF; padding: 8px 12px; border-left: 4px solid #243186; margin-bottom: 10px;">
-                        <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${t.partD}</h3>
+                        <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${nwEsc(t.partD)}</h3>
                       </div>
                       <div style="margin-bottom: 15px;">
-                        <p style="font-weight: 600; margin: 0 0 5px 0; font-size: 10pt; color: #1C1F2E;">${t.strengthsProfessional}</p>
-                        <div style="padding: 10px 12px; border: 1px solid #E6E8F2; border-radius: 4px; background: #FFFFFF; min-height: 40px; word-wrap: break-word; white-space: pre-wrap; font-size: 10pt;">${formData.strengths1 || '–'}</div>
+                        <p style="font-weight: 600; margin: 0 0 5px 0; font-size: 10pt; color: #1C1F2E;">${nwEsc(t.strengthsProfessional)}</p>
+                        <div style="padding: 10px 12px; border: 1px solid #E6E8F2; border-radius: 4px; background: #FFFFFF; min-height: 40px; word-wrap: break-word; white-space: pre-wrap; font-size: 10pt;">${nwEsc(formData.strengths1 || '–')}</div>
                       </div>
                       <div style="margin-bottom: 15px;">
-                        <p style="font-weight: 600; margin: 0 0 5px 0; font-size: 10pt; color: #1C1F2E;">${t.strengthsPersonal}</p>
-                        <div style="padding: 10px 12px; border: 1px solid #E6E8F2; border-radius: 4px; background: #FFFFFF; min-height: 40px; word-wrap: break-word; white-space: pre-wrap; font-size: 10pt;">${formData.strengths2 || '–'}</div>
+                        <p style="font-weight: 600; margin: 0 0 5px 0; font-size: 10pt; color: #1C1F2E;">${nwEsc(t.strengthsPersonal)}</p>
+                        <div style="padding: 10px 12px; border: 1px solid #E6E8F2; border-radius: 4px; background: #FFFFFF; min-height: 40px; word-wrap: break-word; white-space: pre-wrap; font-size: 10pt;">${nwEsc(formData.strengths2 || '–')}</div>
                       </div>
                       
                       ${devPlan && devPlan.filter(d => d.measure).length > 0 ? `
-                      <p style="font-weight: 600; margin: 15px 0 8px 0; font-size: 11pt; color: #243186;">${t.development || 'Entwicklungsmaßnahmen'}</p>
+                      <p style="font-weight: 600; margin: 15px 0 8px 0; font-size: 11pt; color: #243186;">${nwEsc(t.development || 'Entwicklungsmaßnahmen')}</p>
                       <table style="width: 100%; border-collapse: collapse; font-size: 9pt; table-layout: fixed;">
                         <thead>
                           <tr style="background: #243186; color: white;">
-                            <th style="padding: 8px; text-align: left; font-weight: 600;">${t.measure || 'Maßnahme'}</th>
-                            <th style="padding: 8px; text-align: left; font-weight: 600; width: 120px;">${t.responsible || 'Verantwortlich'}</th>
-                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 85px;">${t.deadline || 'Termin'}</th>
+                            <th style="padding: 8px; text-align: left; font-weight: 600;">${nwEsc(t.measure || 'Maßnahme')}</th>
+                            <th style="padding: 8px; text-align: left; font-weight: 600; width: 120px;">${nwEsc(t.responsible || 'Verantwortlich')}</th>
+                            <th style="padding: 8px; text-align: center; font-weight: 600; width: 85px;">${nwEsc(t.deadline || 'Termin')}</th>
                           </tr>
                         </thead>
                         <tbody>
                           ${devPlan.filter(d => d.measure).map((d, idx) => `
-                            <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF'};">
-                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${d.measure || '–'}</td>
-                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${d.responsible || '–'}</td>
-                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; vertical-align: top;">${d.deadline || '–'}</td>
+                            <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF')};">
+                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${nwEsc(d.measure || '–')}</td>
+                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; vertical-align: top;">${nwEsc(d.responsible || '–')}</td>
+                              <td style="padding: 8px; border-bottom: 1px solid #E6E8F2; text-align: center; vertical-align: top;">${nwEsc(d.deadline || '–')}</td>
                             </tr>
                           `).join('')}
                         </tbody>
@@ -27107,25 +27111,25 @@ const renderDashboard = () => {
                     <!-- TEIL E: KARRIEREPERSPEKTIVEN -->
                     <div style="margin-bottom: 20px; page-break-inside: avoid;">
                       <div style="background: #FFFFFF; padding: 8px 12px; border-left: 4px solid #243186; margin-bottom: 10px;">
-                        <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${t.partE || 'Teil E: Karriereperspektive & Zielvorstellungen'}</h3>
+                        <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${nwEsc(t.partE || 'Teil E: Karriereperspektive & Zielvorstellungen')}</h3>
                       </div>
-                      <p style="font-size: 9pt; color: #5F6377; margin-bottom: 8px;">${t.careerIntro || 'Welche Zielvorstellungen hat der/die Mitarbeiter:in?'}</p>
+                      <p style="font-size: 9pt; color: #5F6377; margin-bottom: 8px;">${nwEsc(t.careerIntro || 'Welche Zielvorstellungen hat der/die Mitarbeiter:in?')}</p>
                       <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
                         ${(t.careerOptions || ['Zufrieden mit aktueller Position', 'Strebe Fachkarriere an', 'Strebe Führungskarriere an', 'Offen für Abteilungswechsel', 'Offen für Standortwechsel']).map((opt, i) => careerChecks[i] ? `
-                          <span style="padding: 6px 12px; background: #E8F5EC; border: 1px solid #6EBD84; border-radius: 20px; font-size: 9pt; color: #2F7A48;">✓ ${opt}</span>
-                        ` : '').join('') || `<span style="font-size: 9pt; color: #8B8FA1; font-style: italic;">${lang === 'de' ? 'Keine Auswahl getroffen' : 'Nessuna selezione'}</span>`}
+                          <span style="padding: 6px 12px; background: #E8F5EC; border: 1px solid #6EBD84; border-radius: 20px; font-size: 9pt; color: #2F7A48;">✓ ${nwEsc(opt)}</span>
+                        ` : '').join('') || `<span style="font-size: 9pt; color: #8B8FA1; font-style: italic;">${nwEsc(lang === 'de' ? 'Keine Auswahl getroffen' : 'Nessuna selezione')}</span>`}
                       </div>
                       <div style="padding: 10px 12px; border: 1px solid #E6E8F2; border-radius: 4px; background: #FFFFFF; font-size: 9pt; word-wrap: break-word; white-space: pre-wrap; min-height: 40px;">
-                        ${formData.careerComment || `<span style="color: #8B8FA1; font-style: italic;">${lang === 'de' ? 'Kein Kommentar' : 'Nessun commento'}</span>`}
+                        ${formData.careerComment ? nwEsc(formData.careerComment) : `<span style="color: #8B8FA1; font-style: italic;">${nwEsc(lang === 'de' ? 'Kein Kommentar' : 'Nessun commento')}</span>`}
                       </div>
                     </div>
                     
                     <!-- TEIL F: FEEDBACK -->
                     <div style="margin-bottom: 20px;">
                       <div style="background: #FFFFFF; padding: 8px 12px; border-left: 4px solid #243186; margin-bottom: 10px;">
-                        <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${t.partF || 'Teil F: Mitarbeiter-Feedback'}</h3>
+                        <h3 style="font-size: 12pt; margin: 0; color: #243186; font-weight: 600;">${nwEsc(t.partF || 'Teil F: Mitarbeiter-Feedback')}</h3>
                       </div>
-                      <p style="font-size: 9pt; color: #5F6377; margin-bottom: 12px;">${t.feedbackIntro || 'Bitte teile deine Einschätzung zur Zusammenarbeit, den Arbeitsbedingungen und Entwicklungsmöglichkeiten mit.'}</p>
+                      <p style="font-size: 9pt; color: #5F6377; margin-bottom: 12px;">${nwEsc(t.feedbackIntro || 'Bitte teile deine Einschätzung zur Zusammenarbeit, den Arbeitsbedingungen und Entwicklungsmöglichkeiten mit.')}</p>
                       ${[
                         { label: t.feedbackQ1 || '1. Fühlst du dich ausreichend unterstützt und gefördert?', value: formData.feedbackQ1 },
                         { label: t.feedbackQ2 || '2. Welche Verbesserungsvorschläge hast du (Prozesse, Tools, Arbeitsbedingungen)?', value: formData.feedbackQ2 },
@@ -27136,25 +27140,25 @@ const renderDashboard = () => {
                         { label: t.feedbackQ7 || '7. Wie bewertest du deine Work-Life-Balance? (1=sehr schlecht, 5=sehr gut)', value: formData.feedbackQ7 || '3' }
                       ].map(item => `
                         <div style="margin-bottom: 10px;">
-                          <p style="font-weight: 600; margin: 0 0 4px 0; font-size: 9pt; color: #1C1F2E;">${item.label}</p>
-                          <div style="padding: 8px 12px; border: 1px solid #E6E8F2; border-radius: 4px; background: #FFFFFF; min-height: 30px; font-size: 9pt; word-wrap: break-word; white-space: pre-wrap;">${item.value || '–'}</div>
+                          <p style="font-weight: 600; margin: 0 0 4px 0; font-size: 9pt; color: #1C1F2E;">${nwEsc(item.label)}</p>
+                          <div style="padding: 8px 12px; border: 1px solid #E6E8F2; border-radius: 4px; background: #FFFFFF; min-height: 30px; font-size: 9pt; word-wrap: break-word; white-space: pre-wrap;">${nwEsc(item.value || '–')}</div>
                         </div>
                       `).join('')}
                     </div>
                     
                     <!-- TEIL G: UNTERSCHRIFTEN -->
                     <div style="margin-top: 30px; padding: 20px; border: 2px solid #2F7A48; border-radius: 6px; page-break-inside: avoid;">
-                      <h3 style="font-size: 12pt; margin: 0 0 25px 0; color: #2F7A48; font-weight: 600; text-align: center;">${t.partH || 'Teil G: Unterschriften & Einverständnis'}</h3>
+                      <h3 style="font-size: 12pt; margin: 0 0 25px 0; color: #2F7A48; font-weight: 600; text-align: center;">${nwEsc(t.partH || 'Teil G: Unterschriften & Einverständnis')}</h3>
                       <div style="display: flex; justify-content: space-between; margin-top: 40px;">
                         <div style="width: 42%; text-align: center;">
                           <div style="border-bottom: 2px solid #1C1F2E; height: 60px;"></div>
-                          <p style="margin: 8px 0 0 0; font-size: 9pt; color: #5F6377;">${t.employee}</p>
-                          <p style="margin: 2px 0 0 0; font-size: 8pt; color: #8B8FA1;">${lang === 'de' ? 'Datum, Unterschrift' : lang === 'it' ? 'Data, Firma' : 'Date, Signature'}</p>
+                          <p style="margin: 8px 0 0 0; font-size: 9pt; color: #5F6377;">${nwEsc(t.employee)}</p>
+                          <p style="margin: 2px 0 0 0; font-size: 8pt; color: #8B8FA1;">${nwEsc(lang === 'de' ? 'Datum, Unterschrift' : lang === 'it' ? 'Data, Firma' : 'Date, Signature')}</p>
                         </div>
                         <div style="width: 42%; text-align: center;">
                           <div style="border-bottom: 2px solid #1C1F2E; height: 60px;"></div>
-                          <p style="margin: 8px 0 0 0; font-size: 9pt; color: #5F6377;">${t.manager}</p>
-                          <p style="margin: 2px 0 0 0; font-size: 8pt; color: #8B8FA1;">${lang === 'de' ? 'Datum, Unterschrift' : lang === 'it' ? 'Data, Firma' : 'Date, Signature'}</p>
+                          <p style="margin: 8px 0 0 0; font-size: 9pt; color: #5F6377;">${nwEsc(t.manager)}</p>
+                          <p style="margin: 2px 0 0 0; font-size: 8pt; color: #8B8FA1;">${nwEsc(lang === 'de' ? 'Datum, Unterschrift' : lang === 'it' ? 'Data, Firma' : 'Date, Signature')}</p>
                         </div>
                       </div>
                     </div>
@@ -27162,10 +27166,10 @@ const renderDashboard = () => {
                     <!-- FOOTER -->
                     <div style="margin-top: 30px; padding-top: 10px; border-top: 1px solid #E6E8F2; text-align: center;">
                       <p style="font-size: 8pt; color: #8B8FA1; margin: 0;">
-                        Niederwieser Group | ${lang === 'de' ? 'Selbstreflexionsbogen' : lang === 'it' ? 'Modulo di Autovalutazione' : 'Self-Reflection Form'} | ${currentDate}
+                        Niederwieser Group | ${nwEsc(lang === 'de' ? 'Selbstreflexionsbogen' : lang === 'it' ? 'Modulo di Autovalutazione' : 'Self-Reflection Form')} | ${nwEsc(currentDate)}
                       </p>
                       <p style="font-size: 7pt; color: #C9CDE3; margin: 3px 0 0 0;">
-                        ${lang === 'de' ? 'Dieses Dokument ist vertraulich und nur für den internen Gebrauch bestimmt.' : lang === 'it' ? 'Questo documento è riservato e destinato esclusivamente all\'uso interno.' : 'This document is confidential and intended for internal use only.'}
+                        ${nwEsc(lang === 'de' ? 'Dieses Dokument ist vertraulich und nur für den internen Gebrauch bestimmt.' : lang === 'it' ? 'Questo documento è riservato e destinato esclusivamente all\'uso interno.' : 'This document is confidential and intended for internal use only.')}
                       </p>
                     </div>
                   `;
@@ -28985,10 +28989,9 @@ const renderDashboard = () => {
                           if (!text) return '–';
                           // Ersetze lange Zeichenketten ohne Leerzeichen durch umgebrochene Version
                           // KEINE Kürzung mehr - voller Text wird angezeigt
-                          let formatted = text.replace(/(\S{25})/g, '$1<wbr>');
-                          // Zeilenumbrüche erhalten
-                          formatted = formatted.replace(/\n/g, '<br>');
-                          return formatted;
+                          // Erst Umbruchstellen markieren, dann maskieren, dann die Marken durch die zwei erlaubten Tags ersetzen
+                          let formatted = String(text).replace(/(\S{25})/g, '$1\u0001').replace(/\n/g, '\u0002');
+                          return nwEsc(formatted).replace(/\u0001/g, '<wbr>').replace(/\u0002/g, '<br>');
                         };
                         
                         
@@ -29045,29 +29048,29 @@ const renderDashboard = () => {
                                 <p style="color: #6EBD84; font-size: 8pt; margin: 3px 0 0 0; font-weight: 600; letter-spacing: 1.5px;">FLEXIBLE FOOD PACKAGING</p>
                               </div>
                               <div style="text-align: right;">
-                                <p style="font-size: 8pt; color: #5F6377; margin: 0;">Erstellt: ${currentDate}</p>
-                                <p style="font-size: 7pt; color: #8B8FA1; margin: 2px 0 0 0;">${lang === 'de' ? 'Vertraulich – Personalakte' : lang === 'it' ? 'Riservato – Fascicolo personale' : 'Confidential – Personnel File'}</p>
+                                <p style="font-size: 8pt; color: #5F6377; margin: 0;">Erstellt: ${nwEsc(currentDate)}</p>
+                                <p style="font-size: 7pt; color: #8B8FA1; margin: 2px 0 0 0;">${nwEsc(lang === 'de' ? 'Vertraulich – Personalakte' : lang === 'it' ? 'Riservato – Fascicolo personale' : 'Confidential – Personnel File')}</p>
                               </div>
                             </div>
                             
                             <!-- TITEL + STAMMDATEN -->
                             <div style="display: flex; gap: 15px; margin-bottom: 15px;">
                               <div style="background: #2F7A48; color: white; padding: 12px 18px; border-radius: 6px; flex-shrink: 0;">
-                                <h2 style="margin: 0; font-size: 14pt; font-weight: 700;">${t.title}</h2>
-                                <p style="margin: 3px 0 0 0; font-size: 9pt; opacity: 0.9;">${t.subtitle}</p>
+                                <h2 style="margin: 0; font-size: 14pt; font-weight: 700;">${nwEsc(t.title)}</h2>
+                                <p style="margin: 3px 0 0 0; font-size: 9pt; opacity: 0.9;">${nwEsc(t.subtitle)}</p>
                               </div>
                               <table style="flex: 1; border-collapse: collapse; font-size: 9pt;">
                                 <tr>
-                                  <td style="padding: 5px 8px; background: #F2F3F8; border: 1px solid #E6E8F2; width: 18%;"><span style="font-size: 7pt; color: #5F6377;">${t.employee}</span></td>
-                                  <td style="padding: 5px 8px; border: 1px solid #E6E8F2; font-weight: 700;">${employeeName}</td>
-                                  <td style="padding: 5px 8px; background: #F2F3F8; border: 1px solid #E6E8F2; width: 15%;"><span style="font-size: 7pt; color: #5F6377;">${t.position}</span></td>
-                                  <td style="padding: 5px 8px; border: 1px solid #E6E8F2; font-weight: 600;">${position}</td>
+                                  <td style="padding: 5px 8px; background: #F2F3F8; border: 1px solid #E6E8F2; width: 18%;"><span style="font-size: 7pt; color: #5F6377;">${nwEsc(t.employee)}</span></td>
+                                  <td style="padding: 5px 8px; border: 1px solid #E6E8F2; font-weight: 700;">${nwEsc(employeeName)}</td>
+                                  <td style="padding: 5px 8px; background: #F2F3F8; border: 1px solid #E6E8F2; width: 15%;"><span style="font-size: 7pt; color: #5F6377;">${nwEsc(t.position)}</span></td>
+                                  <td style="padding: 5px 8px; border: 1px solid #E6E8F2; font-weight: 600;">${nwEsc(position)}</td>
                                 </tr>
                                 <tr>
-                                  <td style="padding: 5px 8px; background: #F2F3F8; border: 1px solid #E6E8F2;"><span style="font-size: 7pt; color: #5F6377;">${t.period}</span></td>
-                                  <td style="padding: 5px 8px; border: 1px solid #E6E8F2; font-weight: 600;">${period}</td>
-                                  <td style="padding: 5px 8px; background: #F2F3F8; border: 1px solid #E6E8F2;"><span style="font-size: 7pt; color: #5F6377;">${t.profile}</span></td>
-                                  <td style="padding: 5px 8px; border: 1px solid #E6E8F2; font-weight: 600;">${profileText}</td>
+                                  <td style="padding: 5px 8px; background: #F2F3F8; border: 1px solid #E6E8F2;"><span style="font-size: 7pt; color: #5F6377;">${nwEsc(t.period)}</span></td>
+                                  <td style="padding: 5px 8px; border: 1px solid #E6E8F2; font-weight: 600;">${nwEsc(period)}</td>
+                                  <td style="padding: 5px 8px; background: #F2F3F8; border: 1px solid #E6E8F2;"><span style="font-size: 7pt; color: #5F6377;">${nwEsc(t.profile)}</span></td>
+                                  <td style="padding: 5px 8px; border: 1px solid #E6E8F2; font-weight: 600;">${nwEsc(profileText)}</td>
                                 </tr>
                               </table>
                             </div>
@@ -29076,24 +29079,24 @@ const renderDashboard = () => {
                             ${!noGoalsMode && goals.length > 0 ? `
                             <div style="margin-bottom: 12px;">
                               <div style="background: #F2F3F8; padding: 6px 12px; border-left: 4px solid #243186; margin-bottom: 8px;">
-                                <h3 style="font-size: 11pt; margin: 0; color: #243186; font-weight: 700;">${t.partB}</h3>
+                                <h3 style="font-size: 11pt; margin: 0; color: #243186; font-weight: 700;">${nwEsc(t.partB)}</h3>
                               </div>
                               <table style="width: 100%; border-collapse: collapse; font-size: 9pt;">
                                 <thead>
                                   <tr style="background: #243186; color: white;">
-                                    <th style="padding: 6px 8px; text-align: left;">${t.goal}</th>
-                                    <th style="padding: 6px; text-align: center; width: 50px;">${t.weight}</th>
-                                    <th style="padding: 6px; text-align: center; width: 70px;">${t.achievement}</th>
+                                    <th style="padding: 6px 8px; text-align: left;">${nwEsc(t.goal)}</th>
+                                    <th style="padding: 6px; text-align: center; width: 50px;">${nwEsc(t.weight)}</th>
+                                    <th style="padding: 6px; text-align: center; width: 70px;">${nwEsc(t.achievement)}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   ${goals.map((g, idx) => `
-                                    <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF'};">
-                                      <td style="padding: 6px 8px; border-bottom: 1px solid #E6E8F2;">${g.name || '–'}</td>
-                                      <td style="padding: 6px; border-bottom: 1px solid #E6E8F2; text-align: center; font-weight: 600;">${g.weight}%</td>
+                                    <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#FFFFFF')};">
+                                      <td style="padding: 6px 8px; border-bottom: 1px solid #E6E8F2;">${nwEsc(g.name || '–')}</td>
+                                      <td style="padding: 6px; border-bottom: 1px solid #E6E8F2; text-align: center; font-weight: 600;">${nwEsc(g.weight)}%</td>
                                       <td style="padding: 6px; border-bottom: 1px solid #E6E8F2; text-align: center;">
-                                        <span style="padding: 2px 8px; border-radius: 10px; font-weight: 700; font-size: 8pt; ${g.achievement >= 100 ? 'background: #E8F5EC; color: #2F7A48;' : g.achievement >= 70 ? 'background: #FBF1DD; color: #9A6414;' : 'background: #FBECEA; color: #9B2C22;'}">
-                                          ${g.achievement}%
+                                        <span style="padding: 2px 8px; border-radius: 10px; font-weight: 700; font-size: 8pt; ${nwEsc(g.achievement >= 100 ? 'background: #E8F5EC; color: #2F7A48;' : g.achievement >= 70 ? 'background: #FBF1DD; color: #9A6414;' : 'background: #FBECEA; color: #9B2C22;')}">
+                                          ${nwEsc(g.achievement)}%
                                         </span>
                                       </td>
                                     </tr>
@@ -29102,20 +29105,20 @@ const renderDashboard = () => {
                               </table>
                             </div>
                             ` : `<div style="background: #FBF1DD; border: 1px solid #F59D24; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px;">
-                              <p style="color: #9B2C22; font-size: 9pt; margin: 0;">${t.noGoals} – GPS wird nur aus Kompetenzen berechnet.</p>
+                              <p style="color: #9B2C22; font-size: 9pt; margin: 0;">${nwEsc(t.noGoals)} – GPS wird nur aus Kompetenzen berechnet.</p>
                             </div>`}
                             
                             <!-- TEIL C.1: KERN-KOMPETENZEN -->
                             <div style="margin-bottom: 12px;">
                               <div style="background: #F2F3F8; padding: 6px 12px; border-left: 4px solid #6EBD84; margin-bottom: 8px;">
-                                <h3 style="font-size: 11pt; margin: 0; color: #2F7A48; font-weight: 700;">${t.partC1}</h3>
+                                <h3 style="font-size: 11pt; margin: 0; color: #2F7A48; font-weight: 700;">${nwEsc(t.partC1)}</h3>
                               </div>
                               <table style="width: 100%; border-collapse: collapse; font-size: 8pt; table-layout: fixed;">
                                 <thead>
                                   <tr style="background: #2F7A48; color: white;">
-                                    <th style="padding: 5px 8px; text-align: left; width: 28%;">${t.competency}</th>
-                                    <th style="padding: 5px; text-align: center; width: 18%;">${t.rating}</th>
-                                    <th style="padding: 5px 8px; text-align: left; width: 54%;">${t.comment}</th>
+                                    <th style="padding: 5px 8px; text-align: left; width: 28%;">${nwEsc(t.competency)}</th>
+                                    <th style="padding: 5px; text-align: center; width: 18%;">${nwEsc(t.rating)}</th>
+                                    <th style="padding: 5px 8px; text-align: left; width: 54%;">${nwEsc(t.comment)}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -29123,11 +29126,11 @@ const renderDashboard = () => {
                                     const score = coreScores[comp.id] || 0;
                                     const comment = coreComments[comp.id] || '';
                                     return `
-                                      <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#F2F3F8'};">
-                                        <td style="padding: 5px 8px; border-bottom: 1px solid #E6E8F2; font-weight: 600; font-size: 8pt;">${comp.name}</td>
+                                      <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#F2F3F8')};">
+                                        <td style="padding: 5px 8px; border-bottom: 1px solid #E6E8F2; font-weight: 600; font-size: 8pt;">${nwEsc(comp.name)}</td>
                                         <td style="padding: 5px; border-bottom: 1px solid #E6E8F2; text-align: center;">
-                                          <span style="padding: 3px 8px; border-radius: 10px; font-weight: 700; font-size: 8pt; white-space: nowrap; ${getScoreColorStyle(score)}">
-                                            ${score} – ${bl[score] || '–'}
+                                          <span style="padding: 3px 8px; border-radius: 10px; font-weight: 700; font-size: 8pt; white-space: nowrap; ${nwEsc(getScoreColorStyle(score))}">
+                                            ${nwEsc(score)} – ${nwEsc(bl[score] || '–')}
                                           </span>
                                         </td>
                                         <td style="padding: 5px 8px; border-bottom: 1px solid #E6E8F2; font-size: 8pt; color: #5F6377; font-style: italic; word-wrap: break-word; white-space: pre-wrap; overflow-wrap: break-word;">${formatComment(comment)}</td>
@@ -29142,14 +29145,14 @@ const renderDashboard = () => {
                             ${isManager ? `
                             <div style="margin-bottom: 12px;">
                               <div style="background: #F2F3F8; padding: 6px 12px; border-left: 4px solid #243186; margin-bottom: 8px;">
-                                <h3 style="font-size: 11pt; margin: 0; color: #243186; font-weight: 700;">${t.partC2}</h3>
+                                <h3 style="font-size: 11pt; margin: 0; color: #243186; font-weight: 700;">${nwEsc(t.partC2)}</h3>
                               </div>
                               <table style="width: 100%; border-collapse: collapse; font-size: 8pt; table-layout: fixed;">
                                 <thead>
                                   <tr style="background: #243186; color: white;">
-                                    <th style="padding: 5px 8px; text-align: left; width: 28%;">${t.competency}</th>
-                                    <th style="padding: 5px; text-align: center; width: 18%;">${t.rating}</th>
-                                    <th style="padding: 5px 8px; text-align: left; width: 54%;">${t.comment}</th>
+                                    <th style="padding: 5px 8px; text-align: left; width: 28%;">${nwEsc(t.competency)}</th>
+                                    <th style="padding: 5px; text-align: center; width: 18%;">${nwEsc(t.rating)}</th>
+                                    <th style="padding: 5px 8px; text-align: left; width: 54%;">${nwEsc(t.comment)}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -29157,11 +29160,11 @@ const renderDashboard = () => {
                                     const score = leaderScores[comp.id] || 0;
                                     const comment = leaderComments[comp.id] || '';
                                     return `
-                                      <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#F2F3F8'};">
-                                        <td style="padding: 5px 8px; border-bottom: 1px solid #E6E8F2; font-weight: 600; font-size: 8pt;">${comp.name}</td>
+                                      <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#F2F3F8')};">
+                                        <td style="padding: 5px 8px; border-bottom: 1px solid #E6E8F2; font-weight: 600; font-size: 8pt;">${nwEsc(comp.name)}</td>
                                         <td style="padding: 5px; border-bottom: 1px solid #E6E8F2; text-align: center;">
-                                          <span style="padding: 3px 8px; border-radius: 10px; font-weight: 700; font-size: 8pt; white-space: nowrap; ${getScoreColorStyle(score)}">
-                                            ${score} – ${bl[score] || '–'}
+                                          <span style="padding: 3px 8px; border-radius: 10px; font-weight: 700; font-size: 8pt; white-space: nowrap; ${nwEsc(getScoreColorStyle(score))}">
+                                            ${nwEsc(score)} – ${nwEsc(bl[score] || '–')}
                                           </span>
                                         </td>
                                         <td style="padding: 5px 8px; border-bottom: 1px solid #E6E8F2; font-size: 8pt; color: #5F6377; font-style: italic; word-wrap: break-word; white-space: pre-wrap; overflow-wrap: break-word;">${formatComment(comment)}</td>
@@ -29176,13 +29179,13 @@ const renderDashboard = () => {
                             <!-- GPS ERGEBNIS -->
                             <div style="background: #243186; color: white; padding: 14px 18px; border-radius: 8px; margin: 15px 0;">
                               <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <h3 style="margin: 0; font-size: 12pt; font-weight: 600;">${t.gpsTitle}</h3>
+                                <h3 style="margin: 0; font-size: 12pt; font-weight: 600;">${nwEsc(t.gpsTitle)}</h3>
                                 <div style="display: flex; gap: 25px; align-items: center;">
-                                  ${!noGoalsMode ? `<div style="text-align: center;"><div style="font-size: 18pt; font-weight: 700;">${gps.wasScore.toFixed(1)}</div><div style="font-size: 7pt; opacity: 0.8;">WAS (50%)</div></div>` : ''}
-                                  <div style="text-align: center;"><div style="font-size: 18pt; font-weight: 700;">${gps.wieCoreScore.toFixed(2)}</div><div style="font-size: 7pt; opacity: 0.8;">WIE Core ${noGoalsMode ? (isManager ? '(50%)' : '(100%)') : (isManager ? '(25%)' : '(50%)')}</div></div>
-                                  ${isManager ? `<div style="text-align: center;"><div style="font-size: 18pt; font-weight: 700;">${gps.wieLeadScore.toFixed(2)}</div><div style="font-size: 7pt; opacity: 0.8;">WIE Lead ${noGoalsMode ? '(50%)' : '(25%)'}</div></div>` : ''}
+                                  ${!noGoalsMode ? `<div style="text-align: center;"><div style="font-size: 18pt; font-weight: 700;">${nwEsc(gps.wasScore.toFixed(1))}</div><div style="font-size: 7pt; opacity: 0.8;">WAS (50%)</div></div>` : ''}
+                                  <div style="text-align: center;"><div style="font-size: 18pt; font-weight: 700;">${nwEsc(gps.wieCoreScore.toFixed(2))}</div><div style="font-size: 7pt; opacity: 0.8;">WIE Core ${nwEsc(noGoalsMode ? (isManager ? '(50%)' : '(100%)') : (isManager ? '(25%)' : '(50%)'))}</div></div>
+                                  ${isManager ? `<div style="text-align: center;"><div style="font-size: 18pt; font-weight: 700;">${nwEsc(gps.wieLeadScore.toFixed(2))}</div><div style="font-size: 7pt; opacity: 0.8;">WIE Lead ${nwEsc(noGoalsMode ? '(50%)' : '(25%)')}</div></div>` : ''}
                                   <div style="background: rgba(110, 189, 132, 0.3); padding: 10px 18px; border-radius: 8px; text-align: center; border: 2px solid rgba(110, 189, 132, 0.5);">
-                                    <div style="font-size: 24pt; font-weight: 900; color: #6EBD84;">${gps.finalGPS.toFixed(2)}</div>
+                                    <div style="font-size: 24pt; font-weight: 900; color: #6EBD84;">${nwEsc(gps.finalGPS.toFixed(2))}</div>
                                     <div style="font-size: 8pt; font-weight: 700;">FINAL GPS</div>
                                   </div>
                                 </div>
@@ -29195,15 +29198,15 @@ const renderDashboard = () => {
                             <!-- TEIL D: STÄRKEN & ENTWICKLUNG -->
                             <div style="margin-bottom: 15px;">
                               <div style="background: #FFFFFF; padding: 6px 12px; border-left: 4px solid #5F6377; margin-bottom: 10px;">
-                                <h3 style="font-size: 11pt; margin: 0; color: #1C1F2E; font-weight: 700;">${lang === 'de' ? 'Teil D: Stärken & Entwicklung' : lang === 'it' ? 'Parte D: Punti di forza & Sviluppo' : 'Part D: Strengths & Development'}</h3>
+                                <h3 style="font-size: 11pt; margin: 0; color: #1C1F2E; font-weight: 700;">${nwEsc(lang === 'de' ? 'Teil D: Stärken & Entwicklung' : lang === 'it' ? 'Parte D: Punti di forza & Sviluppo' : 'Part D: Strengths & Development')}</h3>
                               </div>
                               <div style="display: flex; gap: 15px;">
                                 <!-- Stärken -->
                                 <div style="flex: 1; background: #F2F3F8; border: 1px solid #6EBD84; border-radius: 6px; padding: 12px;">
-                                  <h4 style="margin: 0 0 8px 0; font-size: 10pt; color: #2F7A48; font-weight: 600;">${lang === 'de' ? 'Meine Stärken' : lang === 'it' ? 'I miei punti di forza' : 'My Strengths'}</h4>
+                                  <h4 style="margin: 0 0 8px 0; font-size: 10pt; color: #2F7A48; font-weight: 600;">${nwEsc(lang === 'de' ? 'Meine Stärken' : lang === 'it' ? 'I miei punti di forza' : 'My Strengths')}</h4>
                                   ${formData.strengths1 ? `<p style="margin: 0 0 6px 0; font-size: 8pt; color: #1C1F2E; background: white; padding: 6px 8px; border-radius: 4px;">${formatComment(formData.strengths1)}</p>` : ''}
                                   ${formData.strengths2 ? `<p style="margin: 0 0 6px 0; font-size: 8pt; color: #1C1F2E; background: white; padding: 6px 8px; border-radius: 4px;">${formatComment(formData.strengths2)}</p>` : ''}
-                                  ${!formData.strengths1 && !formData.strengths2 ? `<p style="margin: 0; font-size: 8pt; color: #8B8FA1; font-style: italic;">${lang === 'de' ? getText(lang, 'Keine Angabe', 'Non specificato', 'Not specified') : lang === 'it' ? 'Nessuna indicazione' : 'No data'}</p>` : ''}
+                                  ${!formData.strengths1 && !formData.strengths2 ? `<p style="margin: 0; font-size: 8pt; color: #8B8FA1; font-style: italic;">${nwEsc(lang === 'de' ? getText(lang, 'Keine Angabe', 'Non specificato', 'Not specified') : lang === 'it' ? 'Nessuna indicazione' : 'No data')}</p>` : ''}
                                 </div>
                               </div>
                             </div>
@@ -29212,22 +29215,22 @@ const renderDashboard = () => {
                             ${devPlanData && devPlanData.length > 0 && devPlanData.some(d => d.measure) ? `
                             <div style="margin-bottom: 15px;">
                               <div style="background: #F2F3F8; padding: 6px 12px; border-left: 4px solid #2F7A48; margin-bottom: 8px;">
-                                <h4 style="font-size: 10pt; margin: 0; color: #2F7A48; font-weight: 600;">${lang === 'de' ? 'Entwicklungsplan' : lang === 'it' ? 'Piano di sviluppo' : 'Development Plan'}</h4>
+                                <h4 style="font-size: 10pt; margin: 0; color: #2F7A48; font-weight: 600;">${nwEsc(lang === 'de' ? 'Entwicklungsplan' : lang === 'it' ? 'Piano di sviluppo' : 'Development Plan')}</h4>
                               </div>
                               <table style="width: 100%; border-collapse: collapse; font-size: 8pt;">
                                 <thead>
                                   <tr style="background: #2F7A48; color: white;">
-                                    <th style="padding: 5px 8px; text-align: left;">${lang === 'de' ? 'Maßnahme' : lang === 'it' ? 'Misura' : 'Measure'}</th>
-                                    <th style="padding: 5px 8px; text-align: left; width: 25%;">${lang === 'de' ? 'Verantwortlich' : lang === 'it' ? 'Responsabile' : 'Responsible'}</th>
-                                    <th style="padding: 5px 8px; text-align: center; width: 15%;">${lang === 'de' ? 'Termin' : lang === 'it' ? 'Scadenza' : 'Deadline'}</th>
+                                    <th style="padding: 5px 8px; text-align: left;">${nwEsc(lang === 'de' ? 'Maßnahme' : lang === 'it' ? 'Misura' : 'Measure')}</th>
+                                    <th style="padding: 5px 8px; text-align: left; width: 25%;">${nwEsc(lang === 'de' ? 'Verantwortlich' : lang === 'it' ? 'Responsabile' : 'Responsible')}</th>
+                                    <th style="padding: 5px 8px; text-align: center; width: 15%;">${nwEsc(lang === 'de' ? 'Termin' : lang === 'it' ? 'Scadenza' : 'Deadline')}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   ${devPlanData.filter(d => d.measure).map((d, idx) => `
-                                    <tr style="background: ${idx % 2 === 0 ? '#FFFFFF' : '#F2F3F8'};">
-                                      <td style="padding: 5px 8px; border-bottom: 1px solid #E6E8F2;">${d.measure || '–'}</td>
-                                      <td style="padding: 5px 8px; border-bottom: 1px solid #E6E8F2;">${d.responsible || '–'}</td>
-                                      <td style="padding: 5px 8px; border-bottom: 1px solid #E6E8F2; text-align: center;">${d.deadline || '–'}</td>
+                                    <tr style="background: ${nwEsc(idx % 2 === 0 ? '#FFFFFF' : '#F2F3F8')};">
+                                      <td style="padding: 5px 8px; border-bottom: 1px solid #E6E8F2;">${nwEsc(d.measure || '–')}</td>
+                                      <td style="padding: 5px 8px; border-bottom: 1px solid #E6E8F2;">${nwEsc(d.responsible || '–')}</td>
+                                      <td style="padding: 5px 8px; border-bottom: 1px solid #E6E8F2; text-align: center;">${nwEsc(d.deadline || '–')}</td>
                                     </tr>
                                   `).join('')}
                                 </tbody>
@@ -29238,23 +29241,23 @@ const renderDashboard = () => {
                             <!-- TEIL E: KARRIEREWÜNSCHE -->
                             <div style="margin-bottom: 15px;">
                               <div style="background: #F2F3F8; padding: 6px 12px; border-left: 4px solid #243186; margin-bottom: 10px;">
-                                <h3 style="font-size: 11pt; margin: 0; color: #243186; font-weight: 700;">${lang === 'de' ? 'Teil E: Karrierewünsche' : lang === 'it' ? 'Parte E: Aspirazioni di carriera' : 'Part E: Career Aspirations'}</h3>
+                                <h3 style="font-size: 11pt; margin: 0; color: #243186; font-weight: 700;">${nwEsc(lang === 'de' ? 'Teil E: Karrierewünsche' : lang === 'it' ? 'Parte E: Aspirazioni di carriera' : 'Part E: Career Aspirations')}</h3>
                               </div>
                               <div style="background: #F2F3F8; border: 1px solid #E6E8F2; border-radius: 6px; padding: 12px;">
                                 ${careerChecks.some(c => c) ? `
                                   <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-                                    ${careerChecks.map((checked, idx) => checked ? `<span style="background: #243186; color: white; padding: 4px 10px; border-radius: 12px; font-size: 8pt; font-weight: 500;">✓ ${cl[idx]}</span>` : '').join('')}
+                                    ${careerChecks.map((checked, idx) => checked ? `<span style="background: #243186; color: white; padding: 4px 10px; border-radius: 12px; font-size: 8pt; font-weight: 500;">✓ ${nwEsc(cl[idx])}</span>` : '').join('')}
                                   </div>
-                                ` : `<p style="margin: 0 0 10px 0; font-size: 8pt; color: #8B8FA1; font-style: italic;">${lang === 'de' ? 'Keine Auswahl getroffen' : 'No selection'}</p>`}
+                                ` : `<p style="margin: 0 0 10px 0; font-size: 8pt; color: #8B8FA1; font-style: italic;">${nwEsc(lang === 'de' ? 'Keine Auswahl getroffen' : 'No selection')}</p>`}
                                 ${formData.careerComment ? `
                                   <div style="background: white; border-radius: 4px; padding: 8px 10px; margin-top: 8px;">
-                                    <p style="margin: 0 0 4px 0; font-size: 7pt; color: #243186; font-weight: 600;">${lang === 'de' ? 'Kommentar:' : lang === 'it' ? 'Commento:' : 'Comment:'}</p>
+                                    <p style="margin: 0 0 4px 0; font-size: 7pt; color: #243186; font-weight: 600;">${nwEsc(lang === 'de' ? 'Kommentar:' : lang === 'it' ? 'Commento:' : 'Comment:')}</p>
                                     <p style="margin: 0; font-size: 8pt; color: #1C1F2E;">${formatComment(formData.careerComment)}</p>
                                   </div>
                                 ` : ''}
                                 ${formData.wishesNextYear ? `
                                   <div style="background: white; border-radius: 4px; padding: 8px 10px; margin-top: 8px;">
-                                    <p style="margin: 0 0 4px 0; font-size: 7pt; color: #243186; font-weight: 600;">${lang === 'de' ? 'Wünsche für das kommende Jahr:' : lang === 'it' ? 'Desideri per il prossimo anno:' : 'Wishes for next year:'}</p>
+                                    <p style="margin: 0 0 4px 0; font-size: 7pt; color: #243186; font-weight: 600;">${nwEsc(lang === 'de' ? 'Wünsche für das kommende Jahr:' : lang === 'it' ? 'Desideri per il prossimo anno:' : 'Wishes for next year:')}</p>
                                     <p style="margin: 0; font-size: 8pt; color: #1C1F2E;">${formatComment(formData.wishesNextYear)}</p>
                                   </div>
                                 ` : ''}
@@ -29265,16 +29268,16 @@ const renderDashboard = () => {
                             ${(formData.feedbackQ1 || formData.feedbackQ2 || formData.feedbackQ3 || formData.feedbackQ4 || formData.feedbackQ5 || formData.feedbackQ6 || formData.feedbackQ7) ? `
                             <div style="margin-bottom: 15px;">
                               <div style="background: #F2F3F8; padding: 6px 12px; border-left: 4px solid #243186; margin-bottom: 10px;">
-                                <h3 style="font-size: 11pt; margin: 0; color: #243186; font-weight: 700;">${lang === 'de' ? 'Teil F: Feedback an Führungskraft' : lang === 'it' ? 'Parte F: Feedback al responsabile' : 'Part F: Feedback to Manager'}</h3>
+                                <h3 style="font-size: 11pt; margin: 0; color: #243186; font-weight: 700;">${nwEsc(lang === 'de' ? 'Teil F: Feedback an Führungskraft' : lang === 'it' ? 'Parte F: Feedback al responsabile' : 'Part F: Feedback to Manager')}</h3>
                               </div>
                               <div style="background: #FFFFFF; border: 1px solid #E6E8F2; border-radius: 6px; padding: 12px;">
-                                ${formData.feedbackQ1 ? `<div style="margin-bottom: 10px; border-left: 3px solid #243186; padding-left: 10px;"><p style="margin: 0 0 4px 0; font-size: 8pt; color: #243186; font-weight: 600;">${fl.q1}</p><p style="margin: 0; font-size: 8pt; color: #1C1F2E;">${formatComment(formData.feedbackQ1)}</p></div>` : ''}
-                                ${formData.feedbackQ2 ? `<div style="margin-bottom: 10px; border-left: 3px solid #243186; padding-left: 10px;"><p style="margin: 0 0 4px 0; font-size: 8pt; color: #243186; font-weight: 600;">${fl.q2}</p><p style="margin: 0; font-size: 8pt; color: #1C1F2E;">${formatComment(formData.feedbackQ2)}</p></div>` : ''}
-                                ${formData.feedbackQ3 ? `<div style="margin-bottom: 10px; border-left: 3px solid #243186; padding-left: 10px;"><p style="margin: 0 0 4px 0; font-size: 8pt; color: #243186; font-weight: 600;">${fl.q3}</p><p style="margin: 0; font-size: 8pt; color: #1C1F2E;">${formatComment(formData.feedbackQ3)}</p></div>` : ''}
-                                ${formData.feedbackQ4 ? `<div style="margin-bottom: 10px; border-left: 3px solid #243186; padding-left: 10px;"><p style="margin: 0 0 4px 0; font-size: 8pt; color: #243186; font-weight: 600;">${fl.q4}</p><p style="margin: 0; font-size: 8pt; color: #1C1F2E;">${formatComment(formData.feedbackQ4)}</p></div>` : ''}
-                                ${formData.feedbackQ5 ? `<div style="margin-bottom: 10px; border-left: 3px solid #243186; padding-left: 10px;"><p style="margin: 0 0 4px 0; font-size: 8pt; color: #243186; font-weight: 600;">${fl.q5}</p><p style="margin: 0; font-size: 8pt; color: #1C1F2E;">${formatComment(formData.feedbackQ5)}</p></div>` : ''}
-                                ${formData.feedbackQ6 ? `<div style="margin-bottom: 10px; border-left: 3px solid #243186; padding-left: 10px;"><p style="margin: 0 0 4px 0; font-size: 8pt; color: #243186; font-weight: 600;">${fl.q6}</p><p style="margin: 0; font-size: 8pt; color: #1C1F2E;">${formatComment(formData.feedbackQ6)}</p></div>` : ''}
-                                ${formData.feedbackQ7 ? `<div style="background: #E6E8F2; border-radius: 6px; padding: 10px; text-align: center; margin-top: 10px;"><p style="margin: 0 0 4px 0; font-size: 8pt; color: #243186; font-weight: 600;">${fl.q7}</p><p style="margin: 0; font-size: 18pt; font-weight: 900; color: #243186;">${formData.feedbackQ7}<span style="font-size: 10pt; font-weight: 400;">/5</span></p></div>` : ''}
+                                ${formData.feedbackQ1 ? `<div style="margin-bottom: 10px; border-left: 3px solid #243186; padding-left: 10px;"><p style="margin: 0 0 4px 0; font-size: 8pt; color: #243186; font-weight: 600;">${nwEsc(fl.q1)}</p><p style="margin: 0; font-size: 8pt; color: #1C1F2E;">${formatComment(formData.feedbackQ1)}</p></div>` : ''}
+                                ${formData.feedbackQ2 ? `<div style="margin-bottom: 10px; border-left: 3px solid #243186; padding-left: 10px;"><p style="margin: 0 0 4px 0; font-size: 8pt; color: #243186; font-weight: 600;">${nwEsc(fl.q2)}</p><p style="margin: 0; font-size: 8pt; color: #1C1F2E;">${formatComment(formData.feedbackQ2)}</p></div>` : ''}
+                                ${formData.feedbackQ3 ? `<div style="margin-bottom: 10px; border-left: 3px solid #243186; padding-left: 10px;"><p style="margin: 0 0 4px 0; font-size: 8pt; color: #243186; font-weight: 600;">${nwEsc(fl.q3)}</p><p style="margin: 0; font-size: 8pt; color: #1C1F2E;">${formatComment(formData.feedbackQ3)}</p></div>` : ''}
+                                ${formData.feedbackQ4 ? `<div style="margin-bottom: 10px; border-left: 3px solid #243186; padding-left: 10px;"><p style="margin: 0 0 4px 0; font-size: 8pt; color: #243186; font-weight: 600;">${nwEsc(fl.q4)}</p><p style="margin: 0; font-size: 8pt; color: #1C1F2E;">${formatComment(formData.feedbackQ4)}</p></div>` : ''}
+                                ${formData.feedbackQ5 ? `<div style="margin-bottom: 10px; border-left: 3px solid #243186; padding-left: 10px;"><p style="margin: 0 0 4px 0; font-size: 8pt; color: #243186; font-weight: 600;">${nwEsc(fl.q5)}</p><p style="margin: 0; font-size: 8pt; color: #1C1F2E;">${formatComment(formData.feedbackQ5)}</p></div>` : ''}
+                                ${formData.feedbackQ6 ? `<div style="margin-bottom: 10px; border-left: 3px solid #243186; padding-left: 10px;"><p style="margin: 0 0 4px 0; font-size: 8pt; color: #243186; font-weight: 600;">${nwEsc(fl.q6)}</p><p style="margin: 0; font-size: 8pt; color: #1C1F2E;">${formatComment(formData.feedbackQ6)}</p></div>` : ''}
+                                ${formData.feedbackQ7 ? `<div style="background: #E6E8F2; border-radius: 6px; padding: 10px; text-align: center; margin-top: 10px;"><p style="margin: 0 0 4px 0; font-size: 8pt; color: #243186; font-weight: 600;">${nwEsc(fl.q7)}</p><p style="margin: 0; font-size: 18pt; font-weight: 900; color: #243186;">${nwEsc(formData.feedbackQ7)}<span style="font-size: 10pt; font-weight: 400;">/5</span></p></div>` : ''}
                               </div>
                             </div>
                             ` : ''}
@@ -29283,11 +29286,11 @@ const renderDashboard = () => {
                             <div style="margin-top: 25px; padding-top: 15px; border-top: 2px solid #E6E8F2;">
                               <div style="display: flex; gap: 40px;">
                                 <div style="flex: 1;">
-                                  <p style="font-size: 8pt; color: #5F6377; margin: 0 0 25px 0;">${lang === 'de' ? 'Datum / Unterschrift Mitarbeiter:in' : lang === 'it' ? 'Data / Firma collaboratore' : 'Date / Employee Signature'}</p>
+                                  <p style="font-size: 8pt; color: #5F6377; margin: 0 0 25px 0;">${nwEsc(lang === 'de' ? 'Datum / Unterschrift Mitarbeiter:in' : lang === 'it' ? 'Data / Firma collaboratore' : 'Date / Employee Signature')}</p>
                                   <div style="border-bottom: 1px solid #1C1F2E; width: 100%;"></div>
                                 </div>
                                 <div style="flex: 1;">
-                                  <p style="font-size: 8pt; color: #5F6377; margin: 0 0 25px 0;">${lang === 'de' ? 'Datum / Unterschrift Führungskraft' : lang === 'it' ? 'Data / Firma responsabile' : 'Date / Manager Signature'}</p>
+                                  <p style="font-size: 8pt; color: #5F6377; margin: 0 0 25px 0;">${nwEsc(lang === 'de' ? 'Datum / Unterschrift Führungskraft' : lang === 'it' ? 'Data / Firma responsabile' : 'Date / Manager Signature')}</p>
                                   <div style="border-bottom: 1px solid #1C1F2E; width: 100%;"></div>
                                 </div>
                               </div>
@@ -29295,7 +29298,7 @@ const renderDashboard = () => {
                             
                             <!-- FOOTER -->
                             <div style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #E6E8F2; font-size: 7pt; color: #8B8FA1; text-align: center;">
-                              ${lang === 'de' ? 'Vertraulich' : lang === 'it' ? 'Riservato' : 'Confidential'} · Niederwieser Group · Performance Management ${period} · Seite 1-2
+                              ${nwEsc(lang === 'de' ? 'Vertraulich' : lang === 'it' ? 'Riservato' : 'Confidential')} · Niederwieser Group · Performance Management ${nwEsc(period)} · Seite 1-2
                             </div>
                           </div>
                         `;

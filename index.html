@@ -1018,10 +1018,12 @@
         const NW_SHOW_9BOX = false; // Kalibrierung: GPS-Verteilung (9-Box Grid) – ausgeblendet, siehe renderTeamCalibration
         // Wählbare Beurteilungsjahre: laufendes Jahr plus alle Jahre mit Unterlagen
         // (Zielvereinbarung für Y+1 gehört zum Gespräch im Jahr Y)
+        // Beurteilungsjahr, zu dem ein Dokument gehört (Zielvereinbarung Y+1 wird im Jahr Y vereinbart)
+        const nwDocCycle = (ap) => nwIsGoalDoc(ap) ? String(Number(nwDocYear(ap)) - 1) : nwCycleYear(ap);
         const nwBeurteilungsjahre = (docs) => {
           const ys = new Set([nwCurrentCycleYear()]);
           (docs || []).forEach(ap => {
-            const y = nwIsGoalDoc(ap) ? String(Number(nwDocYear(ap)) - 1) : nwCycleYear(ap);
+            const y = nwDocCycle(ap);
             if (/^\d{4}$/.test(y)) ys.add(y);
           });
           return [...ys].sort((x, y) => y.localeCompare(x));
@@ -11478,6 +11480,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
           const [allCompanyMembers, setAllCompanyMembers] = useState([]);
           const [hrDataLoading, setHRDataLoading] = useState(false);
           const [hrFilter, setHrFilter] = useState('all');
+          const [hrYearFilter, setHrYearFilter] = useState('all'); // Anzeigefilter Beurteilungsjahr (Standard: alle)
           const [hrSearch, setHrSearch] = useState('');
           const [hrLocationFilter, setHrLocationFilter] = useState('all'); // NEU: Standort-Filter
           const [hrGpsFilter, setHrGpsFilter] = useState('all'); // NEU: GPS-Range Filter
@@ -16954,8 +16957,12 @@ Best regards`
               );
             }
             
+            // Jahresfilter (nur Anzeige): wirkt auf Kennzahlen, Liste und Export; „Alle Jahre“ = wie bisher
+            const hrYears = nwBeurteilungsjahre(allCompanyAppraisals);
+            const hrYearCount = (y) => allCompanyAppraisals.filter(a => nwDocCycle(a) === y).length;
+            const yearAppraisals = hrYearFilter === 'all' ? allCompanyAppraisals : allCompanyAppraisals.filter(a => nwDocCycle(a) === hrYearFilter);
             // Filter
-            let filtered = [...allCompanyAppraisals];
+            let filtered = [...yearAppraisals];
             // Type filter
             if (hrFilter === 'completed') filtered = filtered.filter(a => a.status === 'completed');
             if (hrFilter === 'draft') filtered = filtered.filter(a => a.status === 'draft');
@@ -17004,13 +17011,13 @@ Best regards`
             // Stats
             const stats = {
               members: allCompanyMembers.length,
-              appraisals: allCompanyAppraisals.length,
-              completed: allCompanyAppraisals.filter(a => a.status === 'completed').length,
-              reviews: allCompanyAppraisals.filter(a => a.type === 'review' || !a.type).length,
-              self: allCompanyAppraisals.filter(a => a.type === 'self' || a.type === 'self_assessment' || a.type === 'self-reflection' || a.type === 'self_assessment_standalone' || a.type === 'self_pdf').length
+              appraisals: yearAppraisals.length,
+              completed: yearAppraisals.filter(a => a.status === 'completed').length,
+              reviews: yearAppraisals.filter(a => a.type === 'review' || !a.type).length,
+              self: yearAppraisals.filter(a => a.type === 'self' || a.type === 'self_assessment' || a.type === 'self-reflection' || a.type === 'self_assessment_standalone' || a.type === 'self_pdf').length
             };
             
-            const reviewsWithGPS = allCompanyAppraisals.filter(a => (a.type === 'review' || !a.type) && a.gpsScore > 0);
+            const reviewsWithGPS = yearAppraisals.filter(a => (a.type === 'review' || !a.type) && a.gpsScore > 0);
             const avgGPS = reviewsWithGPS.length > 0 
               ? (reviewsWithGPS.reduce((sum, a) => sum + a.gpsScore, 0) / reviewsWithGPS.length).toFixed(2)
               : '–';
@@ -17026,7 +17033,12 @@ Best regards`
                   'HR Admin Dashboard'
                 ),
                 React.createElement('p', { className: 'text-ink-60 mb-4' },
-                  getText(lang, 'Unternehmensweite Übersicht aller Performance-Daten', 'Panoramica aziendale', 'Company-wide overview')
+                  getText(lang, 'Unternehmensweite Übersicht aller Performance-Daten', 'Panoramica aziendale', 'Company-wide overview'),
+                  ' · ',
+                  React.createElement('span', { className: 'font-medium text-nw-blue', 'data-testid': 'hr-year-label' },
+                    hrYearFilter === 'all'
+                      ? getText(lang, 'Alle Jahre', 'Tutti gli anni', 'All years')
+                      : getText(lang, 'Beurteilungsjahr ', 'Anno di valutazione ', 'Review year ') + hrYearFilter + getText(lang, ' (Ziele ', ' (obiettivi ', ' (goals ') + (Number(hrYearFilter) + 1) + ')')
                 ),
                 React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-5 gap-3' },
                   React.createElement('div', { className: 'bg-nw-blue-06 rounded-xl p-3 text-center' },
@@ -20597,15 +20609,15 @@ Best regards`
                       filtered.length + ' ' + getText(lang, 'Einträge', 'voci', 'entries')
                     ),
                     // Reset Button
-                    (hrFilter !== 'all' || hrManagerFilter !== 'all' || hrLocationFilter !== 'all' || hrGpsFilter !== 'all' || hrSearch) &&
+                    (hrFilter !== 'all' || hrYearFilter !== 'all' || hrManagerFilter !== 'all' || hrLocationFilter !== 'all' || hrGpsFilter !== 'all' || hrSearch) &&
                     React.createElement('button', {
-                      onClick: () => { setHrFilter('all'); setHrManagerFilter('all'); setHrLocationFilter('all'); setHrGpsFilter('all'); setHrSearch(''); },
+                      onClick: () => { setHrFilter('all'); setHrYearFilter('all'); setHrManagerFilter('all'); setHrLocationFilter('all'); setHrGpsFilter('all'); setHrSearch(''); },
                       className: 'text-xs text-danger hover:text-danger flex items-center gap-1'
                     }, React.createElement(X, { size: 14 }), getText(lang, 'Zurücksetzen', 'Resetta', 'Reset'))
                   )
                 ),
                 // Filter Row
-                React.createElement('div', { className: 'p-4 grid grid-cols-2 md:grid-cols-6 gap-3' },
+                React.createElement('div', { className: 'p-4 grid grid-cols-2 md:grid-cols-7 gap-3' },
                   // Suche
                   React.createElement('div', { className: 'col-span-2' },
                     React.createElement('label', { className: 'block text-xs font-medium text-ink-60 mb-1' }, getText(lang, 'Suche', 'Cerca', 'Search')),
@@ -20616,6 +20628,19 @@ Best regards`
                       onChange: (e) => setHrSearch(e.target.value),
                       className: 'w-full px-3 py-2 border rounded-lg text-sm focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
                     })
+                  ),
+                  // Beurteilungsjahr
+                  React.createElement('div', null,
+                    React.createElement('label', { htmlFor: 'hr-year-filter', className: 'block text-xs font-medium text-ink-60 mb-1' }, getText(lang, 'Beurteilungsjahr', 'Anno', 'Review year')),
+                    React.createElement('select', {
+                      id: 'hr-year-filter',
+                      value: hrYearFilter,
+                      onChange: (e) => setHrYearFilter(e.target.value),
+                      className: 'w-full px-3 py-2 border rounded-lg text-sm focus:border-nw-blue focus:shadow-[0_0_0_3px_#F2F3F8] focus:outline-none transition-[border-color,box-shadow] duration-150'
+                    },
+                      React.createElement('option', { value: 'all' }, getText(lang, 'Alle Jahre', 'Tutti gli anni', 'All years') + ' (' + allCompanyAppraisals.length + ')'),
+                      hrYears.map(y => React.createElement('option', { key: y, value: y }, y + ' (' + hrYearCount(y) + ')'))
+                    )
                   ),
                   // Typ
                   React.createElement('div', null,

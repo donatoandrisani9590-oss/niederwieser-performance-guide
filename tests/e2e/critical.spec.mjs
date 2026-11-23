@@ -491,3 +491,27 @@ test('Mitarbeiter löschen: nur mit eingetipptem Namen, vorher automatische Sich
   expect(download.suggestedFilename()).toMatch(/^Sicherung_Emil_Probe_/);
   await expect.poll(async () => (await listDocs('teamMembers')).some((d) => d.name.endsWith('/tm-emil')), { timeout: 10000 }).toBe(false);
 });
+
+test('HR-Dashboard: Jahresfilter, Standard „Alle Jahre“ wie bisher, Daten unverändert', async ({ page }) => {
+  const before = JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields));
+  await gotoTeamAndLogin(page, USERS.hr);
+  await page.getByText('HR Dashboard', { exact: true }).first().click();
+  const label = page.getByTestId('hr-year-label');
+  await expect(label).toHaveText('Alle Jahre');
+  const entries = page.getByText(/^\d+ Einträge$/);
+  const count = async () => Number((await entries.textContent()).split(' ')[0]);
+  await expect.poll(count).toBeGreaterThan(0);
+  const all = await count();
+  const select = page.locator('#hr-year-filter');
+  await expect(select.locator('option')).toContainText([/^Alle Jahre/, new RegExp('^' + YEAR), new RegExp('^' + PREV_YEAR)]);
+  await select.selectOption(PREV_YEAR);
+  await expect(label).toHaveText(`Beurteilungsjahr ${PREV_YEAR} (Ziele ${YEAR})`);
+  await expect.poll(count).toBeLessThan(all);
+  const prev = await count();
+  await select.selectOption(YEAR);
+  await expect.poll(count).toBe(all - prev);
+  await page.getByRole('button', { name: 'Zurücksetzen' }).click();
+  await expect(label).toHaveText('Alle Jahre');
+  await expect.poll(count).toBe(all);
+  expect(JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields))).toBe(before);
+});

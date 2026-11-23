@@ -1592,7 +1592,7 @@
                         },
                             React.createElement('div', { 
                                 className: 'w-16 h-16 bg-danger-bg rounded-full flex items-center justify-center mx-auto mb-4' 
-                            }, React.createElement('span', { className: 'text-2xl' }, React.createElement(AlertTriangle, { size: 18, 'aria-hidden': true }))),
+                            }, React.createElement('span', { className: 'inline-flex' }, React.createElement(AlertTriangle, { size: 18, 'aria-hidden': true }))),
                             React.createElement('h2', { 
                                 className: 'text-lg font-semibold text-ink mb-2' 
                             }, 'Es ist ein Fehler aufgetreten'),
@@ -6429,7 +6429,7 @@
                 },
                     e('div', { className: 'flex items-center justify-between mb-4' },
                         e('h3', { className: "text-lg font-semibold text-nw-blue flex items-center gap-2" }, 
-                            e('span', { className: 'text-2xl' }, React.createElement(ClipboardList, { size: 18, 'aria-hidden': true })),
+                            e('span', { className: 'inline-flex' }, React.createElement(ClipboardList, { size: 18, 'aria-hidden': true })),
                             lang === 'de' ? 'Entwicklungsmaßnahmen aus letzter Beurteilung (D.2)' 
                             : lang === 'it' ? 'Misure di sviluppo dall\'ultima valutazione (D.2)' 
                             : 'Development Measures from Last Review (D.2)'
@@ -7455,19 +7455,19 @@
                     // Score Zusammenfassung
                     e('div', { className: 'flex gap-4 mt-4' },
                       e('div', { className: 'bg-nw-blue-06 rounded-lg px-4 py-2' },
-                        e('div', { className: 'text-2xl font-semibold' }, (version.gpsScore || 0).toFixed(2)),
+                        e('div', { className: 't-kpi' }, (version.gpsScore || 0).toFixed(2)),
                         e('div', { className: 'text-xs text-warn-bg' }, 'GPS Score')
                       ),
                       e('div', { className: 'bg-nw-blue-06 rounded-lg px-4 py-2' },
-                        e('div', { className: 'text-2xl font-semibold' }, (version.wasScore || 0).toFixed(2)),
+                        e('div', { className: 't-kpi' }, (version.wasScore || 0).toFixed(2)),
                         e('div', { className: 'text-xs text-warn-bg' }, 'WAS')
                       ),
                       e('div', { className: 'bg-nw-blue-06 rounded-lg px-4 py-2' },
-                        e('div', { className: 'text-2xl font-semibold' }, (version.wieCoreScore || 0).toFixed(2)),
+                        e('div', { className: 't-kpi' }, (version.wieCoreScore || 0).toFixed(2)),
                         e('div', { className: 'text-xs text-warn-bg' }, 'WIE')
                       ),
                       versionGoals.length > 0 && e('div', { className: 'bg-nw-blue-06 rounded-lg px-4 py-2' },
-                        e('div', { className: 'text-2xl font-semibold' }, versionGoals.length),
+                        e('div', { className: 't-kpi' }, versionGoals.length),
                         e('div', { className: 'text-xs text-warn-bg' }, lang === 'de' ? 'Ziele' : 'Goals')
                       )
                     )
@@ -9424,7 +9424,7 @@
                                     e('div', { className: "text-xs text-ok mb-1" },
                                         lang === 'de' ? 'Tatsächliche Auszahlung:' : lang === 'it' ? 'Pagamento effettivo:' : 'Actual Payout:'
                                     ),
-                                    e('div', { className: "text-2xl font-semibold text-ok" },
+                                    e('div', { className: "t-kpi text-ok" },
                                         `${formatGermanNumber(totalBonusPayout.toFixed(0))} €`
                                     ),
                                     e('div', { className: `text-xs font-medium ${bonusPayoutPercentage >= 100 ? 'text-ok' : bonusPayoutPercentage >= 70 ? 'text-warn' : 'text-danger'}` },
@@ -9450,7 +9450,7 @@
                   style: { WebkitPrintColorAdjust: 'exact' }
                 },
                   e('div', { className: "flex items-start gap-3" },
-                    e('div', { className: "text-2xl flex-shrink-0" }, React.createElement(Users2, { size: 18, 'aria-hidden': true })),
+                    e('div', { className: "flex-shrink-0" }, React.createElement(Users2, { size: 18, 'aria-hidden': true })),
                     e('div', null,
                       e('div', { className: "font-semibold text-ink mb-1" }, 
                         lang === 'de' ? 'Möglicher Halo-Effekt' : lang === 'it' ? 'Possibile Effetto Halo' : 'Possible Halo Effect'
@@ -9473,7 +9473,7 @@
                   style: { WebkitPrintColorAdjust: 'exact' }
                 },
                   e('div', { className: "flex items-start gap-3" },
-                    e('div', { className: "text-2xl flex-shrink-0" }, React.createElement(Eye, { size: 18, 'aria-hidden': true })),
+                    e('div', { className: "flex-shrink-0" }, React.createElement(Eye, { size: 18, 'aria-hidden': true })),
                     e('div', null,
                       e('div', { className: "font-semibold text-nw-blue mb-1" }, 
                         lang === 'de' 
@@ -9553,8 +9553,8 @@
                 e('div', { className: "bg-white p-8 rounded-card shadow-card border border-line-2 break-inside-avoid" },
                     e('h3', { className: "text-lg font-semibold text-nw-blue mb-4 border-b pb-2" }, nwGloss(t.partC3, lang)),
                     e('div', { className: "bg-panel p-6 rounded-card text-center border border-line" },
-                        e('div', { className: "text-sm text-ink-60 uppercase tracking-[.07em] mb-2" }, "Final GPS"),
-                        e('div', { className: "text-2xl font-semibold text-ink" }, finalGPS.toFixed(2)),
+                        e('div', { className: "eyebrow mb-2" }, "Final GPS"),
+                        e('div', { className: "t-kpi" }, finalGPS.toFixed(2)),
                         e('div', { className: "mt-2 font-medium text-ok" }, 
                             goals.length === 0 || totalGoalWeight === 0
                                 ? (isManager 
@@ -11776,7 +11776,7 @@ Weight more important goals higher!`
               React.createElement('div', { className: 'p-4 space-y-4 max-h-[60vh] overflow-y-auto' },
                 // Firebase Status
                 React.createElement('div', null,
-                  React.createElement('h3', { className: 'text-xs font-semibold text-ink-60 uppercase mb-2' }, 'Firebase Status'),
+                  React.createElement('h3', { className: 'eyebrow mb-2' }, 'Firebase Status'),
                   React.createElement('div', { className: 'bg-ink rounded-lg p-3 space-y-1' },
                     React.createElement('div', { className: 'flex justify-between' },
                       React.createElement('span', { className: 'text-ink-60' }, 'Datenbank:'),
@@ -11809,7 +11809,7 @@ Weight more important goals higher!`
                 
                 // Daten Status
                 React.createElement('div', null,
-                  React.createElement('h3', { className: 'text-xs font-semibold text-ink-60 uppercase mb-2' }, 'Daten Status'),
+                  React.createElement('h3', { className: 'eyebrow mb-2' }, 'Daten Status'),
                   React.createElement('div', { className: 'bg-ink rounded-lg p-3 space-y-1' },
                     React.createElement('div', { className: 'flex justify-between' },
                       React.createElement('span', { className: 'text-ink-60' }, 'Team-Mitglieder:'),
@@ -11834,7 +11834,7 @@ Weight more important goals higher!`
                 
                 // Storage Info
                 React.createElement('div', null,
-                  React.createElement('h3', { className: 'text-xs font-semibold text-ink-60 uppercase mb-2' }, 'Storage'),
+                  React.createElement('h3', { className: 'eyebrow mb-2' }, 'Storage'),
                   React.createElement('div', { className: 'bg-ink rounded-lg p-3 space-y-1' },
                     React.createElement('div', { className: 'flex justify-between' },
                       React.createElement('span', { className: 'text-ink-60' }, 'localStorage (nw_*):'),
@@ -11849,7 +11849,7 @@ Weight more important goals higher!`
                 
                 // Letzte Logs
                 React.createElement('div', null,
-                  React.createElement('h3', { className: 'text-xs font-semibold text-ink-60 uppercase mb-2' }, 'Letzte Aktivitäten'),
+                  React.createElement('h3', { className: 'eyebrow mb-2' }, 'Letzte Aktivitäten'),
                   React.createElement('div', { className: 'bg-ink rounded-lg p-3 max-h-32 overflow-y-auto space-y-1' },
                     debugLogs.length === 0 
                       ? React.createElement('span', { className: 'text-ink-60 italic' }, getText(lang, 'Keine Aktivitäten...', 'Nessuna attività...', 'No activities...'))
@@ -16905,7 +16905,7 @@ Best regards`
                               React.createElement('h4', { className: 'font-semibold text-nw-blue mb-2' }, goal.title || goal.name),
                               // Messkriterium / Target
                               goal.target && React.createElement('div', { className: 'mb-2' },
-                                React.createElement('span', { className: 'text-xs font-medium text-ink-60 uppercase' }, 
+                                React.createElement('span', { className: 'eyebrow' }, 
                                   getText(lang, 'Messkriterium / Zielwert', 'Criterio di misura', 'Measurement / Target')
                                 ),
                                 React.createElement('p', { className: 'text-sm text-ink mt-1' }, goal.target)
@@ -16950,31 +16950,31 @@ Best regards`
               // KPI Cards (EXAKT wie HR Dashboard)
               React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-5 gap-4' },
                 React.createElement('div', { className: 'bg-white rounded-card p-5 shadow-card border border-line' },
-                  React.createElement('div', { className: 'text-2xl font-semibold text-nw-blue' }, totalGoalDocs),
+                  React.createElement('div', { className: 't-kpi text-nw-blue' }, totalGoalDocs),
                   React.createElement('div', { className: 'text-sm text-ink-60 mt-1' },
                     lang === 'de' ? 'Zielvereinbarungen' : lang === 'it' ? 'Accordi' : 'Agreements'
                   )
                 ),
                 React.createElement('div', { className: 'bg-white rounded-card p-5 shadow-card border border-line' },
-                  React.createElement('div', { className: 'text-2xl font-semibold text-ok' }, completedGoals.length),
+                  React.createElement('div', { className: 't-kpi text-ok' }, completedGoals.length),
                   React.createElement('div', { className: 'text-sm text-ink-60 mt-1' },
                     lang === 'de' ? 'Abgeschlossen' : lang === 'it' ? 'Completati' : 'Completed'
                   )
                 ),
                 React.createElement('div', { className: 'bg-white rounded-card p-5 shadow-card border border-line' },
-                  React.createElement('div', { className: 'text-2xl font-semibold text-warn' }, draftGoals.length),
+                  React.createElement('div', { className: 't-kpi text-warn' }, draftGoals.length),
                   React.createElement('div', { className: 'text-sm text-ink-60 mt-1' },
                     lang === 'de' ? 'Entwürfe' : lang === 'it' ? 'Bozze' : 'Drafts'
                   )
                 ),
                 React.createElement('div', { className: 'bg-white rounded-card p-5 shadow-card border border-line' },
-                  React.createElement('div', { className: 'text-2xl font-semibold text-nw-blue' }, allGoals.length),
+                  React.createElement('div', { className: 't-kpi text-nw-blue' }, allGoals.length),
                   React.createElement('div', { className: 'text-sm text-ink-60 mt-1' },
                     lang === 'de' ? 'Einzelziele' : lang === 'it' ? 'Obiettivi singoli' : 'Individual Goals'
                   )
                 ),
                 React.createElement('div', { className: 'bg-white rounded-card p-5 shadow-card border border-line' },
-                  React.createElement('div', { className: 'text-2xl font-semibold text-ok' }, avgWeight + '%'),
+                  React.createElement('div', { className: 't-kpi text-ok' }, avgWeight + '%'),
                   React.createElement('div', { className: 'text-sm text-ink-60 mt-1' },
                     lang === 'de' ? 'Ø Gewichtung' : lang === 'it' ? 'Peso medio' : 'Avg Weight'
                   )
@@ -17086,7 +17086,7 @@ Best regards`
               
             if (!currentAccess || !currentAccess.accessSalary) {
               return React.createElement('div', { className: 'text-center py-20' },
-                React.createElement('div', { className: 'text-2xl mb-4' }, React.createElement(Lock, { size: 18, 'aria-hidden': true })),
+                React.createElement('div', { className: 'mb-4' }, React.createElement(Lock, { size: 18, 'aria-hidden': true })),
                 React.createElement('h2', { className: 'text-lg font-semibold text-nw-blue mb-2' }, 
                   lang === 'de' ? 'Kein Zugriff' : lang === 'it' ? 'Accesso negato' : 'Access Denied'),
                 React.createElement('p', { className: 'text-ink-60' }, 
@@ -17988,23 +17988,23 @@ Best regards`
                 ),
                 React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-5 gap-3' },
                   React.createElement('div', { className: 'bg-nw-blue-06 rounded-card p-3 text-center' },
-                    React.createElement('div', { className: 'text-2xl font-semibold' }, stats.members),
+                    React.createElement('div', { className: 't-kpi' }, stats.members),
                     React.createElement('div', { className: 'text-xs text-ink-60' }, getText(lang, 'Mitarbeiter', 'Collaboratori', 'Employees'))
                   ),
                   React.createElement('div', { className: 'bg-nw-blue-06 rounded-card p-3 text-center' },
-                    React.createElement('div', { className: 'text-2xl font-semibold' }, stats.reviews),
+                    React.createElement('div', { className: 't-kpi' }, stats.reviews),
                     React.createElement('div', { className: 'text-xs text-ink-60' }, 'Reviews')
                   ),
                   React.createElement('div', { className: 'bg-nw-blue-06 rounded-card p-3 text-center' },
-                    React.createElement('div', { className: 'text-2xl font-semibold' }, stats.self),
+                    React.createElement('div', { className: 't-kpi' }, stats.self),
                     React.createElement('div', { className: 'text-xs text-ink-60' }, getText(lang, 'Selbstrefl.', 'Autorifless.', 'Self-Assess.'))
                   ),
                   React.createElement('div', { className: 'bg-nw-blue-06 rounded-card p-3 text-center' },
-                    React.createElement('div', { className: 'text-2xl font-semibold' }, avgGPS),
+                    React.createElement('div', { className: 't-kpi' }, avgGPS),
                     React.createElement('div', { className: 'text-xs text-ink-60' }, 'Ø GPS')
                   ),
                   React.createElement('div', { className: 'bg-nw-blue-06 rounded-card p-3 text-center' },
-                    React.createElement('div', { className: 'text-2xl font-semibold' }, `${stats.completed}/${stats.reviews}`),
+                    React.createElement('div', { className: 't-kpi' }, `${stats.completed}/${stats.reviews}`),
                     React.createElement('div', { className: 'text-xs text-ink-60' }, getText(lang, 'Fertig', 'Completate', 'Done'))
                   )
                 )
@@ -18140,19 +18140,19 @@ Best regards`
                   ),
                   React.createElement('div', { className: 'grid md:grid-cols-4 gap-4 mb-6' },
                     React.createElement('div', { className: 'bg-nw-blue-06 rounded-lg p-4 text-center' },
-                      React.createElement('div', { className: 'text-2xl font-semibold text-nw-blue' }, restoreData.data?.teamAppraisals?.length || 0),
+                      React.createElement('div', { className: 't-kpi text-nw-blue' }, restoreData.data?.teamAppraisals?.length || 0),
                       React.createElement('div', { className: 'text-sm text-nw-blue' }, 'Beurteilungen')
                     ),
                     React.createElement('div', { className: 'bg-nw-green-15 rounded-lg p-4 text-center' },
-                      React.createElement('div', { className: 'text-2xl font-semibold text-ok' }, restoreData.data?.teamMembers?.length || 0),
+                      React.createElement('div', { className: 't-kpi text-ok' }, restoreData.data?.teamMembers?.length || 0),
                       React.createElement('div', { className: 'text-sm text-ok' }, 'Mitarbeiter')
                     ),
                     React.createElement('div', { className: 'bg-nw-blue-06 rounded-lg p-4 text-center' },
-                      React.createElement('div', { className: 'text-2xl font-semibold text-nw-blue' }, restoreData.data?.salaryReviewData?.length || 0),
+                      React.createElement('div', { className: 't-kpi text-nw-blue' }, restoreData.data?.salaryReviewData?.length || 0),
                       React.createElement('div', { className: 'text-sm text-nw-blue' }, 'Salary Review')
                     ),
                     React.createElement('div', { className: 'bg-warn-bg rounded-lg p-4 text-center' },
-                      React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, restoreData.data?.salaryReviewAccess?.length || 0),
+                      React.createElement('div', { className: 't-kpi' }, restoreData.data?.salaryReviewAccess?.length || 0),
                       React.createElement('div', { className: 'text-sm text-ink-60' }, 'Zugriffsrechte')
                     )
                   ),
@@ -18238,19 +18238,19 @@ Best regards`
                   ),
                   React.createElement('div', { className: 'grid md:grid-cols-4 gap-4' },
                     React.createElement('div', { className: 'bg-panel rounded-lg p-4 text-center' },
-                      React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, allCompanyAppraisals.length),
+                      React.createElement('div', { className: 't-kpi' }, allCompanyAppraisals.length),
                       React.createElement('div', { className: 'text-sm text-ink-60' }, 'Beurteilungen')
                     ),
                     React.createElement('div', { className: 'bg-panel rounded-lg p-4 text-center' },
-                      React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, allCompanyMembers.length),
+                      React.createElement('div', { className: 't-kpi' }, allCompanyMembers.length),
                       React.createElement('div', { className: 'text-sm text-ink-60' }, 'Mitarbeiter')
                     ),
                     React.createElement('div', { className: 'bg-panel rounded-lg p-4 text-center' },
-                      React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, allCompanyAppraisals.filter(a => a.type === 'review' || !a.type).length),
+                      React.createElement('div', { className: 't-kpi' }, allCompanyAppraisals.filter(a => a.type === 'review' || !a.type).length),
                       React.createElement('div', { className: 'text-sm text-ink-60' }, 'Reviews')
                     ),
                     React.createElement('div', { className: 'bg-panel rounded-lg p-4 text-center' },
-                      React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, allCompanyAppraisals.filter(a => a.type === 'goals').length),
+                      React.createElement('div', { className: 't-kpi' }, allCompanyAppraisals.filter(a => a.type === 'goals').length),
                       React.createElement('div', { className: 'text-sm text-ink-60' }, 'Zielvereinbarungen')
                     )
                   )
@@ -18589,13 +18589,13 @@ Best regards`
                   ),
                   React.createElement('div', { className: 'flex gap-4 mt-4' },
                     React.createElement('div', { className: 'bg-white/20 rounded-lg px-4 py-2' },
-                      React.createElement('div', { className: 'text-2xl font-semibold' }, 
+                      React.createElement('div', { className: 't-kpi' }, 
                         allCompanyAppraisals.filter(a => a.versionHistory && a.versionHistory.length > 0).length
                       ),
                       React.createElement('div', { className: 'text-xs text-white/70' }, getText(lang, 'Mit Versionen', 'Con versioni', 'With versions'))
                     ),
                     React.createElement('div', { className: 'bg-white/20 rounded-lg px-4 py-2' },
-                      React.createElement('div', { className: 'text-2xl font-semibold' }, 
+                      React.createElement('div', { className: 't-kpi' }, 
                         allCompanyAppraisals.reduce((sum, a) => sum + (a.versionHistory?.length || 0), 0)
                       ),
                       React.createElement('div', { className: 'text-xs text-white/70' }, getText(lang, 'Gesamte Versionen', 'Totale versioni', 'Total versions'))
@@ -18829,25 +18829,25 @@ Best regards`
                     // Score Cards
                     React.createElement('div', { className: 'flex gap-3 mt-4' },
                       React.createElement('div', { className: 'bg-white/20 rounded-lg px-4 py-2' },
-                        React.createElement('div', { className: 'text-2xl font-semibold' }, 
+                        React.createElement('div', { className: 't-kpi' }, 
                           (hrVersionDetailModal.version.gpsScore || 0).toFixed(2)
                         ),
                         React.createElement('div', { className: 'text-xs text-white/70' }, 'GPS')
                       ),
                       React.createElement('div', { className: 'bg-white/20 rounded-lg px-4 py-2' },
-                        React.createElement('div', { className: 'text-2xl font-semibold' }, 
+                        React.createElement('div', { className: 't-kpi' }, 
                           (hrVersionDetailModal.version.wasScore || 0).toFixed(2)
                         ),
                         React.createElement('div', { className: 'text-xs text-white/70' }, 'WAS')
                       ),
                       React.createElement('div', { className: 'bg-white/20 rounded-lg px-4 py-2' },
-                        React.createElement('div', { className: 'text-2xl font-semibold' }, 
+                        React.createElement('div', { className: 't-kpi' }, 
                           (hrVersionDetailModal.version.wieCoreScore || 0).toFixed(2)
                         ),
                         React.createElement('div', { className: 'text-xs text-white/70' }, 'WIE Core')
                       ),
                       hrVersionDetailModal.version.wieLeaderScore > 0 && React.createElement('div', { className: 'bg-white/20 rounded-lg px-4 py-2' },
-                        React.createElement('div', { className: 'text-2xl font-semibold' }, 
+                        React.createElement('div', { className: 't-kpi' }, 
                           hrVersionDetailModal.version.wieLeaderScore.toFixed(2)
                         ),
                         React.createElement('div', { className: 'text-xs text-white/70' }, 'WIE Leader')
@@ -19082,7 +19082,7 @@ Best regards`
                   style: { }
                 },
                   React.createElement('h2', { className: 'text-lg font-semibold mb-2 flex items-center gap-3 text-nw-blue' },
-                    React.createElement('span', { className: 'text-2xl' }, React.createElement(AlertCircle, { size: 18, 'aria-hidden': true })),
+                    React.createElement('span', { className: 'inline-flex' }, React.createElement(AlertCircle, { size: 18, 'aria-hidden': true })),
                     getText(lang, 'Kalibrierung: IST vs. SOLL (Normalverteilung)', 'Calibrazione: Effettivo vs. Atteso', 'Calibration: Actual vs. Expected')
                   ),
                   React.createElement('p', { className: 'text-ink-60' },
@@ -19375,7 +19375,7 @@ Best regards`
                       
                       // Typ-Filter Buttons
                       React.createElement('div', { className: 'mb-6' },
-                        React.createElement('p', { className: 'text-xs text-ink-60 mb-2 font-medium uppercase tracking-[.07em]' },
+                        React.createElement('p', { className: 'eyebrow mb-2' },
                           getText(lang, 'Beurteilungstyp', 'Tipo valutazione', 'Appraisal Type')
                         ),
                         React.createElement('div', { className: 'flex flex-wrap gap-2' },
@@ -19502,7 +19502,7 @@ Best regards`
                     
                     // === KEINE DATEN WARNUNG ===
                     selectedAppraisals.length === 0 && React.createElement('div', { className: 'bg-panel rounded-card p-8 text-center border border-line' },
-                      React.createElement('span', { className: 'text-2xl mb-4 block' }, React.createElement(Mail, { size: 18, 'aria-hidden': true })),
+                      React.createElement('span', { className: 'mb-4 block' }, React.createElement(Mail, { size: 18, 'aria-hidden': true })),
                       React.createElement('p', { className: 'text-ink-60 font-medium' }, 
                         getText(lang, 'Keine Daten ausgewählt', 'Nessun dato selezionato', 'No data selected')
                       ),
@@ -19666,29 +19666,29 @@ Best regards`
                       ),
                       React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-5 gap-4' },
                         React.createElement('div', { className: 'bg-panel rounded-card p-4 text-center' },
-                          React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, selectedAppraisals.length),
+                          React.createElement('div', { className: 't-kpi' }, selectedAppraisals.length),
                           React.createElement('div', { className: 'text-xs text-ink-60 mt-1' }, getText(lang, 'Bewertungen', 'Valutazioni', 'Ratings'))
                         ),
                         React.createElement('div', { className: 'bg-nw-green-15 rounded-card p-4 text-center' },
-                          React.createElement('div', { className: 'text-2xl font-semibold text-ok' }, 
+                          React.createElement('div', { className: 't-kpi text-ok' }, 
                             (buckets[0].percent + buckets[1].percent).toFixed(0) + '%'
                           ),
                           React.createElement('div', { className: 'text-xs text-ok mt-1' }, getText(lang, 'Top (Note 4-5)', 'Top (4-5)', 'Top (Grade 4-5)'))
                         ),
                         React.createElement('div', { className: 'bg-nw-blue-06 rounded-card p-4 text-center' },
-                          React.createElement('div', { className: 'text-2xl font-semibold text-nw-blue' }, 
+                          React.createElement('div', { className: 't-kpi text-nw-blue' }, 
                             buckets[2].percent.toFixed(0) + '%'
                           ),
                           React.createElement('div', { className: 'text-xs text-nw-blue mt-1' }, getText(lang, 'Mitte (Note 3)', 'Centro (3)', 'Middle (Grade 3)'))
                         ),
                         React.createElement('div', { className: 'bg-warn-bg rounded-card p-4 text-center' },
-                          React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, 
+                          React.createElement('div', { className: 't-kpi' }, 
                             (buckets[3].percent + buckets[4].percent).toFixed(0) + '%'
                           ),
                           React.createElement('div', { className: 'text-xs text-ink-60 mt-1' }, getText(lang, 'Unten (Note 1-2)', 'Basso (1-2)', 'Bottom (Grade 1-2)'))
                         ),
                         React.createElement('div', { className: 'bg-nw-blue-06 rounded-card p-4 text-center' },
-                          React.createElement('div', { className: 'text-2xl font-semibold text-nw-blue' }, avgGPSSelected),
+                          React.createElement('div', { className: 't-kpi text-nw-blue' }, avgGPSSelected),
                           React.createElement('div', { className: 'text-xs text-nw-blue mt-1' }, getText(lang, 'Ø GPS-Score', 'GPS medio', 'Avg GPS Score'))
                         )
                       )
@@ -19771,7 +19771,7 @@ Best regards`
                   style: { }
                 },
                   React.createElement('h2', { className: 'text-lg font-semibold mb-2 flex items-center gap-3 text-nw-blue' },
-                    React.createElement('span', { className: 'text-2xl' }, React.createElement(Scale, { size: 18, 'aria-hidden': true })),
+                    React.createElement('span', { className: 'inline-flex' }, React.createElement(Scale, { size: 18, 'aria-hidden': true })),
                     getText(lang, 'Rater-Bias-Index: Härte-Milde-Analyse', 'Indice Bias Valutatore', 'Rater Bias Index: Leniency-Strictness Analysis')
                   ),
                   React.createElement('p', { className: 'text-ink-60' },
@@ -19939,7 +19939,7 @@ Best regards`
                     
                     // Keine Daten Warnung
                     allReviewsWithGPS.length === 0 && React.createElement('div', { className: 'bg-panel rounded-card p-8 text-center' },
-                      React.createElement('span', { className: 'text-2xl mb-4 block' }, React.createElement(Mail, { size: 18, 'aria-hidden': true })),
+                      React.createElement('span', { className: 'mb-4 block' }, React.createElement(Mail, { size: 18, 'aria-hidden': true })),
                       React.createElement('p', { className: 'text-ink-60 font-medium' },
                         getText(lang, 'Keine Review-Daten mit GPS vorhanden.', 'Nessun dato disponibile.', 'No review data with GPS available.')
                       )
@@ -19957,7 +19957,7 @@ Best regards`
                         
                         // LINKE SPALTE: Führungskraft-Filter
                         React.createElement('div', null,
-                          React.createElement('p', { className: 'text-xs text-ink-60 mb-2 font-medium uppercase tracking-[.07em]' },
+                          React.createElement('p', { className: 'eyebrow mb-2' },
                             getText(lang, 'Nach Führungskraft filtern', 'Filtra per manager', 'Filter by Manager')
                           ),
                           React.createElement('div', { className: 'flex flex-wrap gap-2' },
@@ -19993,7 +19993,7 @@ Best regards`
                         
                         // RECHTE SPALTE: Mitarbeiter-Filter
                         React.createElement('div', null,
-                          React.createElement('p', { className: 'text-xs text-ink-60 mb-2 font-medium uppercase tracking-[.07em]' },
+                          React.createElement('p', { className: 'eyebrow mb-2' },
                             getText(lang, 'Nach Mitarbeiter filtern', 'Filtra per collaboratore', 'Filter by Employee')
                           ),
                           React.createElement('div', { className: 'flex flex-wrap gap-3 items-center mb-3' },
@@ -20103,15 +20103,15 @@ Best regards`
                       React.createElement('div', { className: 'bg-white border border-line shadow-card rounded-card p-5 text-ink' },
                         React.createElement('div', { className: 'flex items-center justify-between' },
                           React.createElement('div', null,
-                            React.createElement('p', { className: 'text-xs text-ink-60 uppercase tracking-[.07em]' }, 
+                            React.createElement('p', { className: 'eyebrow' }, 
                               getText(lang, 'Unternehmens-Benchmark (alle)', 'Benchmark aziendale', 'Company Benchmark (all)')
                             ),
-                            React.createElement('p', { className: 'text-2xl font-semibold mt-1' }, companyAvgGPS.toFixed(2)),
+                            React.createElement('p', { className: 't-kpi mt-1' }, companyAvgGPS.toFixed(2)),
                             React.createElement('p', { className: 'text-xs text-ink-60 mt-1' }, 
                               `${allReviewsWithGPS.length} Reviews · σ ${companyStdDev.toFixed(2)}`
                             )
                           ),
-                          React.createElement('div', { className: 'text-2xl opacity-30' }, React.createElement(TrendingUp, { size: 18, 'aria-hidden': true }))
+                          React.createElement('div', { className: 'opacity-30' }, React.createElement(TrendingUp, { size: 18, 'aria-hidden': true }))
                         )
                       ),
                       // Auswahl-Durchschnitt
@@ -20121,10 +20121,10 @@ Best regards`
                       },
                         React.createElement('div', { className: 'flex items-center justify-between' },
                           React.createElement('div', null,
-                            React.createElement('p', { className: 'text-xs text-white/80 uppercase tracking-[.07em]' }, 
+                            React.createElement('p', { className: 'eyebrow text-white/80' }, 
                               getText(lang, 'Aktuelle Auswahl', 'Selezione attuale', 'Current Selection')
                             ),
-                            React.createElement('p', { className: 'text-2xl font-semibold mt-1' }, selectionAvgGPS.toFixed(2)),
+                            React.createElement('p', { className: 't-kpi mt-1' }, selectionAvgGPS.toFixed(2)),
                             React.createElement('p', { className: 'text-xs text-white/70 mt-1' }, 
                               `${selectedAppraisals.length} Reviews · Δ ${(selectionAvgGPS - companyAvgGPS) >= 0 ? '+' : ''}${(selectionAvgGPS - companyAvgGPS).toFixed(2)}`
                             )
@@ -20138,7 +20138,7 @@ Best regards`
                     
                     // === KEINE AUSWAHL WARNUNG ===
                     selectedAppraisals.length === 0 && allReviewsWithGPS.length > 0 && React.createElement('div', { className: 'bg-warn-bg rounded-card p-6 text-center border border-warn/30' },
-                      React.createElement('span', { className: 'text-2xl mb-4 block' }, React.createElement(AlertTriangle, { size: 18, 'aria-hidden': true })),
+                      React.createElement('span', { className: 'mb-4 block' }, React.createElement(AlertTriangle, { size: 18, 'aria-hidden': true })),
                       React.createElement('p', { className: 'text-ink-60 font-medium' },
                         getText(lang, 'Keine Mitarbeiter ausgewählt', 'Nessun collaboratore selezionato', 'No employees selected')
                       ),
@@ -20318,7 +20318,7 @@ Best regards`
                   style: { }
                 },
                   React.createElement('h2', { className: 'text-lg font-semibold mb-2 flex items-center gap-3 text-nw-blue' },
-                    React.createElement('span', { className: 'text-2xl' }, React.createElement(Award, { size: 18, 'aria-hidden': true })),
+                    React.createElement('span', { className: 'inline-flex' }, React.createElement(Award, { size: 18, 'aria-hidden': true })),
                     getText(lang, 'Kompetenz-Radar: Profilvergleich', 'Radar Competenze: Confronto profili', 'Competency Radar: Profile Comparison')
                   ),
                   React.createElement('p', { className: 'text-ink-60' },
@@ -20578,7 +20578,7 @@ Best regards`
                     
                     // Keine Daten Warnung
                     reviewsWithCompetencies.length === 0 && React.createElement('div', { className: 'bg-panel rounded-card p-8 text-center' },
-                      React.createElement('span', { className: 'text-2xl mb-4 block' }, React.createElement(Mail, { size: 18, 'aria-hidden': true })),
+                      React.createElement('span', { className: 'mb-4 block' }, React.createElement(Mail, { size: 18, 'aria-hidden': true })),
                       React.createElement('p', { className: 'text-ink-60 font-medium' },
                         getText(lang, 'Keine Beurteilungen mit Kompetenz-Daten gefunden.', 'Nessuna valutazione con dati di competenza.', 'No appraisals with competency data found.')
                       )
@@ -21196,15 +21196,15 @@ Best regards`
                           
                           return [
                             React.createElement('div', { key: 'green', className: 'p-3 bg-nw-green-15 rounded-lg' },
-                              React.createElement('p', { className: 'text-2xl font-semibold text-ok' }, greenCount),
+                              React.createElement('p', { className: 't-kpi text-ok' }, greenCount),
                               React.createElement('p', { className: 'text-xs text-ok' }, getText(lang, 'Gut dokumentiert', 'Ben documentati', 'Well documented'))
                             ),
                             React.createElement('div', { key: 'amber', className: 'p-3 bg-warn-bg rounded-lg' },
-                              React.createElement('p', { className: 'text-2xl font-semibold text-ink' }, amberCount),
+                              React.createElement('p', { className: 't-kpi' }, amberCount),
                               React.createElement('p', { className: 'text-xs text-ink-60' }, getText(lang, 'Zu prüfen', 'Da verificare', 'To review'))
                             ),
                             React.createElement('div', { key: 'red', className: 'p-3 bg-danger-bg rounded-lg' },
-                              React.createElement('p', { className: 'text-2xl font-semibold text-danger' }, redCount),
+                              React.createElement('p', { className: 't-kpi text-danger' }, redCount),
                               React.createElement('p', { className: 'text-xs text-danger' }, getText(lang, 'Aktion nötig', 'Azione richiesta', 'Action needed'))
                             )
                           ];
@@ -21272,7 +21272,7 @@ Best regards`
                     
                     // Hinweis wenn weniger als 2 ausgewählt
                     selectedEmployees.length < 2 && reviewsWithCompetencies.length > 0 && React.createElement('div', { className: 'bg-nw-green-15 rounded-card p-6 text-center border border-nw-green/40' },
-                      React.createElement('span', { className: 'text-2xl mb-4 block' }, React.createElement(Info, { size: 18, 'aria-hidden': true })),
+                      React.createElement('span', { className: 'mb-4 block' }, React.createElement(Info, { size: 18, 'aria-hidden': true })),
                       React.createElement('p', { className: 'text-ok font-medium' },
                         getText(lang, 
                           `Bitte wähle mindestens 2 Mitarbeiter aus (${hrRadarSelectedEmployees.length}/5 ausgewählt)`, 
@@ -21366,27 +21366,27 @@ Best regards`
                     // KPI Cards
                     React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-5 gap-3' },
                       React.createElement('div', { className: 'bg-nw-blue-12 rounded-card p-4 text-center' },
-                        React.createElement('div', { className: 'text-2xl font-semibold text-nw-blue' }, totalGoalDocs),
+                        React.createElement('div', { className: 't-kpi text-nw-blue' }, totalGoalDocs),
                         React.createElement('div', { className: 'text-xs text-nw-blue' }, 
                           lang === 'de' ? 'Zielvereinbarungen' : lang === 'it' ? 'Accordi obiettivi' : 'Goal Agreements')
                       ),
                       React.createElement('div', { className: 'bg-nw-green-15 rounded-card p-4 text-center' },
-                        React.createElement('div', { className: 'text-2xl font-semibold text-ok' }, completedGoals),
+                        React.createElement('div', { className: 't-kpi text-ok' }, completedGoals),
                         React.createElement('div', { className: 'text-xs text-ok' }, 
                           lang === 'de' ? 'Abgeschlossen' : lang === 'it' ? 'Completati' : 'Completed')
                       ),
                       React.createElement('div', { className: 'bg-warn-bg rounded-card p-4 text-center' },
-                        React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, draftGoals),
+                        React.createElement('div', { className: 't-kpi' }, draftGoals),
                         React.createElement('div', { className: 'text-xs text-ink-60' }, 
                           lang === 'de' ? 'Entwürfe' : lang === 'it' ? 'Bozze' : 'Drafts')
                       ),
                       React.createElement('div', { className: 'bg-nw-blue-12 rounded-card p-4 text-center' },
-                        React.createElement('div', { className: 'text-2xl font-semibold text-nw-blue' }, allGoals.length),
+                        React.createElement('div', { className: 't-kpi text-nw-blue' }, allGoals.length),
                         React.createElement('div', { className: 'text-xs text-nw-blue' }, 
                           lang === 'de' ? 'Einzelziele' : lang === 'it' ? 'Obiettivi singoli' : 'Individual Goals')
                       ),
                       React.createElement('div', { className: 'bg-nw-grey-40 rounded-card p-4 text-center' },
-                        React.createElement('div', { className: 'text-2xl font-semibold text-ink' }, avgWeight + '%'),
+                        React.createElement('div', { className: 't-kpi' }, avgWeight + '%'),
                         React.createElement('div', { className: 'text-xs text-ink-60' }, 
                           lang === 'de' ? 'Ø Gewichtung' : lang === 'it' ? 'Ø Peso' : 'Ø Weight')
                       )
@@ -22041,7 +22041,7 @@ Best regards`
                           };
                           return Object.entries(scores).map(([key, value]) => 
                             React.createElement('div', { key, className: 'bg-panel rounded-card p-3 text-center' },
-                              React.createElement('div', { className: 'text-2xl font-semibold text-nw-blue' }, value || '–'),
+                              React.createElement('div', { className: 't-kpi text-nw-blue' }, value || '–'),
                               React.createElement('div', { className: 'text-xs text-ink-60 mt-1' }, compNames[key] || key),
                               comments[key] && React.createElement('div', { className: 'text-xs text-ink-60 mt-2 italic truncate', title: comments[key] }, 
                                 '"' + comments[key].substring(0, 30) + (comments[key].length > 30 ? '...' : '') + '"'
@@ -22070,7 +22070,7 @@ Best regards`
                           };
                           return Object.entries(scores).filter(([_, v]) => v > 0).map(([key, value]) => 
                             React.createElement('div', { key, className: 'bg-nw-blue-06 rounded-card p-3 text-center' },
-                              React.createElement('div', { className: 'text-2xl font-semibold text-nw-blue' }, value || '–'),
+                              React.createElement('div', { className: 't-kpi text-nw-blue' }, value || '–'),
                               React.createElement('div', { className: 'text-xs text-ink-60 mt-1' }, compNames[key] || key)
                             )
                           );
@@ -22663,14 +22663,14 @@ Best regards`
                   ? React.createElement('div', { className: "grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4" },
                       // GPS Durchschnitt
                       React.createElement('div', { className: "bg-nw-blue-06 rounded-card p-4 text-center" },
-                        React.createElement('div', { className: "text-2xl md:text-2xl font-semibold mb-1" }, stats.avgGPS.toFixed(1)),
+                        React.createElement('div', { className: "t-kpi mb-1" }, stats.avgGPS.toFixed(1)),
                         React.createElement('div', { className: "text-xs md:text-sm text-ink-60" }, 
                           lang === 'de' ? 'GPS Ø' : lang === 'it' ? 'GPS Medio' : 'GPS Avg'
                         )
                       ),
                       // WAS Durchschnitt
                       React.createElement('div', { className: "bg-nw-blue-06 rounded-card p-4 text-center" },
-                        React.createElement('div', { className: "text-2xl md:text-2xl font-semibold mb-1" }, 
+                        React.createElement('div', { className: "t-kpi mb-1" }, 
                           stats.avgWAS > 0 ? stats.avgWAS.toFixed(1) : '–'
                         ),
                         React.createElement('div', { className: "text-xs md:text-sm text-ink-60" }, 
@@ -22679,19 +22679,19 @@ Best regards`
                       ),
                       // WIE Durchschnitt
                       React.createElement('div', { className: "bg-nw-blue-06 rounded-card p-4 text-center" },
-                        React.createElement('div', { className: "text-2xl md:text-2xl font-semibold mb-1" }, stats.avgWIE.toFixed(1)),
+                        React.createElement('div', { className: "t-kpi mb-1" }, stats.avgWIE.toFixed(1)),
                         React.createElement('div', { className: "text-xs md:text-sm text-ink-60" }, 
                           lang === 'de' ? 'WIE Ø' : lang === 'it' ? 'COME Medio' : 'HOW Avg'
                         )
                       ),
                       // Standardabweichung
                       React.createElement('div', { className: "bg-nw-blue-06 rounded-card p-4 text-center" },
-                        React.createElement('div', { className: "text-2xl md:text-2xl font-semibold mb-1" }, stats.stdDev.toFixed(2)),
+                        React.createElement('div', { className: "t-kpi mb-1" }, stats.stdDev.toFixed(2)),
                         React.createElement('div', { className: "text-xs md:text-sm text-ink-60" }, "Std.Dev")
                       ),
                       // Fortschritt
                       React.createElement('div', { className: "bg-nw-blue-06 rounded-card p-4 text-center col-span-2 md:col-span-1" },
-                        React.createElement('div', { className: "text-2xl md:text-2xl font-semibold mb-1" }, 
+                        React.createElement('div', { className: "t-kpi mb-1" }, 
                           `${stats.completedReviews}/${stats.totalMembers}`
                         ),
                         React.createElement('div', { className: "text-xs md:text-sm text-ink-60" }, 
@@ -22929,7 +22929,7 @@ Best regards`
                   return React.createElement('div', { 
                     className: "bg-nw-green-15 border border-line rounded-card p-4 mb-6 flex items-center gap-3"
                   },
-                    React.createElement('span', { className: "text-2xl" }, React.createElement(CheckCircle2, { size: 18, 'aria-hidden': true })),
+                    React.createElement('span', { className: "inline-flex" }, React.createElement(CheckCircle2, { size: 18, 'aria-hidden': true })),
                     React.createElement('div', { className: "text-ok" },
                       React.createElement('span', { className: "font-semibold" }, 
                         lang === 'de' ? 'Keine Warnungen' : lang === 'it' ? 'Nessun avviso' : 'No warnings'
@@ -23145,7 +23145,7 @@ Best regards`
                   React.createElement('div', { className: "flex items-center justify-between mb-6" },
                     React.createElement('div', { className: "flex items-center gap-3" },
                       React.createElement('div', { className: "w-12 h-12 rounded-card bg-nw-blue flex items-center justify-center shadow-card" },
-                        React.createElement('span', { className: "text-2xl" }, React.createElement(TrendingUp, { size: 18, 'aria-hidden': true }))
+                        React.createElement('span', { className: "inline-flex" }, React.createElement(TrendingUp, { size: 18, 'aria-hidden': true }))
                       ),
                       React.createElement('div', null,
                         React.createElement('h3', { className: "text-xl md:text-2xl font-semibold", style: { color: "#243186" } },
@@ -23386,7 +23386,7 @@ Best regards`
                         // GPS Score
                         React.createElement('div', { className: "px-4 py-3" },
                           React.createElement('div', { className: "flex items-center justify-between mb-3" },
-                            React.createElement('span', { className: "text-ink-60 text-xs uppercase tracking-[.07em]" }, "GPS Score"),
+                            React.createElement('span', { className: "eyebrow" }, "GPS Score"),
                             React.createElement('span', { 
                               className: "text-2xl font-semibold",
                               style: { color: action.color }
@@ -23777,7 +23777,7 @@ Best regards`
                     React.createElement('div', { className: "mt-4 grid md:grid-cols-2 gap-3" },
                       // Kernkompetenzen
                       React.createElement('div', { className: "space-y-2" },
-                        React.createElement('h5', { className: "font-semibold text-nw-blue text-xs uppercase tracking-[.07em] mb-2" }, 
+                        React.createElement('h5', { className: "eyebrow mb-2" }, 
                           lang === 'de' ? 'Kernkompetenzen' : lang === 'it' ? 'Competenze core' : 'Core Competencies'
                         ),
                         // Fachkompetenz
@@ -23833,7 +23833,7 @@ Best regards`
                       ),
                       // Führungskompetenzen
                       React.createElement('div', { className: "space-y-2" },
-                        React.createElement('h5', { className: "font-semibold text-nw-blue text-xs uppercase tracking-[.07em] mb-2" }, 
+                        React.createElement('h5', { className: "eyebrow mb-2" }, 
                           lang === 'de' ? 'Führungskompetenzen' : lang === 'it' ? 'Competenze leadership' : 'Leadership Competencies'
                         ),
                         // Mitarbeiterführung
@@ -24767,7 +24767,7 @@ const renderDashboard = () => {
                   // Plus Symbol zwischen den Boxen (nur Desktop)
                   React.createElement('div', { className: "hidden md:flex absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none" },
                     React.createElement('div', { className: "w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-card" },
-                      React.createElement('span', { className: "text-nw-blue text-2xl font-semibold" }, "+")
+                      React.createElement('span', { className: "t-kpi text-nw-blue" }, "+")
                     )
                   )
                 ),
@@ -24922,7 +24922,7 @@ const renderDashboard = () => {
                       React.createElement(Scale, { size: 64, className: "text-ink" })
                     ),
                     React.createElement('div', { className: "text-center mb-4" },
-                      React.createElement('p', { className: "text-sm uppercase tracking-[.07em] text-ink-60 mb-2" }, 
+                      React.createElement('p', { className: "eyebrow mb-2" }, 
                         lang === 'de' ? 'PHASE 1' : 'FASE 1'
                       ),
                       React.createElement('h3', { className: "text-xl font-semibold", style: { color: "#243186" } },
@@ -24958,7 +24958,7 @@ const renderDashboard = () => {
                       React.createElement(Brain, { size: 64, className: "text-ink" })
                     ),
                     React.createElement('div', { className: "text-center mb-4" },
-                      React.createElement('p', { className: "text-sm uppercase tracking-[.07em] text-ink-60 mb-2" }, 
+                      React.createElement('p', { className: "eyebrow mb-2" }, 
                         lang === 'de' ? 'PHASE 2' : 'FASE 2'
                       ),
                       React.createElement('h3', { className: "text-xl font-semibold", style: { color: "#243186" } },
@@ -24994,7 +24994,7 @@ const renderDashboard = () => {
                       React.createElement(MessageCircle, { size: 64, className: "text-ink" })
                     ),
                     React.createElement('div', { className: "text-center mb-4" },
-                      React.createElement('p', { className: "text-sm uppercase tracking-[.07em] text-ink-60 mb-2" }, 
+                      React.createElement('p', { className: "eyebrow mb-2" }, 
                         lang === 'de' ? 'PHASE 3' : 'FASE 3'
                       ),
                       React.createElement('h3', { className: "text-xl font-semibold", style: { color: "#243186" } },
@@ -25030,7 +25030,7 @@ const renderDashboard = () => {
                       React.createElement(Target, { size: 64, className: "text-ink" })
                     ),
                     React.createElement('div', { className: "text-center mb-4" },
-                      React.createElement('p', { className: "text-sm uppercase tracking-[.07em] text-ink-60 mb-2" }, 
+                      React.createElement('p', { className: "eyebrow mb-2" }, 
                         lang === 'de' ? 'PHASE 4' : 'FASE 4'
                       ),
                       React.createElement('h3', { className: "text-xl font-semibold", style: { color: "#243186" } },
@@ -25452,7 +25452,7 @@ const renderDashboard = () => {
                 ),
                 React.createElement('div', { className: "p-6 md:p-8" },
                   React.createElement('div', { className: "flex flex-col items-center mb-8" },
-                    React.createElement('span', { className: "text-sm font-semibold text-ink-60 mb-4 uppercase tracking-[.07em]" }, t.selectScore),
+                    React.createElement('span', { className: "eyebrow mb-4" }, t.selectScore),
                     React.createElement('div', { className: "flex gap-3 md:gap-6" },
                       [1, 2, 3, 4, 5].map(s => React.createElement(ScoreBadge, { key: s, score: s, active: activeScore === s }))
                     )
@@ -25472,7 +25472,7 @@ const renderDashboard = () => {
                       React.createElement('p', { className: "text-ink text-lg leading-relaxed whitespace-pre-line" }, currentLevel.text)
                     ),
                     React.createElement('div', { className: "bg-white rounded-card p-5 border-l-4 border-l-line shadow-card" },
-                      React.createElement('h4', { className: "text-sm font-semibold text-ink-60 uppercase mb-2 flex items-center gap-2" },
+                      React.createElement('h4', { className: "eyebrow mb-2 flex items-center gap-2" },
                         React.createElement(Lightbulb, { size: 16 }), " ", t.example
                       ),
                       React.createElement('p', { className: "text-ink-60 italic font-medium" }, `"${currentLevel.example}"`)
@@ -25507,7 +25507,7 @@ const renderDashboard = () => {
                   React.createElement('div', { 
                     className: "bg-nw-blue-06 rounded-card p-5 md:p-6 w-[140px] md:w-[180px] border border-line"
                   },
-                    React.createElement('div', { className: "text-2xl md:text-2xl font-semibold mb-2 text-center" }, "50%"),
+                    React.createElement('div', { className: "t-kpi mb-2 text-center" }, "50%"),
                     React.createElement('div', { className: "text-lg md:text-xl font-semibold mb-1 text-center", style: { color: "#2F7A48" } }, 
                       lang === 'de' ? 'WAS' : 'COSA'
                     ),
@@ -25517,13 +25517,13 @@ const renderDashboard = () => {
                   ),
                   
                   // Plus Symbol
-                  React.createElement('div', { className: "text-2xl md:text-2xl font-semibold opacity-70" }, "+"),
+                  React.createElement('div', { className: "t-kpi opacity-70" }, "+"),
                   
                   // WIE Box
                   React.createElement('div', { 
                     className: "bg-nw-blue-06 rounded-card p-5 md:p-6 w-[140px] md:w-[180px] border border-line"
                   },
-                    React.createElement('div', { className: "text-2xl md:text-2xl font-semibold mb-2 text-center" }, "50%"),
+                    React.createElement('div', { className: "t-kpi mb-2 text-center" }, "50%"),
                     React.createElement('div', { className: "text-lg md:text-xl font-semibold mb-1 text-center", style: { color: "#2F7A48" } }, 
                       lang === 'de' ? 'WIE' : 'COME'
                     ),
@@ -25533,14 +25533,14 @@ const renderDashboard = () => {
                   ),
                   
                   // Equals Symbol
-                  React.createElement('div', { className: "text-2xl md:text-2xl font-semibold opacity-70" }, "="),
+                  React.createElement('div', { className: "t-kpi opacity-70" }, "="),
                   
                   // GPS Box - jetzt als weißer Kasten mit grünem Text
                   React.createElement('div', { 
                     className: "bg-white rounded-card p-5 md:p-6 w-[140px] md:w-[180px] shadow-card"
                   },
                     React.createElement('div', { className: "text-lg md:text-xl font-semibold mb-1 text-center", style: { color: "#243186" } }, "GPS"),
-                    React.createElement('div', { className: "text-2xl md:text-2xl font-semibold mb-1 text-center", style: { color: "#2F7A48" } }, "1.0–5.0"),
+                    React.createElement('div', { className: "t-kpi mb-1 text-center", style: { color: "#2F7A48" } }, "1.0–5.0"),
                     React.createElement('div', { className: "text-xs text-center text-ink-60" }, "Performance Score")
                   )
                 ),
@@ -25581,7 +25581,7 @@ const renderDashboard = () => {
                       React.createElement(Target, { size: 32 })
                     ),
                     React.createElement('div', null,
-                      React.createElement('div', { className: "text-2xl font-semibold" }, "50%"),
+                      React.createElement('div', { className: "t-kpi" }, "50%"),
                       React.createElement('div', { className: "text-lg font-semibold" }, t.wasExplainTitle)
                     )
                   ),
@@ -25613,7 +25613,7 @@ const renderDashboard = () => {
                       React.createElement(Brain, { size: 32 })
                     ),
                     React.createElement('div', null,
-                      React.createElement('div', { className: "text-2xl font-semibold" }, "50%"),
+                      React.createElement('div', { className: "t-kpi" }, "50%"),
                       React.createElement('div', { className: "text-lg font-semibold" }, t.wieExplainTitle)
                     )
                   ),
@@ -25705,13 +25705,13 @@ const renderDashboard = () => {
                   React.createElement('table', { className: "w-full" },
                     React.createElement('thead', { className: "bg-panel" },
                       React.createElement('tr', null,
-                        React.createElement('th', { className: "px-6 py-3 text-left text-xs font-semibold text-ink uppercase tracking-[.07em]" }, 
+                        React.createElement('th', { className: "eyebrow px-6 py-3 text-left" }, 
                           lang === 'de' ? 'Zielerreichung %' : 'Raggiungimento %'
                         ),
-                        React.createElement('th', { className: "px-6 py-3 text-center text-xs font-semibold text-ink uppercase tracking-[.07em]" }, 
+                        React.createElement('th', { className: "eyebrow px-6 py-3 text-center" }, 
                           "BARS-Stufe"
                         ),
-                        React.createElement('th', { className: "px-6 py-3 text-left text-xs font-semibold text-ink uppercase tracking-[.07em]" }, 
+                        React.createElement('th', { className: "eyebrow px-6 py-3 text-left" }, 
                           lang === 'de' ? 'Beschreibung' : 'Descrizione'
                         )
                       )
@@ -25770,10 +25770,10 @@ const renderDashboard = () => {
                   React.createElement('table', { className: "w-full" },
                     React.createElement('thead', { className: "bg-panel" },
                       React.createElement('tr', null,
-                        React.createElement('th', { className: "px-6 py-3 text-left text-xs font-semibold text-ink uppercase tracking-[.07em]" }, 
+                        React.createElement('th', { className: "eyebrow px-6 py-3 text-left" }, 
                           "GPS Range"
                         ),
-                        React.createElement('th', { className: "px-6 py-3 text-left text-xs font-semibold text-ink uppercase tracking-[.07em]" }, 
+                        React.createElement('th', { className: "eyebrow px-6 py-3 text-left" }, 
                           "Rating"
                         )
                       )
@@ -27604,7 +27604,7 @@ const renderDashboard = () => {
                       e('div', { className: 'text-sm text-ok' }, e('span', { className: 'font-medium' }, lang === 'de' ? 'Geplant: ' : 'Previsto: '), e('span', { className: 'font-semibold' }, plannedBonusNum.toLocaleString('de-DE') + ' €')),
                       e('div', { className: 'text-right' },
                         e('div', { className: 'text-xs text-ok mb-1' }, lang === 'de' ? 'Auszahlung:' : 'Pagamento:'),
-                        e('div', { className: 'text-2xl font-semibold text-ok' }, Math.round(totalBonusPayout).toLocaleString('de-DE') + ' €'),
+                        e('div', { className: 't-kpi text-ok' }, Math.round(totalBonusPayout).toLocaleString('de-DE') + ' €'),
                         e('div', { className: 'text-xs font-medium ' + (bonusPayoutPercentage >= 100 ? 'text-ok' : bonusPayoutPercentage >= 70 ? 'text-warn' : 'text-danger') }, '(' + bonusPayoutPercentage.toFixed(1) + '%)')
                       )
                     )
@@ -27639,7 +27639,7 @@ const renderDashboard = () => {
               // === HALO-EFFEKT WARNUNG ===
               showHaloWarning && e('div', { className: 'bg-warn-bg border border-warn rounded-card p-4 no-print' },
                 e('div', { className: 'flex items-start gap-3' },
-                  e('div', { className: 'text-2xl' }, React.createElement(Users2, { size: 18, 'aria-hidden': true })),
+                  e('div', { className: 'inline-flex' }, React.createElement(Users2, { size: 18, 'aria-hidden': true })),
                   e('div', null,
                     e('div', { className: 'font-semibold text-ink mb-1' }, lang === 'de' ? 'Möglicher Halo-Effekt' : 'Possibile Effetto Halo'),
                     e('p', { className: 'text-sm text-ink-60' }, lang === 'de' ? 'Alle Kompetenzen haben die gleiche Bewertung.' : 'Tutte le competenze hanno la stessa valutazione.')
@@ -27651,8 +27651,8 @@ const renderDashboard = () => {
               e('div', { className: 'bg-white p-8 rounded-card shadow-card border border-line-2 break-inside-avoid' },
                 e('h3', { className: 'text-lg font-semibold text-nw-blue mb-4 border-b pb-2' }, nwGloss(t.partC3, lang)),
                 e('div', { className: 'bg-panel p-6 rounded-card text-center border border-line' },
-                  e('div', { className: 'text-sm text-ink-60 uppercase tracking-[.07em] mb-2' }, 'Final GPS'),
-                  e('div', { className: 'text-2xl font-semibold text-ink' }, finalGPS.toFixed(2)),
+                  e('div', { className: 'eyebrow mb-2' }, 'Final GPS'),
+                  e('div', { className: 't-kpi' }, finalGPS.toFixed(2)),
                   e('div', { className: 'mt-2 font-medium text-ok' },
                     goals.length === 0 || totalGoalWeight === 0
                       ? (isManager ? '(100% WIE: 50% Core + 50% Leadership)' : '(100% WIE: Kern-Kompetenzen)')
@@ -28491,7 +28491,7 @@ const renderDashboard = () => {
                 },
                   React.createElement('div', { className: 'flex items-start justify-between' },
                     React.createElement('div', { className: 'flex items-center gap-3' },
-                      React.createElement('div', { className: 'text-2xl' }, React.createElement(Save, { size: 18, 'aria-hidden': true })),
+                      React.createElement('div', { className: 'inline-flex' }, React.createElement(Save, { size: 18, 'aria-hidden': true })),
                       React.createElement('div', null,
                         React.createElement('p', { className: 'font-semibold text-nw-blue' },
                           lang === 'de' ? 'Ungespeicherter Entwurf gefunden!' : lang === 'it' ? 'Bozza non salvata trovata!' : 'Unsaved draft found!'
@@ -28527,7 +28527,7 @@ const renderDashboard = () => {
                   className: 'bg-warn-bg border border-warn/30 rounded-card p-4 mb-4'
                 },
                   React.createElement('div', { className: 'flex items-start gap-3' },
-                    React.createElement('div', { className: 'text-2xl' }, React.createElement(AlertTriangle, { size: 18, 'aria-hidden': true })),
+                    React.createElement('div', { className: 'inline-flex' }, React.createElement(AlertTriangle, { size: 18, 'aria-hidden': true })),
                     React.createElement('div', { className: 'flex-1' },
                       React.createElement('p', { className: 'font-semibold text-ink' },
                         lang === 'de' ? 'Bereits eingereicht!' : lang === 'it' ? 'Già inviata!' : 'Already submitted!'
@@ -28561,7 +28561,7 @@ const renderDashboard = () => {
                     // Links: Logo
                     React.createElement('div', null,
                       React.createElement('img', { src: NW_LOGO_SRC, alt: 'Niederwieser — Flexible Food Packaging', className: 'h-auto w-[160px]' }),
-                      React.createElement('p', { className: 'text-xs uppercase tracking-[.07em]', style: { color: '#2F7A48' } }, 
+                      React.createElement('p', { className: 'eyebrow', style: { color: '#2F7A48' } }, 
                         lang === 'de' ? 'Selbstreflexion' : lang === 'it' ? 'Autovalutazione' : 'Self-Reflection'
                       ),
                       // === NEU: Auto-Save Indikator ===
@@ -29312,23 +29312,23 @@ const renderDashboard = () => {
                   // WAS - zeige Prozent UND 5er-Skala
                   !noGoalsMode && e('div', { className: 'bg-nw-blue-06 rounded-card p-4 text-center' },
                     e('p', { className: 'text-xs text-nw-blue mb-1' }, 'WAS (50%)'),
-                    e('p', { className: 'text-2xl font-semibold text-nw-blue' }, gps.wasScore.toFixed(2)),
+                    e('p', { className: 't-kpi text-nw-blue' }, gps.wasScore.toFixed(2)),
                     e('p', { className: 'text-xs text-nw-blue' }, '(' + gps.wasScorePercent.toFixed(0) + '%)')
                   ),
                   // WIE Core
                   e('div', { className: 'bg-nw-green-15 rounded-card p-4 text-center' },
                     e('p', { className: 'text-xs text-ok mb-1' }, noGoalsMode ? 'WIE Kern (100%)' : isManager ? 'WIE Kern (25%)' : 'WIE Kern (50%)'),
-                    e('p', { className: 'text-2xl font-semibold text-ok' }, gps.wieCoreScore.toFixed(2))
+                    e('p', { className: 't-kpi text-ok' }, gps.wieCoreScore.toFixed(2))
                   ),
                   // WIE Lead (nur wenn Manager)
                   isManager && e('div', { className: 'bg-nw-blue-06 rounded-card p-4 text-center' },
                     e('p', { className: 'text-xs text-nw-blue mb-1' }, noGoalsMode ? 'WIE Führung (50%)' : 'WIE Führung (25%)'),
-                    e('p', { className: 'text-2xl font-semibold text-nw-blue' }, gps.wieLeadScore.toFixed(2))
+                    e('p', { className: 't-kpi text-nw-blue' }, gps.wieLeadScore.toFixed(2))
                   ),
                   // Final GPS
                   e('div', { className: 'bg-white border border-line shadow-card rounded-card p-4 text-center text-ink' },
                     e('p', { className: 'text-xs opacity-80 mb-1' }, 'GPS'),
-                    e('p', { className: 'text-2xl font-semibold' }, gps.finalGPS.toFixed(2))
+                    e('p', { className: 't-kpi' }, gps.finalGPS.toFixed(2))
                   )
                 )
               ),
@@ -29526,7 +29526,7 @@ const renderDashboard = () => {
                   ),
                   formData.feedbackQ7 && e('div', { className: 'bg-nw-blue-06 rounded-lg p-4 text-center' },
                     e('p', { className: 'text-xs text-nw-blue mb-2' }, lang === 'de' ? 'Work-Life-Balance' : lang === 'it' ? 'Equilibrio vita-lavoro' : 'Work-Life Balance'),
-                    e('p', { className: 'text-2xl font-semibold text-nw-blue' }, formData.feedbackQ7, '/5')
+                    e('p', { className: 't-kpi text-nw-blue' }, formData.feedbackQ7, '/5')
                   )
                 )
               ),

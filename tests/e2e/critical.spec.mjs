@@ -310,7 +310,8 @@ test('Ziel-Dashboard: Jahresfilter optional, Standard „Alle Jahre“ wie bishe
   await page.getByText('Ziel-Dashboard', { exact: true }).first().click();
   const picker = page.getByRole('radiogroup', { name: 'Jahr' });
   await expect(picker.getByRole('radio', { name: 'Alle Jahre' })).toHaveAttribute('aria-checked', 'true');
-  const kpi = page.locator('.text-2xl.font-semibold.text-nw-blue').first();
+  // Kennzahl über die Typo-Rolle des Designsystems (t-kpi), nicht über Einzelklassen
+  const kpi = page.locator('.t-kpi.text-nw-blue').first();
   const all = Number(await kpi.textContent());
   await picker.getByRole('radio', { name: PREV_YEAR }).click();
   await expect.poll(async () => Number(await kpi.textContent())).toBeLessThan(all);

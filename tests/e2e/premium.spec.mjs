@@ -23,9 +23,9 @@ test('Seitenwechsel: jede Ansicht beginnt oben, auch nach Scrollen auf der vorig
   const top = () => page.evaluate(() => document.querySelector('main').scrollTop);
   await nav.getByText('Dashboard', { exact: true }).click();
   await expect(page.getByText('Meine offenen Punkte')).toBeVisible();
-  await page.getByTestId('dashboard-basics').locator('summary').click(); // aufklappen, damit die Seite lang genug zum Scrollen ist (U12)
-  await page.evaluate(() => { document.querySelector('main').scrollTop = 900; });
-  expect(await top()).toBeGreaterThan(300);
+  await page.getByTestId('dashboard-basics').getByRole('button', { name: /Grundlagen/ }).click(); // aufklappen, damit die Seite lang genug zum Scrollen ist (U12)
+  // Das Akkordeon gleitet 280 ms auf: scrollen, sobald die Seite lang genug ist
+  await expect.poll(async () => { await page.evaluate(() => { document.querySelector('main').scrollTop = 900; }); return top(); }).toBeGreaterThan(300);
   await nav.getByText('Team-Übersicht', { exact: true }).click();
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
   expect(await top()).toBe(0);
@@ -422,14 +422,14 @@ test('Dashboard: Grundlagen für Führungskräfte mit Team eingeklappt, auf Klic
   await expect(page.getByText('Wie funktioniert BARS?')).toBeHidden();
   const collapsed = await page.evaluate(() => document.querySelector('main').scrollHeight);
   // Aufklappen: alle Inhalte wie bisher
-  await basics.locator('summary').click();
+  await basics.getByRole('button', { name: /Grundlagen/ }).click();
   for (const text of ['Dein Performance Kompass', 'Wie funktioniert BARS?', 'DER JAHRESZYKLUS IM ÜBERBLICK', 'Fast', 'Fair', 'Personal'])
     await expect(basics.getByText(text, { exact: true }).first()).toBeVisible();
   await expect(basics.getByRole('button', { name: 'Kompetenzen ansehen' })).toBeVisible();
-  const open = await page.evaluate(() => document.querySelector('main').scrollHeight);
-  expect(open).toBeGreaterThan(collapsed + 1000); // eingeklappt ist die Seite deutlich kürzer
+  // eingeklappt ist die Seite deutlich kürzer (das Aufklappen gleitet 280 ms)
+  await expect.poll(() => page.evaluate(() => document.querySelector('main').scrollHeight)).toBeGreaterThan(collapsed + 1000);
   // Per Tastatur bedienbar
-  await basics.locator('summary').focus();
+  await basics.getByRole('button', { name: /Grundlagen/ }).focus();
   await page.keyboard.press('Enter');
   await expect(page.getByText('Dein Performance Kompass')).toBeHidden();
   expect(consoleErrors).toEqual([]);
@@ -442,4 +442,96 @@ test('Dashboard: Grundlagen für neue Nutzer (nicht angemeldet) offen', async ({
   await expect(basics.getByText('Wie funktioniert BARS?')).toBeVisible();
   await basics.getByRole('button', { name: 'Kompetenzen ansehen' }).click();
   await expect(page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('button', { name: 'Kompetenzen' })).toHaveAttribute('aria-current', 'page');
+});
+
+// ---------- n.Org Design System 2.0 (docs/design-transfer bzw. Übergabepaket „Application 2.0“) ----------
+
+test('Designsystem 2.0: Tokens und Rollen wirken (Radius-Token, KPI-Schrift, Shimmer, Touch-Variante, Motion-Tokens)', async ({ page, consoleErrors }) => {
+  await loginTeam(page, USERS.managerA);
+  // rounded-ctl (7 px) am kleinen Knopf, t-kpi 32/38 am Kennzahl-Wert
+  const small = memberRow(page, 'Clara Beispiel').getByRole('button', { name: 'Ansehen' });
+  expect(await small.evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).toBe('7px');
+  const kpi = page.locator('main .t-kpi').first();
+  expect(await kpi.evaluate((el) => getComputedStyle(el).fontSize + '/' + getComputedStyle(el).lineHeight)).toBe('32px/38px');
+  // Klassen aus dem Stilblock und der Konfiguration werden erzeugt
+  const probe = await page.evaluate(async () => {
+    const box = document.createElement('div');
+    box.innerHTML = '<div class="skeleton h-3 w-24"></div><div class="duration-emph ease-standard transition-[width]"></div><div class="animate-view-in"></div><div class="coarse:h-10"></div><div class="shadow-drawer text-touch bg-chart-3"></div>';
+    document.body.appendChild(box);
+    await new Promise((r) => setTimeout(r, 400)); // Tailwind erzeugt die Klassen im Browser
+    const cs = (i) => getComputedStyle(box.children[i]);
+    const css = [...document.styleSheets].map((sh) => { try { return [...sh.cssRules].map((r) => r.cssText).join(' '); } catch (e) { return ''; } }).join(' ');
+    const out = { shimmer: cs(0).animationName, emph: cs(1).transitionDuration, standard: cs(1).transitionTimingFunction, viewIn: cs(2).animationName,
+      coarse: /pointer:\s*coarse/.test(css), touch: cs(4).fontSize, chart3: cs(4).backgroundColor };
+    box.remove();
+    return out;
+  });
+  expect(probe).toEqual({ shimmer: 'shimmer', emph: '0.4s', standard: 'cubic-bezier(0.2, 0, 0, 1)', viewIn: 'view-in', coarse: true, touch: '16px', chart3: 'rgb(146, 152, 195)' });
+  expect(consoleErrors).toEqual([]);
+});
+
+test('Designsystem 2.0: Dashboard-Akkordeon gleitet auf, eingeklappter Inhalt ist nicht erreichbar', async ({ page }) => {
+  await loginTeam(page, USERS.managerA);
+  await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByText('Dashboard', { exact: true }).click();
+  const basics = page.getByTestId('dashboard-basics');
+  const button = basics.getByRole('button', { name: /Grundlagen/ });
+  await expect(button).toHaveAttribute('aria-expanded', 'false');
+  const panel = basics.locator('.disclose');
+  expect(await panel.evaluate((el) => getComputedStyle(el.firstElementChild).visibility)).toBe('hidden');
+  expect(await panel.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe('0.28s');
+  await button.click();
+  await expect(button).toHaveAttribute('aria-expanded', 'true');
+  await expect(basics.getByText('Dein Performance Kompass')).toBeVisible();
+  // Schnellstart-Guide nutzt dasselbe Muster
+  const quick = page.getByTestId('dashboard-quickstart').getByRole('button', { name: /Schnellstart-Guide/ });
+  await expect(quick).toHaveAttribute('aria-expanded', 'false');
+  await quick.click();
+  await expect(page.getByTestId('dashboard-quickstart').getByText('Für Führungskräfte')).toBeVisible();
+});
+
+test.describe('Handy (390 px): Designsystem 2.0', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+  test('Dialog kommt als Bottom-Sheet von unten: volle Breite, oben gerundet, Knöpfe 44 px', async ({ page }) => {
+    await openApp(page);
+    await page.getByRole('button', { name: 'Menü' }).click();
+    await page.locator('#nw-sidebar-menu').getByText('Team-Übersicht', { exact: true }).click();
+    await page.locator('input[type="email"]').fill(USERS.managerA.email);
+    await page.locator('input[type="password"]').first().fill(USERS.managerA.password);
+    await page.locator('form button[type="submit"]').click();
+    await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+    manualDialogs(page, true);
+    const emil = page.getByTestId('member-compact-card').filter({ hasText: 'Emil Probe' });
+    await emil.getByRole('button', { name: 'Starten', exact: true }).click();
+    await page.getByRole('button', { name: 'Zurück', exact: true }).first().click();
+    const sheet = page.locator('[data-nw-dialog]').getByRole('alertdialog');
+    await expect(sheet).toBeVisible();
+    await page.waitForTimeout(450); // Auftritt (280 ms) abwarten
+    const box = await sheet.boundingBox();
+    expect(Math.round(box.x)).toBe(0);
+    expect(Math.round(box.width)).toBe(390);
+    expect(Math.round(box.y + box.height)).toBe(844);
+    const style = await sheet.evaluate((el) => { const c = getComputedStyle(el); return [c.borderTopLeftRadius, c.borderBottomLeftRadius, c.animationName]; });
+    expect(style).toEqual(['12px', '0px', 'sheet-up']);
+    const ok = await page.locator('[data-nw-ok]').boundingBox();
+    const cancel = await page.locator('[data-nw-cancel]').boundingBox();
+    expect(Math.round(ok.height)).toBe(44);
+    expect(cancel.x).toBeLessThan(ok.x); // Abbrechen links, Hauptaktion rechts
+    await page.locator('[data-nw-cancel]').click();
+    await expect(page.locator('[data-nw-dialog]')).toHaveCount(0);
+  });
+});
+
+test('Seitenwechsel mit Übergang: fest positionierte Elemente sitzen danach richtig (⋯-Menü am Knopf)', async ({ page }) => {
+  await loginTeam(page, USERS.managerA);
+  // Die Auftritts-Klasse wird nach dem Übergang abgenommen
+  await expect.poll(() => page.evaluate(() => document.querySelector('main > div').classList.contains('animate-view-in'))).toBe(false);
+  const btn = memberRow(page, 'Clara Beispiel').getByRole('button', { name: /Weitere Aktionen/ });
+  await btn.click();
+  const menu = page.getByRole('menu');
+  await expect(menu).toBeVisible();
+  const b = await btn.boundingBox();
+  // direkt unter dem Knopf (der Auftritt des Menüs bewegt es 140 ms lang um 4 px, deshalb abwarten)
+  await expect.poll(async () => { const m = await menu.boundingBox(); return Math.abs(m.y - (b.y + b.height + 4)); }).toBeLessThan(2);
+  const m = await menu.boundingBox();
+  expect(Math.abs((m.x + m.width) - (b.x + b.width))).toBeLessThan(3); // rechtsbündig am Knopf
 });

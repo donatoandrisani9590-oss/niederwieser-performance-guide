@@ -14,8 +14,8 @@ Freigabe braucht.
 
 | Prüfung | Ausgangslage | Jetzt |
 |---|---|---|
-| Automatische Tests (`npm test`) | 57 / 57 grün | **80 / 80 grün** (23 neue in `tests/e2e/premium.spec.mjs`) |
-| Dieselben Tests unter den eingespielten Firestore-Regeln (`npm run rules:vorschlag`) | 57 / 57 grün | **80 / 80 grün** |
+| Automatische Tests (`npm test`) | 57 / 57 grün | **84 / 84 grün** (27 neue in `tests/e2e/premium.spec.mjs`) |
+| Dieselben Tests unter den eingespielten Firestore-Regeln (`npm run rules:vorschlag`) | 57 / 57 grün | **84 / 84 grün** |
 | Schutzbereich (`node tests/protected/fingerprint.mjs`) | unverändert | **unverändert**, Baseline nicht angefasst |
 | Konsolenfehler in den getesteten Abläufen | 0 | 0 |
 | Browser-Fenster (`confirm`/`prompt`/`alert`) | 33 Stellen | 2 Stellen, beide im Schutzbereich |
@@ -176,6 +176,55 @@ Führungskräfte mit Team**. Nichts ist entfernt, der Inhalt ist unverändert. D
 |---|---|
 | ![vorher](screenshots/17-dashboard-gesamt-vorher.png) | ![nachher](screenshots/17-dashboard-gesamt-nachher.png) |
 
+### 11. n.Org Design System 2.0, Stufe 1 (Fundament)
+
+Grundlage ist das Übergabepaket „Design System erstellen“ (`design-system.md` Teil II §9–§16, `implementation/`,
+Prototyp `Application 2.0.dc.html`). 2.0 baut auf dem Stand auf, den die App schon hatte: Farben, Schrift, Radien
+und Schatten sind unverändert. Neu sind Bewegungs-Tokens, Regeln für Handy und Touch, Kennzahl-Schrift und Muster.
+
+**Umgesetzt in Stufe 1**
+
+| Bereich | Was |
+|---|---|
+| Tokens | vollständiger 2.0-Satz in der eingebetteten Tailwind-Konfiguration: `xs`-Breakpoint, `text-touch` / `3xl` / `4xl`, `chart-*`, `heat-*`, `warn-line`, `danger-line`, `rounded-ctl`, `shadow-drawer`, Dauer- und Easing-Tokens, alle neuen Keyframes, Varianten `coarse:` / `fine:` |
+| Stile | Typografie-Rollen `.t-*`, `.skeleton` mit Schimmer, `.table-scroll`, `.disclose`, `.line-draw`, Feldfehler `aria-invalid`, Eingaben 16 px auf Touch-Geräten |
+| Migration §14.2 | `rounded-[7px]` → `rounded-ctl` (13 Stellen), Lade-Platzhalter `animate-pulse` → `.skeleton` |
+| Dialog | unter 640 px als Bottom-Sheet von unten (volle Breite, oben gerundet, Knöpfe 44 px, Rand für die Geräte-Unterkante), Abgang 200 ms |
+| Akkordeon | Schnellstart-Guide und Grundlagen im Dashboard gleiten über `.disclose` auf (280 ms), Chevron dreht 90° |
+| Kennzahlen | Wert in `t-kpi` (32/38, mobil 26/32), große Dashboard-Zahl in `t-display`, Fortschritt nach „Progress“ (Spur `line-2`, Füllung `chart-1`, 400 ms) |
+| Seitenwechsel | `view-in` (Deckkraft + 4 px, 200 ms) statt des bisherigen Auftritts, kein seitliches Schieben |
+| Touch | Knöpfe 36/40/44 px, Icon-Knöpfe 44 × 44 px, sobald das Gerät ein Touch-Gerät ist |
+| Glossar | Fließtext 12 px (11 px nur für Versalien und Ziffern) |
+
+![Dashboard](screenshots/17-dashboard-gesamt-nachher.png)
+
+![Bottom-Sheet](screenshots/18-handy-dialog-bottom-sheet-nachher.png)
+
+**Bewusste Abweichungen (aus meiner Sicht besser, bitte entscheiden)**
+
+- Bei Dialogen, die etwas löschen oder verwerfen, liegt der Startfokus auf „Abbrechen“. Laut Paket löst Enter die
+  Hauptaktion aus; hier würde Enter sonst versehentlich löschen.
+- Eingeklappter Akkordeon-Inhalt ist unsichtbar geschaltet, damit er nicht per Tab erreichbar ist und nicht
+  vorgelesen wird. Im Paket bleibt er erreichbar.
+- Platzhalter in Feldern bleiben `ink-60` statt `ink-40`, weil die Barrierefreiheits-Prüfung `ink-40` bemängelt.
+- Kennzahl-Karten sind ohne Verlaufslinie und Veränderung gegenüber der Vorperiode, weil es in dieser App dafür
+  keine Zeitreihen gibt. Sie sind deshalb flacher als die 132 px des Pakets.
+
+**Noch nicht umgesetzt (Stufen 2 bis 4, Reihenfolge bitte bestätigen)**
+
+| Stufe | Inhalt | Umfang |
+|---|---|---|
+| 2 Shell | Handy: 56-px-Top-Leiste mit Menü, Logo ohne Payoff 112 px, Navigation als Schublade von links. Tablet: schmale Leiste 84 px, Aufklappen als Overlay. Desktop: Seitenleiste einklappbar. Start- und Zurück-Pille, Logo 220 px über der Anmeldekarte | groß, ändert die Navigation für alle |
+| 3 Muster | `transition-all` an 74 Stellen durch gezielte Übergänge ersetzen, Speichern-Knopf mit Zustandsfolge und gezeichnetem Haken, Feldfehler mit einmaligem Schütteln, Reiter mit gleitendem Strich, Tabellen-Strategien (HR-Tabelle mit fester erster Spalte), Bögen und HR-Dashboard auf dem Handy | mittel bis groß |
+| 4 Charts | HR-Dashboard (Verteilung, Rater-Bias, Radar) auf `chart-*`, `ChartFrame` mit vier Zuständen, Titel als Aussage, Zahlenformat nach §10.3 | mittel |
+
+Den Prototyp `Application 2.0.dc.html` habe ich für Stufe 1 **nicht Zeile für Zeile** gelesen, sondern die
+Spezifikation (Teil II vollständig), die Konfiguration, die Stile und die Bausteine. Für Stufe 2 lese ich die Shell
+des Prototyps vollständig, bevor ich baue.
+
+Das Paket liegt nicht im Repository. Ob es nach `docs/design-transfer-2.0/` soll, ist deine Entscheidung
+(das Repository ist öffentlich, das Paket enthält die Firmenlogos).
+
 ## Prüfungen
 
 ```bash
@@ -190,8 +239,8 @@ cd tests && npm test
 cd tests && npm run rules:vorschlag
 ```
 
-Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 80 / 80 grün,
-`npm run rules:vorschlag` 80 / 80 grün.
+Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 84 / 84 grün,
+`npm run rules:vorschlag` 84 / 84 grün.
 
 Die bestehenden Tests mussten für den Dialog nicht umgeschrieben werden: `tests/e2e/fixtures.mjs` meldet jeden
 App-Dialog über dieselben `page.on('dialog')`-Listener wie ein Browser-Fenster.

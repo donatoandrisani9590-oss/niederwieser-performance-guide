@@ -76,20 +76,27 @@
           theme: {
             // Feste Skala statt Sonderwerte: Overline · Caption · Sekundär · Body ·
             // Abschnitt · Zwischentitel · Seitentitel. Body ist 14 px.
+            // n.Org 2.0: vollständig definiert (nicht extend), sonst würde der kleinere Breakpoint ans Ende sortiert
+            screens: { xs: '360px', sm: '640px', md: '768px', lg: '1024px', xl: '1280px', '2xl': '1536px' },
             fontSize: {
               '2xs': ['11px', { lineHeight: '14px' }],
               xs: ['12px', { lineHeight: '16px' }],
               sm: ['13px', { lineHeight: '18px' }],
               base: ['14px', { lineHeight: '20px' }],
               md: ['15px', { lineHeight: '20px' }],
+              touch: ['16px', { lineHeight: '24px' }], // 2.0: Eingaben auf Touch-Geräten (verhindert iOS-Zoom)
               lg: ['17px', { lineHeight: '24px' }],
               xl: ['22px', { lineHeight: '28px' }],
               '2xl': ['26px', { lineHeight: '32px' }],
+              '3xl': ['32px', { lineHeight: '38px', letterSpacing: '-.02em' }], // 2.0: KPI-Wert
+              '4xl': ['40px', { lineHeight: '44px', letterSpacing: '-.025em' }], // 2.0: Large Metric
             },
             extend: {
               colors: {
                 'nw-blue': '#243186',
                 'nw-blue-90': '#3A46A0',
+                'nw-blue-75': '#5B64A4', // 2.0: Heatmap
+                'nw-blue-50': '#9298C3', // 2.0: Chart-Serie 3
                 'nw-blue-25': '#C9CDE3',
                 'nw-blue-12': '#E6E8F2',
                 'nw-blue-06': '#F2F3F8',
@@ -118,6 +125,12 @@
                 // Rückwärtskompatible Aliasse (werden schrittweise durch warn ersetzt)
                 amber: '#9A6414',
                 'amber-bg': '#FBF1DD',
+                // n.Org 2.0
+                'warn-line': '#EBD9B4',
+                'danger-line': '#EBC5C0',
+                // 2.0 Datenvisualisierung – nur in Charts. Statusfarben sind dort tabu.
+                chart: { 1: '#243186', 2: '#6EBD84', 3: '#9298C3', 4: '#BBD4F0', 5: '#92CEA3', 6: '#D7CFC5', prev: '#C9CDE3', target: '#1C1F2E', grid: '#EEEBE6', axis: '#E4E0DA', label: '#5F6377' },
+                heat: { 1: '#F2F3F8', 2: '#C9CDE3', 3: '#9298C3', 4: '#5B64A4', 5: '#243186' },
               },
               fontFamily: {
                 sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
@@ -125,11 +138,21 @@
               borderRadius: {
                 // 8 px = Bedienelemente (rounded-lg), 10 px = Flächen, 12 px = Dialoge (rounded-xl)
                 card: '10px',
+                ctl: '7px', // 2.0: ersetzt rounded-ctl
               },
               boxShadow: {
                 card: '0 1px 2px rgba(28,31,46,.05)',
                 float: '0 1px 2px rgba(28,31,46,.05), 0 12px 32px -16px rgba(28,31,46,.18)',
                 sheet: '0 1px 2px rgba(28,31,46,.08), 0 24px 48px -24px rgba(28,31,46,.28)',
+                drawer: '0 0 0 1px rgba(28,31,46,.04), -24px 0 48px -24px rgba(28,31,46,.24)', // 2.0
+              },
+              // 2.0 Motion-Tokens: duration-fast, ease-glide usw. (gleiche Werte wie in design-system.md §12.1)
+              transitionDuration: { instant: '100ms', fast: '150ms', base: '200ms', slow: '280ms', emph: '400ms' },
+              transitionTimingFunction: {
+                glide: 'cubic-bezier(.2,.8,.2,1)',    // Auftritte
+                exit: 'cubic-bezier(.4,0,1,1)',       // Abgänge
+                standard: 'cubic-bezier(.2,0,0,1)',   // Zustandswechsel am Ort (Akkordeon, Balken, Fortschritt)
+                drawer: 'cubic-bezier(.32,.72,0,1)',  // Paneele, die hereingleiten
               },
               keyframes: {
                 'fade-in': { from: { opacity: '0' }, to: { opacity: '1' } },
@@ -200,10 +223,25 @@
                   '15%': { opacity: '.3' },
                   '100%': { opacity: '0', transform: 'scale(1.6)' },
                 },
+                // n.Org 2.0
+                shimmer: { from: { backgroundPosition: '150% 0' }, to: { backgroundPosition: '-50% 0' } },
+                'drawer-in-right': { from: { transform: 'translateX(100%)' }, to: { transform: 'translateX(0)' } },
+                'drawer-out-right': { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(100%)' } },
+                'drawer-in-left': { from: { transform: 'translateX(-100%)' }, to: { transform: 'translateX(0)' } },
+                'drawer-out-left': { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-100%)' } },
+                'sheet-up': { from: { transform: 'translateY(100%)' }, to: { transform: 'translateY(0)' } },
+                'sheet-down': { from: { transform: 'translateY(0)' }, to: { transform: 'translateY(100%)' } },
+                'view-in': { from: { opacity: '0', transform: 'translateY(4px)' }, to: { opacity: '1', transform: 'none' } },
+                shake: { '0%, 100%': { transform: 'translateX(0)' }, '20%, 60%': { transform: 'translateX(-4px)' }, '40%, 80%': { transform: 'translateX(4px)' } },
+                'value-flash': { '0%': { backgroundColor: '#E6E8F2' }, '100%': { backgroundColor: 'transparent' } },
+                'check-draw': { from: { strokeDashoffset: '24' }, to: { strokeDashoffset: '0' } },
+                'bar-grow': { from: { transform: 'scaleY(0)' }, to: { transform: 'scaleY(1)' } },
+                'bar-grow-x': { from: { transform: 'scaleX(0)' }, to: { transform: 'scaleX(1)' } },
+                'line-draw': { from: { strokeDashoffset: '1' }, to: { strokeDashoffset: '0' } },
               },
               animation: {
-                // App-Bestand: animate-in / animate-out (vorher eigene Keyframes) → n.Org pop-in / pop-out
-                in: 'pop-in .18s cubic-bezier(.2,.8,.2,1) both',
+                // App-Bestand: animate-in / animate-out → n.Org 2.0 view-in (Opacity + 4 px) / pop-out
+                in: 'view-in .2s cubic-bezier(.2,.8,.2,1) both',
                 out: 'pop-out .12s ease-in both',
                 'fade-in': 'fade-in .18s ease-out both',
                 'pop-in': 'pop-in .18s cubic-bezier(.2,.8,.2,1) both',
@@ -223,9 +261,29 @@
                 'stamp-in': 'stamp-in .55s cubic-bezier(.2,.8,.2,1) both',
                 dissolve: 'dissolve .5s ease-in both',
                 'ink-pulse': 'ink-pulse .7s ease-out both',
+                // n.Org 2.0
+                shimmer: 'shimmer 1.6s cubic-bezier(.4,0,.6,1) infinite',
+                'drawer-in-right': 'drawer-in-right .28s cubic-bezier(.32,.72,0,1) both',
+                'drawer-out-right': 'drawer-out-right .2s cubic-bezier(.4,0,1,1) both',
+                'drawer-in-left': 'drawer-in-left .28s cubic-bezier(.32,.72,0,1) both',
+                'drawer-out-left': 'drawer-out-left .2s cubic-bezier(.4,0,1,1) both',
+                'sheet-up': 'sheet-up .28s cubic-bezier(.32,.72,0,1) both',
+                'sheet-down': 'sheet-down .2s cubic-bezier(.4,0,1,1) both',
+                'view-in': 'view-in .2s cubic-bezier(.2,.8,.2,1) both',
+                shake: 'shake .3s cubic-bezier(.2,0,0,1) 1',
+                'value-flash': 'value-flash .9s ease-out 1',
+                'check-draw': 'check-draw .28s cubic-bezier(.2,.8,.2,1) .06s both',
+                'bar-grow': 'bar-grow .4s cubic-bezier(.2,0,0,1) both',
+                'bar-grow-x': 'bar-grow-x .4s cubic-bezier(.2,0,0,1) both',
+                'line-draw': 'line-draw .6s cubic-bezier(.2,0,0,1) both',
               },
             },
-          }
+          },
+          // n.Org 2.0: Varianten für Zeigegeräte (coarse = Touch: größere Trefferflächen, Eingaben 16 px)
+          plugins: (typeof tailwind !== 'undefined' && typeof tailwind.plugin === 'function') ? [tailwind.plugin(function ({ addVariant }) {
+            addVariant('coarse', '@media (pointer: coarse)');
+            addVariant('fine', '@media (pointer: fine)');
+          })] : []
         };
     </script>
 
@@ -240,6 +298,10 @@
             outline: 2px solid theme('colors.nw-blue');
             outline-offset: 2px;
             border-radius: 4px;
+          }
+          /* n.Org 2.0: Eingaben auf Touch-Geräten mind. 16 px, sonst zoomt iOS beim Fokus */
+          @media (pointer: coarse) {
+            input, select, textarea { font-size: 16px; }
           }
           /* Ruhe für alle, die Bewegung reduziert haben wollen */
           @media (prefers-reduced-motion: reduce) {
@@ -256,7 +318,7 @@
           /* Übergangs-Alias: entspricht <Button variant="secondary" size="sm">.
              Wird beim Umzug der Screens auf die Komponente ersetzt. */
           .btn-row {
-            @apply inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-[7px] border border-line bg-white px-2.5 text-xs font-medium text-ink transition-colors hover:border-nw-blue-25 hover:bg-nw-blue-06;
+            @apply inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-ctl border border-line bg-white px-2.5 text-xs font-medium text-ink transition-colors hover:border-nw-blue-25 hover:bg-nw-blue-06;
           }
           /* Formularfelder in Dialogen — Bausteinmaße: Label 12/600, Feld 32 px hoch */
           .dlg-label {
@@ -268,6 +330,56 @@
           textarea.dlg-input {
             @apply h-auto py-2;
           }
+          /* n.Org 2.0: Touch-Höhe und Fehlerzustand eines Feldes */
+          @media (pointer: coarse) { .dlg-input { @apply h-10 text-touch; } }
+          .dlg-input[aria-invalid='true'] { @apply border-danger focus:shadow-[0_0_0_3px_#FBECEA]; }
+
+          /* ——— n.Org 2.0 Typografie-Rollen (§10): nur Zahlen-Rollen skalieren mit dem Viewport ——— */
+          .t-display   { @apply text-3xl font-semibold text-ink md:text-4xl; font-variant-numeric: tabular-nums; }
+          .t-kpi       { @apply text-2xl font-semibold tracking-[-.02em] text-ink md:text-3xl; font-variant-numeric: tabular-nums; }
+          .t-page      { @apply text-xl font-semibold tracking-[-.014em] text-nw-blue; }
+          .t-hero      { @apply text-xl font-semibold tracking-[-.014em] text-nw-blue md:text-2xl md:tracking-[-.02em]; }
+          .t-section   { @apply text-lg font-semibold tracking-[-.012em] text-nw-blue; }
+          .t-card      { @apply text-md font-semibold text-nw-blue; }
+          .t-body      { @apply text-base text-ink; }
+          .t-secondary { @apply text-sm text-ink-60; }
+          .t-label     { @apply text-xs font-semibold text-ink-60; }
+          .t-meta      { @apply text-xs text-ink-60; }
+          .t-delta     { @apply text-xs font-semibold; font-variant-numeric: tabular-nums; }
+          .t-cell-num  { @apply text-sm text-right; font-variant-numeric: tabular-nums; }
+
+          /* ——— n.Org 2.0 Skeleton mit Shimmer (§12.2), ersetzt animate-pulse ——— */
+          .skeleton {
+            @apply rounded-lg bg-nw-grey-40 animate-shimmer;
+            background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.65) 50%, rgba(255,255,255,0) 100%);
+            background-size: 200% 100%;
+            background-repeat: no-repeat;
+          }
+
+          /* ——— n.Org 2.0 Responsive Tabelle (§11.4): scrollen, erste Spalte bleibt stehen ——— */
+          .table-scroll {
+            @apply relative overflow-x-auto overscroll-x-contain;
+            -webkit-overflow-scrolling: touch;
+            mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+          }
+          .table-scroll[data-at-end='true'] { mask-image: none; }
+          .table-scroll th:first-child,
+          .table-scroll td:first-child { @apply sticky left-0 z-[1] bg-white; }
+
+          /* ——— n.Org 2.0 Akkordeon: Höhe ohne Messen (grid-rows 0fr → 1fr), 280 ms ease-standard ———
+             Zusatz gegenüber dem Paket: Eingeklappter Inhalt ist unsichtbar (nicht per Tab erreichbar, nicht vorgelesen);
+             die Sichtbarkeit schaltet erst nach dem Zuklappen um, damit die Bewegung zu sehen bleibt. */
+          .disclose {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 280ms cubic-bezier(.2,0,0,1);
+          }
+          .disclose[data-open='true'] { grid-template-rows: 1fr; }
+          .disclose > * { overflow: hidden; visibility: hidden; transition: visibility 0s linear 280ms; }
+          .disclose[data-open='true'] > * { visibility: visible; transition-delay: 0s; }
+
+          /* ——— n.Org 2.0 Linienzeichnung: pathLength="1" am <path> setzen ——— */
+          .line-draw { stroke-dasharray: 1; @apply animate-line-draw; }
           .tnum {
             font-variant-numeric: tabular-nums;
           }
@@ -281,7 +393,7 @@
              skalierenden Button. aria-expanded liefern Menu/Popover bereits. */
           .menu-chevron,
           .disclose-chevron {
-            @apply transition-transform duration-150;
+            @apply transition-transform duration-fast ease-standard;
           }
           [aria-expanded='true'] > .menu-chevron,
           [aria-expanded='true'] .menu-chevron {
@@ -869,8 +981,8 @@
           danger: 'bg-transparent text-danger border-transparent hover:bg-danger-bg',
           'danger-primary': 'bg-danger text-white border-transparent hover:bg-[#82241C]'
         };
-        const NW_BTN_SIZE = { sm: 'h-7 px-2.5 text-xs gap-1.5 rounded-[7px]', md: 'h-8 px-3 text-sm gap-2 rounded-lg', lg: 'h-9 px-3.5 text-base gap-2 rounded-lg' };
-        const NW_BTN_ICON_ONLY = { sm: 'w-7 px-0', md: 'w-8 px-0', lg: 'w-9 px-0' };
+        const NW_BTN_SIZE = { sm: 'h-7 px-2.5 text-xs gap-1.5 rounded-ctl coarse:h-9', md: 'h-8 px-3 text-sm gap-2 rounded-lg coarse:h-10', lg: 'h-9 px-3.5 text-base gap-2 rounded-lg coarse:h-11' }; // 2.0: größere Trefferflächen auf Touch-Geräten
+        const NW_BTN_ICON_ONLY = { sm: 'w-7 px-0 coarse:h-11 coarse:w-11', md: 'w-8 px-0 coarse:h-11 coarse:w-11', lg: 'w-9 px-0 coarse:h-11 coarse:w-11' };
         const nwBtnClass = (variant = 'secondary', size = 'md', iconOnly = false) =>
           'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100 disabled:active:scale-100 '
           + NW_BTN_VARIANT[variant] + ' ' + NW_BTN_SIZE[size] + (iconOnly ? ' ' + NW_BTN_ICON_ONLY[size] : '');
@@ -924,7 +1036,7 @@
             React.createElement('div', { className: 'flex items-center gap-1.5 eyebrow' },
               icon && React.createElement(icon, { size: 12, 'aria-hidden': true }), React.createElement('span', { className: 'min-w-0' }, label)), // ein Element: Begriffe mit Erklärung zerfallen sonst in Flex-Teile mit Abstand
             React.createElement('div', { className: 'mt-2 flex items-baseline gap-2' },
-              React.createElement('span', { className: 'text-xl font-semibold tracking-[-.02em] tnum ' + (tone === 'warn' ? 'text-warn' : tone === 'danger' ? 'text-danger' : tone === 'ok' ? 'text-ok' : 'text-nw-blue') }, value)),
+              React.createElement('span', { className: 't-kpi ' + (tone === 'warn' ? 'text-warn' : tone === 'danger' ? 'text-danger' : tone === 'ok' ? 'text-ok' : '') }, value)), // 2.0: KPI-Wert 32/38 (mobil 26/32), ohne Ton in ink
             hint && React.createElement('div', { className: 'mt-1 text-xs text-ink-60' }, hint)
           );
         const NwEmptyState = ({ icon, title, text, action }) =>
@@ -1140,6 +1252,29 @@
             )
           );
         };
+        // Akkordeon (n.Org 2.0 §12.5): Höhe gleitet über .disclose (grid-rows, 280 ms), Chevron dreht 90°.
+        // defaultOpen folgt dem Anlass (z. B. nach der Anmeldung eingeklappt), danach entscheidet der Nutzer.
+        const NwDisclosure = ({ icon, title, hint, defaultOpen, testId, children }) => {
+          const [open, setOpen] = useState(!!defaultOpen);
+          const first = useRef(true);
+          useEffect(() => { if (first.current) { first.current = false; return; } setOpen(!!defaultOpen); }, [defaultOpen]);
+          const id = useRef('nwdisc-' + Math.random().toString(36).slice(2, 8)).current;
+          return React.createElement('section', { 'data-testid': testId },
+            React.createElement('h2', null,
+              React.createElement('button', {
+                type: 'button', 'aria-expanded': open, 'aria-controls': id, onClick: () => setOpen(o => !o),
+                className: 'flex min-h-[46px] w-full flex-wrap items-center gap-2.5 rounded-card border border-line bg-white px-4 py-2 text-left shadow-card transition-colors duration-fast hover:bg-nw-blue-06 coarse:min-h-[48px]'
+              },
+                icon && React.createElement(icon, { size: 16, 'aria-hidden': true, className: 'shrink-0 text-nw-blue' }),
+                React.createElement('span', { className: 'text-base font-semibold text-nw-blue' }, title),
+                hint && React.createElement('span', { className: 'text-xs font-normal text-ink-60' }, hint),
+                React.createElement(ChevronRight, { size: 16, 'aria-hidden': true, className: 'disclose-chevron ml-auto shrink-0 text-ink-60' })
+              )
+            ),
+            React.createElement('div', { id, className: 'disclose', 'data-open': open ? 'true' : 'false' },
+              React.createElement('div', null, React.createElement('div', { className: 'pt-3' }, children)))
+          );
+        };
         // Segmented: Pillen-Auswahl (z. B. Sprache, Ansicht)
         const NwSegmented = ({ options, value, onChange, size = 'md', ariaLabel, className }) =>
           React.createElement('div', { role: 'radiogroup', 'aria-label': ariaLabel, title: ariaLabel, className: 'inline-flex shrink-0 gap-0.5 rounded-lg bg-nw-blue-12 p-[3px] ' + (size === 'sm' ? 'h-7' : 'h-8') + (className ? ' ' + className : '') },
@@ -1170,9 +1305,13 @@
           const uid = 'nwdlg-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
           const cancelValue = kind === 'prompt' ? null : kind === 'alert' ? undefined : false;
 
-          const overlay = el('div', 'no-print fixed inset-0 z-50 grid place-items-center bg-ink/30 p-4 animate-fade-in');
+          // n.Org 2.0 §11.5: unter 640 px als Bottom-Sheet von unten (volle Breite, oben gerundet, Rand für die Geräte-Unterkante)
+          const sheet = !!window.matchMedia && window.matchMedia('(max-width: 639px)').matches;
+          const overlay = el('div', 'no-print fixed inset-0 z-50 grid bg-ink/30 animate-fade-in ' + (sheet ? 'items-end' : 'place-items-center p-4'));
           overlay.setAttribute('data-nw-dialog', kind);
-          const panel = el('div', 'max-h-[90vh] w-full max-w-md animate-pop-in overflow-auto rounded-xl bg-white p-5 shadow-float outline-none');
+          const panel = el('div', sheet
+            ? 'max-h-[90vh] w-full animate-sheet-up overflow-auto rounded-t-xl bg-white p-5 pb-[max(20px,env(safe-area-inset-bottom))] shadow-float outline-none'
+            : 'max-h-[90vh] w-full max-w-md animate-pop-in overflow-auto rounded-xl bg-white p-5 shadow-float outline-none');
           panel.setAttribute('role', o.danger || kind === 'alert' ? 'alertdialog' : 'dialog');
           panel.setAttribute('aria-modal', 'true');
           panel.setAttribute('aria-labelledby', uid + '-t');
@@ -1219,9 +1358,10 @@
           head.appendChild(body);
 
           const row = el('div', 'mt-5 flex flex-wrap items-center justify-end gap-2');
-          const cancel = kind === 'alert' ? null : el('button', nwBtnClass('ghost', 'lg'), o.cancelLabel || L('Abbrechen', 'Annulla', 'Cancel'));
+          const wide = sheet ? ' h-11 min-w-0 flex-1' : ''; // Sheet: beide Knöpfe 44 px hoch über die Breite, Reihenfolge bleibt (Abbrechen links, Hauptaktion rechts)
+          const cancel = kind === 'alert' ? null : el('button', nwBtnClass('ghost', 'lg') + wide, o.cancelLabel || L('Abbrechen', 'Annulla', 'Cancel'));
           if (cancel) { cancel.type = 'button'; cancel.setAttribute('data-nw-cancel', ''); row.appendChild(cancel); }
-          const ok = el('button', nwBtnClass(o.danger ? 'danger-primary' : 'primary', 'lg'), o.okLabel || (kind === 'alert' ? L('Verstanden', 'Ho capito', 'Got it') : L('Bestätigen', 'Conferma', 'Confirm')));
+          const ok = el('button', nwBtnClass(o.danger ? 'danger-primary' : 'primary', 'lg') + wide, o.okLabel || (kind === 'alert' ? L('Verstanden', 'Ho capito', 'Got it') : L('Bestätigen', 'Conferma', 'Confirm')));
           ok.type = 'button';
           ok.setAttribute('data-nw-ok', '');
           row.appendChild(ok);
@@ -1235,8 +1375,8 @@
             done = true;
             overlay.style.pointerEvents = 'none';
             overlay.className = overlay.className.replace('animate-fade-in', 'animate-fade-out');
-            panel.className = panel.className.replace('animate-pop-in', 'animate-pop-out');
-            setTimeout(() => overlay.remove(), 130); // per Timer statt animationend: schließt auch bei reduzierter Bewegung
+            panel.className = panel.className.replace('animate-pop-in', 'animate-pop-out').replace('animate-sheet-up', 'animate-sheet-down');
+            setTimeout(() => overlay.remove(), sheet ? 210 : 130); // Abgang + 10 ms, per Timer statt animationend (schließt auch bei reduzierter Bewegung)
             resolve(result);
           };
           const syncOk = () => { if (wanted !== null) ok.disabled = String(input.value).trim().toLowerCase() !== wanted || wanted === ''; };
@@ -1345,7 +1485,7 @@
           head.className = 'text-xs font-semibold normal-case tracking-normal text-nw-blue';
           head.textContent = g.title[l];
           const body = document.createElement('div');
-          body.className = 'mt-1 text-2xs font-normal normal-case leading-relaxed tracking-normal text-ink-60';
+          body.className = 'mt-1 text-xs font-normal normal-case leading-relaxed tracking-normal text-ink-60';
           body.textContent = g.text[l];
           tip.appendChild(head);
           tip.appendChild(body);
@@ -15688,12 +15828,12 @@ Best regards`
                 ? React.createElement('div', { className: 'space-y-3', role: 'status', 'aria-label': getText(lang, 'Team wird geladen', 'Caricamento team', 'Loading team') },
                     [0, 1, 2].map(i => React.createElement('div', { key: i, className: 'rounded-card border border-line bg-white p-5' },
                       React.createElement('div', { className: 'flex items-center gap-3' },
-                        React.createElement('div', { className: 'h-10 w-10 animate-pulse rounded-lg bg-nw-grey-40/70' }),
+                        React.createElement('div', { className: 'h-10 w-10 skeleton' }),
                         React.createElement('div', { className: 'flex-1 space-y-2' },
-                          React.createElement('div', { className: 'h-3 w-40 animate-pulse rounded-lg bg-nw-grey-40/70' }),
-                          React.createElement('div', { className: 'h-3 w-24 animate-pulse rounded-lg bg-nw-grey-40/70' }))),
+                          React.createElement('div', { className: 'h-3 w-40 skeleton' }),
+                          React.createElement('div', { className: 'h-3 w-24 skeleton' }))),
                       React.createElement('div', { className: 'mt-4 grid grid-cols-3 gap-3' },
-                        [0, 1, 2].map(j => React.createElement('div', { key: j, className: 'h-20 animate-pulse rounded-lg bg-nw-grey-40/70' })))
+                        [0, 1, 2].map(j => React.createElement('div', { key: j, className: 'h-20 skeleton' })))
                     ))
                   )
               : teamMembers.length === 0 
@@ -16043,11 +16183,11 @@ Best regards`
                           !status.self && selfLink && React.createElement('div', { className: 'flex items-center gap-2' },
                             React.createElement('button', {
                               onClick: () => copyLink(member),
-                              className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06'
+                              className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-ctl bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06'
                             }, React.createElement(Link, { size: 12 }), lang === 'de' ? 'Link für Selbstreflexion kopieren' : lang === 'it' ? 'Copia link autovalutazione' : 'Copy self-reflection link'),
                             member.email && React.createElement('button', {
                               onClick: () => sendEmail(member),
-                              className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06'
+                              className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-ctl bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06'
                             }, React.createElement(Mail, { size: 12 }), lang === 'de' ? 'Link per E-Mail senden' : lang === 'it' ? 'Invia link via e-mail' : 'Send link via email')
                           )
                         ),
@@ -16093,7 +16233,7 @@ Best regards`
                                   e.stopPropagation();
                                   openSelfAssessment(status.selfDigital);
                                 },
-                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 w-full'
+                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-ctl bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 w-full'
                               }, 
                                 React.createElement(Eye, { size: 14 }),
                                 lang === 'de' ? 'Digital ansehen' : lang === 'it' ? 'Visualizza digitale' : 'View Digital'
@@ -16125,7 +16265,7 @@ Best regards`
                                       e.stopPropagation();
                                       openPdfInNewTab(status.selfPdf, status.selfPdf.pdfFileName || 'Selbstreflexion.pdf');
                                     },
-                                    className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue flex-1'
+                                    className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-ctl bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue flex-1'
                                   }, 
                                     React.createElement(Eye, { size: 12 }),
                                     lang === 'de' ? 'Ansehen' : lang === 'it' ? 'Visualizza' : 'View'
@@ -16154,7 +16294,7 @@ Best regards`
                                         showToast(lang === 'de' ? 'Fehler beim Download' : 'Download error', 'error');
                                       }
                                     },
-                                    className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 flex-1'
+                                    className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-ctl bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 flex-1'
                                   }, 
                                     React.createElement(Download, { size: 12 }),
                                     lang === 'de' ? 'Download' : lang === 'it' ? 'Scarica' : 'Download'
@@ -16169,7 +16309,7 @@ Best regards`
                                     e.stopPropagation();
                                     copyLink(member);
                                   },
-                                  className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 flex-1',
+                                  className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-ctl bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 flex-1',
                                   title: lang === 'de' ? 'Link für Selbstreflexion kopieren' : lang === 'it' ? 'Copia link autovalutazione' : 'Copy self-reflection link'
                                 }, 
                                   React.createElement(Link, { size: 12 }),
@@ -16180,7 +16320,7 @@ Best regards`
                                     e.stopPropagation();
                                     sendEmail(member);
                                   },
-                                  className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 flex-1',
+                                  className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-ctl bg-white text-ink border-line hover:border-nw-blue-25 hover:bg-nw-blue-06 flex-1',
                                   title: lang === 'de' ? 'Selbstreflexions-Link per E-Mail senden' : lang === 'it' ? 'Invia link autovalutazione via email' : 'Send self-reflection link via email'
                                 }, 
                                   React.createElement(Mail, { size: 12 }),
@@ -16189,7 +16329,7 @@ Best regards`
                               ),
                               // Button 3: PDF Upload (NEU)
                               React.createElement('label', {
-                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue w-full cursor-pointer',
+                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-ctl bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue w-full cursor-pointer',
                                 title: lang === 'de' ? 'PDF-Selbstreflexion hochladen' : lang === 'it' ? 'Carica PDF autovalutazione' : 'Upload PDF self-reflection'
                               },
                                 React.createElement('input', {
@@ -16287,7 +16427,7 @@ Best regards`
                               ),
                               // Upload Button
                               React.createElement('label', {
-                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue w-full cursor-pointer',
+                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-ctl bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue w-full cursor-pointer',
                                 title: lang === 'de' ? 'Unterschriebene Beurteilung hochladen' : lang === 'it' ? 'Carica valutazione firmata' : 'Upload signed review'
                               },
                                 React.createElement('input', {
@@ -16367,7 +16507,7 @@ Best regards`
                               ),
                               // Upload Button
                               React.createElement('label', {
-                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-[7px] bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue w-full cursor-pointer',
+                                className: 'inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap border font-medium leading-none transition-[color,background-color,border-color,opacity,transform] duration-150 hover:scale-[1.02] active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-45 h-7 px-2.5 text-xs gap-1.5 rounded-ctl bg-transparent text-ink-60 border-transparent hover:bg-nw-blue-06 hover:text-nw-blue w-full cursor-pointer',
                                 title: lang === 'de' ? 'Unterschriebene Zielvereinbarung hochladen' : lang === 'it' ? 'Carica accordo obiettivi firmato' : 'Upload signed goals agreement'
                               },
                                 React.createElement('input', {
@@ -24228,7 +24368,7 @@ const renderDashboard = () => {
             // Safety check inside render
             if (!data || !data.intro) return React.createElement('div', null, "Loading...");
 
-            return React.createElement('div', { className: "space-y-5 animate-in" },
+            return React.createElement('div', { className: "space-y-5" },
               // === MIGRATION SUCCESS BANNER ===
               migrationStatus === 'done' && migrationResult && (migrationResult.members > 0 || migrationResult.appraisals > 0) &&
                 React.createElement('div', { 
@@ -24336,8 +24476,9 @@ const renderDashboard = () => {
                     React.createElement(icon, { size: 15, 'aria-hidden': true, className: 'text-nw-blue' }),
                     React.createElement('span', { className: 'flex-1 text-ink' }, label),
                     React.createElement('span', { className: 'tnum font-semibold ' + (done === n ? 'text-ok' : 'text-ink') }, `${done}/${n}`)),
-                  React.createElement('div', { className: 'h-1.5 overflow-hidden rounded-full bg-nw-blue-12', role: 'progressbar', 'aria-label': label, 'aria-valuenow': done, 'aria-valuemin': 0, 'aria-valuemax': n },
-                    React.createElement('div', { className: 'h-full rounded-full transition-[width] duration-300 ' + (done === n ? 'bg-ok' : 'bg-nw-green'), style: { width: `${Math.round(done / n * 100)}%` } })));
+                  React.createElement('div', { className: 'h-1.5 overflow-hidden rounded-full bg-line-2', role: 'progressbar', 'aria-label': label, 'aria-valuenow': done, 'aria-valuemin': 0, 'aria-valuemax': n },
+                    // 2.0 „Progress“: Spur line-2, Füllung chart-1, Breite gleitet 400 ms; „fertig“ trägt die Zahl daneben (ok), nicht die Balkenfarbe
+                    React.createElement('div', { className: 'h-full rounded-full bg-chart-1 transition-[width] duration-emph ease-standard', style: { width: `${Math.round(done / n * 100)}%` } })));
 
                 const toneDot = { danger: 'bg-danger-bg text-danger', warn: 'bg-warn-bg text-warn', brand: 'bg-nw-blue-06 text-nw-blue', neutral: 'bg-nw-grey-40 text-ink-60' };
                 return React.createElement('div', { className: 'space-y-5' },
@@ -24348,8 +24489,8 @@ const renderDashboard = () => {
                       React.createElement(NwPaneHeader, { title: T(`Wo ich stehe · ${yr}`, `A che punto sono · ${yr}`, `Where I stand · ${yr}`), icon: TrendingUp }),
                       React.createElement('div', { className: 'space-y-4 p-4' },
                         React.createElement('div', { className: 'flex items-end gap-3' },
-                          React.createElement('span', { className: 'tnum text-2xl font-semibold ' + (overall === 100 ? 'text-ok' : 'text-nw-blue') }, `${overall}%`),
-                          React.createElement('span', { className: 'pb-1 text-sm text-ink-60' }, reviewsDone === n ? T('Alle Beurteilungen abgeschlossen', 'Tutte le valutazioni completate', 'All reviews completed') : T('des Jahresgesprächs-Zyklus erledigt', 'del ciclo annuale completato', 'of the annual cycle done'))),
+                          React.createElement('span', { className: 't-display ' + (overall === 100 ? 'text-ok' : '') }, `${overall}\u202F%`), // 2.0: eine große Kennzahl je Ansicht, Prozent mit schmalem Leerzeichen
+                          React.createElement('span', { className: 'pb-1.5 text-sm text-ink-60' }, reviewsDone === n ? T('Alle Beurteilungen abgeschlossen', 'Tutte le valutazioni completate', 'All reviews completed') : T('des Jahresgesprächs-Zyklus erledigt', 'del ciclo annuale completato', 'of the annual cycle done'))),
                         progressRow(T(`Selbstreflexionen ${yr} eingegangen`, `Autovalutazioni ${yr} ricevute`, `Self-reflections ${yr} received`), selfIn, FileText),
                         progressRow(T(`Beurteilungen ${yr} abgeschlossen`, `Valutazioni ${yr} completate`, `Reviews ${yr} completed`), reviewsDone, ClipboardList),
                         progressRow(T('Gespräche geführt', 'Colloqui svolti', 'Meetings held'), meetingsDone, Calendar),
@@ -24381,14 +24522,10 @@ const renderDashboard = () => {
 
               // === QUICKSTART GUIDE (So funktioniert's) – n.Org: erklären, wenn gefragt ===
               // Offen für neue Nutzer (nicht angemeldet / noch kein Team), sonst eingeklappt
-              React.createElement('details', { className: 'group rounded-card border border-line bg-white shadow-card', open: !(user && !user.isAnonymous && teamMembers.length > 0) },
-                React.createElement('summary', { className: 'flex min-h-[46px] cursor-pointer list-none flex-wrap items-center gap-2.5 rounded-card px-4 py-2 transition-colors hover:bg-nw-blue-06 group-open:rounded-b-none group-open:border-b group-open:border-line-2 [&::-webkit-details-marker]:hidden' },
-                  React.createElement(Lightbulb, { size: 16, 'aria-hidden': true, className: 'text-nw-blue' }),
-                  React.createElement('h2', { className: 'text-base font-semibold text-nw-blue' }, lang === 'de' ? 'Schnellstart-Guide' : lang === 'it' ? 'Guida Rapida' : 'Quick Start Guide'),
-                  React.createElement('span', { className: 'text-xs text-ink-60' }, lang === 'de' ? 'So nutzt du den Performance Manager' : lang === 'it' ? 'Come utilizzare il Performance Manager' : 'How to use the Performance Manager'),
-                  React.createElement(ChevronDown, { size: 16, 'aria-hidden': true, className: 'ml-auto text-ink-60 transition-transform duration-150 group-open:rotate-180' })
-                ),
-                React.createElement('div', { className: "grid gap-0 md:grid-cols-2 md:divide-x md:divide-line-2" },
+              React.createElement(NwDisclosure, { icon: Lightbulb, testId: 'dashboard-quickstart', defaultOpen: !(user && !user.isAnonymous && teamMembers.length > 0),
+                title: lang === 'de' ? 'Schnellstart-Guide' : lang === 'it' ? 'Guida Rapida' : 'Quick Start Guide',
+                hint: lang === 'de' ? 'So nutzt du den Performance Manager' : lang === 'it' ? 'Come utilizzare il Performance Manager' : 'How to use the Performance Manager' },
+                React.createElement('div', { className: "grid gap-0 rounded-card border border-line bg-white shadow-card md:grid-cols-2 md:divide-x md:divide-line-2" },
                   (() => {
                     const stepRow = (n, title, text, tone) => React.createElement('li', { className: 'flex items-start gap-3', key: n },
                       React.createElement('span', { className: `grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-semibold tnum ${tone === 'green' ? 'bg-nw-green-15 text-ok' : 'bg-nw-blue-06 text-nw-blue'}` }, String(n)),
@@ -24472,14 +24609,10 @@ const renderDashboard = () => {
               // === GRUNDLAGEN (Willkommen, Werte, Performance Kompass, BARS, Jahreszyklus) – n.Org: erklären, wenn gefragt ===
               // Gleiches Muster wie der Schnellstart-Guide: offen für neue Nutzer (nicht angemeldet / noch kein Team),
               // eingeklappt für Führungskräfte mit Team. Nichts entfällt, die Inhalte sind unverändert.
-              React.createElement('details', { className: 'group', 'data-testid': 'dashboard-basics', open: !(user && !user.isAnonymous && teamMembers.length > 0) },
-                React.createElement('summary', { className: 'flex min-h-[46px] cursor-pointer list-none flex-wrap items-center gap-2.5 rounded-card border border-line bg-white px-4 py-2 shadow-card transition-colors hover:bg-nw-blue-06 [&::-webkit-details-marker]:hidden' },
-                  React.createElement(BookOpen, { size: 16, 'aria-hidden': true, className: 'text-nw-blue' }),
-                  React.createElement('h2', { className: 'text-base font-semibold text-nw-blue' }, getText(lang, 'Grundlagen: Werte, GPS und Jahreszyklus', 'Fondamenti: valori, GPS e ciclo annuale', 'Basics: values, GPS and annual cycle')),
-                  React.createElement('span', { className: 'text-xs text-ink-60' }, getText(lang, 'Zum Nachschlagen', 'Da consultare', 'For reference')),
-                  React.createElement(ChevronDown, { size: 16, 'aria-hidden': true, className: 'ml-auto text-ink-60 transition-transform duration-150 group-open:rotate-180' })
-                ),
-                React.createElement('div', { className: 'mt-5 space-y-5' },
+              React.createElement(NwDisclosure, { icon: BookOpen, testId: 'dashboard-basics', defaultOpen: !(user && !user.isAnonymous && teamMembers.length > 0),
+                title: getText(lang, 'Grundlagen: Werte, GPS und Jahreszyklus', 'Fondamenti: valori, GPS e ciclo annuale', 'Basics: values, GPS and annual cycle'),
+                hint: getText(lang, 'Zum Nachschlagen', 'Da consultare', 'For reference') },
+                React.createElement('div', { className: 'space-y-5 pt-2' },
               React.createElement('div', { className: "bg-white rounded-xl p-6 shadow-card border border-line" },
                 React.createElement('h2', { className: "text-lg font-semibold mb-4", style: { color: "#243186" } }, t.welcome),
                 React.createElement('p', { className: "mb-6 leading-relaxed text-ink" },
@@ -25223,7 +25356,7 @@ const renderDashboard = () => {
             const currentLevel = compData.levels[activeScore];
             const isProductionDetail = detailAreaContext === 'production';
 
-            return React.createElement('div', { className: "animate-in slide-in-from-right duration-300 pb-12" },
+            return React.createElement('div', { className: "pb-12" },
               // Verbesserte Navigation
               React.createElement('button', {
                 onClick: () => setActiveView('list'),
@@ -29870,7 +30003,10 @@ const renderDashboard = () => {
               )
             ),
             React.createElement('main', { className: "min-w-0 flex-1 overflow-y-auto md:h-screen px-4 py-5 md:px-8 md:py-6 md:pb-20" },
-              React.createElement('div', { className: (activeView === 'hrdashboard' || activeView === 'salaryreview' || activeView === 'goalsdashboard') ? "w-full" : "max-w-5xl mx-auto" },
+              React.createElement('div', { key: activeView, className: 'animate-view-in ' + ((activeView === 'hrdashboard' || activeView === 'salaryreview' || activeView === 'goalsdashboard') ? "w-full" : "max-w-5xl mx-auto"),
+                // Nach dem Auftritt die Animationsklasse abnehmen: Eine (auch beendete) Transform-Animation macht den Rahmen zum
+                // Bezugspunkt für fest positionierte Kinder (⋯-Menü, Dialoge in der Ansicht) – sie säßen sonst versetzt.
+                onAnimationEnd: (ev) => { if (ev.target === ev.currentTarget) ev.currentTarget.classList.remove('animate-view-in'); } },
                 // Zurück und Home auf jeder Seite
                 (navHistory.length > 0 || activeView !== 'dashboard') && React.createElement('nav', { 'aria-label': getText(lang, 'Seitennavigation', 'Navigazione pagina', 'Page navigation'), className: 'no-print mb-4 flex flex-wrap items-center gap-2', 'data-print-hide': 'true' },
                   React.createElement(NwButton, { size: 'sm', variant: 'secondary', icon: ArrowLeft, onClick: goBack, disabled: navHistory.length === 0, title: getText(lang, 'Eine Seite zurück', 'Una pagina indietro', 'Back one page') }, getText(lang, 'Zurück', 'Indietro', 'Back')),

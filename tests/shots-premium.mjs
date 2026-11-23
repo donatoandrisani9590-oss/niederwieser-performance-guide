@@ -132,7 +132,13 @@ async function run(tag, useBase) {
     await page.getByRole('menu').waitFor();
     await page.waitForTimeout(400);
     await shot('12-handy-zeilenmenue');
-    await page.keyboard.press('Escape');
+    // Dialog auf dem Handy: Bottom-Sheet (n.Org 2.0 §11.5)
+    await page.getByRole('menuitem', { name: 'Entfernen' }).click();
+    await page.locator('[data-nw-dialog]').last().waitFor();
+    await page.waitForTimeout(500);
+    await shot('18-handy-dialog-bottom-sheet');
+    await page.locator('[data-nw-cancel]').last().click();
+    await page.waitForTimeout(300);
   }
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.waitForTimeout(400);

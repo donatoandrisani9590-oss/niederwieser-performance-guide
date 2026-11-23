@@ -1,3 +1,5 @@
+// ALTE Regeln: bis 23.11.2026 eingespielt, seitdem ersetzt durch tests/rules/vorschlag.rules.
+// Nur noch zum Zurückwechseln (Text einfügen und veröffentlichen) und für den Vergleich (npm run rules:aktuell).
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {

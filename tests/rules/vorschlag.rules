@@ -1,5 +1,5 @@
 rules_version = '2';
-// VORSCHLAG Stufe 1 (23.11.2026) – noch NICHT eingespielt.
+// Stufe 1 (23.11.2026) – EINGESPIELT am 23.11.2026 (Firebase-Konsole, durch den Auftraggeber).
 // Grundlage: die aktuell eingespielten Regeln (tests/rules/aktuell.rules). Alles, was heute funktioniert, funktioniert
 // weiter (alle E2E-Tests laufen unter diesen Regeln). Neu:
 //  1. HR-Admin-Liste enthält auch die HR-Adresse der App (HR_ADMIN_EMAILS in index.html).

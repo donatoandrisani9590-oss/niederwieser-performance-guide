@@ -13945,8 +13945,25 @@ Goal 3: 20% weight, 80% achieved → 16 points
           const deleteTeamMember = async (id) => {
             if (!user || !db) return;
             
-            if (confirm(lang === 'de' ? 'Wirklich löschen?' : lang === 'it' ? 'Eliminare?' : 'Delete?')) {
+            // Idiotensicher: Folgen klar benennen, Namen eintippen lassen, vorher automatisch sichern.
+            const nwMember = teamMembers.find(m => m.id === id) || {};
+            const nwDocs = teamAppraisals.filter(a => a.employeeId === id);
+            const nwTyped = prompt(getText(lang,
+              `ACHTUNG – endgültig löschen\n\n${nwMember.name || 'Dieser Mitarbeiter'} und alle ${nwDocs.length} Unterlagen (Selbstreflexionen, Beurteilungen, Zielvereinbarungen aller Jahre) werden unwiderruflich gelöscht.\n\nVorher wird automatisch eine Sicherungsdatei heruntergeladen.\n\nZum Bestätigen den Namen eintippen:`,
+              `ATTENZIONE – eliminazione definitiva\n\n${nwMember.name || ''} e tutti i ${nwDocs.length} documenti verranno eliminati.\n\nPer confermare digita il nome:`,
+              `WARNING – permanent deletion\n\n${nwMember.name || ''} and all ${nwDocs.length} documents will be deleted.\n\nType the name to confirm:`));
+            const nwConfirmed = nwTyped !== null && String(nwTyped).trim().toLowerCase() === String(nwMember.name || '').trim().toLowerCase() && String(nwMember.name || '').trim() !== '';
+            if (nwTyped !== null && !nwConfirmed) showToast(getText(lang, 'Name stimmt nicht überein – nichts gelöscht.', 'Il nome non corrisponde – nulla eliminato.', 'Name does not match – nothing deleted.'), 'warning');
+            if (nwConfirmed) {
               try {
+                // Sicherungsdatei (nur Download, keine Datenänderung)
+                try {
+                  const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), member: nwMember, appraisals: nwDocs }, null, 2)], { type: 'application/json' });
+                  const a = document.createElement('a');
+                  a.href = URL.createObjectURL(blob);
+                  a.download = `Sicherung_${String(nwMember.name || id).replace(/[^\wäöüÄÖÜß-]+/g, '_')}_${new Date().toISOString().slice(0, 10)}.json`;
+                  document.body.appendChild(a); a.click(); a.remove();
+                } catch (e) { console.warn('Sicherung konnte nicht erstellt werden', e); }
                 // Lösche Mitarbeiter
                 await db.collection('teamMembers').doc(id).delete();
                 

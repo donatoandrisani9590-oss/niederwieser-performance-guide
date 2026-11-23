@@ -442,3 +442,33 @@ test('Mitarbeiter-Link: am Ende des Bogens ein klarer Abschicken-Schritt', async
   await expect(submit).toBeVisible();
   await expect(page.getByText('Bisher ist deine Selbstreflexion nur als Entwurf gespeichert.')).toBeVisible();
 });
+
+test('Phase 1 (Schalter an): Führungskraft teilt Beurteilung mit Mitarbeiter und nimmt es zurück, mit Lese-Fassung und Protokoll', async ({ page }) => {
+  await page.addInitScript(() => { window.__NW_FEATURES__ = { shareWithEmployee: true }; });
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  page.removeAllListeners('dialog');
+  page.on('dialog', (d) => d.accept().catch(() => {}));
+  await memberRow(page, 'Clara Beispiel').getByRole('button', { name: 'Mit Mitarbeiter teilen' }).first().click();
+  await expect(memberRow(page, 'Clara Beispiel')).toContainText('Mit Mitarbeiter geteilt');
+  await expect.poll(async () => field(await getDoc('teamAppraisals/ap-clara-review'), 'sharedWithEmployee'), { timeout: 10000 }).toBe(true);
+  await expect.poll(async () => (await listDocs('auditLog')).length, { timeout: 10000 }).toBeGreaterThan(0);
+  let doc = await getDoc('teamAppraisals/ap-clara-review');
+  expect(field(doc, 'sharedEmployeeEmail')).toBe('tm-clara@test.local');
+  expect(doc.fields.sharedSnapshot.mapValue.fields.gpsScore).toBeTruthy();
+  // Bestehende Felder unverändert
+  expect(field(doc, 'status')).toBe('completed');
+  expect(field(doc, 'employeeId')).toBe('tm-clara');
+  const log = (await listDocs('auditLog')).map((d) => field(d, 'action'));
+  expect(log).toContain('share_with_employee');
+  // Zurücknehmen
+  await memberRow(page, 'Clara Beispiel').getByRole('button', { name: 'Teilen zurücknehmen' }).click();
+  await expect(memberRow(page, 'Clara Beispiel').getByRole('button', { name: 'Mit Mitarbeiter teilen' }).first()).toBeVisible();
+  await expect.poll(async () => field(await getDoc('teamAppraisals/ap-clara-review'), 'sharedWithEmployee'), { timeout: 10000 }).toBe(false);
+});
+
+test('Phase 1 (Schalter aus, Standard): kein Teilen-Knopf', async ({ page }) => {
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Mit Mitarbeiter teilen' })).toHaveCount(0);
+});

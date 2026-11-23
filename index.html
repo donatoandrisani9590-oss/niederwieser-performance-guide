@@ -15023,6 +15023,27 @@ Best regards`
               }
             };
             
+            // Fehlende E-Mail-Adresse nachtragen (nur ergänzen, eine vorhandene Adresse wird nie überschrieben)
+            const addMemberEmail = async (member) => {
+              if (String(member.email || '').trim()) return;
+              const input = prompt(getText(lang, `E-Mail-Adresse von ${member.name}:`, `Indirizzo e-mail di ${member.name}:`, `Email address of ${member.name}:`), '');
+              if (input === null) return;
+              const email = input.trim().toLowerCase();
+              if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showToast(getText(lang, 'Das ist keine gültige E-Mail-Adresse – nichts gespeichert.', 'Indirizzo e-mail non valido – nulla salvato.', 'Not a valid email address – nothing saved.'), 'warning');
+                return;
+              }
+              try {
+                const now = new Date().toISOString();
+                await db.collection('teamMembers').doc(member.id).update({ email, emailAddedAt: now, emailAddedBy: (user && user.email) || '' });
+                await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'member_email_added', target: 'teamMembers/' + member.id });
+                showToast(getText(lang, `E-Mail für ${member.name} gespeichert`, 'E-mail salvata', 'Email saved'), 'success');
+              } catch (e) {
+                console.error('E-Mail speichern fehlgeschlagen:', e);
+                showToast(getText(lang, 'Speichern fehlgeschlagen. Bitte erneut versuchen.', 'Salvataggio non riuscito.', 'Saving failed.'), 'error');
+              }
+            };
+
             // NEU: "Zielvereinbarungsgespräch geführt" Toggle
             const toggleGoalMeetingDone = async (member) => {
               try {
@@ -15339,9 +15360,11 @@ Best regards`
                                     React.createElement('div', { className: 'truncate font-semibold text-ink' }, member.name),
                                     React.createElement('div', { className: 'truncate text-xs text-ink-60' }, member.position || '–'),
                                     !isOwner && React.createElement(NwTag, { tone: 'brand', className: 'mt-1' }, T('Geteilt', 'Condiviso', 'Shared')),
-                                    !String(member.email || '').trim() && React.createElement('span', {
-                                      className: 'mt-1 inline-flex', title: T('Ohne E-Mail-Adresse gehen „Link per E-Mail“ und das Teilen nicht.', 'Senza e-mail niente link via e-mail né condivisione.', 'Without an email address no link by email and no sharing.')
-                                    }, React.createElement(NwTag, { tone: 'warn' }, T('Keine E-Mail', 'Nessuna e-mail', 'No email')))
+                                    !String(member.email || '').trim() && React.createElement('div', { className: 'mt-1 flex flex-wrap items-center gap-2' },
+                                      React.createElement('span', {
+                                        className: 'inline-flex', title: T('Ohne E-Mail-Adresse gehen „Link per E-Mail“ und das Teilen nicht.', 'Senza e-mail niente link via e-mail né condivisione.', 'Without an email address no link by email and no sharing.')
+                                      }, React.createElement(NwTag, { tone: 'warn' }, T('Keine E-Mail', 'Nessuna e-mail', 'No email'))),
+                                      isOwner && React.createElement('button', { type: 'button', onClick: () => addMemberEmail(member), className: 'text-xs font-medium text-nw-blue underline-offset-2 hover:underline' }, T('E-Mail ergänzen', 'Aggiungi e-mail', 'Add email')))
                                   )
                                 )
                               ),

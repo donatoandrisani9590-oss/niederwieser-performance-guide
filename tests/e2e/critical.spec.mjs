@@ -597,12 +597,25 @@ test('Offline-Hinweis: erscheint bei Verbindungsverlust und verschwindet danach 
   await expect(page.getByText('Verbindung wieder da')).toBeVisible();
 });
 
-test('Team-Übersicht: Mitarbeiter ohne E-Mail-Adresse sind gekennzeichnet', async ({ page }) => {
+test('Team-Übersicht: Mitarbeiter ohne E-Mail-Adresse gekennzeichnet, Adresse direkt ergänzen', async ({ page }) => {
   await setDoc('teamMembers/tm-fritz', { name: 'Fritz Ohnemail', position: 'Lager', department: '', email: '', userId: ids.uidA, ownerEmail: USERS.managerA.email, accessCode: 'CODE-tm-fritz', createdAt: '2025-02-01T00:00:00.000Z' });
   await gotoTeamAndLogin(page, USERS.managerA);
   await expect(page.getByText('5 Mitarbeiter')).toBeVisible();
   await expect(memberRow(page, 'Fritz Ohnemail')).toContainText('Keine E-Mail');
   await expect(memberRow(page, 'Clara Beispiel')).not.toContainText('Keine E-Mail');
+  // Ungültige Adresse: nichts gespeichert; gültige: gespeichert, Kennzeichnung verschwindet
+  const add = async (typed) => {
+    page.removeAllListeners('dialog');
+    page.on('dialog', (d) => d.accept(typed).catch(() => {}));
+    await memberRow(page, 'Fritz Ohnemail').getByRole('button', { name: 'E-Mail ergänzen' }).click();
+  };
+  await add('fritz-ohne-at');
+  await expect(page.getByText('Das ist keine gültige E-Mail-Adresse')).toBeVisible();
+  expect(field(await getDoc('teamMembers/tm-fritz'), 'email')).toBe('');
+  await add(' Fritz@Test.Local ');
+  await expect.poll(async () => field(await getDoc('teamMembers/tm-fritz'), 'email'), { timeout: 10000 }).toBe('fritz@test.local');
+  await expect(memberRow(page, 'Fritz Ohnemail')).not.toContainText('Keine E-Mail');
+  expect(field(await getDoc('teamMembers/tm-fritz'), 'name')).toBe('Fritz Ohnemail');
 });
 
 test('Mitarbeiter-Link: vor dem Abschicken Übersicht der leeren Felder, Abbrechen schickt nichts ab', async ({ page }) => {

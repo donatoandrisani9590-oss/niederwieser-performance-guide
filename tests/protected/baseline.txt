@@ -34,8 +34,9 @@ import React, {…} from 'https://esm.sh/react@18.2.0';
 import ReactDOM from 'https://esm.sh/react-dom@18.2.0/client';
 import {…} from 'https://esm.sh/lucide-react@0.292.0';
 
-### firestore (90)
+### firestore (92)
 await db.collection('appraisals').doc(hrEditAppraisal.id).update(updates);
+await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: 'member_email_added', target: 'teamMembers/' + member.id });
 await db.collection('auditLog').add({ at: now, by: (user && user.email) || '', byUid: (user && user.uid) || '', action: share ? 'share_with_employee' : 'unshare_with_employee', target: docItem.id, employeeId: member.id, docType: docItem.type || 'review' });
 await db.collection('registeredUsers').doc(u.docId).update(lock ? { disabled: true, disabledAt: now, disabledBy: (user && user.email) || '' } : { disabled: false, enabledAt: now, enabledBy: (user && user.email) || '' });
 await db.collection('registeredUsers').doc(u.docId).update({ fullName: name, fullNameChangedAt: new Date().toISOString(), fullNameChangedBy: (user && user.email) || '' });
@@ -64,6 +65,7 @@ await db.collection('teamAppraisals').doc(pending.id).update({ userId: user.uid,
 await db.collection('teamAppraisals').doc(selfAssessmentId).set(selfAssessmentData);
 await db.collection('teamMembers').doc(doc.id).update({ accessCode: newCode });
 await db.collection('teamMembers').doc(id).delete();
+await db.collection('teamMembers').doc(member.id).update({ email, emailAddedAt: now, emailAddedBy: (user && user.email) || '' });
 await db.collection('teamMembers').doc(member.id).update({ goalMeetingDone: newValue, goalMeetingDoneAt: newValue ? new Date().toISOString() : null });
 await db.collection('teamMembers').doc(member.id).update({ meetingDone: newValue, meetingDoneAt: newValue ? new Date().toISOString() : null });
 await db.collection('teamMembers').doc(member.id).update({ sharedWith: newShared });

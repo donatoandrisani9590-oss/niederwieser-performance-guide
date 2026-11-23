@@ -14,10 +14,30 @@ flüssig, modern, intuitiv, selbsterklärend und nahezu idiotensicher sein. Es s
 Beurteilung braucht, aber nichts Überflüssiges. Du arbeitest so lange, bis du als Team überzeugt bist, eine
 übergabereife Premium-Arbeit abzuliefern, alles geprüft ist und alles läuft.
 
+## 0. Den richtigen Stand holen (wichtig, bevor du irgendetwas anderes tust)
+
+Der neue Stand liegt **nur auf GitHub**: Repository `donatoandrisani9590-oss/niederwieser-performance-guide`, Branch
+**`feature/rollen-und-freigaben`**. Lokale Ordner auf dem Mac, auch der, den der Auftraggeber dir gibt, können eine
+**alte Version** enthalten, zum Beispiel eine einzelne `index.html` (v93) ohne Git oder einen alten Klon.
+
+1. Den Ordner des Auftraggebers **nicht** als Arbeitsstand verwenden und **nichts darin ändern oder überschreiben**.
+   Du darfst ihn höchstens lesen, etwa um alte Dateien zu vergleichen.
+2. Den Stand frisch in einen **eigenen neuen Ordner** klonen, zum Beispiel:
+   ```bash
+   git clone -b feature/rollen-und-freigaben https://github.com/donatoandrisani9590-oss/niederwieser-performance-guide.git ~/nw-performance-neu
+   ```
+   Gibt es den Zielordner schon, nimm einen anderen Namen. Lösche nichts.
+3. Prüfe, ob du im richtigen Stand bist. **Alle** Punkte müssen zutreffen, sonst bist du falsch:
+   - `git -C ~/nw-performance-neu branch --show-current` zeigt `feature/rollen-und-freigaben`
+   - die Dateien `docs/PROMPT-NEUER-CHAT.md`, `tests/vorschau/start.mjs` und `tests/rules/vorschlag.rules` existieren
+   - `index.html` enthält `NW_FEATURES` und `nwMeetingUpdate` (die alte Version enthält beides nicht)
+4. Vor jeder Arbeitssitzung `git pull` im neuen Ordner, damit du den neuesten Stand hast.
+5. Teile dem Auftraggeber am Anfang in einem Satz mit, in welchem Ordner und auf welchem Branch du arbeitest.
+
 ## 1. Zuerst orientieren (vor jeder Änderung lesen)
 
-Repository: `donatoandrisani9590-oss/niederwieser-performance-guide` (GitHub). Falls auf dem Mac noch nicht vorhanden,
-klonen. Arbeitsbasis ist der Branch **`feature/rollen-und-freigaben`**, denn er enthält alles.
+Arbeitsordner ist der frische Klon aus Schritt 0. Arbeitsbasis ist der Branch **`feature/rollen-und-freigaben`**,
+denn er enthält alles.
 
 Lies vollständig:
 1. `CLAUDE.md`: verbindliche Regeln (Schutzbereich, Pflichtprüfungen, Designsystem)
@@ -48,7 +68,7 @@ Teste **ausschließlich in der lokalen Vorschau**. Sie arbeitet mit dem Firebase
 kann echte Daten weder lesen noch schreiben.
 
 ```bash
-cd tests && npm install && npm run vorschau
+cd ~/nw-performance-neu/tests && npm install && npm run vorschau
 ```
 
 Voraussetzungen auf dem Mac: Node.js ab Version 20 und Java ab Version 11, das der Firestore-Emulator braucht.

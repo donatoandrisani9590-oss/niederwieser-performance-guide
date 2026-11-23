@@ -36,7 +36,7 @@ async function loginVia(page, user) {
   await page.locator('input[type="email"]').fill(user.email);
   await page.locator('input[type="password"]').first().fill(user.password);
   await page.locator('form button[type="submit"]').click();
-  await expect(page.getByText('Abmelden').first()).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId('user-card')).toBeVisible({ timeout: 15000 }); // angepasst (Shell 2.0): „Abmelden“ steht im Konto-Popover der Nutzerkarte
 }
 
 // Navigationseinträge der Seitenleiste (Text) → Dateiname

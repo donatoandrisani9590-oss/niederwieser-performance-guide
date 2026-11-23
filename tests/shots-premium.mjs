@@ -86,7 +86,7 @@ async function run(tag, useBase) {
     await page.evaluate(() => { document.querySelector('main').scrollTop = 420; });
     await page.waitForTimeout(500);
     await shot('14-bogen-leiste', { clip: { x: 300, y: 0, width: 1140, height: 260 } });
-    await page.getByRole('button', { name: 'Home', exact: true }).click();
+    await page.getByRole('button', { name: 'Start', exact: true }).click();
     await page.locator('[data-nw-ok]').last().click();
     // Neuer Dialog (vorher: graues Browser-Fenster, lässt sich nicht fotografieren)
     await nav('Team-Übersicht');
@@ -97,7 +97,7 @@ async function run(tag, useBase) {
     await page.waitForTimeout(350);
     await shot('05-dialog-abschluss-pruefung');
     await page.locator('[data-nw-cancel]').last().click();
-    await page.getByRole('button', { name: 'Home', exact: true }).click();
+    await page.getByRole('button', { name: 'Start', exact: true }).click();
     await page.locator('[data-nw-dialog]').last().waitFor();
     await page.waitForTimeout(350);
     await shot('06-dialog-formular-verlassen');
@@ -143,9 +143,10 @@ async function run(tag, useBase) {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.waitForTimeout(400);
   // HR-Reiter
-  await page.locator('aside').getByText('Abmelden').first().click();
+  await page.getByTestId('user-card').click();
+  await page.getByRole('button', { name: 'Abmelden' }).click();
   await login(USERS.hr);
-  await page.getByText('Abmelden').first().waitFor();
+  await page.getByTestId('user-card').waitFor();
   await nav('HR Dashboard');
   await page.getByRole('tab', { name: /Normalverteilung/ }).waitFor();
   await page.waitForTimeout(800);

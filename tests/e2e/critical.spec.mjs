@@ -58,7 +58,8 @@ test('Andere Führungskraft sieht keine fremden Mitarbeiter', async ({ page }) =
 test('Abmelden und erneut anmelden: alle Daten wieder da', async ({ page }) => {
   await gotoTeamAndLogin(page, USERS.managerA);
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
-  await page.getByText('Abmelden').first().click();
+  await page.getByTestId('user-card').click(); // angepasst (Shell 2.0): „Abmelden“ steht im Konto-Popover der Nutzerkarte
+  await page.getByRole('button', { name: 'Abmelden' }).click();
   await expect(page.getByText('Abmelden')).toHaveCount(0);
   await page.getByText('Team-Übersicht', { exact: true }).first().click();
   await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -367,11 +368,12 @@ test('Kalibrierung ohne 9-Box-Grid', async ({ page }) => {
   await expect(page.getByText(/9-Box Grid/)).toHaveCount(0);
 });
 
-test('Zurück und Home: auf jeder Seite, Schritt für Schritt zurück, Formular fragt vor dem Verlassen', async ({ page }) => {
+test('Zurück und Start: auf jeder Seite, Schritt für Schritt zurück, Formular fragt vor dem Verlassen', async ({ page }) => {
   await gotoTeamAndLogin(page, USERS.managerA);
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
   const back = page.getByRole('navigation', { name: 'Seitennavigation' }).getByRole('button', { name: 'Zurück' });
-  const home = page.getByRole('navigation', { name: 'Seitennavigation' }).getByRole('button', { name: 'Home' });
+  // angepasst (Shell 2.0): Zurück und Start sind die Pillen in der Seitenleiste; „Home“ heißt „Start“
+  const home = page.getByRole('navigation', { name: 'Seitennavigation' }).getByRole('button', { name: 'Start' });
   await page.getByText('Kalibrierung', { exact: true }).first().click();
   await expect(page.getByText(/Review-Periode/)).toBeVisible();
   await page.getByText('Kompetenzen', { exact: true }).first().click();
@@ -380,10 +382,10 @@ test('Zurück und Home: auf jeder Seite, Schritt für Schritt zurück, Formular 
   await expect(page.getByText(/Review-Periode/)).toBeVisible();
   await back.click();
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
-  // Home führt zum Dashboard, dort gibt es keinen Home-Knopf
+  // Start führt zum Dashboard, dort ist die Start-Pille gesperrt (sichtbar, aber ohne Wirkung)
   await home.click();
   await expect(page.getByText(`Wo ich stehe · ${YEAR}`)).toBeVisible();
-  await expect(home).toHaveCount(0);
+  await expect(home).toBeDisabled();
   // Formular: Rückfrage abgelehnt → bleibt im Formular, nichts gespeichert
   await back.click();
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
@@ -528,7 +530,8 @@ test('Papierkorb: HR stellt einen entfernten Mitarbeiter mit allen Unterlagen un
   await expect(page.getByText('Emil Probe ist im Papierkorb')).toBeVisible();
   await expect.poll(async () => (await getDoc('teamMembers/tm-emil')) === null, { timeout: 10000 }).toBe(true);
   // HR: Papierkorb → Wiederherstellen
-  await page.getByText('Abmelden').first().click();
+  await page.getByTestId('user-card').click(); // angepasst (Shell 2.0): „Abmelden“ steht im Konto-Popover der Nutzerkarte
+  await page.getByRole('button', { name: 'Abmelden' }).click();
   await expect(page.getByText('Abmelden')).toHaveCount(0);
   await page.reload();
   await gotoTeamAndLogin(page, USERS.hr);
@@ -625,7 +628,7 @@ test('Phase 3 (Schalter aus, Standard): Sperrfeld ohne Wirkung', async ({ page }
   const uidB = docB.name.split('/').pop();
   await setDoc(`registeredUsers/${uidB}`, { email: USERS.managerB.email, uid: uidB, fullName: USERS.managerB.name, createdAt: '2025-01-10T00:00:00.000Z', disabled: true });
   await gotoTeamAndLogin(page, USERS.managerB);
-  await expect(page.getByRole('button', { name: /Abmelden/ }).first()).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId('user-card')).toBeVisible({ timeout: 15000 }); // angepasst (Shell 2.0): „Abmelden“ steht im Konto-Popover der Nutzerkarte
   await page.waitForTimeout(1500);
   await expect(page.getByText('Dein Konto ist gesperrt.')).toHaveCount(0);
   await expect(page.locator('input[type="password"]')).toHaveCount(0);

@@ -156,12 +156,20 @@ test('Geteilte Beurteilung (Schalter an): nach späterem Speichern Hinweis „Se
   await expect(row).toContainText('Mit Mitarbeiter geteilt');
 });
 
-test('Nutzerkarte: Name vollständig lesbar, Abmelden erreichbar', async ({ page }) => {
+test('Nutzerkarte: Name vollständig lesbar, Konto-Popover mit Rolle und Abmelden', async ({ page }) => {
   await loginTeam(page, USERS.managerA);
-  const name = page.locator('aside').getByText(USERS.managerA.name, { exact: true });
+  const card = page.getByTestId('user-card');
+  const name = card.getByText(USERS.managerA.name, { exact: true });
   await expect(name).toBeVisible();
   expect(await name.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true); // nicht abgeschnitten
-  await expect(page.locator('aside').getByRole('button', { name: 'Abmelden' })).toBeVisible();
+  await card.click();
+  const pop = page.getByRole('dialog', { name: 'Konto' });
+  await expect(pop).toContainText('Angemeldet');
+  await expect(pop).toContainText(USERS.managerA.email);
+  await expect(pop).toContainText('Führungskraft');
+  await expect(pop.getByRole('button', { name: 'Abmelden' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(pop).toHaveCount(0);
 });
 
 test.describe('Handy (390 px)', () => {
@@ -372,14 +380,15 @@ test('Glossar im Bogen: Überschriften behalten ihren Wortlaut, WAS/WIE/GPS/BARS
   expect(box.y + box.height).toBeLessThanOrEqual(900);
   // Seitenwechsel räumt ein offenes Kärtchen weg
   manualDialogs(page, true);
-  await page.getByRole('button', { name: 'Home', exact: true }).click();
+  await page.getByRole('button', { name: 'Start', exact: true }).click();
   await page.locator('[data-nw-ok]').click();
   await expect(page.locator('[data-nw-gloss]')).toHaveCount(0);
 });
 
 test('Glossar auf Italienisch: COSA und COME mit italienischer Erklärung', async ({ page }) => {
   await loginTeam(page, USERS.managerA);
-  await page.getByRole('radio', { name: 'IT' }).click();
+  await page.getByRole('button', { name: /^Sprache/ }).click();
+  await page.getByRole('menuitemradio', { name: /Italiano/ }).click();
   await page.getByRole('row').filter({ hasText: 'Emil Probe' }).getByRole('button', { name: 'Avvia', exact: true }).click();
   const cosa = page.locator('main [data-nw-term="WAS"]').first();
   await expect(cosa).toHaveText('COSA');
@@ -534,4 +543,87 @@ test('Seitenwechsel mit Übergang: fest positionierte Elemente sitzen danach ric
   await expect.poll(async () => { const m = await menu.boundingBox(); return Math.abs(m.y - (b.y + b.height + 4)); }).toBeLessThan(2);
   const m = await menu.boundingBox();
   expect(Math.abs((m.x + m.width) - (b.x + b.width))).toBeLessThan(3); // rechtsbündig am Knopf
+});
+
+// ---------- Shell 2.0 (design-system.md §16.1) ----------
+
+test('Shell am Desktop: Seitenleiste mit Logo, Pillen, Sprach-Menü und Konto-Karte; einklappbar zur schmalen Leiste', async ({ page, consoleErrors }) => {
+  await loginTeam(page, USERS.managerA);
+  const aside = page.locator('aside');
+  expect(Math.round((await aside.boundingBox()).width)).toBe(256);
+  const logo = aside.getByRole('img', { name: /Niederwieser/ });
+  expect(Math.round((await logo.boundingBox()).width)).toBe(196); // LmP_RGB, 196 px
+  const pages = page.getByRole('navigation', { name: 'Seitennavigation' });
+  await expect(pages.getByRole('button', { name: 'Start' })).toBeEnabled();
+  await expect(pages.getByRole('button', { name: 'Zurück' })).toBeEnabled();
+  // Pille weitet sich beim Darüberfahren und zeigt das Wort
+  const back = pages.getByRole('button', { name: 'Zurück' });
+  const before = (await back.boundingBox()).width;
+  await back.hover();
+  await expect.poll(async () => (await back.boundingBox()).width).toBeGreaterThan(before + 30);
+  await page.mouse.move(800, 500);
+  // Icon-Knöpfe behalten ihr Icon in voller Größe (⋯-Menü)
+  const more = memberRow(page, 'Clara Beispiel').getByRole('button', { name: /Weitere Aktionen/ });
+  expect(await more.evaluate((el) => Math.round(el.querySelector('svg').getBoundingClientRect().width))).toBe(14);
+  // Sprache über das kompakte Menü
+  await page.getByRole('button', { name: /^Sprache/ }).click();
+  await page.getByRole('menuitemradio', { name: /English/ }).click();
+  await expect(page.getByRole('navigation', { name: 'Main navigation' }).getByText('Team Overview')).toBeVisible();
+  await page.getByRole('button', { name: /^Language/ }).click();
+  await page.getByRole('menuitemradio', { name: /Deutsch/ }).click();
+  // Einklappen → schmale Leiste (84 px) mit denselben Zielen als Icons, wieder aufklappen
+  await page.getByRole('button', { name: 'Seitenleiste einklappen' }).click();
+  expect(Math.round((await page.locator('aside').boundingBox()).width)).toBe(84);
+  await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('button', { name: 'Dashboard', exact: true }).click();
+  await expect(page.getByText('Meine offenen Punkte')).toBeVisible();
+  await page.getByRole('button', { name: 'Seitenleiste aufklappen' }).click();
+  expect(Math.round((await page.locator('aside').boundingBox()).width)).toBe(256);
+  expect(consoleErrors).toEqual([]);
+});
+
+test.describe('Tablet (1024 px): Shell 2.0', () => {
+  test.use({ viewport: { width: 1024, height: 768 } });
+  test('Schmale Leiste als Standard, Aufklappen als Overlay über dem Inhalt, Navigation schließt es', async ({ page }) => {
+    await openApp(page);
+    expect(Math.round((await page.locator('aside').boundingBox()).width)).toBe(84);
+    const mainLeft = (await page.locator('main').boundingBox()).x;
+    await page.getByRole('button', { name: 'Seitenleiste aufklappen' }).click();
+    const nav = page.getByRole('dialog', { name: 'Navigation' });
+    await expect(nav).toBeVisible();
+    expect((await page.locator('main').boundingBox()).x).toBe(mainLeft); // der Inhalt springt nicht
+    await nav.getByRole('button', { name: 'Team-Übersicht' }).click();
+    await expect(nav).toHaveCount(0);
+    await expect(page.locator('input[type="email"]')).toBeVisible();
+    // Esc schließt das Overlay
+    await page.getByRole('button', { name: 'Seitenleiste aufklappen' }).click();
+    await expect(nav).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(nav).toHaveCount(0);
+  });
+});
+
+test.describe('Handy (390 px): Shell 2.0', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+  test('Top-Leiste 56 px mit Menü, Logo ohne Payoff und Assistent; Navigation als Schublade von links', async ({ page }) => {
+    await openApp(page);
+    const bar = page.locator('header').first();
+    expect(Math.round((await bar.boundingBox()).height)).toBe(56);
+    expect(Math.round((await bar.getByRole('img', { name: 'Niederwieser' }).boundingBox()).width)).toBe(112); // LoP_RGB
+    const menu = bar.getByRole('button', { name: 'Menü' });
+    const size = await menu.boundingBox();
+    expect(Math.round(size.width)).toBe(44); expect(Math.round(size.height)).toBe(44);
+    await expect(page.locator('aside')).toHaveCount(0);
+    await menu.click();
+    const drawer = page.getByRole('dialog', { name: 'Navigation' });
+    await expect(drawer).toBeVisible();
+    await page.waitForTimeout(400);
+    const box = await drawer.boundingBox();
+    expect(Math.round(box.x)).toBe(0);
+    expect(box.width).toBeLessThanOrEqual(300);
+    await expect(drawer.getByText('Sprache')).toBeVisible();               // Sprachwahl im Fuß
+    await expect(drawer.getByRole('radio', { name: 'IT' })).toBeVisible();
+    await drawer.getByRole('button', { name: 'Schließen' }).click();
+    await expect(drawer).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
+  });
 });

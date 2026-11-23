@@ -1206,6 +1206,31 @@
         // Formular-Leiste (bleibt beim Scrollen oben): Abschnitte A, B, C … zum Springen, aktueller Abschnitt
         // hervorgehoben, dazu Speichern/Abschließen (gleiche Handler wie im Kopf). Liest die Abschnitte aus den
         // Überschriften „Teil …“ des umgebenden Bogens – ändert am Bogen selbst nichts.
+        // n.Org 2.0 Reiter: ein Indikator, der zum aktiven Reiter gleitet (statt Rahmen je Reiter).
+        // Misst den Reiter mit aria-selected im Eltern-Element; folgt Umbruch und Größenänderung.
+        const NwTabIndicator = ({ dep }) => {
+          const ref = useRef(null);
+          const [box, setBox] = useState(null);
+          React.useLayoutEffect(() => {
+            const list = ref.current && ref.current.parentElement;
+            if (!list) return;
+            const measure = () => {
+              const tab = list.querySelector('[role="tab"][aria-selected="true"]');
+              if (!tab) return setBox(null);
+              const next = { x: tab.offsetLeft, y: tab.offsetTop + tab.offsetHeight - 2, w: tab.offsetWidth };
+              setBox(prev => prev && prev.x === next.x && prev.y === next.y && prev.w === next.w ? prev : next);
+            };
+            measure();
+            if (typeof ResizeObserver === 'undefined') return;
+            const ro = new ResizeObserver(measure);
+            ro.observe(list);
+            [...list.querySelectorAll('[role="tab"]')].forEach(t => ro.observe(t));
+            return () => ro.disconnect();
+          }, [dep]);
+          return React.createElement('span', { ref, 'aria-hidden': true, 'data-testid': 'tab-indicator',
+            style: box ? { transform: `translate(${box.x}px, ${box.y}px)`, width: box.w + 'px' } : { width: 0 },
+            className: 'pointer-events-none absolute left-0 top-0 h-0.5 rounded-full bg-nw-blue transition-[transform,width] duration-base ease-glide' });
+        };
         const NwFormBar = ({ lang, actions, offset = 0 }) => {
           const barRef = useRef(null);
           const [secs, setSecs] = useState([]);
@@ -1822,7 +1847,7 @@
                     ),
 
                     // Error Message
-                    error && React.createElement('div', { role: 'alert', className: 'mb-4 flex items-start gap-2 rounded-lg bg-danger-bg px-3 py-2.5 text-sm text-danger' },
+                    error && React.createElement('div', { role: 'alert', key: 'err-' + error, className: 'mb-4 flex animate-shake items-start gap-2 rounded-lg bg-danger-bg px-3 py-2.5 text-sm text-danger' },
                         React.createElement(AlertCircle, { size: 16, 'aria-hidden': true, className: 'mt-0.5 shrink-0' }),
                         error
                     ),
@@ -2104,13 +2129,15 @@
           check: 'M20 6 9 17l-5-5', x: 'M18 6 6 18M6 6l12 12', alert: 'M12 8v5M12 16.5h.01', info: 'M12 16v-5M12 7.5h.01',
           help: 'M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01', edit: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z'
         };
-        const nwSvgIcon = (name, size) => {
+        const nwSvgIcon = (name, size, draw) => {
           const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
           svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('width', size || 12); svg.setAttribute('height', size || 12);
           svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '2.6');
           svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round'); svg.setAttribute('aria-hidden', 'true');
           const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
           path.setAttribute('d', NW_SVG_PATHS[name] || NW_SVG_PATHS.info);
+          // n.Org 2.0 Bestätigung: der Haken zeichnet sich (check-draw), reduced-motion schaltet es global ab
+          if (draw) { path.setAttribute('stroke-dasharray', '24'); path.setAttribute('class', 'animate-check-draw'); }
           svg.appendChild(path);
           return svg;
         };
@@ -2132,7 +2159,7 @@
           const icon = document.createElement('span');
           icon.className = 'grid h-5 w-5 shrink-0 place-items-center rounded-full text-2xs font-semibold text-white ' + (tone[type] || tone.success);
           icon.setAttribute('aria-hidden', 'true');
-          icon.appendChild(nwSvgIcon(icons[type] || icons.success, 12));
+          icon.appendChild(nwSvgIcon(icons[type] || icons.success, 12, (icons[type] || icons.success) === 'check'));
           const text = document.createElement('span');
           text.className = 'min-w-0 whitespace-pre-line';
           text.textContent = message; // textContent statt innerHTML (XSS-sicher)
@@ -6219,13 +6246,13 @@
                             type: 'button',
                             disabled: isSaving,
                             className: nwBtnClass('secondary', 'lg') + ' w-full'
-                          }, !isSaving && e(Save, { size: 16, 'aria-hidden': true }), isSaving ? '…' : (lang === 'de' ? 'Entwurf speichern' : lang === 'it' ? 'Salva bozza' : 'Save draft')),
+                          }, isSaving ? e(Loader2, { size: 16, className: 'animate-spin', 'aria-hidden': true }) : e(Save, { size: 16, 'aria-hidden': true }), isSaving ? (lang === 'de' ? 'Speichert …' : lang === 'it' ? 'Salvataggio …' : 'Saving …') : (lang === 'de' ? 'Entwurf speichern' : lang === 'it' ? 'Salva bozza' : 'Save draft')),
                           e('button', {
                             onClick: async () => { if (await nwConfirmCompletion({ lang, kind: 'goals', goals, devItems: devGoals })) handleSaveTeamAppraisal('completed'); },
                             type: 'button',
                             disabled: isSaving,
                             className: nwBtnClass('primary', 'lg') + ' w-full'
-                          }, !isSaving && e(Check, { size: 16, 'aria-hidden': true }), isSaving ? '…' : (lang === 'de' ? 'Abschließen' : lang === 'it' ? 'Completa' : 'Complete')),
+                          }, isSaving ? e(Loader2, { size: 16, className: 'animate-spin', 'aria-hidden': true }) : e(Check, { size: 16, 'aria-hidden': true }), isSaving ? (lang === 'de' ? 'Speichert …' : lang === 'it' ? 'Salvataggio …' : 'Saving …') : (lang === 'de' ? 'Abschließen' : lang === 'it' ? 'Completa' : 'Complete')),
                           e('button', {
                             onClick: handleCancelTeam,
                             type: 'button',
@@ -6336,8 +6363,8 @@
                       )
                     ),
                     
-                    e('h2', { className: "text-lg font-semibold", style: { color: "#243186" } }, lang === 'de' ? 'Zielvereinbarung' : lang === 'it' ? 'Accordo sugli obiettivi' : 'Goal Agreement'),
-                    e('p', { className: "font-medium", style: { color: "#2F7A48" } }, t.headerSubtitle)
+                    e('h2', { className: "text-lg font-semibold text-nw-blue" }, lang === 'de' ? 'Zielvereinbarung' : lang === 'it' ? 'Accordo sugli obiettivi' : 'Goal Agreement'),
+                    e('p', { className: "font-medium text-ok" }, t.headerSubtitle)
                 ),
 
                 // Formular-Leiste: Abschnitte + Speichern/Abschließen immer erreichbar
@@ -8711,13 +8738,13 @@
                             type: 'button',
                             disabled: isSaving,
                             className: nwBtnClass('secondary', 'lg') + ' w-full'
-                          }, !isSaving && e(Save, { size: 16, 'aria-hidden': true }), isSaving ? '…' : (lang === 'de' ? 'Entwurf speichern' : lang === 'it' ? 'Salva bozza' : 'Save draft')),
+                          }, isSaving ? e(Loader2, { size: 16, className: 'animate-spin', 'aria-hidden': true }) : e(Save, { size: 16, 'aria-hidden': true }), isSaving ? (lang === 'de' ? 'Speichert …' : lang === 'it' ? 'Salvataggio …' : 'Saving …') : (lang === 'de' ? 'Entwurf speichern' : lang === 'it' ? 'Salva bozza' : 'Save draft')),
                           e('button', {
                             onClick: async () => { if (await nwConfirmCompletion({ lang, kind: 'review', goals, devItems: devPlan })) handleSaveTeamAppraisal('completed'); },
                             type: 'button',
                             disabled: isSaving,
                             className: nwBtnClass('primary', 'lg') + ' w-full'
-                          }, !isSaving && e(Check, { size: 16, 'aria-hidden': true }), isSaving ? '…' : (lang === 'de' ? 'Abschließen' : lang === 'it' ? 'Completa' : 'Complete')),
+                          }, isSaving ? e(Loader2, { size: 16, className: 'animate-spin', 'aria-hidden': true }) : e(Check, { size: 16, 'aria-hidden': true }), isSaving ? (lang === 'de' ? 'Speichert …' : lang === 'it' ? 'Salvataggio …' : 'Saving …') : (lang === 'de' ? 'Abschließen' : lang === 'it' ? 'Completa' : 'Complete')),
                           e('button', {
                             onClick: handleCancelTeam,
                             type: 'button',
@@ -8820,8 +8847,8 @@
                       )
                     ),
                     
-                    e('h2', { className: "text-lg font-semibold", style: { color: "#243186" } }, t.headerTitle),
-                    e('p', { className: "font-medium", style: { color: "#2F7A48" } }, t.headerSubtitle)
+                    e('h2', { className: "text-lg font-semibold text-nw-blue" }, t.headerTitle),
+                    e('p', { className: "font-medium text-ok" }, t.headerSubtitle)
                 ),
                 
                 // === BARS-REFERENZ INFO-BLOCK (analog Selbstreflexionsbogen) ===
@@ -18011,12 +18038,13 @@ Best regards`
               ),
               
               // === HR SUB-TAB NAVIGATION ===
-              React.createElement('div', { role: 'tablist', 'aria-label': 'HR Dashboard', className: 'flex flex-wrap gap-0.5 border-b border-line' },
+              React.createElement('div', { role: 'tablist', 'aria-label': 'HR Dashboard', className: 'relative flex flex-wrap gap-0.5 border-b border-line' },
+                React.createElement(NwTabIndicator, { dep: hrSubTab + '|' + lang }),
                 React.createElement('button', {
                   onClick: () => setHrSubTab('overview'),
                   role: 'tab', 'aria-selected': hrSubTab === 'overview', type: 'button',
                   className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-fast hover:scale-[1.03] active:scale-[.98] ' + 
-                    (hrSubTab === 'overview' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
+                    (hrSubTab === 'overview' ? 'border-transparent text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   React.createElement(Building2, { size: 16 }),
                   getText(lang, 'Übersicht', 'Panoramica', 'Overview')
@@ -18025,7 +18053,7 @@ Best regards`
                   onClick: () => setHrSubTab('calibration'),
                   role: 'tab', 'aria-selected': hrSubTab === 'calibration', type: 'button',
                   className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-fast hover:scale-[1.03] active:scale-[.98] ' + 
-                    (hrSubTab === 'calibration' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
+                    (hrSubTab === 'calibration' ? 'border-transparent text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   React.createElement(TrendingUp, { size: 16, 'aria-hidden': true }),
                   getText(lang, 'Normalverteilung', 'Distribuzione', 'Distribution')
@@ -18034,7 +18062,7 @@ Best regards`
                   onClick: () => setHrSubTab('rater-bias'),
                   role: 'tab', 'aria-selected': hrSubTab === 'rater-bias', type: 'button',
                   className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-fast hover:scale-[1.03] active:scale-[.98] ' + 
-                    (hrSubTab === 'rater-bias' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
+                    (hrSubTab === 'rater-bias' ? 'border-transparent text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   React.createElement(Scale, { size: 16, 'aria-hidden': true }),
                   getText(lang, 'Rater-Bias', 'Bias Valutatore', 'Rater Bias')
@@ -18043,7 +18071,7 @@ Best regards`
                   onClick: () => setHrSubTab('radar'),
                   role: 'tab', 'aria-selected': hrSubTab === 'radar', type: 'button',
                   className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-fast hover:scale-[1.03] active:scale-[.98] ' + 
-                    (hrSubTab === 'radar' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
+                    (hrSubTab === 'radar' ? 'border-transparent text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   React.createElement(Award, { size: 16, 'aria-hidden': true }),
                   getText(lang, 'Kompetenz-Radar', 'Radar Competenze', 'Competency Radar')
@@ -18052,7 +18080,7 @@ Best regards`
                   onClick: () => setHrSubTab('goals-dashboard'),
                   role: 'tab', 'aria-selected': hrSubTab === 'goals-dashboard', type: 'button',
                   className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-fast hover:scale-[1.03] active:scale-[.98] ' + 
-                    (hrSubTab === 'goals-dashboard' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
+                    (hrSubTab === 'goals-dashboard' ? 'border-transparent text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   React.createElement(Target, { size: 16, 'aria-hidden': true }),
                   getText(lang, 'Ziel-Dashboard', 'Dashboard Obiettivi', 'Goals Dashboard')
@@ -18062,7 +18090,7 @@ Best regards`
                   onClick: () => setHrSubTab('versions'),
                   role: 'tab', 'aria-selected': hrSubTab === 'versions', type: 'button',
                   className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-fast hover:scale-[1.03] active:scale-[.98] ' + 
-                    (hrSubTab === 'versions' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
+                    (hrSubTab === 'versions' ? 'border-transparent text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   React.createElement(Clock, { size: 16 }),
                   getText(lang, 'Versionen', 'Versioni', 'Versions')
@@ -18072,7 +18100,7 @@ Best regards`
                   onClick: () => setHrSubTab('backup'),
                   role: 'tab', 'aria-selected': hrSubTab === 'backup', type: 'button',
                   className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-fast hover:scale-[1.03] active:scale-[.98] ' + 
-                    (hrSubTab === 'backup' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
+                    (hrSubTab === 'backup' ? 'border-transparent text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   React.createElement(Save, { size: 16, 'aria-hidden': true }),
                   getText(lang, 'Backup & Restore', 'Backup & Ripristino', 'Backup & Restore')
@@ -18081,7 +18109,7 @@ Best regards`
                   onClick: () => setHrSubTab('trash'),
                   role: 'tab', 'aria-selected': hrSubTab === 'trash', type: 'button',
                   className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-fast hover:scale-[1.03] active:scale-[.98] ' +
-                    (hrSubTab === 'trash' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
+                    (hrSubTab === 'trash' ? 'border-transparent text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   React.createElement(Trash2, { size: 16 }),
                   getText(lang, 'Papierkorb', 'Cestino', 'Trash')
@@ -18090,7 +18118,7 @@ Best regards`
                   onClick: () => setHrSubTab('users'),
                   role: 'tab', 'aria-selected': hrSubTab === 'users', type: 'button',
                   className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-fast hover:scale-[1.03] active:scale-[.98] ' +
-                    (hrSubTab === 'users' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
+                    (hrSubTab === 'users' ? 'border-transparent text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
                   React.createElement(Users, { size: 16 }),
                   getText(lang, 'Benutzer', 'Utenti', 'Users')
@@ -23148,7 +23176,7 @@ Best regards`
                         React.createElement('span', { className: "inline-flex" }, React.createElement(TrendingUp, { size: 18, 'aria-hidden': true }))
                       ),
                       React.createElement('div', null,
-                        React.createElement('h3', { className: "text-xl md:text-2xl font-semibold", style: { color: "#243186" } },
+                        React.createElement('h3', { className: "t-hero" },
                           lang === 'de' ? 'GPS-Verteilung (9-Box Grid)' : lang === 'it' ? 'Distribuzione GPS (9-Box Grid)' : 'GPS Distribution (9-Box Grid)'
                         ),
                         React.createElement('p', { className: "text-sm text-ink-60" },
@@ -23159,23 +23187,23 @@ Best regards`
                     // Legende (Rating-Farben)
                     React.createElement('div', { className: "hidden lg:flex items-center gap-3 text-xs" },
                       React.createElement('div', { className: "flex items-center gap-1.5" },
-                        React.createElement('div', { className: "w-3 h-3 rounded-full", style: { backgroundColor: '#9B2C22' } }),
+                        React.createElement('div', { className: "w-3 h-3 rounded-full bg-danger" }),
                         React.createElement('span', { className: "text-ink-60" }, "1 (≤1.5)")
                       ),
                       React.createElement('div', { className: "flex items-center gap-1.5" },
-                        React.createElement('div', { className: "w-3 h-3 rounded-full", style: { backgroundColor: '#9A6414' } }),
+                        React.createElement('div', { className: "w-3 h-3 rounded-full bg-warn" }),
                         React.createElement('span', { className: "text-ink-60" }, "2")
                       ),
                       React.createElement('div', { className: "flex items-center gap-1.5" },
-                        React.createElement('div', { className: "w-3 h-3 rounded-full", style: { backgroundColor: '#243186' } }),
+                        React.createElement('div', { className: "w-3 h-3 rounded-full bg-nw-blue" }),
                         React.createElement('span', { className: "text-ink-60" }, "3")
                       ),
                       React.createElement('div', { className: "flex items-center gap-1.5" },
-                        React.createElement('div', { className: "w-3 h-3 rounded-full", style: { backgroundColor: '#2F7A48' } }),
+                        React.createElement('div', { className: "w-3 h-3 rounded-full bg-ok" }),
                         React.createElement('span', { className: "text-ink-60" }, "4")
                       ),
                       React.createElement('div', { className: "flex items-center gap-1.5" },
-                        React.createElement('div', { className: "w-3 h-3 rounded-full", style: { backgroundColor: '#2F7A48' } }),
+                        React.createElement('div', { className: "w-3 h-3 rounded-full bg-ok" }),
                         React.createElement('span', { className: "text-ink-60" }, "5 (>4.5)")
                       )
                     )
@@ -23443,16 +23471,16 @@ Best regards`
                   
                   // === ARCHETYPEN-ERKLÄRUNG ===
                   React.createElement('div', { className: "mt-6 bg-panel rounded-card p-5 border border-line" },
-                    React.createElement('h4', { className: "text-sm font-semibold mb-4 flex items-center gap-2", style: { color: '#243186' } },
+                    React.createElement('h4', { className: "text-sm font-semibold mb-4 flex items-center gap-2 text-nw-blue" },
                       React.createElement(Info, { size: 16 }),
                       lang === 'de' ? 'Die 4 Archetypen verstehen' : lang === 'it' ? 'Capire i 4 archetipi' : 'Understanding the 4 Archetypes'
                     ),
                     React.createElement('div', { className: "grid md:grid-cols-2 gap-3" },
                       // ROLE MODEL (oben rechts)
-                      React.createElement('div', { className: "flex gap-3 p-3 bg-white rounded-lg border-l-4", style: { borderColor: '#2F7A48' } },
+                      React.createElement('div', { className: "flex gap-3 p-3 bg-white rounded-lg border-l-4 border-ok" },
                         React.createElement('span', { className: "text-xl" }, React.createElement(Star, { size: 18, 'aria-hidden': true })),
                         React.createElement('div', null,
-                          React.createElement('div', { className: "font-semibold text-sm", style: { color: '#2F7A48' } }, "ROLE MODEL"),
+                          React.createElement('div', { className: "font-semibold text-sm text-ok" }, "ROLE MODEL"),
                           React.createElement('p', { className: "text-xs text-ink-60 mt-0.5" },
                             lang === 'de' 
                               ? 'High WAS + High WIE. Vorbilder, Mentoren, Beförderungskandidaten.'
@@ -23462,10 +23490,10 @@ Best regards`
                         )
                       ),
                       // HIDDEN GEM (oben links)
-                      React.createElement('div', { className: "flex gap-3 p-3 bg-white rounded-lg border-l-4", style: { borderColor: '#9A6414' } },
+                      React.createElement('div', { className: "flex gap-3 p-3 bg-white rounded-lg border-l-4 border-warn" },
                         React.createElement('span', { className: "text-xl" }, React.createElement(Award, { size: 18, 'aria-hidden': true })),
                         React.createElement('div', null,
-                          React.createElement('div', { className: "font-semibold text-sm", style: { color: '#9A6414' } }, "HIDDEN GEM"),
+                          React.createElement('div', { className: "font-semibold text-sm text-warn" }, "HIDDEN GEM"),
                           React.createElement('p', { className: "text-xs text-ink-60 mt-0.5" },
                             lang === 'de' 
                               ? 'Low WAS + High WIE. Tolles Verhalten, braucht klarere Ziele.'
@@ -23475,10 +23503,10 @@ Best regards`
                         )
                       ),
                       // SOLO STAR (unten rechts)
-                      React.createElement('div', { className: "flex gap-3 p-3 bg-white rounded-lg border-l-4", style: { borderColor: '#9B2C22' } },
+                      React.createElement('div', { className: "flex gap-3 p-3 bg-white rounded-lg border-l-4 border-danger" },
                         React.createElement('span', { className: "text-xl" }, React.createElement(Target, { size: 18, 'aria-hidden': true })),
                         React.createElement('div', null,
-                          React.createElement('div', { className: "font-semibold text-sm", style: { color: '#9B2C22' } }, "SOLO STAR"),
+                          React.createElement('div', { className: "font-semibold text-sm text-danger" }, "SOLO STAR"),
                           React.createElement('p', { className: "text-xs text-ink-60 mt-0.5" },
                             lang === 'de' 
                               ? 'High WAS + Low WIE. Erreicht Ziele, aber WIE ist problematisch. Verhaltens-Coaching nötig.'
@@ -23488,10 +23516,10 @@ Best regards`
                         )
                       ),
                       // HANDLUNGSBEDARF (unten links)
-                      React.createElement('div', { className: "flex gap-3 p-3 bg-white rounded-lg border-l-4", style: { borderColor: '#9B2C22' } },
+                      React.createElement('div', { className: "flex gap-3 p-3 bg-white rounded-lg border-l-4 border-danger" },
                         React.createElement('span', { className: "text-xl" }, React.createElement(AlertCircle, { size: 18, 'aria-hidden': true })),
                         React.createElement('div', null,
-                          React.createElement('div', { className: "font-semibold text-sm", style: { color: '#9B2C22' } }, 
+                          React.createElement('div', { className: "font-semibold text-sm text-danger" }, 
                             lang === 'de' ? 'HANDLUNGSBEDARF' : lang === 'it' ? 'AZIONE RICHIESTA' : 'ACTION REQUIRED'
                           ),
                           React.createElement('p', { className: "text-xs text-ink-60 mt-0.5" },
@@ -23724,7 +23752,7 @@ Best regards`
                 return React.createElement('div', { className: "bg-white rounded-card p-6 md:p-8 shadow-card border border-line" },
                   // Header
                   React.createElement('div', { className: "flex flex-col md:flex-row md:items-center md:justify-between mb-4" },
-                    React.createElement('h3', { className: "text-xl md:text-2xl font-semibold flex items-center gap-2", style: { color: "#243186" } },
+                    React.createElement('h3', { className: "t-hero flex items-center gap-2" },
                       "", lang === 'de' ? 'Kompetenz-Heatmap' : lang === 'it' ? 'Heatmap Competenze' : 'Competency Heatmap'
                     ),
                     // Legende (Unternehmensfarben)
@@ -24331,7 +24359,7 @@ Best regards`
                           React.createElement(Users, { size: 20, className: "text-white" })
                         ),
                         React.createElement('div', { className: "flex-1" },
-                          React.createElement('h4', { className: "font-semibold text-sm mb-1", style: { color: '#243186' } },
+                          React.createElement('h4', { className: "font-semibold text-sm mb-1 text-nw-blue" },
                             lang === 'de' ? 'Peer-Learning Impulse' 
                               : lang === 'it' ? 'Impulsi Peer-Learning' 
                               : 'Peer-Learning Opportunities'
@@ -24668,12 +24696,12 @@ const renderDashboard = () => {
                 hint: getText(lang, 'Zum Nachschlagen', 'Da consultare', 'For reference') },
                 React.createElement('div', { className: 'space-y-5 pt-2' },
               React.createElement('div', { className: "bg-white rounded-card p-6 shadow-card border border-line" },
-                React.createElement('h2', { className: "text-lg font-semibold mb-4", style: { color: "#243186" } }, t.welcome),
+                React.createElement('h2', { className: "text-lg font-semibold mb-4 text-nw-blue" }, t.welcome),
                 React.createElement('p', { className: "mb-6 leading-relaxed text-ink" },
                   t.intro, React.createElement('strong', null, t.introBold), t.introEnd
                 ),
                 React.createElement('div', { className: "bg-panel p-5 rounded-lg border border-line-2 mb-6" },
-                  React.createElement('h3', { className: "font-semibold mb-3 flex items-center gap-2", style: { color: "#243186" } },
+                  React.createElement('h3', { className: "font-semibold mb-3 flex items-center gap-2 text-nw-blue" },
                     React.createElement(Target, { size: 18 }), " ", t.strategyTitle
                   ),
                   React.createElement('p', { className: "text-sm leading-relaxed text-ink" },
@@ -24912,7 +24940,7 @@ const renderDashboard = () => {
               ),
               
               React.createElement('div', { className: "mt-12 mb-8" },
-                React.createElement('h2', { className: "text-lg font-semibold mb-8 text-center", style: { color: "#243186" } },
+                React.createElement('h2', { className: "text-lg font-semibold mb-8 text-center text-nw-blue" },
                   lang === 'de' ? 'DER JAHRESZYKLUS IM ÜBERBLICK' : 'IL CICLO ANNUALE IN SINTESI'
                 ),
                 // Verwendung der benutzerdefinierten Klasse für gleich hohe Spalten
@@ -24925,7 +24953,7 @@ const renderDashboard = () => {
                       React.createElement('p', { className: "eyebrow mb-2" }, 
                         lang === 'de' ? 'PHASE 1' : 'FASE 1'
                       ),
-                      React.createElement('h3', { className: "text-xl font-semibold", style: { color: "#243186" } },
+                      React.createElement('h3', { className: "text-xl font-semibold text-nw-blue" },
                         lang === 'de' ? 'Entwurf & Kalibrierung' : 'Bozza & Calibrazione'
                       )
                     ),
@@ -24961,7 +24989,7 @@ const renderDashboard = () => {
                       React.createElement('p', { className: "eyebrow mb-2" }, 
                         lang === 'de' ? 'PHASE 2' : 'FASE 2'
                       ),
-                      React.createElement('h3', { className: "text-xl font-semibold", style: { color: "#243186" } },
+                      React.createElement('h3', { className: "text-xl font-semibold text-nw-blue" },
                         lang === 'de' ? 'Selbstreflexion' : 'Autoriflessione'
                       )
                     ),
@@ -24997,7 +25025,7 @@ const renderDashboard = () => {
                       React.createElement('p', { className: "eyebrow mb-2" }, 
                         lang === 'de' ? 'PHASE 3' : 'FASE 3'
                       ),
-                      React.createElement('h3', { className: "text-xl font-semibold", style: { color: "#243186" } },
+                      React.createElement('h3', { className: "text-xl font-semibold text-nw-blue" },
                         lang === 'de' ? 'Review-Gespräch' : 'Colloquio di Review'
                       )
                     ),
@@ -25033,7 +25061,7 @@ const renderDashboard = () => {
                       React.createElement('p', { className: "eyebrow mb-2" }, 
                         lang === 'de' ? 'PHASE 4' : 'FASE 4'
                       ),
-                      React.createElement('h3', { className: "text-xl font-semibold", style: { color: "#243186" } },
+                      React.createElement('h3', { className: "text-xl font-semibold text-nw-blue" },
                         lang === 'de' ? 'Zielvereinbarung' : 'Definizione Obiettivi'
                       )
                     ),
@@ -25145,9 +25173,9 @@ const renderDashboard = () => {
               ),
               React.createElement('div', { className: 'space-y-4' },
                 steps.map(step => React.createElement('div', { key: step.num, className: 'bg-white rounded-card p-5 shadow-card border border-line relative overflow-hidden' },
-                  React.createElement('div', { className: 'absolute top-0 left-0 w-1.5 h-full', style: { backgroundColor: '#6EBD84' } }),
+                  React.createElement('div', { className: 'absolute top-0 left-0 w-1.5 h-full bg-nw-green' }),
                   React.createElement('div', { className: 'flex items-start gap-4 ml-2' },
-                    React.createElement('div', { className: 'w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0', style: { backgroundColor: '#243186' } }, step.num),
+                    React.createElement('div', { className: 'w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 bg-nw-blue' }, step.num),
                     React.createElement('div', { className: 'flex-1' },
                       React.createElement('div', { className: 'flex items-center gap-2 mb-2' },
                         React.createElement('span', { className: 'text-xl' }, step.icon),
@@ -25334,10 +25362,10 @@ const renderDashboard = () => {
                         ? 'Basis ist nicht das "Bauchgefühl", sondern der Vergleich des beobachteten Verhaltens mit den definierten Ankern.'
                         : 'La base non è l\'intuizione, ma il confronto del comportamento osservato con gli ancore definiti.'
                     ),
-                    React.createElement('div', { className: "bg-nw-blue-06 rounded-lg p-5 border-l-4", style: { borderColor: "#6EBD84" } },
+                    React.createElement('div', { className: "bg-nw-blue-06 rounded-lg p-5 border-l-4 border-nw-green" },
                       React.createElement('div', { className: "flex items-start gap-3 mb-3" },
-                        React.createElement(Lightbulb, { size: 24, style: { color: "#2F7A48" }, className: "flex-shrink-0 mt-1" }),
-                        React.createElement('p', { className: "text-lg font-semibold", style: { color: "#2F7A48" } },
+                        React.createElement(Lightbulb, { size: 24, className: "flex-shrink-0 mt-1 text-ok" }),
+                        React.createElement('p', { className: "text-lg font-semibold text-ok" },
                           lang === 'de' 
                             ? 'Die Vorgehensweise für Führungskräfte:'
                             : 'La procedura per i manager:'
@@ -25508,7 +25536,7 @@ const renderDashboard = () => {
                     className: "bg-nw-blue-06 rounded-card p-5 md:p-6 w-[140px] md:w-[180px] border border-line"
                   },
                     React.createElement('div', { className: "t-kpi mb-2 text-center" }, "50%"),
-                    React.createElement('div', { className: "text-lg md:text-xl font-semibold mb-1 text-center", style: { color: "#2F7A48" } }, 
+                    React.createElement('div', { className: "text-lg md:text-xl font-semibold mb-1 text-center text-ok" }, 
                       lang === 'de' ? 'WAS' : 'COSA'
                     ),
                     React.createElement('div', { className: "text-xs opacity-80 text-center" }, 
@@ -25524,7 +25552,7 @@ const renderDashboard = () => {
                     className: "bg-nw-blue-06 rounded-card p-5 md:p-6 w-[140px] md:w-[180px] border border-line"
                   },
                     React.createElement('div', { className: "t-kpi mb-2 text-center" }, "50%"),
-                    React.createElement('div', { className: "text-lg md:text-xl font-semibold mb-1 text-center", style: { color: "#2F7A48" } }, 
+                    React.createElement('div', { className: "text-lg md:text-xl font-semibold mb-1 text-center text-ok" }, 
                       lang === 'de' ? 'WIE' : 'COME'
                     ),
                     React.createElement('div', { className: "text-xs opacity-80 text-center" }, 
@@ -25539,8 +25567,8 @@ const renderDashboard = () => {
                   React.createElement('div', { 
                     className: "bg-white rounded-card p-5 md:p-6 w-[140px] md:w-[180px] shadow-card"
                   },
-                    React.createElement('div', { className: "text-lg md:text-xl font-semibold mb-1 text-center", style: { color: "#243186" } }, "GPS"),
-                    React.createElement('div', { className: "t-kpi mb-1 text-center", style: { color: "#2F7A48" } }, "1.0–5.0"),
+                    React.createElement('div', { className: "text-lg md:text-xl font-semibold mb-1 text-center text-nw-blue" }, "GPS"),
+                    React.createElement('div', { className: "t-kpi mb-1 text-center text-ok" }, "1.0–5.0"),
                     React.createElement('div', { className: "text-xs text-center text-ink-60" }, "Performance Score")
                   )
                 ),
@@ -25696,10 +25724,10 @@ const renderDashboard = () => {
               React.createElement('div', { className: "bg-white rounded-card shadow-card border border-line-2 overflow-hidden" },
                 React.createElement('div', { className: "p-6 border-b border-line bg-white border border-line shadow-card", style: { } },
                   React.createElement('h3', { className: "text-lg font-semibold text-nw-blue flex items-center gap-3" },
-                    React.createElement(Scale, { className: "w-7 h-7", style: { color: "#2F7A48" } }),
+                    React.createElement(Scale, { className: "w-7 h-7 text-ok" }),
                     t.barsConversionTitle
                   ),
-                  React.createElement('p', { className: "mt-2", style: { color: "#2F7A48" } }, t.barsConversionDesc)
+                  React.createElement('p', { className: "mt-2 text-ok" }, t.barsConversionDesc)
                 ),
                 React.createElement('div', { className: "overflow-x-auto" },
                   React.createElement('table', { className: "w-full" },
@@ -25761,10 +25789,10 @@ const renderDashboard = () => {
               React.createElement('div', { className: "bg-white rounded-card shadow-card border border-line-2 overflow-hidden" },
                 React.createElement('div', { className: "p-6 border-b border-line bg-white border border-line shadow-card", style: { } },
                   React.createElement('h3', { className: "text-lg font-semibold text-nw-blue flex items-center gap-3" },
-                    React.createElement(Award, { className: "w-7 h-7", style: { color: "#2F7A48" } }),
+                    React.createElement(Award, { className: "w-7 h-7 text-ok" }),
                     t.performanceRatingTitle
                   ),
-                  React.createElement('p', { className: "mt-2", style: { color: "#2F7A48" } }, t.performanceRatingDesc)
+                  React.createElement('p', { className: "mt-2 text-ok" }, t.performanceRatingDesc)
                 ),
                 React.createElement('div', { className: "overflow-x-auto" },
                   React.createElement('table', { className: "w-full" },
@@ -25822,26 +25850,26 @@ const renderDashboard = () => {
               // Why GPS Section
               React.createElement('div', { className: "rounded-card  p-8 bg-white border border-line shadow-card", style: { } },
                 React.createElement('h3', { className: "text-lg font-semibold text-nw-blue mb-6 flex items-center gap-3" },
-                  React.createElement(Lightbulb, { className: "w-7 h-7", style: { color: "#2F7A48" } }),
+                  React.createElement(Lightbulb, { className: "w-7 h-7 text-ok" }),
                   t.whyGPSTitle
                 ),
                 React.createElement('div', { className: "grid md:grid-cols-3 gap-6" },
                   React.createElement('div', { className: "bg-white bg-opacity-10 rounded-lg p-6" },
-                    React.createElement('div', { className: "w-12 h-12 rounded-full flex items-center justify-center mb-4", style: { backgroundColor: "#6EBD84" } },
+                    React.createElement('div', { className: "w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-nw-green" },
                       React.createElement(Scale, { className: "w-6 h-6 text-ink" })
                     ),
                     React.createElement('h4', { className: "text-lg font-semibold text-nw-blue mb-2" }, t.whyGPS1Title),
                     React.createElement('p', { className: "text-ink-60 text-sm" }, t.whyGPS1Text)
                   ),
                   React.createElement('div', { className: "bg-white bg-opacity-10 rounded-lg p-6" },
-                    React.createElement('div', { className: "w-12 h-12 rounded-full flex items-center justify-center mb-4", style: { backgroundColor: "#6EBD84" } },
+                    React.createElement('div', { className: "w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-nw-green" },
                       React.createElement(Target, { className: "w-6 h-6 text-ink" })
                     ),
                     React.createElement('h4', { className: "text-lg font-semibold text-nw-blue mb-2" }, t.whyGPS2Title),
                     React.createElement('p', { className: "text-ink-60 text-sm" }, t.whyGPS2Text)
                   ),
                   React.createElement('div', { className: "bg-white bg-opacity-10 rounded-lg p-6" },
-                    React.createElement('div', { className: "w-12 h-12 rounded-full flex items-center justify-center mb-4", style: { backgroundColor: "#6EBD84" } },
+                    React.createElement('div', { className: "w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-nw-green" },
                       React.createElement(TrendingUp, { className: "w-6 h-6 text-ink" })
                     ),
                     React.createElement('h4', { className: "text-lg font-semibold text-nw-blue mb-2" }, t.whyGPS3Title),
@@ -26620,7 +26648,7 @@ const renderDashboard = () => {
                       e('div', { className: 'space-y-4' },
                         // Step 1
                         e('div', { className: 'flex gap-4' },
-                          e('div', { className: 'w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0', style: { backgroundColor: '#243186' } }, '1'),
+                          e('div', { className: 'w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 bg-nw-blue' }, '1'),
                           e('div', null,
                             e('p', { className: 'font-semibold text-ink' }, 
                               getText('Link kopieren', 'Copia il link', 'Copy the link')
@@ -26636,7 +26664,7 @@ const renderDashboard = () => {
                         ),
                         // Step 2
                         e('div', { className: 'flex gap-4' },
-                          e('div', { className: 'w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0', style: { backgroundColor: '#243186' } }, '2'),
+                          e('div', { className: 'w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 bg-nw-blue' }, '2'),
                           e('div', null,
                             e('p', { className: 'font-semibold text-ink' }, 
                               getText('Link an Führungskraft senden', 'Invia il link al responsabile', 'Send link to your manager')
@@ -26652,7 +26680,7 @@ const renderDashboard = () => {
                         ),
                         // Step 3
                         e('div', { className: 'flex gap-4' },
-                          e('div', { className: 'w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0', style: { backgroundColor: '#6EBD84' } }, '3'),
+                          e('div', { className: 'w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 bg-nw-green' }, '3'),
                           e('div', null,
                             e('p', { className: 'font-semibold text-ink' }, 
                               getText('Fertig!', 'Fatto!', 'Done!')
@@ -27226,7 +27254,7 @@ const renderDashboard = () => {
                 e('div', { className: 'sticky top-0 z-10 mb-6 rounded-card border border-line bg-white p-4 shadow-card no-print' },
                   e('div', { className: 'flex flex-col gap-4' },
                     e('div', { className: 'text-ink' },
-                      e('h2', { className: 'text-lg font-semibold', style: { color: '#243186' } }, lang === 'de' ? 'Selbstreflexionsbogen' : 'Autovalutazione'),
+                      e('h2', { className: 'text-lg font-semibold text-nw-blue' }, lang === 'de' ? 'Selbstreflexionsbogen' : 'Autovalutazione'),
                       e('p', { className: 'text-ink-60 text-sm' }, t.headerSubtitle)
                     ),
                     
@@ -27302,7 +27330,7 @@ const renderDashboard = () => {
                   // === NORMAL-MODUS: Neue einfache Anleitung (kein Link-Kopieren mehr nötig!) ===
                   : e('div', { className: 'bg-nw-green-15 border border-nw-green/40 rounded-card p-5 mb-4 no-print' },
                       e('div', { className: 'flex items-start gap-4' },
-                        e('div', { className: 'w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0', style: { backgroundColor: '#2F7A48' } },
+                        e('div', { className: 'w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-ok' },
                           e(Send, { size: 24, className: 'text-white' })
                         ),
                         e('div', null,
@@ -27359,11 +27387,11 @@ const renderDashboard = () => {
                 // === NEU: BARS-Kompetenz-Hinweis mit Link zum Öffnen in neuem Tab ===
                 e('div', { className: 'bg-nw-blue-06 border border-nw-blue-25 rounded-card p-4 mb-4 no-print' },
                   e('div', { className: 'flex items-start gap-4' },
-                    e('div', { className: 'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0', style: { background: '#243186' } },
+                    e('div', { className: 'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-nw-blue' },
                       e(BookOpen, { size: 18, className: 'text-white' })
                     ),
                     e('div', { className: 'flex-1' },
-                      e('h4', { className: 'font-semibold text-base mb-1', style: { color: '#243186' } }, 
+                      e('h4', { className: 'font-semibold text-base mb-1 text-nw-blue' }, 
                         lang === 'de' ? 'Verhaltensanker als Orientierung' 
                         : lang === 'it' ? 'Ancoraggi comportamentali come riferimento'
                         : 'Behavioral Anchors as Reference'
@@ -27422,8 +27450,8 @@ const renderDashboard = () => {
                   )
                 ),
                 
-                e('h2', { className: 'text-lg font-semibold', style: { color: '#243186' } }, lang === 'de' ? 'Selbstreflexionsbogen' : lang === 'it' ? 'Modulo di autovalutazione' : 'Self-Reflection Form'),
-                e('p', { className: 'font-medium', style: { color: '#2F7A48' } }, t.headerSubtitle)
+                e('h2', { className: 'text-lg font-semibold text-nw-blue' }, lang === 'de' ? 'Selbstreflexionsbogen' : lang === 'it' ? 'Modulo di autovalutazione' : 'Self-Reflection Form'),
+                e('p', { className: 'font-medium text-ok' }, t.headerSubtitle)
               ),
               
               // Formular-Leiste: Abschnitte + Speichern/Senden immer erreichbar
@@ -28561,7 +28589,7 @@ const renderDashboard = () => {
                     // Links: Logo
                     React.createElement('div', null,
                       React.createElement('img', { src: NW_LOGO_SRC, alt: 'Niederwieser — Flexible Food Packaging', className: 'h-auto w-[160px]' }),
-                      React.createElement('p', { className: 'eyebrow', style: { color: '#2F7A48' } }, 
+                      React.createElement('p', { className: 'eyebrow text-ok' }, 
                         lang === 'de' ? 'Selbstreflexion' : lang === 'it' ? 'Autovalutazione' : 'Self-Reflection'
                       ),
                       // === NEU: Auto-Save Indikator ===
@@ -29744,7 +29772,7 @@ const renderDashboard = () => {
                 // Content
                 importStatus === 'success' 
                   ? React.createElement('div', { className: 'p-8 text-center' },
-                      React.createElement('div', { className: 'w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center', style: { backgroundColor: '#6EBD84' } },
+                      React.createElement('div', { className: 'w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center bg-nw-green' },
                         React.createElement(CheckCircle2, { size: 40, className: 'text-white' })
                       ),
                       React.createElement('h3', { className: 'text-xl font-semibold text-nw-blue mb-2' },

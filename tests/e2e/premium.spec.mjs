@@ -627,3 +627,28 @@ test.describe('Handy (390 px): Shell 2.0', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
   });
 });
+
+// n.Org 2.0 Reiter: ein gleitender Indikator unter dem aktiven Reiter (kein Rahmen je Reiter)
+test('HR-Dashboard: Reiter-Indikator sitzt unter dem aktiven Reiter und folgt dem Wechsel', async ({ page }) => {
+  await openApp(page);
+  await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByText('Team-Übersicht', { exact: true }).click();
+  await page.locator('input[type="email"]').fill(USERS.hr.email);
+  await page.locator('input[type="password"]').first().fill(USERS.hr.password);
+  await page.locator('form button[type="submit"]').click();
+  await expect(page.getByTestId('user-card')).toBeVisible();
+  await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByText('HR Dashboard', { exact: true }).click();
+  const list = page.getByRole('tablist', { name: 'HR Dashboard' });
+  const ind = list.getByTestId('tab-indicator');
+  const under = async (name) => {
+    const tab = list.getByRole('tab', { name });
+    await expect(tab).toHaveAttribute('aria-selected', 'true');
+    await expect.poll(async () => {
+      const [t, i] = [await tab.boundingBox(), await ind.boundingBox()];
+      return Math.abs(t.x - i.x) < 2 && Math.abs(t.width - i.width) < 2 && Math.abs(t.y + t.height - (i.y + i.height)) < 3;
+    }).toBe(true);
+  };
+  await under(/Übersicht/);
+  await list.getByRole('tab', { name: /Papierkorb/ }).click();
+  await page.mouse.move(5, 5); // weg vom Reiter: der Hover-Zoom (3 %) verfälscht sonst dessen Maße
+  await under(/Papierkorb/);
+});

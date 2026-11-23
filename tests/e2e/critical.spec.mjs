@@ -596,3 +596,11 @@ test('Offline-Hinweis: erscheint bei Verbindungsverlust und verschwindet danach 
   await expect(page.getByTestId('offline-banner')).toHaveCount(0);
   await expect(page.getByText('Verbindung wieder da')).toBeVisible();
 });
+
+test('Team-Übersicht: Mitarbeiter ohne E-Mail-Adresse sind gekennzeichnet', async ({ page }) => {
+  await setDoc('teamMembers/tm-fritz', { name: 'Fritz Ohnemail', position: 'Lager', department: '', email: '', userId: ids.uidA, ownerEmail: USERS.managerA.email, accessCode: 'CODE-tm-fritz', createdAt: '2025-02-01T00:00:00.000Z' });
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('5 Mitarbeiter')).toBeVisible();
+  await expect(memberRow(page, 'Fritz Ohnemail')).toContainText('Keine E-Mail');
+  await expect(memberRow(page, 'Clara Beispiel')).not.toContainText('Keine E-Mail');
+});

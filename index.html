@@ -15338,7 +15338,10 @@ Best regards`
                                   React.createElement('div', { className: 'min-w-0' },
                                     React.createElement('div', { className: 'truncate font-semibold text-ink' }, member.name),
                                     React.createElement('div', { className: 'truncate text-xs text-ink-60' }, member.position || '–'),
-                                    !isOwner && React.createElement(NwTag, { tone: 'brand', className: 'mt-1' }, T('Geteilt', 'Condiviso', 'Shared'))
+                                    !isOwner && React.createElement(NwTag, { tone: 'brand', className: 'mt-1' }, T('Geteilt', 'Condiviso', 'Shared')),
+                                    !String(member.email || '').trim() && React.createElement('span', {
+                                      className: 'mt-1 inline-flex', title: T('Ohne E-Mail-Adresse gehen „Link per E-Mail“ und das Teilen nicht.', 'Senza e-mail niente link via e-mail né condivisione.', 'Without an email address no link by email and no sharing.')
+                                    }, React.createElement(NwTag, { tone: 'warn' }, T('Keine E-Mail', 'Nessuna e-mail', 'No email')))
                                   )
                                 )
                               ),

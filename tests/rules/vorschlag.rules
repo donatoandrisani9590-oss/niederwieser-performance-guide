@@ -1,0 +1,116 @@
+rules_version = '2';
+// VORSCHLAG Stufe 1 (23.11.2026) – noch NICHT eingespielt.
+// Grundlage: die aktuell eingespielten Regeln (tests/rules/aktuell.rules). Alles, was heute funktioniert, funktioniert
+// weiter (alle E2E-Tests laufen unter diesen Regeln). Neu:
+//  1. HR-Admin-Liste enthält auch die HR-Adresse der App (HR_ADMIN_EMAILS in index.html).
+//  2. Gehaltsdaten nur noch für HR und eingeladene Personen (Eintrag in salaryReviewAccess), nicht mehr für jeden
+//     Angemeldeten oder anonyme Link-Nutzer.
+//     Zugriffsrechte (salaryReviewAccess) darf nur noch HR vergeben.
+//  3. Anonyme Nutzer (Mitarbeiter-Link) dürfen Unterlagen nicht mehr löschen und nur noch Selbstreflexionen schreiben.
+//  4. Freigaben für die neuen Funktionen: Protokoll (auditLog), Papierkorb (trash), HR-Benutzerverwaltung.
+//  5. Ein Nutzer kann seine eigene Sperre nicht selbst aufheben.
+// Bleibt für Stufe 2 (braucht Umbau der Abfragen, siehe Konzept Abschnitt 9): Lesen von teamMembers/teamAppraisals ist
+// weiter für alle Angemeldeten inkl. Mitarbeiter-Link offen.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    // Angemeldet mit eigenem Konto (nicht anonym über den Mitarbeiter-Link)
+    function isAccount() {
+      return request.auth != null && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+    function isUser(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    function isHRAdmin() {
+      return isAccount() &&
+             request.auth.token.email != null &&
+             request.auth.token.email.lower() in [
+               'd.andrisani@niederwiesergroup.com',
+               'donato.andrisani@niederwiesergroup.com',
+               'hr@niederwiesergroup.com'
+             ];
+    }
+    // Schlüssel wie in der App: E-Mail klein, alles außer a-z/0-9 durch _ ersetzt
+    function accessKey() {
+      return request.auth.token.email.lower().replace('[^a-z0-9]', '_');
+    }
+    function hasSalaryAccess() {
+      return isHRAdmin() || (isAccount() && request.auth.token.email != null &&
+        exists(/databases/$(database)/documents/salaryReviewAccess/$(accessKey())));
+      // (bewusst ohne Prüfung von accessSalary: die App lädt die Daten für jede eingeladene Person und filtert selbst;
+      //  strenger geht es erst, wenn die App das Laden davon abhängig macht)
+    }
+    function isSelfDoc(data) {
+      return data.get('type', '') in ['self', 'self_assessment', 'self-reflection', 'self_assessment_standalone', 'self_pdf'];
+    }
+
+    match /teamMembers/{memberId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() &&
+        (request.resource.data.userId == request.auth.uid || isHRAdmin());
+      allow delete: if isAuthenticated() &&
+        (resource.data.userId == request.auth.uid || isHRAdmin());
+    }
+
+    match /teamAppraisals/{appraisalId} {
+      allow read: if isAuthenticated();
+      // Konten wie bisher; Mitarbeiter-Link nur Selbstreflexionen anlegen/ändern, nie löschen
+      allow create: if isAccount() || (isAuthenticated() && isSelfDoc(request.resource.data));
+      allow update: if isAccount() || (isAuthenticated() && isSelfDoc(resource.data) && isSelfDoc(request.resource.data));
+      allow delete: if isAccount();
+    }
+
+    match /salaryReviewData/{docId} {
+      allow read, create, update, delete: if hasSalaryAccess();
+    }
+
+    match /salaryReviewAccess/{docId} {
+      allow read: if isAccount();
+      allow create, update, delete: if isHRAdmin();
+    }
+
+    match /salaryReviewHistory/{docId} {
+      allow read, create: if hasSalaryAccess();
+      allow update, delete: if false;
+    }
+
+    match /registeredUsers/{userId} {
+      allow read: if isAccount();
+      // Eigener Eintrag: anlegen und ändern, aber die Sperrfelder nicht anfassen
+      allow create: if isUser(userId) && request.resource.data.get('disabled', false) != true;
+      allow update: if (isUser(userId) &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['disabled', 'disabledAt', 'disabledBy', 'enabledAt', 'enabledBy']))
+        || (isHRAdmin() &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fullName', 'fullNameChangedAt', 'fullNameChangedBy', 'disabled', 'disabledAt', 'disabledBy', 'enabledAt', 'enabledBy']));
+      allow delete: if false;
+    }
+
+    // Protokoll: nur anhängen, nur im eigenen Namen; lesen nur HR; nie ändern oder löschen
+    match /auditLog/{entryId} {
+      allow create: if isAccount() && request.resource.data.byUid == request.auth.uid;
+      allow read: if isHRAdmin();
+      allow update, delete: if false;
+    }
+
+    // Papierkorb: ablegen durch die entfernende Person, lesen/wiederherstellen/endgültig löschen durch HR
+    match /trash/{trashId} {
+      allow create: if isAccount() && request.resource.data.deletedByUid == request.auth.uid;
+      allow update: if (isAccount() && resource.data.deletedByUid == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])) || isHRAdmin();
+      allow read, delete: if isHRAdmin();
+      match /items/{itemId} {
+        allow create: if isAccount() &&
+          get(/databases/$(database)/documents/trash/$(trashId)).data.deletedByUid == request.auth.uid;
+        allow read, delete: if isHRAdmin();
+        allow update: if false;
+      }
+    }
+
+    match /appraisals/{appraisalId} {
+      allow read, write: if isAccount();
+    }
+  }
+}

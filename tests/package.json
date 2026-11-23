@@ -7,7 +7,9 @@
     "vendor": "node vendor/build.mjs",
     "emulators": "firebase emulators:start --project demo-nw-test --config firebase.json --only auth,firestore",
     "test": "node vendor/build.mjs && firebase emulators:exec --project demo-nw-test --config firebase.json --only auth,firestore \"playwright test --trace off\"",
-    "protected": "node protected/fingerprint.mjs"
+    "protected": "node protected/fingerprint.mjs",
+    "rules:aktuell": "firebase emulators:exec --project demo-nw-test --config firebase.rules-aktuell.json --only auth,firestore \"node rules/pruefen.mjs aktuell\"",
+    "rules:vorschlag": "firebase emulators:exec --project demo-nw-test --config firebase.rules-vorschlag.json --only auth,firestore \"node rules/pruefen.mjs vorschlag && playwright test --trace off\""
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

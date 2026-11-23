@@ -194,8 +194,9 @@ dass Mitarbeiter nur ihre eigenen, geteilten Unterlagen sehen.
 
 ## 10. Offene Punkte
 
-1. **Aktuelle Firestore-Regeln:** Firebase-Konsole → Firestore → Regeln → Text kopieren und mir schicken.
-   Damit kann ich den Befund aus Abschnitt 9 bestätigen und den Wechsel absichern.
+1. ~~Aktuelle Firestore-Regeln~~ **Erhalten am 23.11.2026, Befund bestätigt** (sogar schärfer: auch Gehaltsdaten und
+   Gehalts-Zugriffsrechte sind für den Mitarbeiter-Link offen). Vorschlag Stufe 1, getestet und zum Einspielen bereit:
+   [FIRESTORE-REGELN.md](FIRESTORE-REGELN.md).
 2. **Betriebsrat und Datenschutz:** vor dem Einschalten von „Mein Bereich“ klären.
 
 ## Anhang: ursprüngliche Entscheidungsfragen

@@ -44,7 +44,8 @@ test('Erststart: vom ersten Aufruf bis zur ersten abgeschlossenen Beurteilung nu
   if (await confirm.isVisible().catch(() => false)) await confirm.click().catch(() => {});
   await expect.poll(async () => (await listDocs('teamAppraisals')).filter((d) => field(d, 'employeeName') === 'Mia Muster' && field(d, 'status') === 'completed').length, { timeout: 15000 }).toBe(1);
 
-  // 6) Dashboard bestätigt den Fortschritt und führt weiter
+  // 6) Dashboard bestätigt den Fortschritt und führt weiter (erst klicken, wenn die App nach dem Abschluss zurück ist)
+  await expect(page.getByRole('row').filter({ hasText: 'Mia Muster' })).toContainText('Abgeschlossen');
   await page.getByText('Dashboard', { exact: true }).first().click();
   await expect(page.getByText('Alle Beurteilungen abgeschlossen')).toBeVisible();
   // Der Schnellstart-Guide war dafür nie nötig

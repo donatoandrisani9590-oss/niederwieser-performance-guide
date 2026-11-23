@@ -1264,7 +1264,7 @@
                                     devLog('✅ displayName aus registeredUsers gesetzt:', doc.data().fullName);
                                 } else if (!userCredential.user.displayName) {
                                     // v92: Wenn auch in registeredUsers kein Name → Prompt anzeigen
-                                    const promptMsg = lang === 'de' ? 'Bitte geben Sie Ihren vollständigen Namen ein (Vor- und Nachname):' 
+                                    const promptMsg = lang === 'de' ? 'Bitte gib deinen vollständigen Namen ein (Vor- und Nachname):' 
                                                     : lang === 'it' ? 'Inserisci il tuo nome completo (nome e cognome):' 
                                                     : 'Please enter your full name (first and last name):';
                                     const enteredName = prompt(promptMsg);
@@ -8232,7 +8232,7 @@
                           ),
                           e('div', { className: 'min-w-0' },
                             e('p', { className: 'font-semibold text-ok text-sm truncate' },
-                              `✨ ${lang === 'de' ? 'Selbstreflexion von' : lang === 'it' ? 'Autovalutazione di' : 'Self-Reflection from'} ${linkedSelfAssessment.employeeName}`
+                              `✨ ${lang === 'de' ? 'Selbstreflexion von' : lang === 'it' ? 'Autovalutazione di' : 'Self-Reflection from'} ${linkedSelfAssessment.employeeName}${linkedSelfAssessment.status && linkedSelfAssessment.status !== 'completed' ? (lang === 'de' ? ' (Entwurf, nicht abgeschickt)' : lang === 'it' ? ' (bozza, non inviata)' : ' (draft, not submitted)') : ''}`
                             ),
                             e('p', { className: 'text-xs text-ok flex items-center gap-2 flex-wrap' },
                               e('span', null, 
@@ -15211,8 +15211,9 @@ Best regards`
                               : status.selfPdf
                               ? cell(React.createElement(NwChip, { tone: 'ok', icon: FileText }, T('Eingegangen (PDF)', 'Ricevuta (PDF)', 'Received (PDF)')))
                               : sd
-                              ? cell(React.createElement(NwChip, { tone: 'warn', icon: Edit3 }, T('In Arbeit beim Mitarbeiter', 'In corso dal collaboratore', 'In progress (employee)')),
-                                  selfLink && act(T('Erinnern', 'Ricorda', 'Remind'), () => sendEmail(member), Send))
+                              ? cell(React.createElement(NwChip, { tone: 'warn', icon: Edit3 }, T('Entwurf, nicht abgeschickt', 'Bozza, non inviata', 'Draft, not submitted') + ((sd.updatedAt || sd.createdAt) ? ' · ' + fmt(sd.updatedAt || sd.createdAt) : '')),
+                                  act(T('Ansehen', 'Visualizza', 'View'), () => openSelfAssessment(sd), Eye),
+                                  selfLink && linkBtn(T('Ans Abschicken erinnern', 'Ricorda di inviare', 'Remind to submit'), () => sendEmail(member)))
                               : cell(React.createElement(NwChip, { tone: 'neutral', icon: Clock }, T('Offen', 'Aperta', 'Open')),
                                   selfLink && act(T('Link senden', 'Invia link', 'Send link'), () => sendEmail(member), Send));
 
@@ -15505,7 +15506,7 @@ Best regards`
                             React.createElement('div', { className: `text-xs mb-3 space-y-1` },
                               // Digital vorhanden?
                               status.selfDigital && React.createElement('div', { className: 'text-ok' },
-                                `✓ ${lang === 'de' ? 'Digital eingegangen' : lang === 'it' ? 'Ricevuta digitale' : 'Digital received'}${status.selfDigital.createdAt || status.selfDigital.submittedAt ? ` ${new Date(status.selfDigital.createdAt || status.selfDigital.submittedAt).toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'it' ? 'it-IT' : 'en-GB')}` : ''}`
+                                `${status.selfDigital.status === 'completed' ? '✓ ' + (lang === 'de' ? 'Digital eingegangen' : lang === 'it' ? 'Ricevuta digitale' : 'Digital received') : (lang === 'de' ? '✎ Entwurf, nicht abgeschickt' : lang === 'it' ? '✎ Bozza, non inviata' : '✎ Draft, not submitted')}${status.selfDigital.createdAt || status.selfDigital.submittedAt ? ` ${new Date(status.selfDigital.createdAt || status.selfDigital.submittedAt).toLocaleDateString(lang === 'de' ? 'de-DE' : lang === 'it' ? 'it-IT' : 'en-GB')}` : ''}`
                               ),
                               // PDF vorhanden?
                               status.selfPdf && React.createElement('div', { className: 'text-warn' },
@@ -23423,6 +23424,9 @@ const renderDashboard = () => {
                 const items = [];
                 rows.forEach(({ m, st }) => {
                   const rv = st.reviewDigital;
+                  // Selbstreflexion nur als Entwurf gespeichert (Mitarbeiter hat nicht abgeschickt)
+                  if (st.selfDigital && st.selfDigital.status !== 'completed' && !st.selfPdf)
+                    items.push({ prio: 5, tone: 'warn', icon: Edit3, text: T(`Selbstreflexion ${m.name} liegt nur als Entwurf vor (nicht abgeschickt)`, `L'autovalutazione di ${m.name} è solo una bozza (non inviata)`, `${m.name}'s self-reflection is only a draft (not submitted)`), label: T('Ansehen', 'Visualizza', 'View'), go: goTeam });
                   if (st.scheduledAt && new Date(st.scheduledAt) < now && !st.meetingDone)
                     items.push({ prio: 0, tone: 'danger', icon: Calendar, text: T(`Gespräch mit ${m.name} überfällig (${fmt(st.scheduledAt)})`, `Colloquio con ${m.name} scaduto (${fmt(st.scheduledAt)})`, `Meeting with ${m.name} overdue (${fmt(st.scheduledAt)})`), label: T('Zum Team', 'Al team', 'To team'), go: goTeam });
                   if (rv && rv.status !== 'completed')
@@ -23439,7 +23443,8 @@ const renderDashboard = () => {
                   else if (st.goalsDigital && st.goalsDigital.status !== 'completed')
                     items.push({ prio: 4, tone: 'warn', icon: Target, text: T(`Zielvereinbarung ${nextYr} ${m.name} fortsetzen`, `Continua gli obiettivi ${nextYr} di ${m.name}`, `Continue ${m.name}'s ${nextYr} goals`), label: T('Fortsetzen', 'Continua', 'Continue'), go: () => startTeamGoalSetting(m.id, periodOf(st.goalsDigital, nextYr), st.goalsDigital) });
                 });
-                const selfMissing = n - selfIn;
+                const selfDrafts = rows.filter(r => r.st.selfDigital && r.st.selfDigital.status !== 'completed' && !r.st.selfPdf).length;
+                const selfMissing = n - selfIn - selfDrafts;
                 if (selfMissing > 0)
                   items.push({ prio: 5, tone: 'neutral', icon: Send, text: T(`${selfMissing} Selbstreflexion${selfMissing === 1 ? '' : 'en'} ${yr} noch nicht eingegangen`, `${selfMissing} autovalutazioni ${yr} non ancora ricevute`, `${selfMissing} self-reflection(s) ${yr} not yet received`), label: T('Links senden', 'Invia link', 'Send links'), go: goTeam });
                 items.sort((x, y) => x.prio - y.prio);
@@ -26641,6 +26646,21 @@ const renderDashboard = () => {
                                   : lang === 'it' ? 'Feedback costruttivo sulla collaborazione...' 
                                   : 'Constructive feedback on collaboration...'
                     })
+                  )
+                ),
+                
+                // === ABSCHLUSS: klarer Abschicken-Schritt am Ende des Bogens ===
+                // (vorher stand der Knopf nur oben – viele Bögen blieben als Entwurf liegen)
+                e('div', { className: 'no-print rounded-xl border border-nw-blue-25 bg-nw-blue-06 p-6 text-center', 'data-no-print': 'true' },
+                  e('h3', { className: 'text-lg font-semibold text-nw-blue' }, getText(lang, 'Fertig?', 'Finito?', 'Done?')),
+                  e('p', { className: 'mx-auto mt-1 max-w-xl text-sm text-ink-60' },
+                    getText(lang,
+                      'Bisher ist deine Selbstreflexion nur als Entwurf gespeichert. Erst mit dem Abschicken sieht deine Führungskraft sie als eingegangen.',
+                      'Finora la tua autovalutazione è salvata solo come bozza. Solo inviandola il tuo responsabile la vedrà come ricevuta.',
+                      'So far your self-reflection is only saved as a draft. Only after submitting will your manager see it as received.')),
+                  e('div', { className: 'mt-4 flex flex-wrap justify-center gap-2' },
+                    e(NwButton, { variant: 'secondary', icon: Save, onClick: () => handleSave('draft'), disabled: isSaving }, getText(lang, 'Als Entwurf speichern', 'Salva come bozza', 'Save as draft')),
+                    e(NwButton, { variant: 'primary', size: 'lg', icon: Send, onClick: handleCompleteAndSend, disabled: isSaving }, getText(lang, 'Selbstreflexion abschicken', 'Invia autovalutazione', 'Submit self-reflection'))
                   )
                 )
               )

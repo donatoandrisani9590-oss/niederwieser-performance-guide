@@ -14843,7 +14843,8 @@ Weight more important goals higher!`
                     const memberRef = db.collection('teamMembers').doc(appraisalWithType.employeeId);
                     await memberRef.update({ 
                       scheduledAt: scheduledDate.toISOString(),
-                      scheduledSource: 'form' // Markiere als "aus Formular übernommen"
+                      scheduledSource: 'form', // Markiere als "aus Formular übernommen"
+                      scheduledByName: getUserDisplayName(user) || ''
                     });
                     devLog('📅 Smart-Sync: Termin automatisch übernommen:', scheduledDate.toLocaleDateString('de-DE'));
                   }
@@ -15651,7 +15652,8 @@ Best regards`
               try {
                 await db.collection('teamMembers').doc(scheduleModalMember.id).update({ 
                   scheduledAt: parsed.toISOString(),
-                  scheduledSource: 'manual' // Markiere als "manuell gesetzt"
+                  scheduledSource: 'manual', // Markiere als "manuell gesetzt"
+                  scheduledByName: getUserDisplayName(user) || '' // Vermerk: wer den Termin eingetragen hat
                 });
                 
                 // SUCCESS FEEDBACK
@@ -15680,6 +15682,7 @@ Best regards`
                 await db.collection('teamMembers').doc(scheduleModalMember.id).update({ 
                   scheduledAt: null,
                   scheduledSource: null,
+                  scheduledByName: null,
                   meetingDone: null // Auch meetingDone zurücksetzen
                 });
                 setScheduleModalOpen(false);
@@ -15700,6 +15703,7 @@ Best regards`
               const atKey = kind === 'goal' ? 'goalMeetingDoneAt' : 'meetingDoneAt';
               const sub = kind === 'goal' ? 'goal' : 'review';
               const update = { [doneKey]: newValue, [atKey]: newValue ? now : null,
+                [doneKey + 'ByName']: newValue ? (getUserDisplayName(user) || '') : null, // Vermerk: wer markiert hat
                 [`meetingsByYear.${y}.${sub}Done`]: newValue, [`meetingsByYear.${y}.${sub}DoneAt`]: newValue ? now : null };
               const orig = teamMembers.find(m => m.id === member.id) || member;
               const prevYear = orig[doneKey] === true && orig[atKey] ? nwDateCycleYear(orig[atKey]) : '';
@@ -16034,14 +16038,20 @@ Best regards`
                                   selfLink && act(T('Link senden', 'Invia link', 'Send link'), () => sendEmail(member), Send));
 
                             // Beurteilung = Performancegespräch: Offen → Entwurf → Abgeschlossen (+ Gespräch)
+                            // Geteilte Mitarbeiter: beide Führungskräfte dürfen eintragen, der Vermerk nennt, wer es war
+                            const nwShared = (member.sharedWith || []).length > 0;
+                            const byNote = (name) => nwShared && name ? note(T(`eingetragen von ${name}`, `inserito da ${name}`, `entered by ${name}`)) : null;
                             const meetingLine = status.meetingDone
-                              ? note('' + T('Gespräch geführt', 'Colloquio svolto', 'Meeting held') + (status.meetingDoneAt ? ' · ' + fmt(status.meetingDoneAt) : ''), 'ok')
+                              ? React.createElement('span', { className: 'inline-flex flex-wrap items-center gap-x-2 gap-y-0.5' },
+                                  note('' + T('Gespräch geführt', 'Colloquio svolto', 'Meeting held') + (status.meetingDoneAt ? ' · ' + fmt(status.meetingDoneAt) : ''), 'ok'),
+                                  byNote(member.meetingDoneByName))
                               : React.createElement('span', { className: 'inline-flex flex-wrap items-center gap-x-2 gap-y-0.5' },
                                   scheduled
                                     ? (meetingToday
                                         ? note(T('Gespräch heute', 'Colloquio oggi', 'Meeting today'))
                                         : note((overdue ? T('Gespräch überfällig', 'Colloquio scaduto', 'Meeting overdue') : T('Gespräch am', 'Colloquio il', 'Meeting on')) + ' ' + fmt(status.scheduledAt), overdue ? 'danger' : null))
                                     : note(T('Kein Gesprächstermin', 'Nessun appuntamento', 'No meeting date')),
+                                  scheduled && byNote(member.scheduledByName),
                                   linkBtn(scheduled ? T('Ändern', 'Modifica', 'Change') : T('Termin planen', 'Pianifica', 'Schedule'), () => scheduleDate(member)),
                                   rv && rv.status === 'completed' && linkBtn(T('Als geführt markieren', 'Segna come svolto', 'Mark as held'), () => toggleMeetingDone({ ...member, meetingDone: false })));
                             const reviewCell = rv && rv.status === 'completed'

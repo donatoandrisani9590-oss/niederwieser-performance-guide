@@ -72,8 +72,8 @@ await db.collection('teamMembers').doc(member.id).update(nwMeetingUpdate(member,
 await db.collection('teamMembers').doc(member.id).update(nwMeetingUpdate(member, 'review', newValue));
 await db.collection('teamMembers').doc(member.id).update({ email, emailAddedAt: now, emailAddedBy: (user && user.email) || '' });
 await db.collection('teamMembers').doc(member.id).update({ sharedWith: newShared });
-await db.collection('teamMembers').doc(scheduleModalMember.id).update({ scheduledAt: null, scheduledSource: null, meetingDone: null // Auch meetingDone zurücksetzen });
-await db.collection('teamMembers').doc(scheduleModalMember.id).update({ scheduledAt: parsed.toISOString(), scheduledSource: 'manual' // Markiere als "manuell gesetzt" });
+await db.collection('teamMembers').doc(scheduleModalMember.id).update({ scheduledAt: null, scheduledSource: null, scheduledByName: null, meetingDone: null // Auch meetingDone zurücksetzen });
+await db.collection('teamMembers').doc(scheduleModalMember.id).update({ scheduledAt: parsed.toISOString(), scheduledSource: 'manual', // Markiere als "manuell gesetzt" scheduledByName: getUserDisplayName(user) || '' // Vermerk: wer den Termin eingetragen hat });
 await db.collection('trash').doc(t.docId).delete();
 await db.collection('trash').doc(t.docId).update({ restoredAt: now, restoredBy: (user && user.email) || '' });
 await storage.ref(docData.storagePath).delete();

@@ -49,8 +49,29 @@ service cloud.firestore {
 
     match /teamMembers/{memberId} {
       allow read: if isAuthenticated();
-      allow create, update: if isAuthenticated() &&
+      // Geteilte Mitarbeiter (sharedWith): die eingeladene Führungskraft darf nur Termin und Gesprächs-Haken
+      // eintragen, samt Vermerk, wer es war. Stammdaten, Besitzer und die Teilen-Liste bleiben dem Besitzer und HR.
+      function sharedManagerSetsMeeting() {
+        return isAccount() && request.auth.token.email != null &&
+               resource.data.sharedWith is list &&
+               request.auth.token.email.lower() in resource.data.sharedWith &&
+               request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                 'scheduledAt', 'scheduledSource', 'scheduledByName',
+                 'meetingDone', 'meetingDoneAt', 'meetingDoneByName',
+                 'goalMeetingDone', 'goalMeetingDoneAt', 'goalMeetingDoneByName',
+                 'meetingsByYear']);
+      }
+      allow create: if isAuthenticated() &&
         (request.resource.data.userId == request.auth.uid || isHRAdmin());
+      // Besitzer bleibt Besitzer: Ändern darf, wem der Mitarbeiter schon gehört (oder ein Konto bei einem Altbestand
+      // ohne Besitzer). Vorher reichte es, sich im neuen Stand selbst als Besitzer einzutragen: Damit konnte jedes
+      // angemeldete Konto, auch eine anonyme Sitzung über den Mitarbeiter-Link, fremde Mitarbeiter übernehmen.
+      function ownsOrAdoptsOrphan() {
+        return (('userId' in resource.data) && resource.data.userId == request.auth.uid) ||
+               (isAccount() && (!('userId' in resource.data) || resource.data.userId == null));
+      }
+      allow update: if isAuthenticated() &&
+        ((ownsOrAdoptsOrphan() && request.resource.data.userId == request.auth.uid) || isHRAdmin() || sharedManagerSetsMeeting());
       allow delete: if isAuthenticated() &&
         (resource.data.userId == request.auth.uid || isHRAdmin());
     }

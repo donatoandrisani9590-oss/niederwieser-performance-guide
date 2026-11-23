@@ -723,3 +723,24 @@ test('Team-Übersicht: ein Entwurf mit Vorgabewert verändert den Ø GPS-Score n
   await expect(memberRow(page, 'Emil Probe')).toContainText('Entwurf', { timeout: 15000 });
   await expect(tile).toHaveText(before);
 });
+
+// Geteilte Mitarbeiter (Freigabe 23.11.2026): beide Führungskräfte dürfen einen Termin eintragen, ein Vermerk nennt, wer es war.
+// Frieda gehört Bernd und ist mit Anna geteilt. Vorher schlug der Eintrag der eingeladenen Führungskraft an den Regeln fehl.
+test('Geteilter Mitarbeiter: eingeladene Führungskraft trägt einen Termin ein, Vermerk nennt ihren Namen', async ({ page, consoleErrors }) => {
+  await loginTeam(page, USERS.managerA);
+  const row = memberRow(page, 'Frieda Geteilt');
+  await row.getByRole('button', { name: 'Termin planen' }).click();
+  const when = new Date(Date.now() + 5 * 864e5); when.setHours(10, 0, 0, 0);
+  const local = new Date(when.getTime() - when.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  await page.locator('input[type="datetime-local"]').fill(local);
+  await page.getByRole('button', { name: 'Speichern', exact: true }).click();
+  await expect(page.getByText('Termin für Frieda Geteilt gespeichert')).toBeVisible();
+  await expect(row).toContainText('eingetragen von Anna Testleiterin');
+  const doc = await getDoc('teamMembers/tm-frieda');
+  expect(field(doc, 'scheduledByName')).toBe('Anna Testleiterin');
+  expect(new Date(field(doc, 'scheduledAt')).getTime()).toBe(when.getTime());
+  expect(field(doc, 'name')).toBe('Frieda Geteilt'); // Stammdaten unberührt
+  // Bei nicht geteilten Mitarbeitern erscheint kein Vermerk
+  await expect(memberRow(page, 'Clara Beispiel')).not.toContainText('eingetragen von');
+  expect(consoleErrors).toEqual([]);
+});

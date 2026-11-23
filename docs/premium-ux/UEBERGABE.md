@@ -383,6 +383,28 @@ Unverändert: die „Abschlussrate“ (abgeschlossene / alle Unterlagen), die GP
 Daten. Geändert ist nur, welche Unterlagen in die Anzeige eingehen. Der Schutzbereich-Fingerabdruck ist unverändert.
 Zwei neue Tests rechnen die Werte aus den Testdaten nach (94 Tests).
 
+### 17. Geteilte Mitarbeiter: beide tragen Termine ein, mit Vermerk (S7; freigegeben am 23.11.2026)
+
+- Die eingeladene Führungskraft kann bei einem geteilten Mitarbeiter einen Termin planen und das Gespräch als
+  geführt markieren. Vorher schlug das an den Regeln fehl.
+- Bei geteilten Mitarbeitern steht neben Termin und Haken „eingetragen von <Name>“.
+- Neue Felder am Mitarbeiter: `scheduledByName`, `meetingDoneByName`, `goalMeetingDoneByName`. Bestehende Daten laden
+  unverändert, ältere Einträge haben keinen Vermerk.
+- **Schutzbereich-Referenz aktualisiert** (mit ausdrücklicher Freigabe): genau zwei Speicher-Anweisungen, Termin
+  speichern und Termin löschen, schreiben das Namensfeld mit. Sonst ist die Referenz unverändert.
+- Regeln (`tests/rules/vorschlag.rules`, nichts davon ist live): Die eingeladene Führungskraft darf nur Termin- und
+  Gesprächsfelder schreiben, keine Stammdaten, nicht den Besitzer, nicht die Teilen-Liste.
+
+**Dabei gefundene Lücke in den Regeln.** Ändern war erlaubt, wenn im neuen Stand die eigene Kennung als Besitzer
+stand. Wem der Mitarbeiter vorher gehörte, wurde nicht geprüft: Jedes angemeldete Konto konnte fremde Mitarbeiter
+übernehmen und danach löschen. Im Vorschlag ist das geschlossen (Ändern nur durch den bisherigen Besitzer, HR oder die
+eingeladene Führungskraft für Termin und Haken). In `tests/rules/aktuell.rules` besteht die Lücke für angemeldete
+Konten weiter; ob die Live-App genau diese Regeln nutzt, lässt sich aus dem Repo nicht prüfen. **Die Regeln
+einzuspielen ist Sache des Auftraggebers.**
+
+Acht neue Regel-Prüfungen in `tests/rules/pruefen.mjs` und ein Ablauf-Test (95 Tests).
+Offen: Die eingeladene Führungskraft kann sich nicht selbst aus der Teilen-Liste austragen.
+
 ## Prüfungen
 
 ```bash
@@ -397,8 +419,8 @@ cd tests && npm test
 cd tests && npm run rules:vorschlag
 ```
 
-Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 94 / 94 grün,
-`npm run rules:vorschlag` 94 / 94 grün.
+Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 95 / 95 grün,
+`npm run rules:vorschlag` 95 / 95 grün.
 
 Die bestehenden Tests mussten für den Dialog nicht umgeschrieben werden: `tests/e2e/fixtures.mjs` meldet jeden
 App-Dialog über dieselben `page.on('dialog')`-Listener wie ein Browser-Fenster.

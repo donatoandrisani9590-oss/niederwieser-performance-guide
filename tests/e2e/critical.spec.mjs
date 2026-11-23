@@ -627,3 +627,25 @@ test('Mitarbeiter-Link: vor dem Abschicken Übersicht der leeren Felder, Abbrech
   await submit.click();
   await expect.poll(completedSelf, { timeout: 15000 }).toBe(before + 1);
 });
+
+test('Backup wiederherstellen: Vorschau zeigt neu, ersetzt und „Bestand neuer“, ohne etwas zu schreiben', async ({ page }) => {
+  const before = JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields));
+  const backup = { exportedAt: '2025-01-01T00:00:00.000Z', data: { teamMembers: [], salaryReviewData: [], salaryReviewAccess: [], teamAppraisals: [
+    { id: 'ap-clara-review', type: 'review', employeeName: 'Clara Beispiel', updatedAt: '2000-01-01T00:00:00.000Z' },
+    { id: 'ap-emil-goals', type: 'goals', employeeName: 'Emil Probe', updatedAt: '2999-01-01T00:00:00.000Z' },
+    { id: 'ap-gibt-es-nicht', type: 'review', employeeName: 'Nur im Backup', updatedAt: '2025-01-01T00:00:00.000Z' },
+  ] } };
+  await gotoTeamAndLogin(page, USERS.hr);
+  await page.getByText('HR Dashboard', { exact: true }).first().click();
+  await page.getByRole('tab', { name: 'Backup & Restore' }).click();
+  await page.locator('input[type="file"][accept=".json"]').setInputFiles({ name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(backup)) });
+  const cmp = page.getByTestId('restore-compare');
+  await expect(cmp).toContainText('1 neu');
+  await expect(cmp).toContainText('1 werden durch den Stand im Backup ersetzt');
+  await expect(cmp).toContainText('1 sind aktuell NEUER als im Backup');
+  const item = (name) => page.locator('div.px-4.py-2.border-b').filter({ hasText: name });
+  await expect(item('Clara Beispiel')).toContainText('Bestand neuer');
+  await expect(item('Nur im Backup')).toContainText('Neu');
+  await expect(item('Emil Probe')).toContainText('Ersetzt');
+  expect(JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields))).toBe(before);
+});

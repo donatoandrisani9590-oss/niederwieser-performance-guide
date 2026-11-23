@@ -17377,6 +17377,26 @@ Best regards`
                     )
                   ),
                   
+                  // Vergleich mit dem aktuellen Bestand (nur Anzeige): was kommt neu dazu, was wird ersetzt,
+                  // wo ist der Bestand neuer als das Backup (dort würde das Wiederherstellen neuere Arbeit überschreiben)
+                  (() => {
+                    const current = new Map(allCompanyAppraisals.map(a => [a.id, a]));
+                    const ts = (a) => { const v = a && (a.updatedAt || a.createdAt); const d = v && v.toDate ? v.toDate() : new Date(v || 0); return isNaN(d) ? 0 : d.getTime(); };
+                    const list = restoreData.data?.teamAppraisals || [];
+                    const neu = list.filter(a => !current.has(a.id)).length;
+                    const newer = list.filter(a => current.has(a.id) && ts(current.get(a.id)) > ts(a)).length;
+                    const replaced = list.length - neu - newer;
+                    return React.createElement('div', { 'data-testid': 'restore-compare', className: 'mb-6 rounded-lg border border-line p-4 text-sm' },
+                      React.createElement('div', { className: 'mb-2 font-semibold text-nw-blue' }, 'Vergleich mit den aktuellen Daten'),
+                      React.createElement('ul', { className: 'space-y-1' },
+                        React.createElement('li', null, React.createElement('strong', null, neu), ' neu (gibt es aktuell nicht)'),
+                        React.createElement('li', null, React.createElement('strong', null, replaced), ' werden durch den Stand im Backup ersetzt (Backup gleich alt oder neuer)'),
+                        React.createElement('li', { className: newer > 0 ? 'text-danger font-medium' : '' }, React.createElement('strong', null, newer), ' sind aktuell NEUER als im Backup – „ALLE wiederherstellen“ würde diese neueren Änderungen überschreiben')
+                      ),
+                      newer > 0 && React.createElement('p', { className: 'mt-2 text-ink-60' }, 'Tipp: Stelle besser einzeln wieder her, was wirklich fehlt (Knopf „Wiederherstellen“ je Zeile, Hinweis „Bestand neuer“ beachten).')
+                    );
+                  })(),
+
                   // Appraisals List
                   React.createElement('div', { className: 'border rounded-lg overflow-hidden mb-4' },
                     React.createElement('div', { className: 'bg-nw-grey-40 px-4 py-2 font-semibold text-sm' }, 
@@ -17391,7 +17411,14 @@ Best regards`
                           React.createElement('div', null,
                             React.createElement('span', { className: 'font-medium' }, a.employeeName || a.formData?.employee || 'Unbekannt'),
                             React.createElement('span', { className: 'text-ink-60 ml-2' }, '(' + (a.type || 'review') + ')'),
-                            a.gpsScore > 0 && React.createElement('span', { className: 'ml-2 px-2 py-0.5 bg-nw-green-15 text-ok rounded-lg text-xs' }, 'GPS: ' + a.gpsScore.toFixed(2))
+                            a.gpsScore > 0 && React.createElement('span', { className: 'ml-2 px-2 py-0.5 bg-nw-green-15 text-ok rounded-lg text-xs' }, 'GPS: ' + a.gpsScore.toFixed(2)),
+                            (() => {
+                              const cur = allCompanyAppraisals.find(x => x.id === a.id);
+                              const ts = (v0) => { const v = v0 && (v0.updatedAt || v0.createdAt); const d = v && v.toDate ? v.toDate() : new Date(v || 0); return isNaN(d) ? 0 : d.getTime(); };
+                              if (!cur) return React.createElement(NwTag, { tone: 'brand', className: 'ml-2' }, 'Neu');
+                              if (ts(cur) > ts(a)) return React.createElement(NwTag, { tone: 'danger', className: 'ml-2' }, 'Bestand neuer');
+                              return React.createElement(NwTag, { tone: 'neutral', className: 'ml-2' }, 'Ersetzt');
+                            })()
                           ),
                           React.createElement('button', {
                             onClick: async () => {

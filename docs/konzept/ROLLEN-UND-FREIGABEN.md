@@ -256,7 +256,7 @@ Geschäftslogik oder Datenmodell, das braucht deine Freigabe.
 | H1 | Keine Benutzerverwaltung | **Teilweise erledigt (Schalter `userAdmin`, aus):** Reiter „Benutzer“ mit Suche und Filter (mit/ohne Team, gesperrt), Name ändern, Passwort-Reset-Mail, Sperren/Entsperren (Abmeldung, HR-Admins und das eigene Konto ausgenommen), Export je Person, jede Aktion im `auditLog`. Offen: Rolle vergeben und Mitarbeiter umhängen (erst mit den Regeln aus Phase 0 sicher), Anmeldekonto löschen (Blaze) | P1 | erteilt |
 | H2 | HR-Dashboard mischt alle Jahre | **Erledigt:** Auswahl „Beurteilungsjahr“ mit Anzahl je Jahr; wirkt auf Kennzahlen, Liste und Export. Standard „Alle Jahre“, damit ein Export nie unbemerkt Jahre auslässt | P1 | erledigt |
 | H3 | Kein Protokoll, wer was geändert, gelöscht oder geteilt hat | Protokoll-Ansicht (Teilen wird seit Phase 1 schon protokolliert); Löschen und Wiederherstellen ergänzen | P2 | erteilt |
-| H4 | Wiederherstellen aus Backup überschreibt ohne Vorschau der Unterschiede | Vorschau „wird ersetzt / neu“ und Bestätigung mit Anzahl | P2 | frei |
+| H4 | Wiederherstellen aus Backup überschreibt ohne Vorschau der Unterschiede | **Erledigt:** Vergleich mit dem Bestand (neu / ersetzt / „Bestand neuer“) mit Warnung und Kennzeichnung je Zeile. Die Wiederherstellung selbst ist unverändert | P2 | erledigt |
 | H5 | Sicherheitsregeln unbekannt, vermutlich zu offen (Abschnitt 9) | Phase 0 | P1 | erteilt |
 
 ### Empfohlene Reihenfolge

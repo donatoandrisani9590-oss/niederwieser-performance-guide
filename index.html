@@ -2054,6 +2054,12 @@
         // etwa ein Kommentar der Selbstreflexion, beim Erzeugen eines PDFs als HTML ausgeführt (Audit 23.11.2026, S2).
         const NW_ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
         const nwEsc = (v) => v == null ? '' : String(v).replace(/[&<>"']/g, (c) => NW_ESC_MAP[c]);
+        // Schlüssel des offenen Bogens: wer (Mitarbeiter), was (Art, Dokument), welches Jahr. Vorher war es der gesamte
+        // gemerkte Stand als Text. Seit „Entwurf speichern“ im Bogen bleibt, ändert sich dieser Stand beim Speichern;
+        // der Bogen würde dann neu aufgebaut und seither Getipptes ginge verloren. Ein anderer Bogen ergibt weiterhin
+        // einen anderen Schlüssel.
+        const nwCtxKey = (c) => !c || typeof c !== 'object' ? 'default'
+          : [c.type || '', c.appraisalId || (c.existingData && c.existingData.id) || '', (c.employee && c.employee.id) || '', c.period || ''].join('|');
         const getUserDisplayName = (user) => {
           if (!user) return '';
           // 1. Firebase displayName (gesetzt via updateProfile)
@@ -7014,6 +7020,7 @@
                 }
               } catch (err) {
                 console.error('❌ Fehler beim Laden der Selbstreflexion:', err);
+                showToast(lang === 'de' ? 'Die Selbstreflexion konnte nicht geladen werden.' : lang === 'it' ? 'Impossibile caricare l\'autovalutazione.' : 'The self-reflection could not be loaded.', 'warning');
               }
               setIsRefreshingSelf(false);
             };
@@ -15715,6 +15722,7 @@ Best regards`
                 setScheduleModalMember(null);
               } catch (e) { 
                 console.error(e); 
+                showToast(getText(lang, 'Termin konnte nicht gelöscht werden. Bitte erneut versuchen.', 'Impossibile eliminare l\'appuntamento. Riprova.', 'Could not delete the appointment. Please try again.'), 'error');
               }
             };
             
@@ -26070,6 +26078,7 @@ const renderDashboard = () => {
                     }
                   } catch (err) {
                     console.error('Fehler beim Laden der Gast-Selbstreflexion:', err);
+                    showToast(lang === 'de' ? 'Dein gespeicherter Entwurf konnte nicht geladen werden. Lade die Seite neu, bevor du etwas eingibst.' : lang === 'it' ? 'Impossibile caricare la bozza salvata. Ricarica la pagina prima di inserire dati.' : 'Your saved draft could not be loaded. Reload the page before entering anything.', 'error');
                   }
                   setLoadingFirestore(false);
                   return;
@@ -26353,6 +26362,8 @@ const renderDashboard = () => {
                   }
                 } catch (err) {
                   console.error('❌ Auto-Save Fehler:', err);
+                  // Nicht still scheitern: Wer weitertippt, soll wissen, dass der letzte Stand nicht gesichert ist
+                  showToast(lang === 'de' ? 'Automatisches Speichern fehlgeschlagen. Prüfe deine Verbindung und speichere den Entwurf von Hand.' : lang === 'it' ? 'Salvataggio automatico non riuscito. Controlla la connessione e salva la bozza manualmente.' : 'Autosave failed. Check your connection and save the draft manually.', 'error');
                 }
               }, 60000); // Alle 60 Sekunden
               
@@ -30219,10 +30230,10 @@ const renderDashboard = () => {
                 activeView === 'detail' && renderDetailView(),
                 activeView === 'gpsexplainer' && renderGPSExplainer(),
                 activeView === 'mySelfReflection' && React.createElement(MySelfReflectionComponent, { lang: lang, user: user }),
-                activeView === 'zielvereinbarung' && React.createElement(Zielvereinbarung, { key: JSON.stringify(safeLocalStorage.getItem('nw_current_employee', 'default')), lang: lang, onSaveTeam: saveTeamAppraisal, onCancel: () => setActiveView(isHRAdmin ? 'hrdashboard' : 'teamoverview') }),
+                activeView === 'zielvereinbarung' && React.createElement(Zielvereinbarung, { key: nwCtxKey(safeLocalStorage.getItem('nw_current_employee', 'default')), lang: lang, onSaveTeam: saveTeamAppraisal, onCancel: () => setActiveView(isHRAdmin ? 'hrdashboard' : 'teamoverview') }),
                 activeView === 'teamoverview' && renderTeamOverview(),
                 activeView === 'viewSelfAssessment' && renderViewSelfAssessment(),
-                activeView === 'formular' && React.createElement(AppraisalForm, { key: JSON.stringify(safeLocalStorage.getItem('nw_current_employee', 'default')), lang: lang, onSaveTeam: saveTeamAppraisal, onCancel: () => { safeLocalStorage.removeItem('nw_hr_edit_appraisal_id'); setActiveView(isHRAdmin ? 'hrdashboard' : 'teamoverview'); }, db: db, setActiveView: setActiveView }),
+                activeView === 'formular' && React.createElement(AppraisalForm, { key: nwCtxKey(safeLocalStorage.getItem('nw_current_employee', 'default')), lang: lang, onSaveTeam: saveTeamAppraisal, onCancel: () => { safeLocalStorage.removeItem('nw_hr_edit_appraisal_id'); setActiveView(isHRAdmin ? 'hrdashboard' : 'teamoverview'); }, db: db, setActiveView: setActiveView }),
                 activeView === 'teamcalibration' && renderTeamCalibration(),
                 activeView === 'hrdashboard' && isHRAdmin && renderHRDashboard(),
                 activeView === 'salaryreview' && (isHRAdmin || salaryReviewUserRole?.accessSalary) && renderSalaryReviewModule(),

@@ -779,3 +779,57 @@ test('Beurteilung: „Entwurf speichern“ bleibt im Bogen, zweites Speichern ü
   // Abschließen führt weiterhin zurück
   expect(consoleErrors).toEqual([]);
 });
+
+// Absicherung zu „Entwurf speichern bleibt im Bogen“: Neuladen mitten in der Arbeit und Versionshistorie über
+// mehrere Zwischenspeicherungen. Beides war nach der Umstellung noch nicht durch einen Test belegt.
+test('Beurteilung: nach Zwischenspeichern und Neuladen ist der Stand da, jede geänderte Fassung landet in der Versionshistorie', async ({ page, consoleErrors }) => {
+  await loginTeam(page, USERS.managerA);
+  await memberRow(page, 'Emil Probe').getByRole('button', { name: 'Starten' }).click();
+  const save = page.getByRole('button', { name: 'Entwurf speichern' }).first();
+  const rating = page.getByRole('combobox', { name: 'Rating – Fachkompetenz & Anwendung' });
+  const doc = async () => (await listDocs('teamAppraisals')).find((d) => field(d, 'employeeId') === 'tm-emil' && field(d, 'type') === 'review');
+  const versions = async () => { const d = await doc(); const v = d && d.fields.versionHistory; return v && v.arrayValue && v.arrayValue.values ? v.arrayValue.values.length : 0; };
+  const saved = async () => { const before = field(await doc() || {}, 'updatedAt'); await page.waitForTimeout(1100); await save.click(); await expect.poll(async () => field(await doc() || {}, 'updatedAt') !== before, { timeout: 15000 }).toBe(true); await expect(save).toBeEnabled(); };
+
+  await rating.selectOption('4');
+  await page.locator('textarea').first().fill('Erste Fassung');
+  await saved();                       // 1. Speichern: noch keine Vorfassung
+  expect(await versions()).toBe(0);
+  await rating.selectOption('5');
+  await saved();                       // 2. Speichern: die erste Fassung wird aufgehoben
+  expect(await versions()).toBe(1);
+  await rating.selectOption('2');
+  await saved();                       // 3. Speichern: die zweite Fassung kommt dazu, keine geht verloren
+  expect(await versions()).toBe(2);
+  const created = field(await doc(), 'createdAt');
+
+  // Nach dem Speichern weitergetippter Text bleibt stehen, auch wenn die App neu zeichnet (fremde Änderung an einem
+  // anderen Mitarbeiter). Vorher wurde der Bogen dabei neu aufgebaut, weil sein Schlüssel der gemerkte Stand war.
+  const ta = page.locator('textarea').first();
+  await ta.fill('Nach dem Speichern getippt');
+  await ta.evaluate((el) => { el.__marke = 'bleibt'; });
+  await setDoc('teamMembers/tm-fremd', { name: 'Neu Dazu', position: 'Lager', department: '', email: '', userId: (await getDoc('teamMembers/tm-emil')).fields.userId.stringValue, accessCode: 'CODE-tm-fremd', createdAt: new Date().toISOString() });
+  await page.waitForTimeout(1500);
+  expect(await ta.evaluate((el) => el.__marke)).toBe('bleibt');
+  await expect(ta).toHaveValue('Nach dem Speichern getippt');
+  await ta.fill('Erste Fassung');
+  await saved();
+  expect(await versions()).toBe(3);  // 4. Speichern: die dritte Fassung kommt dazu
+
+  // Neuladen mitten in der Arbeit, dann den Entwurf wieder öffnen
+  await page.reload();
+  await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByText('Team-Übersicht', { exact: true }).click();
+  await memberRow(page, 'Emil Probe').getByRole('button', { name: 'Fortsetzen' }).click();
+  await expect(page.locator('textarea').first()).toHaveValue('Erste Fassung');
+  await expect(page.getByRole('combobox', { name: 'Rating – Fachkompetenz & Anwendung' })).toHaveValue('2');
+  // Weiter speichern nach dem Neuladen: derselbe Entwurf, Historie wächst weiter, Anlagedatum bleibt
+  await page.getByRole('combobox', { name: 'Rating – Fachkompetenz & Anwendung' }).selectOption('3');
+  const before = field(await doc(), 'updatedAt');
+  await page.waitForTimeout(1100);
+  await page.getByRole('button', { name: 'Entwurf speichern' }).first().click();
+  await expect.poll(async () => field(await doc(), 'updatedAt') !== before, { timeout: 15000 }).toBe(true);
+  expect(await versions()).toBe(4);
+  expect(field(await doc(), 'createdAt')).toBe(created);
+  expect((await listDocs('teamAppraisals')).filter((d) => field(d, 'employeeId') === 'tm-emil' && field(d, 'type') === 'review').length).toBe(1);
+  expect(consoleErrors).toEqual([]);
+});

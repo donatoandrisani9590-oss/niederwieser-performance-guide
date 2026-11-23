@@ -36,6 +36,9 @@ test('Erststart: vom ersten Aufruf bis zur ersten abgeschlossenen Beurteilung nu
 
   // 5) Die Status-Matrix zeigt die nächste Aktion; Beurteilung starten und abschließen
   await page.getByRole('row').filter({ hasText: 'Mia Muster' }).getByRole('button', { name: 'Starten', exact: true }).click();
+  // Abschluss-Prüfung fragt mit den offenen Punkten nach: bestätigen
+  page.removeAllListeners('dialog');
+  page.on('dialog', (d) => d.accept().catch(() => {}));
   await page.getByRole('button', { name: /Abschließen/ }).first().click();
   const confirm = page.getByRole('button', { name: /Ja|Bestätigen|Abschließen/ }).last();
   if (await confirm.isVisible().catch(() => false)) await confirm.click().catch(() => {});

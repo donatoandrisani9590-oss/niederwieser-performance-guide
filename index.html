@@ -1018,6 +1018,36 @@
         const NW_SHOW_9BOX = false; // Kalibrierung: GPS-Verteilung (9-Box Grid) – ausgeblendet, siehe renderTeamCalibration
         // Wählbare Beurteilungsjahre: laufendes Jahr plus alle Jahre mit Unterlagen
         // (Zielvereinbarung für Y+1 gehört zum Gespräch im Jahr Y)
+        // Abschluss-Prüfung (freigegeben 23.11.2026): vor „Abschließen“ Lücken nennen. Bei Zielgewichten ungleich
+        // 100 % ist Abschließen gesperrt, als Entwurf speichern bleibt immer möglich. Gibt true zurück, wenn
+        // abgeschlossen werden darf. kind: 'review' | 'goals'.
+        const nwConfirmCompletion = ({ lang, kind, goals, devItems }) => {
+          const L = (de, it, en) => getText(lang, de, it, en);
+          const named = (goals || []).filter(g => String(g.name || '').trim());
+          const weighted = (goals || []).filter(g => (parseFloat(g.weight) || 0) > 0);
+          const total = weighted.reduce((sum, g) => sum + (parseFloat(g.weight) || 0), 0);
+          if (named.length > 0 && Math.abs(total - 100) > 0.5) {
+            alert(L(`Abschließen noch nicht möglich: Die Zielgewichte ergeben ${total} % statt 100 %.\n\nBitte die Gewichte anpassen. Als Entwurf speichern geht jederzeit.`,
+              `Impossibile completare: i pesi degli obiettivi sommano ${total} % invece di 100 %.\n\nAdatta i pesi. Puoi sempre salvare come bozza.`,
+              `Cannot complete yet: goal weights add up to ${total} % instead of 100 %.\n\nPlease adjust the weights. Saving as draft is always possible.`));
+            return false;
+          }
+          const gaps = [];
+          if (named.length === 0) gaps.push(L('Keine Ziele eingetragen', 'Nessun obiettivo inserito', 'No goals entered'));
+          const unnamedWeighted = weighted.filter(g => !String(g.name || '').trim()).length;
+          if (named.length > 0 && unnamedWeighted > 0) gaps.push(L(`${unnamedWeighted} Ziel(e) mit Gewicht, aber ohne Bezeichnung`, `${unnamedWeighted} obiettivo/i con peso ma senza nome`, `${unnamedWeighted} goal(s) with weight but no name`));
+          if (kind === 'review') {
+            const noAch = named.filter(g => !(parseFloat(g.achievement) > 0)).length;
+            if (noAch > 0) gaps.push(L(`${noAch} von ${named.length} Zielen ohne Zielerreichung`, `${noAch} di ${named.length} obiettivi senza raggiungimento`, `${noAch} of ${named.length} goals without achievement`));
+          }
+          if (Array.isArray(devItems) && !devItems.some(d => String(d.measure || d.name || '').trim())) gaps.push(L('Keine Entwicklungsmaßnahme', 'Nessuna misura di sviluppo', 'No development measure'));
+          const label = kind === 'goals' ? L('Zielvereinbarung', 'Accordo obiettivi', 'Goal agreement') : L('Beurteilung', 'Valutazione', 'Review');
+          return confirm(gaps.length
+            ? L(`${label} abschließen?\n\nNoch offen:\n• ${gaps.join('\n• ')}\n\nOK = trotzdem abschließen · Abbrechen = weiter bearbeiten`,
+                `Completare ${label}?\n\nAncora aperto:\n• ${gaps.join('\n• ')}\n\nOK = completa comunque · Annulla = continua`,
+                `Complete ${label}?\n\nStill open:\n• ${gaps.join('\n• ')}\n\nOK = complete anyway · Cancel = keep editing`)
+            : L(`${label} jetzt abschließen?`, `Completare ora ${label}?`, `Complete ${label} now?`));
+        };
         // Beurteilungsjahr, zu dem ein Dokument gehört (Zielvereinbarung Y+1 wird im Jahr Y vereinbart)
         const nwDocCycle = (ap) => nwIsGoalDoc(ap) ? String(Number(nwDocYear(ap)) - 1) : nwCycleYear(ap);
         const nwBeurteilungsjahre = (docs) => {
@@ -5723,7 +5753,7 @@
                             className: nwBtnClass('secondary', 'lg') + ' w-full'
                           }, isSaving ? '⏳ ...' : '💾 ' + (lang === 'de' ? 'Als Entwurf' : lang === 'it' ? 'Bozza' : 'Save Draft')),
                           e('button', {
-                            onClick: () => handleSaveTeamAppraisal('completed'),
+                            onClick: () => { if (nwConfirmCompletion({ lang, kind: 'goals', goals, devItems: devGoals })) handleSaveTeamAppraisal('completed'); },
                             type: 'button',
                             disabled: isSaving,
                             className: nwBtnClass('primary', 'lg') + ' w-full'
@@ -5845,7 +5875,7 @@
                 // Formular-Leiste: Abschnitte + Speichern/Abschließen immer erreichbar
                 e(NwFormBar, { lang, actions: teamButtonsVisible && teamContext ? [
                   { label: getText(lang, 'Speichern', 'Salva', 'Save'), icon: Save, onClick: () => handleSaveTeamAppraisal('draft'), disabled: isSaving },
-                  { label: getText(lang, 'Fertig & abschließen', 'Fine e completa', 'Done & complete'), icon: CheckCircle2, variant: 'primary', onClick: () => handleSaveTeamAppraisal('completed'), disabled: isSaving }
+                  { label: getText(lang, 'Fertig & abschließen', 'Fine e completa', 'Done & complete'), icon: CheckCircle2, variant: 'primary', onClick: () => { if (nwConfirmCompletion({ lang, kind: 'goals', goals, devItems: devGoals })) handleSaveTeamAppraisal('completed'); }, disabled: isSaving }
                 ] : [] }),
                 e('div', { className: "bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid" },
                     e('h3', { className: "text-lg font-semibold text-nw-blue mb-4 border-b pb-2" }, t.partA),
@@ -8211,7 +8241,7 @@
                             className: nwBtnClass('secondary', 'lg') + ' w-full'
                           }, isSaving ? '⏳ ...' : '💾 ', isSaving ? '' : (lang === 'de' ? 'Entwurf speichern' : lang === 'it' ? 'Salva bozza' : 'Save Draft')),
                           e('button', {
-                            onClick: () => handleSaveTeamAppraisal('completed'),
+                            onClick: () => { if (nwConfirmCompletion({ lang, kind: 'review', goals, devItems: devPlan })) handleSaveTeamAppraisal('completed'); },
                             type: 'button',
                             disabled: isSaving,
                             className: nwBtnClass('primary', 'lg') + ' w-full'
@@ -8470,7 +8500,7 @@
                 // Formular-Leiste: Abschnitte + Speichern/Abschließen immer erreichbar
                 e(NwFormBar, { lang, actions: teamButtonsVisible && teamContext ? [
                   { label: getText(lang, 'Speichern', 'Salva', 'Save'), icon: Save, onClick: () => handleSaveTeamAppraisal('draft'), disabled: isSaving },
-                  { label: getText(lang, 'Fertig & abschließen', 'Fine e completa', 'Done & complete'), icon: CheckCircle2, variant: 'primary', onClick: () => handleSaveTeamAppraisal('completed'), disabled: isSaving }
+                  { label: getText(lang, 'Fertig & abschließen', 'Fine e completa', 'Done & complete'), icon: CheckCircle2, variant: 'primary', onClick: () => { if (nwConfirmCompletion({ lang, kind: 'review', goals, devItems: devPlan })) handleSaveTeamAppraisal('completed'); }, disabled: isSaving }
                 ] : [] }),
                 e('div', { className: "bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid" },
                     e('h3', { className: "text-lg font-semibold text-nw-blue mb-4 border-b pb-2" }, t.partA),

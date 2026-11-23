@@ -139,7 +139,12 @@ test('Beurteilung anlegen, als Entwurf speichern, ändern, abschließen und nach
   await expect(memberRow(page, 'David Muster').getByRole('button', { name: 'Fortsetzen', exact: true })).toHaveCount(1); // Seed-Entwurf
   await rowButton(page, 'Emil Probe', 'Fortsetzen').click();
   await expect(page.getByRole('button', { name: /Abschließen/ }).first()).toBeVisible();
+  // Abschluss-Prüfung nennt offene Punkte (Zielerreichung fehlt) und fragt nach: bestätigen
+  let completionMsg = '';
+  page.removeAllListeners('dialog');
+  page.on('dialog', (d) => { completionMsg = d.message(); d.accept().catch(() => {}); });
   await page.getByRole('button', { name: /Abschließen/ }).first().click();
+  await expect.poll(() => completionMsg).toContain('2 von 2 Zielen ohne Zielerreichung');
   const confirm = page.getByRole('button', { name: /Ja|Bestätigen|Abschließen/ }).last();
   if (await confirm.isVisible().catch(() => false)) await confirm.click().catch(() => {});
 
@@ -661,4 +666,43 @@ test('Backup wiederherstellen: Vorschau zeigt neu, ersetzt und „Bestand neuer�
   await expect(item('Nur im Backup')).toContainText('Neu');
   await expect(item('Emil Probe')).toContainText('Ersetzt');
   expect(JSON.stringify((await listDocs('teamAppraisals')).map((d) => d.fields))).toBe(before);
+});
+
+test('Abschluss-Prüfung: Zielgewichte ungleich 100 % sperren das Abschließen, der Entwurf bleibt', async ({ page }) => {
+  await setDoc('teamAppraisals/ap-david-draft', {
+    id: 'ap-david-draft', type: 'review', status: 'draft', period: YEAR, employeeId: 'tm-david', employeeName: 'David Muster',
+    employeePosition: 'Teamleiter Produktion', position: 'Teamleiter Produktion', userId: ids.uidA, managerId: ids.uidA, managerName: 'Testleitung',
+    createdAt: `${YEAR}-11-01T00:00:00.000Z`, updatedAt: `${YEAR}-11-15T00:00:00.000Z`, isManager: true, includeLeadership: true, noGoalsMode: false,
+    goals: [{ id: 1, name: 'Ausschuss reduzieren', weight: 50, achievement: 100 }, { id: 2, name: 'Rüstzeit senken', weight: 30, achievement: 90 }],
+    coreScores: {}, leaderScores: {}, wasScore: 0, wieCoreScore: 0, gpsScore: 0,
+    formData: { employee: 'David Muster', position: 'Teamleiter Produktion', manager: 'Anna Testleiterin', date: `${YEAR}-11-25` }, versionHistory: [],
+  });
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  await rowButton(page, 'David Muster', 'Fortsetzen').click();
+  await expect(page.getByRole('button', { name: /Abschließen/ }).first()).toBeVisible();
+  const messages = [];
+  page.removeAllListeners('dialog');
+  page.on('dialog', (d) => { messages.push(d.message()); d.accept().catch(() => {}); });
+  await page.getByRole('button', { name: /Abschließen/ }).first().click();
+  await expect.poll(() => messages.join('|')).toContain('80 % statt 100 %');
+  await page.waitForTimeout(1500);
+  expect(field(await getDoc('teamAppraisals/ap-david-draft'), 'status')).toBe('draft');
+  expect(messages.some((m) => m.includes('abschließen?'))).toBe(false); // keine Rückfrage, sondern gesperrt
+});
+
+test('Abschluss-Prüfung Zielvereinbarung: leere Vereinbarung fragt nach, Abbrechen speichert nichts', async ({ page }) => {
+  const count = async () => (await listDocs('teamAppraisals')).filter((d) => field(d, 'employeeId') === 'tm-david' && field(d, 'type') === 'goals').length;
+  const before = await count();
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  await rowButton(page, 'David Muster', 'Erstellen').click();
+  await expect(page.getByRole('button', { name: /Abschließen/ }).first()).toBeVisible();
+  let msg = '';
+  page.removeAllListeners('dialog');
+  page.on('dialog', (d) => { if (!msg) msg = d.message(); d.dismiss().catch(() => {}); });
+  await page.getByRole('button', { name: /Abschließen/ }).first().click();
+  await expect.poll(() => msg).toContain('Keine Ziele eingetragen');
+  await page.waitForTimeout(1000);
+  expect(await count()).toBe(before);
 });

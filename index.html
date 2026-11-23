@@ -1036,7 +1036,7 @@
             meta && React.createElement('span', { className: 'text-xs text-ink-60' }, meta),
             actions && React.createElement('div', { className: 'ml-auto flex flex-wrap items-center gap-2' }, actions)
           );
-        const NwStatCard = ({ label, value, hint, tone, icon, onClick }) =>
+        const NwStatCard = ({ label, value, hint, tone, icon, onClick, testId }) =>
           React.createElement(onClick ? 'button' : 'div', {
             onClick, type: onClick ? 'button' : undefined,
             className: 'rounded-card border border-line bg-white px-4 py-3.5 text-left shadow-card ' + (onClick ? ' transition-transform duration-fast hover:-translate-y-0.5' : '')
@@ -1044,7 +1044,7 @@
             React.createElement('div', { className: 'flex items-center gap-1.5 eyebrow' },
               icon && React.createElement(icon, { size: 12, 'aria-hidden': true }), React.createElement('span', { className: 'min-w-0' }, label)), // ein Element: Begriffe mit Erklärung zerfallen sonst in Flex-Teile mit Abstand
             React.createElement('div', { className: 'mt-2 flex items-baseline gap-2' },
-              React.createElement('span', { className: 't-kpi ' + (tone === 'warn' ? 'text-warn' : tone === 'danger' ? 'text-danger' : tone === 'ok' ? 'text-ok' : '') }, value)), // 2.0: KPI-Wert 32/38 (mobil 26/32), ohne Ton in ink
+              React.createElement('span', { 'data-testid': testId, className: 't-kpi ' + (tone === 'warn' ? 'text-warn' : tone === 'danger' ? 'text-danger' : tone === 'ok' ? 'text-ok' : '') }, value)), // 2.0: KPI-Wert 32/38 (mobil 26/32), ohne Ton in ink
             hint && React.createElement('div', { className: 'mt-1 text-xs text-ink-60' }, hint)
           );
         const NwEmptyState = ({ icon, title, text, action }) =>
@@ -15846,7 +15846,7 @@ Best regards`
             });
             
             // GPS-Durchschnitt
-            const reviewsWithGPS = teamMembers.map(m => getStatus(m).review).filter(r => r && r.gpsScore);
+            const reviewsWithGPS = teamMembers.map(m => getStatus(m).review).filter(r => r && r.status === 'completed' && r.gpsScore); // nur abgeschlossene (Kennzahl-Korrektur, freigegeben 23.11.2026)
             const avgGPS = reviewsWithGPS.length > 0 
               ? (reviewsWithGPS.reduce((sum, r) => sum + r.gpsScore, 0) / reviewsWithGPS.length).toFixed(1)
               : null;
@@ -15899,7 +15899,7 @@ Best regards`
                   label: overdueAppointments.length > 0 ? getText(lang, 'Gespräche überfällig', 'Colloqui scaduti', 'Meetings overdue') : getText(lang, 'Gespräche diese Woche', 'Colloqui questa settimana', 'Meetings this week'),
                   value: overdueAppointments.length > 0 ? overdueAppointments.length : appointmentsThisWeek.length,
                   tone: overdueAppointments.length > 0 ? 'danger' : undefined }),
-                React.createElement(NwStatCard, { icon: TrendingUp, label: nwGloss(lang === 'de' ? 'Ø GPS-Score' : 'Avg GPS Score', lang), value: avgGPS || '—', tone: avgGPS ? (avgGPS >= 3 ? 'ok' : 'warn') : undefined })
+                React.createElement(NwStatCard, { icon: TrendingUp, label: nwGloss(lang === 'de' ? 'Ø GPS-Score' : 'Avg GPS Score', lang), value: avgGPS || '—', testId: 'stat-avg-gps', tone: avgGPS ? (avgGPS >= 3 ? 'ok' : 'warn') : undefined })
               ),
               
               // (Hilfe-Hinweis entfällt: HR-Copilot steht dauerhaft in der Seitenleiste und unten rechts – n.Org: erklären, wenn gefragt)
@@ -18028,8 +18028,19 @@ Best regards`
               reviews: yearAppraisals.filter(a => a.type === 'review' || !a.type).length,
               self: yearAppraisals.filter(a => a.type === 'self' || a.type === 'self_assessment' || a.type === 'self-reflection' || a.type === 'self_assessment_standalone' || a.type === 'self_pdf').length
             };
+            // Kennzahl-Korrektur (freigegeben 23.11.2026):
+            //  - „Fertig“ = abgeschlossene Beurteilungen von allen Beurteilungen (vorher: alle abgeschlossenen Unterlagen / Beurteilungen → „8/5“)
+            //  - Quoten = Mitarbeiter mit mindestens einer Unterlage / Mitarbeiter (vorher: Unterlagen / Mitarbeiter → „125 %“ bei mehreren Jahren)
+            //  - Ø GPS nur aus abgeschlossenen Beurteilungen (Entwürfe tragen Vorgabewerte)
+            const nwIsReview = (a) => a.type === 'review' || !a.type;
+            const nwIsSelf = (a) => a.type === 'self' || a.type === 'self_assessment' || a.type === 'self-reflection' || a.type === 'self_assessment_standalone' || a.type === 'self_pdf';
+            const nwWho = (a) => a.employeeId || a.employeeName || (a.formData && a.formData.employee) || a.id;
+            const nwCovered = (test) => Math.min(new Set(yearAppraisals.filter(test).map(nwWho)).size, allCompanyMembers.length);
+            stats.reviewsCompleted = yearAppraisals.filter(a => nwIsReview(a) && a.status === 'completed').length;
+            stats.membersWithReview = nwCovered(nwIsReview);
+            stats.membersWithSelf = nwCovered(nwIsSelf);
             
-            const reviewsWithGPS = yearAppraisals.filter(a => (a.type === 'review' || !a.type) && a.gpsScore > 0);
+            const reviewsWithGPS = yearAppraisals.filter(a => nwIsReview(a) && a.status === 'completed' && a.gpsScore > 0);
             const avgGPS = reviewsWithGPS.length > 0 
               ? (reviewsWithGPS.reduce((sum, a) => sum + a.gpsScore, 0) / reviewsWithGPS.length).toFixed(2)
               : '–';
@@ -18070,8 +18081,8 @@ Best regards`
                     React.createElement('div', { className: 'text-xs text-ink-60' }, 'Ø GPS')
                   ),
                   React.createElement('div', { className: 'bg-nw-blue-06 rounded-card p-3 text-center' },
-                    React.createElement('div', { className: 't-kpi' }, `${stats.completed}/${stats.reviews}`),
-                    React.createElement('div', { className: 'text-xs text-ink-60' }, getText(lang, 'Fertig', 'Completate', 'Done'))
+                    React.createElement('div', { className: 't-kpi', 'data-testid': 'hr-kpi-done' }, `${stats.reviewsCompleted}/${stats.reviews}`),
+                    React.createElement('div', { className: 'text-xs text-ink-60' }, getText(lang, 'Reviews fertig', 'Valutazioni completate', 'Reviews done'))
                   )
                 )
               ),
@@ -18531,8 +18542,8 @@ Best regards`
                   // Fortschritts-Übersicht
                   (() => {
                     const completionRate = stats.appraisals > 0 ? ((stats.completed / stats.appraisals) * 100).toFixed(0) : 0;
-                    const selfRate = stats.members > 0 ? ((stats.self / stats.members) * 100).toFixed(0) : 0;
-                    const reviewRate = stats.members > 0 ? ((stats.reviews / stats.members) * 100).toFixed(0) : 0;
+                    const selfRate = stats.members > 0 ? ((stats.membersWithSelf / stats.members) * 100).toFixed(0) : 0;
+                    const reviewRate = stats.members > 0 ? ((stats.membersWithReview / stats.members) * 100).toFixed(0) : 0;
                     
                     return React.createElement('div', { className: 'space-y-3' },
                       React.createElement('h4', { className: 'font-semibold text-nw-blue text-sm' }, 
@@ -18564,12 +18575,12 @@ Best regards`
                       ),
                       React.createElement('div', { className: 'grid grid-cols-2 gap-2 text-xs' },
                         React.createElement('div', { className: 'bg-nw-blue-06 p-2 rounded-lg text-center' },
-                          React.createElement('div', { className: 'font-semibold text-nw-blue' }, selfRate + '%'),
-                          React.createElement('div', { className: 'text-nw-blue' }, getText(lang, 'Selbstrefl.', 'Autorifless.', 'Self-Assess.'))
+                          React.createElement('div', { className: 'font-semibold text-nw-blue', 'data-testid': 'hr-rate-self' }, selfRate + '\u202F%'),
+                          React.createElement('div', { className: 'text-nw-blue' }, getText(lang, 'Mitarbeiter mit Selbstrefl.', 'Collab. con autorifless.', 'Employees with self-assess.'))
                         ),
                         React.createElement('div', { className: 'bg-nw-blue-06 p-2 rounded-lg text-center' },
-                          React.createElement('div', { className: 'font-semibold text-nw-blue' }, reviewRate + '%'),
-                          React.createElement('div', { className: 'text-nw-blue' }, 'Reviews')
+                          React.createElement('div', { className: 'font-semibold text-nw-blue', 'data-testid': 'hr-rate-review' }, reviewRate + '\u202F%'),
+                          React.createElement('div', { className: 'text-nw-blue' }, getText(lang, 'Mitarbeiter mit Review', 'Collab. con valutazione', 'Employees with review'))
                         )
                       )
                     );

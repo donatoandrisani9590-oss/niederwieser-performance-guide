@@ -39,13 +39,13 @@ Details im [Übergabebericht](UEBERGABE.md).
 | # | Rolle | Stelle | Problem | Vorschlag | Was berührt wäre |
 |---|---|---|---|---|---|
 | S1 | Führungskraft | Bogen, Knopf „Speichern“ | Zwischenspeichern wirft zurück in die Team-Übersicht. Wer mitten im Gespräch sichert, muss den Bogen neu öffnen und seine Stelle suchen | „Speichern“ bleibt im Bogen und zeigt „Gespeichert · 14:32“. Verlassen nur über „Abschließen“ oder „Schließen“ | Ablauf nach dem Speichern im Speicher-Handler |
-| S2 | Führungskraft | Team-Übersicht, Kennzahl „Ø GPS-Score“ | Ein eben angelegter Entwurf mit Vorgabewerten (GPS 2,00) zieht den Team-Durchschnitt von 3,8 auf 3,2 | Durchschnitt nur über abgeschlossene Beurteilungen | Kennzahl |
-| S3 | HR | HR-Dashboard „Fortschritt“ | „150 % Reviews“ bei „Alle Jahre“ (6 Beurteilungen auf 4 Mitarbeiter) | Anzahl statt Prozent, oder Prozent nur bei gewähltem Jahr | Kennzahl |
+| S2 ✅ | Führungskraft | Team-Übersicht, Kennzahl „Ø GPS-Score“ | Ein eben angelegter Entwurf mit Vorgabewerten (GPS 2,00) zieht den Team-Durchschnitt von 3,8 auf 3,2 | Durchschnitt nur über abgeschlossene Beurteilungen | Kennzahl |
+| S3 ✅ | HR | HR-Dashboard „Fortschritt“ | „150 % Reviews“ bei „Alle Jahre“ (6 Beurteilungen auf 4 Mitarbeiter) | Anzahl statt Prozent, oder Prozent nur bei gewähltem Jahr | Kennzahl |
 | S4 | alle | Anmeldung | Kein „Passwort vergessen?“. Heute geht das nur über HR mit dem Schalter `userAdmin` | Link, der die Reset-Mail von Firebase auslöst | Anmeldung (neuer Auth-Aufruf) |
 | S5 | Führungskraft | Termin löschen, E-Mail ergänzen | „Rückgängig“ bräuchte hier einen neuen Schreibzugriff | Toast mit „Rückgängig“, der den alten Wert zurückschreibt | neuer Datenzugriff |
 | S6 | HR | unter jedem Reiter | Unter Papierkorb, Benutzer, Backup und Versionen steht weiter die ganze Beurteilungsliste samt „GPS für alle neu berechnen“ | Liste und Sammelaktion nur in „Übersicht“ | Sichtbarkeit einer HR-Funktion |
 | S7 | Führungskraft | geteilte Mitarbeiter (Kennzeichen „Geteilt“) | „Als geführt markieren“, „Termin planen“ und der Zielgespräch-Haken schreiben in `teamMembers`. Die eingespielten Regeln erlauben das nur der Besitzer-Führungskraft und HR (war in den alten Regeln schon so). Bisher schlug der Klick **still** fehl, jetzt erscheint „Speichern fehlgeschlagen“ | Entweder die Regeln erlauben geteilten Führungskräften genau diese Felder, oder die Aktionen sind bei geteilten Mitarbeitern gesperrt mit Grund („nur die zuständige Führungskraft“) | Sicherheitsregeln bzw. Sichtbarkeit einer Funktion |
-| S8 | HR | HR-Dashboard, Kennzahl „Fertig“ | „8/5 Fertig“ bei „Alle Jahre“: mehr erledigte als gezählte Unterlagen (gleiche Ursache wie S3) | zusammen mit S3 klären | Kennzahl |
+| S8 ✅ | HR | HR-Dashboard, Kennzahl „Fertig“ | „8/5 Fertig“ bei „Alle Jahre“: mehr erledigte als gezählte Unterlagen (gleiche Ursache wie S3) | zusammen mit S3 klären | Kennzahl |
 | M5 | Mitarbeiter | Selbstreflexion | „Geplanter Bonus“ und „Final GPS 2,00“ vor jeder Eingabe (bekannt aus §11) | Im Mitarbeiterbogen ausblenden oder erst nach dem Ausfüllen zeigen | Inhalt des Bogens |
 
 ## C. Geprüft und in Ordnung

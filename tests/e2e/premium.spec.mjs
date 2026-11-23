@@ -1,7 +1,7 @@
 // Premium-UX (Branch feature/premium-ux): Seitenwechsel, Überfällig-Anzeige und der einheitliche Dialog.
 // Nur Emulator und Testdaten, wie alle anderen Tests.
 import { test, expect, openApp, manualDialogs } from './fixtures.mjs';
-import { seed, USERS, getDoc, setDoc, listDocs } from './seed.mjs';
+import { seed, USERS, YEAR, getDoc, setDoc, listDocs } from './seed.mjs';
 
 const field = (doc, name) => { const v = doc && doc.fields && doc.fields[name]; return v ? Object.values(v)[0] : undefined; };
 const memberRow = (page, name) => page.getByRole('row').filter({ hasText: name });
@@ -683,4 +683,43 @@ test('Einladung: „Link senden“ öffnet den Versand-Dialog, Outlook erhält E
   await memberRow(page, 'Emil Probe').getByRole('button', { name: 'Link senden' }).click();
   await page.locator('[data-nw-dialog]').getByRole('button', { name: 'Abbrechen' }).click();
   expect((await page.evaluate(() => window.__opened)).length).toBe(1);
+});
+
+// Kennzahl-Korrektur (freigegeben 23.11.2026): Zähler und Nenner meinen dieselbe Menge, Quoten zählen Mitarbeiter,
+// der Durchschnitt nimmt nur abgeschlossene Beurteilungen. Die Erwartung wird aus den Testdaten berechnet.
+test('HR-Kennzahlen: „Reviews fertig“ höchstens n/n, Quoten höchstens 100 %, aus den Daten nachgerechnet', async ({ page }) => {
+  await openApp(page);
+  await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByText('Team-Übersicht', { exact: true }).click();
+  await page.locator('input[type="email"]').fill(USERS.hr.email);
+  await page.locator('input[type="password"]').first().fill(USERS.hr.password);
+  await page.locator('form button[type="submit"]').click();
+  await expect(page.getByTestId('user-card')).toBeVisible();
+  await page.getByRole('navigation', { name: 'Hauptnavigation' }).getByText('HR Dashboard', { exact: true }).click();
+  const docs = (await listDocs('teamAppraisals')).filter((d) => !field(d, 'deletedAt') && field(d, 'deleted') !== true);
+  const members = (await listDocs('teamMembers')).length;
+  const isReview = (d) => !field(d, 'type') || field(d, 'type') === 'review';
+  const isSelf = (d) => /^self/.test(String(field(d, 'type')));
+  const reviews = docs.filter(isReview);
+  const done = reviews.filter((d) => field(d, 'status') === 'completed').length;
+  const cover = (test) => Math.round(100 * Math.min(new Set(docs.filter(test).map((d) => field(d, 'employeeId'))).size, members) / members);
+  await expect(page.getByTestId('hr-kpi-done')).toHaveText(`${done}/${reviews.length}`);
+  expect(done).toBeLessThanOrEqual(reviews.length);
+  const num = async (id) => Number((await page.getByTestId(id).innerText()).replace(/[^0-9]/g, ''));
+  expect(await num('hr-rate-review')).toBe(cover(isReview));
+  expect(await num('hr-rate-self')).toBe(cover(isSelf));
+  expect(await num('hr-rate-review')).toBeLessThanOrEqual(100);
+  expect(reviews.length).toBeGreaterThan(members); // die Testdaten enthalten mehrere Jahre: vorher ergab das über 100 %
+});
+
+test('Team-Übersicht: ein Entwurf mit Vorgabewert verändert den Ø GPS-Score nicht', async ({ page }) => {
+  const ids = await seed();
+  await loginTeam(page, USERS.managerA);
+  const tile = page.getByTestId('stat-avg-gps');
+  const before = await tile.innerText();
+  expect(before).toMatch(/\d\.\d/);
+  const now = new Date().toISOString();
+  await setDoc('teamAppraisals/ap-emil-entwurf', { id: 'ap-emil-entwurf', type: 'review', status: 'draft', period: YEAR, employeeId: 'tm-emil', employeeName: 'Emil Probe',
+    userId: ids.uidA, managerId: ids.uidA, createdAt: now, updatedAt: now, gpsScore: 2 });
+  await expect(memberRow(page, 'Emil Probe')).toContainText('Entwurf', { timeout: 15000 });
+  await expect(tile).toHaveText(before);
 });

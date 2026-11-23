@@ -371,6 +371,18 @@ HR-Ansichten): kein Überlauf, keine überlappenden Knöpfe, Tippflächen ab 36 
 - Italienisch und Englisch: Anleitung nennt noch alte Knopfnamen; rund 220 Textstellen fehlen (U14).
 - HR: Die Beurteilungsliste steht weiter unter jedem Reiter (S6, braucht Freigabe).
 
+### 16. Kennzahlen korrigiert (S2, S3, S8; freigegeben am 23.11.2026)
+
+| Kennzahl | Vorher | Nachher |
+|---|---|---|
+| HR „Fertig“ | alle abgeschlossenen Unterlagen / Beurteilungen → „8/5“ | „Reviews fertig“: abgeschlossene Beurteilungen / Beurteilungen → „4/5“ |
+| HR Quoten „Reviews“, „Selbstrefl.“ | Unterlagen / Mitarbeiter → „125 %“ bei mehreren Jahren | Mitarbeiter mit mindestens einer Unterlage / Mitarbeiter, höchstens 100 % → „75 %“ |
+| Ø GPS (Team-Übersicht und HR) | alle Beurteilungen mit Wert, auch Entwürfe mit Vorgabewerten | nur abgeschlossene Beurteilungen |
+
+Unverändert: die „Abschlussrate“ (abgeschlossene / alle Unterlagen), die GPS-Berechnung selbst und alle gespeicherten
+Daten. Geändert ist nur, welche Unterlagen in die Anzeige eingehen. Der Schutzbereich-Fingerabdruck ist unverändert.
+Zwei neue Tests rechnen die Werte aus den Testdaten nach (94 Tests).
+
 ## Prüfungen
 
 ```bash
@@ -385,8 +397,8 @@ cd tests && npm test
 cd tests && npm run rules:vorschlag
 ```
 
-Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 92 / 92 grün,
-`npm run rules:vorschlag` 92 / 92 grün.
+Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 94 / 94 grün,
+`npm run rules:vorschlag` 94 / 94 grün.
 
 Die bestehenden Tests mussten für den Dialog nicht umgeschrieben werden: `tests/e2e/fixtures.mjs` meldet jeden
 App-Dialog über dieselben `page.on('dialog')`-Listener wie ein Browser-Fenster.

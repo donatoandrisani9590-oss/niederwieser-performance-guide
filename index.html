@@ -29229,9 +29229,30 @@ const renderDashboard = () => {
           );
         }
 
+        // Hinweis bei Verbindungsverlust (nur Anzeige, auf jeder Seite inkl. Mitarbeiter-Link)
+        const NwOfflineBanner = () => {
+          const L = (de, it, en) => { const l = (document.documentElement.lang || 'de').slice(0, 2); return l === 'it' ? it : l === 'en' ? en : de; };
+          const [offline, setOffline] = useState(typeof navigator !== 'undefined' && navigator.onLine === false);
+          useEffect(() => {
+            const goOff = () => setOffline(true);
+            const goOn = () => { setOffline(prev => { if (prev) showToast(L('Verbindung wieder da – du kannst weiterarbeiten und speichern.', 'Connessione ripristinata – puoi continuare e salvare.', 'Back online – you can continue and save.'), 'success'); return false; }); };
+            window.addEventListener('offline', goOff);
+            window.addEventListener('online', goOn);
+            return () => { window.removeEventListener('offline', goOff); window.removeEventListener('online', goOn); };
+          }, []);
+          if (!offline) return null;
+          return React.createElement('div', { role: 'alert', 'data-testid': 'offline-banner', className: 'no-print fixed left-1/2 top-3 z-50 flex w-[min(560px,calc(100vw-32px))] -translate-x-1/2 items-start gap-2.5 rounded-card border border-warn/30 bg-white px-3.5 py-2.5 text-sm text-ink shadow-float' },
+            React.createElement('span', { 'aria-hidden': true, className: 'mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-warn text-2xs font-semibold text-white' }, '!'),
+            React.createElement('span', { className: 'min-w-0' },
+              React.createElement('strong', { className: 'font-semibold' }, L('Keine Internetverbindung. ', 'Nessuna connessione. ', 'No internet connection. ')),
+              L('Bitte lass dieses Fenster offen und speichere erst wieder, wenn dieser Hinweis verschwunden ist. Deine Eingaben im Bogen bleiben bis dahin stehen.',
+                'Lascia aperta questa finestra e salva solo quando questo avviso sarà scomparso. I tuoi dati nel modulo restano.',
+                'Keep this window open and save again once this notice has disappeared. Your entries in the form stay in place.')));
+        };
+
         // --- RENDER APP ---
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(React.createElement(ErrorBoundary, null, React.createElement(PerformanceApp)));
+        root.render(React.createElement(ErrorBoundary, null, React.createElement(PerformanceApp), React.createElement(NwOfflineBanner)));
     </script>
 </body>
 </html>

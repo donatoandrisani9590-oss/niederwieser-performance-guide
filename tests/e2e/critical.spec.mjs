@@ -585,3 +585,14 @@ test('Phase 3 (Schalter aus, Standard): kein Benutzer-Reiter im HR-Dashboard', a
   await expect(page.getByRole('tab', { name: 'Backup & Restore' })).toBeVisible();
   await expect(page.getByRole('tab', { name: 'Benutzer' })).toHaveCount(0);
 });
+
+test('Offline-Hinweis: erscheint bei Verbindungsverlust und verschwindet danach wieder', async ({ page, context }) => {
+  await gotoTeamAndLogin(page, USERS.managerA);
+  await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  await expect(page.getByTestId('offline-banner')).toHaveCount(0);
+  await context.setOffline(true);
+  await expect(page.getByTestId('offline-banner')).toContainText('Keine Internetverbindung');
+  await context.setOffline(false);
+  await expect(page.getByTestId('offline-banner')).toHaveCount(0);
+  await expect(page.getByText('Verbindung wieder da')).toBeVisible();
+});

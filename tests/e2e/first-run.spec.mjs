@@ -53,6 +53,9 @@ test('Erststart Mitarbeiter: Link öffnen, starten, absenden – Selbstreflexion
   await openApp(page, '?accessCode=CODE-tm-emil');
   await expect(page.getByText(/Willkommen, Emil Probe/)).toBeVisible({ timeout: 15000 });
   await page.getByRole('button', { name: /Selbstreflexion starten/ }).click();
+  // Vor dem Abschicken fragt die App mit einer Übersicht der leeren Felder nach: bestätigen
+  page.removeAllListeners('dialog');
+  page.on('dialog', (d) => d.accept().catch(() => {}));
   await page.getByRole('button', { name: /Abschließen & Senden/ }).first().click();
   const confirm = page.getByRole('button', { name: /Ja|Bestätigen|Senden/ }).last();
   if (await confirm.isVisible().catch(() => false)) await confirm.click().catch(() => {});

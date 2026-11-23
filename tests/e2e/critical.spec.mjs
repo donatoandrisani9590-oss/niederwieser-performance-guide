@@ -604,3 +604,26 @@ test('Team-Übersicht: Mitarbeiter ohne E-Mail-Adresse sind gekennzeichnet', asy
   await expect(memberRow(page, 'Fritz Ohnemail')).toContainText('Keine E-Mail');
   await expect(memberRow(page, 'Clara Beispiel')).not.toContainText('Keine E-Mail');
 });
+
+test('Mitarbeiter-Link: vor dem Abschicken Übersicht der leeren Felder, Abbrechen schickt nichts ab', async ({ page }) => {
+  const completedSelf = async () => (await listDocs('teamAppraisals')).filter((d) => field(d, 'employeeId') === 'tm-emil' && /self/.test(field(d, 'type') || '') && field(d, 'status') === 'completed').length;
+  const before = await completedSelf();
+  await openApp(page, '?accessCode=CODE-tm-emil');
+  await page.getByRole('button', { name: /Selbstreflexion starten/ }).click();
+  const submit = page.getByRole('button', { name: 'Selbstreflexion abschicken' });
+  await submit.scrollIntoViewIfNeeded();
+  let message = '';
+  page.removeAllListeners('dialog');
+  page.on('dialog', (d) => { if (d.message().startsWith('Selbstreflexion abschicken?')) message = d.message(); d.dismiss().catch(() => {}); });
+  await submit.click();
+  await expect.poll(() => message).toContain('Noch leer (alles freiwillig)');
+  expect(message).toContain('Kompetenzen ohne Kommentar');
+  expect(message).toContain('Feedback an die Führungskraft');
+  await page.waitForTimeout(1000);
+  expect(await completedSelf()).toBe(before);
+  // OK: wird abgeschickt
+  page.removeAllListeners('dialog');
+  page.on('dialog', (d) => d.accept().catch(() => {}));
+  await submit.click();
+  await expect.poll(completedSelf, { timeout: 15000 }).toBe(before + 1);
+});

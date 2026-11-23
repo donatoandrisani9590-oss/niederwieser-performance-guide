@@ -224,7 +224,7 @@ Geschäftslogik oder Datenmodell, das braucht deine Freigabe.
 | A1 | „Mitarbeiter entfernen“ löschte alle Unterlagen aller Jahre nach einem einfachen „Wirklich löschen?“ | **Erledigt:** Folgen werden genannt, der Name muss eingetippt werden, vorher automatische Sicherungsdatei | P1 | erledigt |
 | A2 | Löschen ist endgültig | **Papierkorb** statt Löschen: archivieren und ausblenden, HR kann 90 Tage wiederherstellen | P1 | nötig |
 | A3 | 24 Browser-Rückfragen (`confirm`), Knöpfe nur „OK/Abbrechen“ | Einheitlicher Dialog mit klarer Aktion („Endgültig löschen“, rot) und „Rückgängig“ in der Meldung danach | P2 | frei |
-| A4 | Kein Hinweis bei Verbindungsverlust | Banner „Offline – Änderungen werden gespeichert, sobald du wieder online bist“, Speichern-Knopf bis dahin gesperrt | P2 | frei |
+| A4 | Kein Hinweis bei Verbindungsverlust | **Erledigt:** Hinweis auf jeder Seite (auch beim Mitarbeiter-Link), Meldung sobald die Verbindung wieder da ist. Speichern-Knöpfe bleiben unverändert | P2 | erledigt |
 | A5 | Fachbegriffe ohne Erklärung (GPS, WAS/WIE, BARS, SR-Link) | Kurze Erklärung beim Darüberfahren und Tippen (Glossar) | P3 | frei |
 | A6 | Italienisch und Englisch sind an einigen Stellen unvollständig (nur Deutsch hinterlegt) | Fehlende Texte automatisch finden und nachtragen | P2 | frei |
 
@@ -234,7 +234,7 @@ Geschäftslogik oder Datenmodell, das braucht deine Freigabe.
 |---|---|---|---|---|
 | M1 | 14 Selbstreflexionen 2025 blieben unbemerkt als Entwurf liegen | **Erledigt:** Leiste mit „Fertig & senden“, Abschluss-Kasten, Entwürfe für die Führungskraft sichtbar | P1 | erledigt |
 | M2 | Nach dem Abschicken ist das Eingetragene nicht mehr einsehbar; Link verloren = kein Zugang | „Mein Bereich“ mit Anmeldung (Phase 2) | P1 | erteilt |
-| M3 | Beim Abschicken wird nicht gezeigt, was fehlt | Vor dem Senden eine Übersicht: „3 Kompetenzen ohne Kommentar, Teil E leer – trotzdem senden?“ | P2 | frei |
+| M3 | Beim Abschicken wird nicht gezeigt, was fehlt | **Erledigt:** Vor dem Senden eine Übersicht der leeren (freiwilligen) Felder, „OK = jetzt abschicken · Abbrechen = weiter ausfüllen“. Keine neue Pflicht | P2 | erledigt |
 | M4 | Ziele muss der Mitarbeiter selbst abtippen | Ziele aus der Zielvereinbarung vorbefüllen (setzt Phase 0 voraus: Zugriff des Links auf die eigene Zielvereinbarung) | P2 | erteilt (Phase 0) |
 | M5 | „Geplanter Bonus“ und die GPS-Note „2,00“ vor jeder Eingabe verunsichern | Im Mitarbeiterbogen ausblenden bzw. erst nach dem Ausfüllen zeigen | P2 | nötig (offen) |
 | M6 | Langer Bogen auf dem Handy | Tabellen als Karten, Leiste mit Abschnitten bleibt sichtbar (teilweise erledigt) | P2 | frei |
@@ -247,7 +247,7 @@ Geschäftslogik oder Datenmodell, das braucht deine Freigabe.
 | F2 | Keine Reihenfolge sichtbar: Selbstreflexion → Beurteilung → Gespräch → Ziele | In jeder Zeile der nächste Schritt hervorgehoben, im Dashboard „Meine offenen Punkte“ (erledigt) | P2 | frei |
 | F3 | Nach „Teilen“ geänderte Beurteilung weicht von der geteilten Fassung ab | Hinweis „Seit dem Teilen geändert – erneut teilen?“ | P2 | frei |
 | F4 | Gesprächs-Merker gilt nicht je Jahr (Datenmodell) | Optionales Feld je Jahr (`meetings[2026]`), alte Daten bleiben | P2 | nötig |
-| F5 | Mitarbeiter ohne E-Mail können nicht eingeladen oder geteilt werden | In der Matrix kennzeichnen, mit „E-Mail ergänzen“ direkt in der Zeile | P2 | frei |
+| F5 | Mitarbeiter ohne E-Mail können nicht eingeladen oder geteilt werden | **Teilweise erledigt:** Kennzeichnung „Keine E-Mail“ in der Matrix. „E-Mail ergänzen“ in der Zeile wäre eine neue Speicherfunktion für ein bestehendes Feld, dafür brauche ich ein kurzes OK | P2 | nötig |
 
 ### HR-Admin
 

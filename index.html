@@ -25660,6 +25660,30 @@ const renderDashboard = () => {
               }
             };
             
+            // Vor dem Abschicken: kurze Übersicht, was noch leer ist (alles freiwillig, Abschicken bleibt möglich).
+            // Ruft danach unverändert handleCompleteAndSend auf.
+            const confirmCompleteAndSend = () => {
+              if (!formData.employee?.trim()) return handleCompleteAndSend(); // Name fehlt: Hinweis kommt vom Handler
+              const empty = (v) => !String(v == null ? '' : v).trim();
+              const open = [];
+              if (!noGoalsMode && !goals.some(g => !empty(g.name))) open.push(getText(lang, 'Ziele', 'Obiettivi', 'Goals'));
+              const noComment = coreList.filter(c => empty(c.comment)).length;
+              if (noComment > 0) open.push(getText(lang, `${noComment} von ${coreList.length} Kompetenzen ohne Kommentar`, `${noComment} di ${coreList.length} competenze senza commento`, `${noComment} of ${coreList.length} competencies without comment`));
+              if (empty(formData.strengths1) && empty(formData.strengths2)) open.push(getText(lang, 'Stärken', 'Punti di forza', 'Strengths'));
+              if (empty(formData.development1) && empty(formData.development2)) open.push(getText(lang, 'Entwicklungsfelder', 'Aree di sviluppo', 'Development areas'));
+              if (!devPlan.some(d => !empty(d.measure))) open.push(getText(lang, 'Entwicklungsmaßnahmen', 'Misure di sviluppo', 'Development measures'));
+              if (empty(formData.wishesNextYear)) open.push(getText(lang, 'Wünsche für das nächste Jahr', 'Desideri per il prossimo anno', 'Wishes for next year'));
+              if (empty(formData.feedbackManager)) open.push(getText(lang, 'Feedback an die Führungskraft', 'Feedback al responsabile', 'Feedback to manager'));
+              const msg = open.length
+                ? getText(lang,
+                    'Selbstreflexion abschicken?\n\nNoch leer (alles freiwillig):\n• ' + open.join('\n• ') + '\n\nOK = jetzt abschicken · Abbrechen = weiter ausfüllen',
+                    'Inviare l\'autovalutazione?\n\nAncora vuoto (facoltativo):\n• ' + open.join('\n• ') + '\n\nOK = invia ora · Annulla = continua',
+                    'Submit self-reflection?\n\nStill empty (all optional):\n• ' + open.join('\n• ') + '\n\nOK = submit now · Cancel = keep filling in')
+                : getText(lang, 'Selbstreflexion jetzt abschicken? Deine Führungskraft sieht sie danach.', 'Inviare ora l\'autovalutazione?', 'Submit self-reflection now?');
+              if (!confirm(msg)) return;
+              return handleCompleteAndSend();
+            };
+            
             // === SHARE-LINK GENERIERUNG ===
             const generateShareLink = () => {
               // Erstelle komprimierte Daten für den Link
@@ -26406,7 +26430,7 @@ const renderDashboard = () => {
                       
                       // Abschließen-Button - verwendet neuen idiotensicheren Handler
                       e('button', { 
-                        onClick: handleCompleteAndSend, 
+                        onClick: confirmCompleteAndSend, 
                         disabled: isSaving, 
                         className: nwBtnClass('primary', 'lg') + ' w-full' 
                       }, 
@@ -26593,7 +26617,7 @@ const renderDashboard = () => {
               // Formular-Leiste: Abschnitte + Speichern/Senden immer erreichbar
               e(NwFormBar, { lang, offset: isGuestMode ? 52 : 0, actions: [
                 { label: getText(lang, 'Speichern', 'Salva', 'Save'), icon: Save, onClick: () => handleSave('draft'), disabled: isSaving },
-                { label: getText(lang, 'Fertig & senden', 'Fine e invia', 'Done & send'), icon: Send, variant: 'primary', onClick: handleCompleteAndSend, disabled: isSaving }
+                { label: getText(lang, 'Fertig & senden', 'Fine e invia', 'Done & send'), icon: Send, variant: 'primary', onClick: confirmCompleteAndSend, disabled: isSaving }
               ] }),
               // === TEIL A: STAMMDATEN ===
               e('div', { className: 'bg-white p-8 rounded-xl shadow-float border border-line-2 break-inside-avoid' },
@@ -26929,7 +26953,7 @@ const renderDashboard = () => {
                       'So far your self-reflection is only saved as a draft. Only after submitting will your manager see it as received.')),
                   e('div', { className: 'mt-4 flex flex-wrap justify-center gap-2' },
                     e(NwButton, { variant: 'secondary', icon: Save, onClick: () => handleSave('draft'), disabled: isSaving }, getText(lang, 'Als Entwurf speichern', 'Salva come bozza', 'Save as draft')),
-                    e(NwButton, { variant: 'primary', size: 'lg', icon: Send, onClick: handleCompleteAndSend, disabled: isSaving }, getText(lang, 'Selbstreflexion abschicken', 'Invia autovalutazione', 'Submit self-reflection'))
+                    e(NwButton, { variant: 'primary', size: 'lg', icon: Send, onClick: confirmCompleteAndSend, disabled: isSaving }, getText(lang, 'Selbstreflexion abschicken', 'Invia autovalutazione', 'Submit self-reflection'))
                   )
                 )
               )

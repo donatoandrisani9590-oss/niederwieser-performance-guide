@@ -112,18 +112,21 @@ test('Einheitlicher Dialog: E-Mail ergänzen mit Eingabefeld, Enter speichert', 
   await expect.poll(async () => field(await getDoc('teamMembers/tm-emil'), 'email'), { timeout: 10000 }).toBe('emil.probe@test.local');
 });
 
-test('Gespräch als geführt markieren: Rückmeldung mit „Rückgängig“, das den Haken wieder entfernt', async ({ page, consoleErrors }) => {
+test('Gesprächs-Haken umschalten: Rückmeldung mit „Rückgängig“, das den alten Stand wiederherstellt', async ({ page, consoleErrors }) => {
   await loginTeam(page, USERS.managerA);
-  const row = memberRow(page, 'Frieda Geteilt'); // abgeschlossene Beurteilung, Gespräch noch nicht geführt
-  await row.getByRole('button', { name: 'Als geführt markieren' }).click();
-  const toast = page.locator('#nw-toast-region');
-  await expect(toast).toContainText('Gespräch mit Frieda Geteilt als geführt markiert');
+  // Clara ist eine eigene Mitarbeiterin (bei geteilten erlauben die Firestore-Regeln das Ändern nicht), Gespräch ist geführt
+  const row = memberRow(page, 'Clara Beispiel');
   await expect(row).toContainText('Gespräch geführt');
-  await expect.poll(async () => field(await getDoc('teamMembers/tm-frieda'), 'meetingDone'), { timeout: 10000 }).toBe(true);
+  await row.getByRole('button', { name: /Weitere Aktionen/ }).click();
+  await page.getByRole('menuitem', { name: 'Beurteilungsgespräch: zurücksetzen' }).click();
+  const toast = page.locator('#nw-toast-region');
+  await expect(toast).toContainText('Gespräch mit Clara Beispiel ist wieder offen');
+  await expect(row).not.toContainText('Gespräch geführt');
+  await expect.poll(async () => field(await getDoc('teamMembers/tm-clara'), 'meetingDone'), { timeout: 10000 }).toBe(false);
   await toast.getByRole('button', { name: 'Rückgängig' }).click();
-  await expect(toast).toContainText('Gespräch mit Frieda Geteilt ist wieder offen');
-  await expect(row.getByRole('button', { name: 'Als geführt markieren' })).toBeVisible();
-  await expect.poll(async () => field(await getDoc('teamMembers/tm-frieda'), 'meetingDone'), { timeout: 10000 }).toBe(false);
+  await expect(toast).toContainText('Gespräch mit Clara Beispiel als geführt markiert');
+  await expect(row).toContainText('Gespräch geführt');
+  await expect.poll(async () => field(await getDoc('teamMembers/tm-clara'), 'meetingDone'), { timeout: 10000 }).toBe(true);
   // Nach dem Zurücknehmen gibt es kein zweites „Rückgängig“ (keine Endlosschleife)
   await expect(toast.getByRole('button', { name: 'Rückgängig' })).toHaveCount(0);
   expect(consoleErrors).toEqual([]);

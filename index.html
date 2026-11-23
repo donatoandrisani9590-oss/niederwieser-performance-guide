@@ -1782,7 +1782,8 @@
         // TOAST NOTIFICATION UTILITY
         // ============================================
         // n.Org Toast: unten mittig, dunkel (ink), Statussymbol farbig, dauerhafte Live-Region (a11y)
-        const showToast = (message, type = 'success') => {
+        // opts.action = { label, onClick }: Knopf im Toast (z. B. „Rückgängig“), der Toast bleibt dann 8 s stehen
+        const showToast = (message, type = 'success', opts) => {
           const tone = { success: 'bg-ok', error: 'bg-danger', warning: 'bg-warn', info: 'bg-nw-blue' };
           const icons = { success: '✓', error: '✕', warning: '!', info: 'i' };
           let region = document.getElementById('nw-toast-region');
@@ -1805,12 +1806,23 @@
           text.textContent = message; // textContent statt innerHTML (XSS-sicher)
           toast.appendChild(icon);
           toast.appendChild(text);
-          region.appendChild(toast);
-          
-          setTimeout(() => {
+          const leave = () => {
+            if (!toast.isConnected || toast.dataset.leaving) return;
+            toast.dataset.leaving = '1';
             toast.className = toast.className.replace('animate-toast-in', 'animate-toast-out');
             setTimeout(() => toast.remove(), 180);
-          }, 3200);
+          };
+          const action = opts && opts.action;
+          if (action && action.label && typeof action.onClick === 'function') {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'shrink-0 rounded-md bg-white/15 px-2.5 py-1 text-xs font-semibold text-white transition-[background-color,transform] duration-150 hover:scale-[1.02] hover:bg-white/25 active:scale-[.97]';
+            btn.textContent = action.label;
+            btn.addEventListener('click', () => { leave(); action.onClick(); });
+            toast.appendChild(btn);
+          }
+          region.appendChild(toast);
+          setTimeout(leave, action ? 8000 : type === 'error' ? 6000 : 3200);
         };
 
         // === GPS CONFIDENCE CALCULATOR ===
@@ -5875,13 +5887,13 @@
                             type: 'button',
                             disabled: isSaving,
                             className: nwBtnClass('secondary', 'lg') + ' w-full'
-                          }, isSaving ? '⏳ ...' : '💾 ' + (lang === 'de' ? 'Als Entwurf' : lang === 'it' ? 'Bozza' : 'Save Draft')),
+                          }, !isSaving && e(Save, { size: 16, 'aria-hidden': true }), isSaving ? '…' : (lang === 'de' ? 'Entwurf speichern' : lang === 'it' ? 'Salva bozza' : 'Save draft')),
                           e('button', {
                             onClick: async () => { if (await nwConfirmCompletion({ lang, kind: 'goals', goals, devItems: devGoals })) handleSaveTeamAppraisal('completed'); },
                             type: 'button',
                             disabled: isSaving,
                             className: nwBtnClass('primary', 'lg') + ' w-full'
-                          }, isSaving ? '⏳ ...' : '✓ ' + (lang === 'de' ? 'Abschließen' : lang === 'it' ? 'Completa' : 'Complete')),
+                          }, !isSaving && e(Check, { size: 16, 'aria-hidden': true }), isSaving ? '…' : (lang === 'de' ? 'Abschließen' : lang === 'it' ? 'Completa' : 'Complete')),
                           e('button', {
                             onClick: handleCancelTeam,
                             type: 'button',
@@ -8367,13 +8379,13 @@
                             type: 'button',
                             disabled: isSaving,
                             className: nwBtnClass('secondary', 'lg') + ' w-full'
-                          }, isSaving ? '⏳ ...' : '💾 ', isSaving ? '' : (lang === 'de' ? 'Entwurf speichern' : lang === 'it' ? 'Salva bozza' : 'Save Draft')),
+                          }, !isSaving && e(Save, { size: 16, 'aria-hidden': true }), isSaving ? '…' : (lang === 'de' ? 'Entwurf speichern' : lang === 'it' ? 'Salva bozza' : 'Save draft')),
                           e('button', {
                             onClick: async () => { if (await nwConfirmCompletion({ lang, kind: 'review', goals, devItems: devPlan })) handleSaveTeamAppraisal('completed'); },
                             type: 'button',
                             disabled: isSaving,
                             className: nwBtnClass('primary', 'lg') + ' w-full'
-                          }, isSaving ? '⏳ ...' : '✓ ', isSaving ? '' : (lang === 'de' ? 'Abschließen' : lang === 'it' ? 'Completa' : 'Complete')),
+                          }, !isSaving && e(Check, { size: 16, 'aria-hidden': true }), isSaving ? '…' : (lang === 'de' ? 'Abschließen' : lang === 'it' ? 'Completa' : 'Complete')),
                           e('button', {
                             onClick: handleCancelTeam,
                             type: 'button',
@@ -10776,6 +10788,7 @@ Goal 3: 20% weight, 80% achieved → 16 points
           // === ZURÜCK / HOME: Verlauf der besuchten Ansichten (nur im Speicher; URLs und Daten unberührt) ===
           const [navHistory, setNavHistory] = useState([]);
           const navRef = useRef({ view: 'dashboard', area: null, skip: false });
+          const nwTeamLatest = useRef(null); // jeweils aktueller Stand der Team-Übersicht für „Rückgängig“ im Toast
           useEffect(() => {
             const prev = navRef.current;
             if (prev.view === activeView && prev.area === competencyArea) return;
@@ -14446,11 +14459,13 @@ Goal 3: 20% weight, 80% achieved → 16 points
               // Angepasste Meldung je nach Typ
               const typeLabel = appraisalWithType.type === 'goals' 
                 ? (lang === 'de' ? 'Zielvereinbarung' : lang === 'it' ? 'Accordo obiettivi' : 'Goal Agreement')
-                : (lang === 'de' ? 'Bewertung' : lang === 'it' ? 'Valutazione' : 'Assessment');
+                : (lang === 'de' ? 'Beurteilung' : lang === 'it' ? 'Valutazione' : 'Review');
+              const nwWho = String(appraisalWithType.employeeName || '').trim();
+              const nwFor = nwWho ? (lang === 'de' ? ' für ' : lang === 'it' ? ' per ' : ' for ') + nwWho : '';
               const statusLabel = appraisalWithType.status === 'draft'
-                ? (lang === 'de' ? ' (Entwurf)' : lang === 'it' ? ' (Bozza)' : ' (Draft)')
+                ? (lang === 'de' ? ' als Entwurf gespeichert' : lang === 'it' ? ' salvato come bozza' : ' saved as draft')
                 : (lang === 'de' ? ' abgeschlossen' : lang === 'it' ? ' completato' : ' completed');
-              showToast(typeLabel + statusLabel + (lang === 'de' ? ' gespeichert!' : lang === 'it' ? ' salvato!' : ' saved!'), appraisalWithType.status === 'completed' ? 'success' : 'info'); // v92: Toast statt alert
+              showToast(typeLabel + nwFor + statusLabel, appraisalWithType.status === 'completed' ? 'success' : 'info'); // v92: Toast statt alert
               setActiveView(isHRAdmin ? 'hrdashboard' : 'teamoverview');
             } catch (error) {
               console.error('Error saving appraisal:', error);
@@ -15252,13 +15267,32 @@ Best regards`
               }
               return update;
             };
-            const toggleMeetingDone = async (member) => {
+            // Rückmeldung für die Gesprächs-Haken mit „Rückgängig“. Rückgängig ruft denselben Umschalter mit dem dann
+            // aktuellen Stand auf, also genau das, was ein zweiter Klick täte (kein eigener Datenzugriff).
+            const nwMeetingToast = (member, kind, newValue, isUndo) => {
+              const what = kind === 'goal' ? getText(lang, 'Zielgespräch', 'Colloquio obiettivi', 'Goal meeting') : getText(lang, 'Gespräch', 'Colloquio', 'Meeting');
+              const msg = newValue
+                ? getText(lang, `${what} mit ${member.name} als geführt markiert`, `${what} con ${member.name} segnato come svolto`, `${what} with ${member.name} marked as held`)
+                : getText(lang, `${what} mit ${member.name} ist wieder offen`, `${what} con ${member.name} di nuovo aperto`, `${what} with ${member.name} is open again`);
+              showToast(msg, 'success', isUndo ? undefined : { action: { label: getText(lang, 'Rückgängig', 'Annulla', 'Undo'), onClick: () => {
+                const cur = nwTeamLatest.current || {};
+                const m = (cur.teamMembers || []).find(x => x.id === member.id);
+                if (!m) return;
+                const st = cur.getStatus(m);
+                if (kind === 'goal') cur.toggleGoalMeetingDone({ ...m, goalMeetingDone: st.goalMeetingDone }, true);
+                else cur.toggleMeetingDone({ ...m, meetingDone: st.meetingDone }, true);
+              } } });
+            };
+            const nwSaveFailedToast = () => showToast(getText(lang, 'Speichern fehlgeschlagen. Bitte erneut versuchen.', 'Salvataggio non riuscito. Riprova.', 'Saving failed. Please try again.'), 'error');
+            const toggleMeetingDone = async (member, isUndo) => {
               try {
                 const newValue = !member.meetingDone;
                 await db.collection('teamMembers').doc(member.id).update(nwMeetingUpdate(member, 'review', newValue));
                 devLog(`✅ Beurteilungsgespräch geführt`);
+                nwMeetingToast(member, 'review', newValue, isUndo === true);
               } catch (e) { 
                 console.error('Fehler beim Speichern von meetingDone:', e);
+                nwSaveFailedToast();
               }
             };
             
@@ -15286,13 +15320,15 @@ Best regards`
             };
 
             // NEU: "Zielvereinbarungsgespräch geführt" Toggle
-            const toggleGoalMeetingDone = async (member) => {
+            const toggleGoalMeetingDone = async (member, isUndo) => {
               try {
                 const newValue = !member.goalMeetingDone;
                 await db.collection('teamMembers').doc(member.id).update(nwMeetingUpdate(member, 'goal', newValue));
                 devLog(`✅ Zielvereinbarungsgespräch geführt`);
+                nwMeetingToast(member, 'goal', newValue, isUndo === true);
               } catch (e) { 
                 console.error('Fehler beim Speichern von goalMeetingDone:', e);
+                nwSaveFailedToast();
               }
             };
             
@@ -15325,6 +15361,7 @@ Best regards`
 };
             
             const getStatus = (member) => nwMemberStatus(member, teamYear);
+            nwTeamLatest.current = { teamMembers, getStatus, toggleMeetingDone, toggleGoalMeetingDone };
             
             // Fortschritt berechnen
             const totalTasks = teamMembers.length * 3;
@@ -15416,7 +15453,7 @@ Best regards`
                 React.createElement(NwStatCard, { icon: ClipboardList, label: lang === 'de' ? 'Reviews offen' : 'Reviews pending', value: pendingReviews, tone: pendingReviews > 0 ? 'warn' : 'ok' }),
                 React.createElement(NwStatCard, { icon: FileText, label: lang === 'de' ? 'Selbstrefl. fehlen' : 'Self-refl. missing', value: pendingSelfReflections, tone: pendingSelfReflections > 0 ? 'warn' : 'ok' }),
                 React.createElement(NwStatCard, { icon: Calendar,
-                  label: overdueAppointments.length > 0 ? (lang === 'de' ? '⚠️ Überfällig!' : '⚠️ Overdue!') : (lang === 'de' ? 'Diese Woche' : 'This week'),
+                  label: overdueAppointments.length > 0 ? getText(lang, 'Gespräche überfällig', 'Colloqui scaduti', 'Meetings overdue') : getText(lang, 'Gespräche diese Woche', 'Colloqui questa settimana', 'Meetings this week'),
                   value: overdueAppointments.length > 0 ? overdueAppointments.length : appointmentsThisWeek.length,
                   tone: overdueAppointments.length > 0 ? 'danger' : undefined }),
                 React.createElement(NwStatCard, { icon: TrendingUp, label: lang === 'de' ? 'Ø GPS-Score' : 'Avg GPS Score', value: avgGPS || '—', tone: avgGPS ? (avgGPS >= 3 ? 'ok' : 'warn') : undefined })
@@ -15533,7 +15570,11 @@ Best regards`
                             const shareLine = (docItem) => NW_FEATURES.shareWithEmployee && docItem && docItem.status === 'completed' && (docItem.sharedWithEmployee
                               ? React.createElement('span', { className: 'inline-flex flex-wrap items-center gap-x-2 gap-y-0.5' },
                                   note(T('Mit Mitarbeiter geteilt', 'Condivisa con il collaboratore', 'Shared with employee') + (docItem.sharedWithEmployeeAt ? ' · ' + fmt(docItem.sharedWithEmployeeAt) : '') + (docItem.employeeAcknowledgedAt ? ' · ' + T('gelesen', 'letta', 'read') + ' ' + fmt(docItem.employeeAcknowledgedAt) : ''), 'ok'),
-                                  linkBtn(T('Teilen zurücknehmen', 'Annulla condivisione', 'Revoke'), () => shareWithEmployee(member, docItem, false)))
+                                  linkBtn(T('Teilen zurücknehmen', 'Annulla condivisione', 'Revoke'), () => shareWithEmployee(member, docItem, false)),
+                                  // Nach dem Teilen gespeichert: Der Mitarbeiter sieht noch die geteilte Fassung
+                                  docItem.updatedAt && docItem.sharedWithEmployeeAt && (new Date(docItem.updatedAt) - new Date(docItem.sharedWithEmployeeAt) > 2000) && React.createElement('span', { className: 'inline-flex flex-wrap items-center gap-x-2 gap-y-0.5', 'data-testid': 'changed-since-share' },
+                                    React.createElement(NwTag, { tone: 'warn' }, T('Seit dem Teilen geändert', 'Modificata dopo la condivisione', 'Changed since sharing')),
+                                    linkBtn(T('Erneut teilen', 'Condividi di nuovo', 'Share again'), () => shareWithEmployee(member, docItem, true))))
                               : linkBtn(T('Mit Mitarbeiter teilen', 'Condividi con il collaboratore', 'Share with employee'), () => shareWithEmployee(member, docItem, true)));
                             // Bestehende Unterlagen mit ihrem gespeicherten Jahr öffnen (nie überschreiben)
                             const openReview = () => startTeamAppraisal(member.id, rv && rv.period != null && rv.period !== '' ? rv.period : teamYear, rv || null);
@@ -17606,7 +17647,7 @@ Best regards`
                   className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-150 hover:scale-[1.03] active:scale-[.98] ' + 
                     (hrSubTab === 'calibration' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
-                  '🔔',
+                  React.createElement(TrendingUp, { size: 16, 'aria-hidden': true }),
                   getText(lang, 'Normalverteilung', 'Distribuzione', 'Distribution')
                 ),
                 React.createElement('button', {
@@ -17615,7 +17656,7 @@ Best regards`
                   className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-150 hover:scale-[1.03] active:scale-[.98] ' + 
                     (hrSubTab === 'rater-bias' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
-                  '⚖️',
+                  React.createElement(Scale, { size: 16, 'aria-hidden': true }),
                   getText(lang, 'Rater-Bias', 'Bias Valutatore', 'Rater Bias')
                 ),
                 React.createElement('button', {
@@ -17624,7 +17665,7 @@ Best regards`
                   className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-150 hover:scale-[1.03] active:scale-[.98] ' + 
                     (hrSubTab === 'radar' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
-                  '🕸️',
+                  React.createElement(Award, { size: 16, 'aria-hidden': true }),
                   getText(lang, 'Kompetenz-Radar', 'Radar Competenze', 'Competency Radar')
                 ),
                 React.createElement('button', {
@@ -17633,7 +17674,7 @@ Best regards`
                   className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-150 hover:scale-[1.03] active:scale-[.98] ' + 
                     (hrSubTab === 'goals-dashboard' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
-                  '📋',
+                  React.createElement(Target, { size: 16, 'aria-hidden': true }),
                   getText(lang, 'Ziel-Dashboard', 'Dashboard Obiettivi', 'Goals Dashboard')
                 ),
                 // Versions Tab Button
@@ -17653,7 +17694,7 @@ Best regards`
                   className: '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 pb-2.5 pt-2 text-base font-medium transition-[color,border-color,transform] duration-150 hover:scale-[1.03] active:scale-[.98] ' + 
                     (hrSubTab === 'backup' ? 'border-nw-blue text-nw-blue font-semibold' : 'border-transparent text-ink-60 hover:text-nw-blue')
                 },
-                  '💾',
+                  React.createElement(Save, { size: 16, 'aria-hidden': true }),
                   getText(lang, 'Backup & Restore', 'Backup & Ripristino', 'Backup & Restore')
                 ),
                 React.createElement('button', {
@@ -29600,10 +29641,12 @@ const renderDashboard = () => {
                       (getUserDisplayName(user) || '?').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase()
                     ),
                     React.createElement('div', { className: "min-w-0 flex-1" },
-                      React.createElement('div', { className: "truncate text-sm font-semibold text-ink" }, getUserDisplayName(user)),
-                      React.createElement('div', { className: "truncate text-2xs text-ink-60" }, isHRAdmin ? 'HR Admin' : getText(lang, 'Führungskraft', 'Responsabile', 'Manager'))
-                    ),
-                    React.createElement(NwButton, { variant: 'ghost', size: 'sm', icon: LogOut, onClick: handleLogout, title: user.email || '' }, getText(lang, 'Abmelden', 'Esci', 'Logout'))
+                      React.createElement('div', { className: "truncate text-sm font-semibold text-ink", title: getUserDisplayName(user) }, getUserDisplayName(user)),
+                      React.createElement('div', { className: "flex items-center justify-between gap-2" },
+                        React.createElement('span', { className: "truncate text-2xs text-ink-60" }, isHRAdmin ? 'HR Admin' : getText(lang, 'Führungskraft', 'Responsabile', 'Manager')),
+                        React.createElement(NwButton, { variant: 'ghost', size: 'sm', icon: LogOut, onClick: handleLogout, title: user.email || '', className: '-mr-1.5' }, getText(lang, 'Abmelden', 'Esci', 'Logout'))
+                      )
+                    )
                   )
                 )
                 ) // Ende Menü-Container

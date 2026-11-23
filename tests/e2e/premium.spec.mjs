@@ -111,3 +111,51 @@ test('Einheitlicher Dialog: E-Mail ergänzen mit Eingabefeld, Enter speichert', 
   await expect(dlg).toHaveCount(0);
   await expect.poll(async () => field(await getDoc('teamMembers/tm-emil'), 'email'), { timeout: 10000 }).toBe('emil.probe@test.local');
 });
+
+test('Gespräch als geführt markieren: Rückmeldung mit „Rückgängig“, das den Haken wieder entfernt', async ({ page, consoleErrors }) => {
+  await loginTeam(page, USERS.managerA);
+  const row = memberRow(page, 'Frieda Geteilt'); // abgeschlossene Beurteilung, Gespräch noch nicht geführt
+  await row.getByRole('button', { name: 'Als geführt markieren' }).click();
+  const toast = page.locator('#nw-toast-region');
+  await expect(toast).toContainText('Gespräch mit Frieda Geteilt als geführt markiert');
+  await expect(row).toContainText('Gespräch geführt');
+  await expect.poll(async () => field(await getDoc('teamMembers/tm-frieda'), 'meetingDone'), { timeout: 10000 }).toBe(true);
+  await toast.getByRole('button', { name: 'Rückgängig' }).click();
+  await expect(toast).toContainText('Gespräch mit Frieda Geteilt ist wieder offen');
+  await expect(row.getByRole('button', { name: 'Als geführt markieren' })).toBeVisible();
+  await expect.poll(async () => field(await getDoc('teamMembers/tm-frieda'), 'meetingDone'), { timeout: 10000 }).toBe(false);
+  // Nach dem Zurücknehmen gibt es kein zweites „Rückgängig“ (keine Endlosschleife)
+  await expect(toast.getByRole('button', { name: 'Rückgängig' })).toHaveCount(0);
+  expect(consoleErrors).toEqual([]);
+});
+
+test('Geteilte Beurteilung (Schalter an): nach späterem Speichern Hinweis „Seit dem Teilen geändert“ mit „Erneut teilen“', async ({ page }) => {
+  await page.addInitScript(() => { window.__NW_FEATURES__ = { shareWithEmployee: true }; });
+  const doc = await getDoc('teamAppraisals/ap-clara-review');
+  const sharedAt = new Date(Date.now() - 3600 * 1000).toISOString();
+  // Geteilt vor einer Stunde, danach noch einmal gespeichert (updatedAt jünger als das Teilen)
+  const plainMember = { sharedWithEmployee: true, sharedWithEmployeeAt: sharedAt, sharedWithEmployeeBy: USERS.managerA.email, updatedAt: new Date().toISOString() };
+  const res = await fetch(`http://127.0.0.1:8080/v1/${doc.name}?updateMask.fieldPaths=sharedWithEmployee&updateMask.fieldPaths=sharedWithEmployeeAt&updateMask.fieldPaths=sharedWithEmployeeBy&updateMask.fieldPaths=updatedAt`, {
+    method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner' },
+    body: JSON.stringify({ fields: { sharedWithEmployee: { booleanValue: true }, sharedWithEmployeeAt: { stringValue: plainMember.sharedWithEmployeeAt }, sharedWithEmployeeBy: { stringValue: plainMember.sharedWithEmployeeBy }, updatedAt: { stringValue: plainMember.updatedAt } } }),
+  });
+  expect(res.ok).toBe(true);
+  await loginTeam(page, USERS.managerA);
+  const row = memberRow(page, 'Clara Beispiel');
+  await expect(row.getByTestId('changed-since-share')).toContainText('Seit dem Teilen geändert');
+  await expect(row.getByRole('button', { name: 'Erneut teilen' })).toBeVisible();
+  // Erneut teilen (Rückfrage bestätigen): Hinweis verschwindet, weil das Teilen jetzt jünger ist als die Änderung
+  page.removeAllListeners('dialog');
+  page.on('dialog', (d) => d.accept().catch(() => {}));
+  await row.getByRole('button', { name: 'Erneut teilen' }).click();
+  await expect(row.getByTestId('changed-since-share')).toHaveCount(0, { timeout: 10000 });
+  await expect(row).toContainText('Mit Mitarbeiter geteilt');
+});
+
+test('Nutzerkarte: Name vollständig lesbar, Abmelden erreichbar', async ({ page }) => {
+  await loginTeam(page, USERS.managerA);
+  const name = page.locator('aside').getByText(USERS.managerA.name, { exact: true });
+  await expect(name).toBeVisible();
+  expect(await name.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true); // nicht abgeschnitten
+  await expect(page.locator('aside').getByRole('button', { name: 'Abmelden' })).toBeVisible();
+});

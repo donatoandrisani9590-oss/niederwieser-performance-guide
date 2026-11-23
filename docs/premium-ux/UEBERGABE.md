@@ -14,11 +14,12 @@ Freigabe braucht.
 
 | Prüfung | Ausgangslage | Jetzt |
 |---|---|---|
-| Automatische Tests (`npm test`) | 57 / 57 grün | **84 / 84 grün** (27 neue in `tests/e2e/premium.spec.mjs`) |
-| Dieselben Tests unter den eingespielten Firestore-Regeln (`npm run rules:vorschlag`) | 57 / 57 grün | **84 / 84 grün** |
+| Automatische Tests (`npm test`) | 57 / 57 grün | **87 / 87 grün** (30 neue in `tests/e2e/premium.spec.mjs`) |
+| Dieselben Tests unter den eingespielten Firestore-Regeln (`npm run rules:vorschlag`) | 57 / 57 grün | **87 / 87 grün** |
 | Schutzbereich (`node tests/protected/fingerprint.mjs`) | unverändert | **unverändert**, Baseline nicht angefasst |
 | Konsolenfehler in den getesteten Abläufen | 0 | 0 |
 | Browser-Fenster (`confirm`/`prompt`/`alert`) | 33 Stellen | 2 Stellen, beide im Schutzbereich |
+| Emojis und Symbolzeichen in der Oberfläche | 501 Zeilen | 16 Zeilen, alle im Schutzbereich |
 | Bewertungssystem (Teile, Skalen, Formeln, Pflichtfelder) | – | unverändert |
 
 Getestet wurde ausschließlich in der lokalen Vorschau mit dem Emulator und Testdaten. Nichts ist gemergt, nichts
@@ -214,7 +215,7 @@ und Schatten sind unverändert. Neu sind Bewegungs-Tokens, Regeln für Handy und
 
 | Stufe | Inhalt | Umfang |
 |---|---|---|
-| 2 Shell | Handy: 56-px-Top-Leiste mit Menü, Logo ohne Payoff 112 px, Navigation als Schublade von links. Tablet: schmale Leiste 84 px, Aufklappen als Overlay. Desktop: Seitenleiste einklappbar. Start- und Zurück-Pille, Logo 220 px über der Anmeldekarte | groß, ändert die Navigation für alle |
+| 2 Shell | **erledigt**, siehe Abschnitt 12 | |
 | 3 Muster | `transition-all` an 74 Stellen durch gezielte Übergänge ersetzen, Speichern-Knopf mit Zustandsfolge und gezeichnetem Haken, Feldfehler mit einmaligem Schütteln, Reiter mit gleitendem Strich, Tabellen-Strategien (HR-Tabelle mit fester erster Spalte), Bögen und HR-Dashboard auf dem Handy | mittel bis groß |
 | 4 Charts | HR-Dashboard (Verteilung, Rater-Bias, Radar) auf `chart-*`, `ChartFrame` mit vier Zuständen, Titel als Aussage, Zahlenformat nach §10.3 | mittel |
 
@@ -224,6 +225,62 @@ des Prototyps vollständig, bevor ich baue.
 
 Das Paket liegt nicht im Repository. Ob es nach `docs/design-transfer-2.0/` soll, ist deine Entscheidung
 (das Repository ist öffentlich, das Paket enthält die Firmenlogos).
+
+### 12. n.Org Design System 2.0, Stufe 2: Übernahme in der Fläche
+
+Auslöser war deine Rückmeldung nach dem ersten Test: nur leicht orientiert, Emojis noch enthalten. Vorgehen: erst
+messen, dann je Bereich eine feste Regel, automatisch anwenden, Schutzbereich und Tests prüfen, eigener Commit.
+
+| Bereich | Vorher | Nachher | Was |
+|---|---|---|---|
+| Emojis und Symbolzeichen | 501 Zeilen | 16 (Schutzbereich) | 453 Vor-/Nachsätze entfernt, 90 allein stehende → Icons aus dem Lucide-Satz, Ampel-Emojis → Punkt-Baustein, Toast und Dialog mit gezeichneten Icons, Status als Chip mit Text |
+| Shell | Karte oben, Menü klappt auf | drei Zustände nach §16.1 | Seitenleiste 256 px (einklappbar), schmale Leiste 84 px mit Overlay, Top-Leiste 56 px mit Schublade, Start-/Zurück-Pille, Konto-Popover, Sprach-Menü, Logos LmP 196 / LoP 112 |
+| Pauschale Übergänge | 74 | 0 | gezielte Eigenschaften, Dauern als Tokens |
+| Flächen mit Dialog-Radius | 295 | 19 (Dialoge, Leisten-Karte) | 10 px für Flächen |
+| Schwebe-Schatten an ruhenden Flächen | 67 | 0 | `shadow-card` |
+| Doppelte Rahmen / Weichzeichner | 38 / 26 | 0 / 0 | |
+| Laufweiten außerhalb der Skala | 23 | 0 | |
+| Knöpfe im Knopf-Set | 43 von 248 | 105 von 260 | 48 frei gestaltete umgestellt, dazu Shell und Dialoge |
+| Pfeil- und Trennzeichen | 84 | 0 | „←“/„→“ an Knöpfen entfernt, „ • “ → „ · “ |
+
+| Desktop | Tablet (Overlay) | Handy (Schublade) |
+|---|---|---|
+| ![Desktop](screenshots/20-shell-desktop.png) | ![Tablet](screenshots/24-shell-tablet-overlay.png) | ![Handy](screenshots/26-shell-handy-schublade.png) |
+
+**Dabei gefunden und behoben:** Wo zwei widersprüchliche Klassen am selben Element standen (zwei Höhen, zwei
+Seitenpolster), entschied die Reihenfolge, in der Tailwind die Klassen im Browser erzeugt. Mit der neuen Shell
+kippte das: Das ⋯-Icon war gequetscht, die Sheet-Knöpfe zu niedrig. Knopf- und Dialog-Baustein setzen ihre Werte
+jetzt eindeutig.
+
+**Bewusste Abweichungen in dieser Stufe (bitte entscheiden)**
+
+- **Zurück/Start auf dem Handy auch im Inhalt.** Laut Paket liegen die Pillen nur in der Leiste, also in der
+  Schublade. Ohne sichtbaren Zurück-Knopf bräuchte man auf dem Handy zwei Tipps.
+- **Assistent statt Suche.** Die App hat keine globale Suche; an ihrer Stelle steht der HR-Copilot.
+- **Anmeldung bleibt in der Shell.** Laut Paket ist die Anmeldung eine eigene Seite ohne Leiste mit Logo 220 px über
+  der Karte. Hier ist sie Teil der Team-Übersicht, weil nicht angemeldete Nutzer Dashboard und Anleitung sehen
+  dürfen. Ein zweites Logo wäre gegen „ein Logo pro Ansicht“.
+- **Kein Speicherstatus und kein Rückgängig-Verlauf im Leistenfuß.** Dafür gibt es in der App keine Grundlage
+  (kein Autosave für Führungskräfte, kein Verlauf).
+- **Grün und amber gefüllte Knöpfe sind jetzt blau** (eine Akzentfarbe). Dadurch gibt es Ansichten mit mehr als
+  einer gefüllten Hauptaktion; welche davon Nebenaktion wird, ist eine inhaltliche Entscheidung je Ansicht.
+
+**Noch nicht am Designsystem (gemessen, Stand dieses Commits)**
+
+| Bereich | Stand | Warum offen |
+|---|---|---|
+| Knöpfe | 155 von 260 außerhalb des Knopf-Sets | zusammengesetzte Klassen (zustandsabhängig), Reiter, Listenzeilen, runde Icon-Knöpfe: nur einzeln umstellbar |
+| Eingabefelder | 175 frei gestaltet | bereits einheitlich im Aussehen, aber nicht über den Feld-Baustein; Höhe 32/36 px und Touch-Größen fehlen |
+| Schriftgröße 26 px | 106 Stellen | nur für Kennzahlen und Hero-Titel gedacht; jede Stelle braucht die passende Rolle (`t-kpi`, `t-section`, …) |
+| Inline-Stile | 301 | Farben stammen aus der Palette, stehen aber als Wert im Code statt als Token |
+| Deko-Kreise 64–96 px | 12 | Leerzustände nach dem Baustein (36 px) |
+| Versalien ohne Overline-Baustein | 59 | |
+| PDF-Vorlagen | 24 Zeilen mit Emojis | Aussehen der PDFs soll laut `PROTECTED.md` vorher gezeigt werden |
+| Schutzbereich | 16 Zeilen mit Symbolzeichen | HR-Reparaturwerkzeug, Rückgabe der Vollständigkeits-Berechnung (Anzeige ist schon auf Icons umgestellt) |
+| Muster | Speichern-Knopf mit Zustandsfolge, Feldfehler mit Schütteln, gleitende Reiter, Tabellen-Strategien, Bögen auf dem Handy | Stufe 3 |
+| Charts im HR-Bereich | Farben aus der Palette, aber ohne `ChartFrame`, Zustände und Zahlenformat | Stufe 4 |
+
+Die Messung lässt sich jederzeit wiederholen; die Regeln der Umstellung stehen in den Commit-Texten.
 
 ## Prüfungen
 
@@ -239,8 +296,8 @@ cd tests && npm test
 cd tests && npm run rules:vorschlag
 ```
 
-Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 84 / 84 grün,
-`npm run rules:vorschlag` 84 / 84 grün.
+Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 87 / 87 grün,
+`npm run rules:vorschlag` 87 / 87 grün.
 
 Die bestehenden Tests mussten für den Dialog nicht umgeschrieben werden: `tests/e2e/fixtures.mjs` meldet jeden
 App-Dialog über dieselben `page.on('dialog')`-Listener wie ein Browser-Fenster.

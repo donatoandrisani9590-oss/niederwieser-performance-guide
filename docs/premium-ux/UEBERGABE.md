@@ -7,13 +7,13 @@ Draft-PR auf `feature/rollen-und-freigaben`
 
 Dieser Stand ist **ein erster, abgeschlossener Teil**, nicht die ganze Premium-Runde. Erledigt sind die Punkte, die
 ein falsches Bild erzeugten oder den Ablauf am stärksten störten: der einheitliche Dialog statt Browser-Fenstern,
-der falsche „Überfällig“-Alarm, die Scroll-Position beim Seitenwechsel, Rückmeldungen mit „Rückgängig“.
-Offen sind die mobile Team-Übersicht, das Glossar, die IT/EN-Texte und alles, was deine Freigabe braucht.
+der falsche „Überfällig“-Alarm, die Scroll-Position beim Seitenwechsel, Rückmeldungen mit „Rückgängig“ und die
+Team-Übersicht auf dem Handy. Offen sind das Glossar, die IT/EN-Texte und alles, was deine Freigabe braucht.
 
 | Prüfung | Ausgangslage | Jetzt |
 |---|---|---|
-| Automatische Tests (`npm test`) | 57 / 57 grün | **65 / 65 grün** (8 neue in `tests/e2e/premium.spec.mjs`) |
-| Dieselben Tests unter den eingespielten Firestore-Regeln (`npm run rules:vorschlag`) | 57 / 57 grün | **65 / 65 grün** |
+| Automatische Tests (`npm test`) | 57 / 57 grün | **70 / 70 grün** (13 neue in `tests/e2e/premium.spec.mjs`) |
+| Dieselben Tests unter den eingespielten Firestore-Regeln (`npm run rules:vorschlag`) | 57 / 57 grün | **70 / 70 grün** |
 | Schutzbereich (`node tests/protected/fingerprint.mjs`) | unverändert | **unverändert**, Baseline nicht angefasst |
 | Konsolenfehler in den getesteten Abläufen | 0 | 0 |
 | Browser-Fenster (`confirm`/`prompt`/`alert`) | 33 Stellen | 2 Stellen, beide im Schutzbereich |
@@ -93,6 +93,26 @@ Vorher behielt der Inhaltsbereich beim Seitenwechsel die Scroll-Position der vor
 - Bogenkopf: Icons statt Emojis, „Entwurf speichern“ heißt auch in der Zielvereinbarung so.
 - Mit Schalter `shareWithEmployee`: Hinweis „Seit dem Teilen geändert“ mit „Erneut teilen“ (F3 aus §11).
 
+### 6. Team-Übersicht auf dem Handy (U6)
+
+Vorher war die Status-Matrix auf dem Handy eine Tabelle, die breiter ist als der Bildschirm. Beurteilung,
+Zielvereinbarung und das ⋯-Menü lagen unsichtbar rechts. Jetzt zeigt die App unter 768 px je Mitarbeiter eine Karte
+mit denselben drei Schritten und denselben Aktionen untereinander. Ab 768 px bleibt die Tabelle wie bisher.
+
+| Vorher (390 px) | Nachher (390 px) |
+|---|---|
+| ![vorher](screenshots/11-handy-team-uebersicht-vorher.png) | ![nachher](screenshots/11-handy-team-uebersicht-nachher.png) |
+
+Dabei zwei Fehler behoben, die nicht nur das Handy betrafen:
+
+- **⋯-Menü ragte unten aus dem Bildschirm.** In unteren Zeilen war der letzte Eintrag („Entfernen“) abgeschnitten und
+  nicht erreichbar, weil Scrollen das Menü schließt. Das Menü wird jetzt nach dem Öffnen gemessen und ganz in den
+  sichtbaren Bereich geschoben, auch am Desktop.
+- **Toast auf dem Handy gequetscht.** Sein Behälter begann bei 50 % der Breite, der Text brach nach jedem Wort um.
+  Jetzt nutzt er die Bildschirmbreite und sitzt über dem runden HR-Copilot-Knopf.
+
+![Zeilenmenü auf dem Handy](screenshots/12-handy-zeilenmenue-nachher.png)
+
 ## Prüfungen
 
 ```bash
@@ -107,8 +127,8 @@ cd tests && npm test
 cd tests && npm run rules:vorschlag
 ```
 
-Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 65 / 65 grün,
-`npm run rules:vorschlag` 65 / 65 grün.
+Ergebnis des letzten Laufs vor dem Push (23.11.2026): Schutzbereich unverändert, `npm test` 70 / 70 grün,
+`npm run rules:vorschlag` 70 / 70 grün.
 
 Die bestehenden Tests mussten für den Dialog nicht umgeschrieben werden: `tests/e2e/fixtures.mjs` meldet jeden
 App-Dialog über dieselben `page.on('dialog')`-Listener wie ein Browser-Fenster. Ein Test wurde inhaltlich angepasst:
@@ -125,7 +145,6 @@ cd tests && node shots-premium.mjs <pfad-zur-alten-index.html>
 
 | # | Punkt | Warum noch offen |
 |---|---|---|
-| U6 | Team-Übersicht auf dem Handy als Karten statt breiter Tabelle | größter offener Punkt für die mobile Nutzung; das ⋯-Menü ließ sich bei 390 px im automatischen Durchlauf nicht zuverlässig öffnen. **Auf einem echten Handy noch nicht geprüft** |
 | U4 | Knopf-Beschriftungen in der Abschnittsleiste und im Mitarbeiterbogen vereinheitlichen | braucht Anpassungen an mehreren Tests, eigener Schritt |
 | U10 | Erklärungen für GPS, WAS, WIE, BARS beim Darüberfahren (A5) | nicht begonnen |
 | U11 | „Selbstreflexion ansehen“: ein Zurück, dazu „Beurteilung starten“ | nicht begonnen |
@@ -133,9 +152,12 @@ cd tests && node shots-premium.mjs <pfad-zur-alten-index.html>
 | U14 | rund 220 Textstellen nur DE/EN, Italienisch zeigt dort Englisch (A6) | groß, eigene Runde |
 
 Nicht vollständig durchgespielt habe ich: PDF-Erzeugung im Browser, Kalibrierung und Ziel-Dashboard im Detail,
-Salary Review, den Mitarbeiterbogen bis zum Abschicken von Hand und die echte Handy-Breite von 390 px (Chrome
-lässt als Fenster nur 500 px zu). Diese Abläufe sind durch die automatischen Tests abgedeckt, aber nicht mit
-eigenen Augen auf Feinschliff geprüft.
+Salary Review und den Mitarbeiterbogen bis zum Abschicken von Hand. Diese Abläufe sind durch die automatischen
+Tests abgedeckt, aber nicht mit eigenen Augen auf Feinschliff geprüft.
+
+Die Handy-Ansicht ist bei 390 px automatisch getestet und auf Bildschirmfotos geprüft, **aber nicht auf einem echten
+Handy** (Fingerbedienung, Tastatur, Safari). Auf dem Handy umgestellt ist nur die Team-Übersicht; die Bögen,
+das HR-Dashboard und die Kartenansicht habe ich dort nicht überarbeitet.
 
 ## Was du entscheiden oder freigeben musst
 

@@ -941,6 +941,26 @@
           const [pos, setPos] = useState(null);
           const ref = useRef(null);
           const btnRef = useRef(null);
+          // Nach dem Öffnen messen und ganz in den sichtbaren Bereich schieben, noch vor dem ersten Zeichnen (kein Springen).
+          // Unten am Bildschirm ragte der letzte Eintrag („Entfernen“) sonst heraus und war nicht erreichbar, weil
+          // Scrollen das Menü schließt.
+          // Tailwind erzeugt die Stile im Browser erst kurz nach dem Einfügen: Beim ersten Öffnen ist die gemessene Höhe
+          // deshalb noch zu klein. Der ResizeObserver zieht die Position nach, sobald die endgültige Größe feststeht.
+          React.useLayoutEffect(() => {
+            if (!pos) return;
+            const menuEl = ref.current && ref.current.querySelector('[role=menu]');
+            if (!menuEl) return;
+            const clamp = () => {
+              const maxTop = Math.max(8, window.innerHeight - menuEl.offsetHeight - 8);
+              const maxLeft = Math.max(8, window.innerWidth - menuEl.offsetWidth - 8);
+              if (pos.top > maxTop || pos.left > maxLeft) setPos({ top: Math.min(pos.top, maxTop), left: Math.min(pos.left, maxLeft) });
+            };
+            clamp();
+            if (typeof ResizeObserver === 'undefined') return;
+            const ro = new ResizeObserver(clamp);
+            ro.observe(menuEl);
+            return () => ro.disconnect();
+          }, [pos]);
           useEffect(() => {
             if (!pos) return;
             const close = () => setPos(null);
@@ -967,7 +987,7 @@
             }, React.createElement(MoreHorizontal, { size: 14, 'aria-hidden': true })),
             pos && React.createElement('div', {
               role: 'menu', 'aria-label': label,
-              className: 'fixed z-30 w-[220px] animate-menu-in rounded-lg border border-line bg-white p-1 shadow-float',
+              className: 'fixed z-30 max-h-[calc(100vh-16px)] w-[220px] animate-menu-in overflow-y-auto rounded-lg border border-line bg-white p-1 shadow-float',
               style: { top: pos.top + 'px', left: pos.left + 'px' },
               onClick: () => setPos(null),
               onKeyDown: (ev) => {
@@ -1792,7 +1812,7 @@
             region.id = 'nw-toast-region';
             region.setAttribute('aria-live', 'polite');
             region.setAttribute('role', 'status');
-            region.className = 'pointer-events-none fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center gap-2';
+            region.className = 'pointer-events-none fixed inset-x-4 bottom-24 z-50 flex flex-col items-center gap-2 md:bottom-6'; // volle Breite mit Rand (vorher nur die halbe: Text brach auf dem Handy nach jedem Wort um), auf dem Handy über dem Assistent-Knopf
             document.body.appendChild(region);
           }
           const toast = document.createElement('div');
@@ -10789,6 +10809,17 @@ Goal 3: 20% weight, 80% achieved → 16 points
           const [navHistory, setNavHistory] = useState([]);
           const navRef = useRef({ view: 'dashboard', area: null, skip: false });
           const nwTeamLatest = useRef(null); // jeweils aktueller Stand der Team-Übersicht für „Rückgängig“ im Toast
+          // Schmale Bildschirme (Handy, unter 768 px): Die Status-Matrix zeigt dann je Mitarbeiter eine Karte statt
+          // einer Tabelle, die breiter ist als der Bildschirm. Es wird immer nur eine der beiden Fassungen gerendert.
+          const [nwNarrow, setNwNarrow] = useState(() => typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(max-width: 767px)').matches);
+          useEffect(() => {
+            if (!window.matchMedia) return;
+            const mq = window.matchMedia('(max-width: 767px)');
+            const sync = () => setNwNarrow(mq.matches);
+            sync();
+            if (mq.addEventListener) mq.addEventListener('change', sync); else mq.addListener(sync);
+            return () => { if (mq.removeEventListener) mq.removeEventListener('change', sync); else mq.removeListener(sync); };
+          }, []);
           useEffect(() => {
             const prev = navRef.current;
             if (prev.view === activeView && prev.area === competencyArea) return;
@@ -15547,15 +15578,12 @@ Best regards`
                       T(`Zielvereinbarung ${nextYear}`, `Obiettivi ${nextYear}`, `Goals ${nextYear}`),
                       ''
                     ];
-                    return React.createElement('div', { className: 'relative overflow-x-auto rounded-card border border-line bg-white shadow-card' },
-                      React.createElement('table', { className: 'w-full min-w-[860px] text-sm' },
-                        React.createElement('thead', null,
+                    const nwHead = React.createElement('thead', null,
                           React.createElement('tr', { className: 'border-b border-line bg-panel text-left' },
                             headers.map((h, i) => React.createElement('th', { key: i, scope: 'col', className: 'eyebrow px-4 py-2.5' + (i === 4 ? ' w-14' : '') }, h || React.createElement('span', { className: 'sr-only' }, T('Aktionen', 'Azioni', 'Actions'))))
                           )
-                        ),
-                        React.createElement('tbody', null,
-                          teamMembers.map(member => {
+                        );
+                    const nwRows = teamMembers.map(member => {
                             const status = getStatus(member);
                             const isOwner = member._isOwner !== false;
                             const selfLink = getSelfLink(member);
@@ -15631,8 +15659,8 @@ Best regards`
                               : cell(React.createElement(NwChip, { tone: 'neutral', icon: Clock }, T('Offen', 'Aperta', 'Open')),
                                   act(T('Erstellen', 'Crea', 'Create'), openGoals, Target));
 
-                            return React.createElement('tr', { key: member.id, className: 'border-b border-line-2 align-top last:border-0 hover:bg-panel/60' },
-                              React.createElement('td', { className: 'px-4 py-3' },
+                            // Dieselben Bausteine für Tabellenzeile (breit) und Karte (Handy)
+                            const nwWho =
                                 React.createElement('div', { className: 'flex items-center gap-3' },
                                   React.createElement('div', { className: 'grid h-9 w-9 shrink-0 place-items-center rounded-full bg-nw-blue-06 text-xs font-semibold text-nw-blue', 'aria-hidden': true },
                                     member.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()),
@@ -15646,12 +15674,8 @@ Best regards`
                                       }, React.createElement(NwTag, { tone: 'warn' }, T('Keine E-Mail', 'Nessuna e-mail', 'No email'))),
                                       isOwner && React.createElement('button', { type: 'button', onClick: () => addMemberEmail(member), className: 'text-xs font-medium text-nw-blue underline-offset-2 hover:underline' }, T('E-Mail ergänzen', 'Aggiungi e-mail', 'Add email')))
                                   )
-                                )
-                              ),
-                              React.createElement('td', { className: 'px-4 py-3' }, selfCell),
-                              React.createElement('td', { className: 'px-4 py-3' }, reviewCell),
-                              React.createElement('td', { className: 'px-4 py-3' }, goalsCell),
-                              React.createElement('td', { className: 'px-2 py-3 text-right' },
+                                );
+                            const nwMenu =
                                 React.createElement(NwRowMenu, { label: T(`Weitere Aktionen für ${member.name}`, `Altre azioni per ${member.name}`, `More actions for ${member.name}`) },
                                   selfLink && React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => copyLink(member) }, React.createElement(Copy, { size: 14, 'aria-hidden': true }), T('Selbstreflexion-Link kopieren', 'Copia link autovalutazione', 'Copy self-reflection link')),
                                   selfLink && React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => sendEmail(member) }, React.createElement(Mail, { size: 14, 'aria-hidden': true }), T('Link per E-Mail senden', 'Invia link via e-mail', 'Send link via email')),
@@ -15661,13 +15685,26 @@ Best regards`
                                   isOwner && React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => shareMember(member) }, React.createElement(Share2, { size: 14, 'aria-hidden': true }), T('Mit Führungskraft teilen', 'Condividi con responsabile', 'Share with manager')),
                                   React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM, onClick: () => { setTeamViewMode('cards'); setTimeout(() => { const el = document.getElementById('member-card-' + member.id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); } }, React.createElement(LayoutGrid, { size: 14, 'aria-hidden': true }), T('Details & PDF-Upload', 'Dettagli e caricamento PDF', 'Details & PDF upload')),
                                   React.createElement('button', { type: 'button', role: 'menuitem', className: NW_MENU_ITEM + ' text-danger hover:bg-danger-bg', onClick: () => removeMemberFromView(member, isOwner) }, React.createElement(Trash2, { size: 14, 'aria-hidden': true }), isOwner ? T('Entfernen', 'Rimuovi', 'Remove') : T('Aus meiner Ansicht entfernen', 'Rimuovi dalla mia vista', 'Remove from my view'))
-                                )
-                              )
+                                );
+                            if (nwNarrow) return React.createElement('div', { key: member.id, role: 'listitem', 'data-testid': 'member-compact-card', className: 'rounded-card border border-line bg-white p-4 shadow-card' },
+                              React.createElement('div', { className: 'flex items-start gap-2' },
+                                React.createElement('div', { className: 'min-w-0 flex-1' }, nwWho),
+                                nwMenu),
+                              React.createElement('dl', { className: 'mt-3 space-y-3 border-t border-line-2 pt-3' },
+                                [[headers[1], selfCell], [headers[2], reviewCell], [headers[3], goalsCell]].map(([label, content], i) => React.createElement('div', { key: i },
+                                  React.createElement('dt', { className: 'eyebrow mb-1.5' }, label),
+                                  React.createElement('dd', null, content)))));
+                            return React.createElement('tr', { key: member.id, className: 'border-b border-line-2 align-top last:border-0 hover:bg-panel/60' },
+                              React.createElement('td', { className: 'px-4 py-3' }, nwWho),
+                              React.createElement('td', { className: 'px-4 py-3' }, selfCell),
+                              React.createElement('td', { className: 'px-4 py-3' }, reviewCell),
+                              React.createElement('td', { className: 'px-4 py-3' }, goalsCell),
+                              React.createElement('td', { className: 'px-2 py-3 text-right' }, nwMenu)
                             );
-                          })
-                        )
-                      )
-                    );
+                    });
+                    if (nwNarrow) return React.createElement('div', { role: 'list', className: 'space-y-3' }, nwRows);
+                    return React.createElement('div', { className: 'relative overflow-x-auto rounded-card border border-line bg-white shadow-card' },
+                      React.createElement('table', { className: 'w-full min-w-[860px] text-sm' }, nwHead, React.createElement('tbody', null, nwRows)));
                   })()
 
                 // === KARTENANSICHT (Detail) ===

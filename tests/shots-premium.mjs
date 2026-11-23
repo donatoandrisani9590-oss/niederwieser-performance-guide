@@ -91,7 +91,27 @@ async function run(tag, useBase) {
     await page.locator('#nw-toast-region').getByRole('button', { name: 'Rückgängig' }).waitFor();
     await page.waitForTimeout(300);
     await shot('08-toast-rueckgaengig');
+    await page.locator('#nw-toast-region').getByRole('button', { name: 'Rückgängig' }).click(); // Testzustand wiederherstellen
+    await page.waitForTimeout(4200); // Toast ist weg, bevor die Handy-Bilder entstehen
   }
+  // Handy 390 px: Team-Übersicht (vorher breite Tabelle, nachher je Mitarbeiter eine Karte)
+  await nav('Team-Übersicht');
+  await page.getByText('4 Mitarbeiter').waitFor();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(700);
+  await shot('11-handy-team-uebersicht', { fullPage: true });
+  if (!useBase) {
+    const emil = page.getByTestId('member-compact-card').filter({ hasText: 'Emil Probe' });
+    await emil.getByRole('button', { name: /Weitere Aktionen/ }).scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+    await emil.getByRole('button', { name: /Weitere Aktionen/ }).click();
+    await page.getByRole('menu').waitFor();
+    await page.waitForTimeout(400);
+    await shot('12-handy-zeilenmenue');
+    await page.keyboard.press('Escape');
+  }
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.waitForTimeout(400);
   // HR-Reiter
   await page.locator('aside').getByText('Abmelden').first().click();
   await login(USERS.hr);

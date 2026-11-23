@@ -162,3 +162,114 @@ test('Nutzerkarte: Name vollständig lesbar, Abmelden erreichbar', async ({ page
   expect(await name.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true); // nicht abgeschnitten
   await expect(page.locator('aside').getByRole('button', { name: 'Abmelden' })).toBeVisible();
 });
+
+test.describe('Handy (390 px)', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  async function loginTeamMobile(page, user) {
+    await openApp(page);
+    await page.getByRole('button', { name: 'Menü' }).click();
+    await page.locator('#nw-sidebar-menu').getByText('Team-Übersicht', { exact: true }).click();
+    await page.locator('input[type="email"]').fill(user.email);
+    await page.locator('input[type="password"]').first().fill(user.password);
+    await page.locator('form button[type="submit"]').click();
+    await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+  }
+  const card = (page, name) => page.getByTestId('member-compact-card').filter({ hasText: name });
+  const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+
+  test('Team-Übersicht: je Mitarbeiter eine Karte mit allen drei Schritten, nichts liegt seitlich außerhalb', async ({ page, consoleErrors }) => {
+    await loginTeamMobile(page, USERS.managerA);
+    await expect(page.getByTestId('member-compact-card')).toHaveCount(4);
+    await expect(page.locator('main table')).toHaveCount(0); // keine breite Tabelle mehr
+    expect(await overflow(page)).toBe(0);
+    const emil = card(page, 'Emil Probe');
+    await expect(emil).toContainText('Selbstreflexion');
+    await expect(emil).toContainText('Beurteilung & Gespräch');
+    await expect(emil).toContainText('Zielvereinbarung');
+    // Jede Aktion der Karte liegt innerhalb der Bildschirmbreite
+    const boxes = await emil.getByRole('button').evaluateAll((els) => els.map((el) => { const r = el.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.right)]; }));
+    expect(boxes.length).toBeGreaterThan(3);
+    for (const [left, right] of boxes) { expect(left).toBeGreaterThanOrEqual(0); expect(right).toBeLessThanOrEqual(390); }
+    // Der hervorgehobene nächste Schritt führt in den Bogen
+    await emil.getByRole('button', { name: 'Starten', exact: true }).click();
+    await expect(page.getByRole('button', { name: /Entwurf speichern/ }).first()).toBeVisible();
+    expect(consoleErrors).toEqual([]);
+  });
+
+  test('Team-Übersicht: ⋯-Menü ganz sichtbar, „Entfernen“ erreichbar, Dialog passt auf den Bildschirm', async ({ page }) => {
+    await loginTeamMobile(page, USERS.managerA);
+    manualDialogs(page, true);
+    const frieda = card(page, 'Frieda Geteilt'); // letzte Karte, unten am Bildschirm
+    await frieda.getByRole('button', { name: /Weitere Aktionen/ }).scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400); // Nachrollen abwarten (Scrollen schließt ein offenes Menü)
+    await frieda.getByRole('button', { name: /Weitere Aktionen/ }).click();
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    const box = await menu.boundingBox();
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(390);
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y + box.height).toBeLessThanOrEqual(844);
+    await expect(page.getByRole('menuitem', { name: 'Entfernen' })).toBeInViewport({ ratio: 1 });
+    await page.getByRole('menuitem', { name: 'Entfernen' }).click();
+    const dlg = page.locator('[data-nw-dialog]');
+    await expect(dlg).toContainText('aus deiner Ansicht entfernen?');
+    const panel = await dlg.getByRole('alertdialog').boundingBox();
+    expect(panel.x).toBeGreaterThanOrEqual(0);
+    expect(panel.x + panel.width).toBeLessThanOrEqual(390);
+    await expect(dlg.locator('[data-nw-ok]')).toBeInViewport({ ratio: 1 });
+    await dlg.locator('[data-nw-cancel]').click();
+    await expect(dlg).toHaveCount(0);
+  });
+
+  test('Wechsel der Breite: am Desktop wieder die Tabelle, dieselben Aktionen', async ({ page }) => {
+    await loginTeamMobile(page, USERS.managerA);
+    await expect(page.getByTestId('member-compact-card')).toHaveCount(4);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await expect(page.locator('main table')).toHaveCount(1);
+    await expect(page.getByTestId('member-compact-card')).toHaveCount(0);
+    await expect(memberRow(page, 'Emil Probe').getByRole('button', { name: 'Starten', exact: true })).toBeVisible();
+  });
+});
+
+test('⋯-Menü in der untersten Zeile bleibt ganz im sichtbaren Bereich (niedriges Fenster)', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 620 });
+  await loginTeam(page, USERS.managerA);
+  const btn = memberRow(page, 'Frieda Geteilt').getByRole('button', { name: /Weitere Aktionen/ });
+  await btn.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(400);
+  await btn.click();
+  const menu = page.getByRole('menu');
+  await expect(menu).toBeVisible();
+  await expect.poll(async () => { const b = await menu.boundingBox(); return b ? Math.round(b.y + b.height) : 9999; }).toBeLessThanOrEqual(620);
+  await expect(page.getByRole('menuitem', { name: 'Entfernen' })).toBeInViewport({ ratio: 1 });
+});
+
+test.describe('Handy (390 px): Rückmeldung', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+  test('Toast nutzt die Bildschirmbreite und liegt über dem Assistent-Knopf, nicht darauf', async ({ page }) => {
+    await openApp(page);
+    await page.getByRole('button', { name: 'Menü' }).click();
+    await page.locator('#nw-sidebar-menu').getByText('Team-Übersicht', { exact: true }).click();
+    await page.locator('input[type="email"]').fill(USERS.managerA.email);
+    await page.locator('input[type="password"]').first().fill(USERS.managerA.password);
+    await page.locator('form button[type="submit"]').click();
+    await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
+    const clara = page.getByTestId('member-compact-card').filter({ hasText: 'Clara Beispiel' });
+    await clara.getByRole('button', { name: /Weitere Aktionen/ }).click();
+    await page.getByRole('menuitem', { name: 'Beurteilungsgespräch: zurücksetzen' }).click();
+    const toast = page.locator('#nw-toast-region > div').last();
+    await expect(toast).toContainText('Gespräch mit Clara Beispiel ist wieder offen');
+    await expect(toast.getByRole('button', { name: 'Rückgängig' })).toBeVisible();
+    const box = await toast.boundingBox();
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(390);
+    expect(box.width).toBeGreaterThan(280); // vorher rund 195 px (halbe Breite), der Text brach nach jedem Wort um
+    expect(box.height).toBeLessThan(70);    // höchstens zwei Zeilen
+    const assistant = await page.getByRole('button', { name: /HR-Copilot|Assistent/ }).last().boundingBox();
+    expect(box.y + box.height).toBeLessThanOrEqual(assistant.y); // Toast endet über dem runden Knopf
+    await toast.getByRole('button', { name: 'Rückgängig' }).click();
+    await expect.poll(async () => field(await getDoc('teamMembers/tm-clara'), 'meetingDone'), { timeout: 10000 }).toBe(true);
+  });
+});

@@ -13,7 +13,7 @@ Kennzahlen, wartet auf deine Freigabe.
 
 ## A. Ohne Schutzbereich (wichtigste zuerst)
 
-**Stand 23.11.2026:** erledigt sind U1, U2, U3, U5, U7, U8, U9, teilweise U4. Offen sind U6, U10, U11, U12, U14.
+**Stand 23.11.2026:** erledigt sind U1, U2, U3, U5, U6, U7, U8, U9, teilweise U4. Offen sind U10, U11, U12, U14.
 Details im [Übergabebericht](UEBERGABE.md).
 
 | # | Rolle | Stelle | Problem | Vorschlag | Prio | Aufwand |
@@ -23,7 +23,7 @@ Details im [Übergabebericht](UEBERGABE.md).
 | U3 ✅ | alle | 27 Rückfragen und 5 Eingaben über Browser-Fenster (`confirm`, `prompt`, `alert`) | Graue Systemfenster mit „OK / Abbrechen“, die Aktion steht nur im Text („OK = trotzdem abschließen“). Blockieren den ganzen Tab, sehen auf jedem Gerät anders aus, auf dem Handy abgeschnitten. Offen als A3 in §11 | Ein einheitlicher n.Org-Dialog: Titel, Liste der offenen Punkte, klar beschriftete Knöpfe („Trotzdem abschließen“ / „Weiter bearbeiten“), rot bei endgültigem Löschen, Namensfeld mit Live-Prüfung beim Entfernen, Esc und Enter, Fokus gefangen | P1 | L |
 | U4 (teilweise) | Führungskraft, Mitarbeiter | Bögen | Dieselbe Aktion heißt dreimal anders: „Entwurf speichern“ / „Speichern“ / „Als Entwurf speichern“ und „Abschließen“ / „Fertig & abschließen“ bzw. „Abschließen & Senden“ / „Fertig & senden“ / „Selbstreflexion abschicken“. Dazu Emojis in Knöpfen (💾, ✓) | Je Aktion ein Wort, überall gleich. Emojis durch Icons ersetzen | P2 | S |
 | U5 ✅ | alle | Rückmeldungen (Toasts) | „Bewertung abgeschlossen gespeichert!“, „Bewertung (Entwurf) gespeichert!“: holprig, „Bewertung“ statt „Beurteilung“, Ausrufezeichen. Nach „Gespräch geführt“ kein „Rückgängig“ | Klare Sätze („Beurteilung für Emil Probe abgeschlossen“). Toast mit Aktionsknopf „Rückgängig“ dort, wo ein vorhandener Umschalter es ohne neue Datenzugriffe erlaubt (Gespräch geführt, Zielgespräch geführt) | P2 | M |
-| U6 | Führungskraft | Team-Übersicht auf dem Handy | Die Status-Matrix ist 961 px breit in 458 px. Beurteilung, Ziele und das Menü liegen unsichtbar rechts, kein Hinweis auf das Wischen. Bei 390 px ließ sich das ⋯-Menü im automatischen Durchlauf nicht zuverlässig öffnen (schließt beim Scrollen) | Unter 768 px je Mitarbeiter eine Karte mit denselben Zellen und Aktionen untereinander | P2 | M |
+| U6 ✅ | Führungskraft | Team-Übersicht auf dem Handy | Die Status-Matrix ist 961 px breit in 458 px. Beurteilung, Ziele und das Menü liegen unsichtbar rechts, kein Hinweis auf das Wischen. Bei 390 px ließ sich das ⋯-Menü im automatischen Durchlauf nicht öffnen. Ursache gefunden und behoben: Das Menü ragte unten aus dem Bildschirm, der letzte Eintrag „Entfernen“ war abgeschnitten (auch in unteren Zeilen am Desktop) | Unter 768 px je Mitarbeiter eine Karte mit denselben Zellen und Aktionen untereinander | P2 | M |
 | U7 ✅ | Führungskraft | Nutzerkarte unten links | „Anna Te…“ und „Führungskr…“ abgeschnitten, weil „Abmelden“ als Text daneben steht | Abmelden als Icon-Knopf mit Beschriftung beim Darüberfahren, Name und Rolle voll lesbar | P3 | S |
 | U8 ✅ | HR | HR-Dashboard, Reiter | Fünf Reiter mit Emojis (🔔 ⚖️ 🕸️ 📋 💾), vier mit Icons. Kennzahl-Titel „⚠ ÜBERFÄLLIG!“ | Durchgehend Icons, ruhige Titel | P3 | S |
 | U9 ✅ | Führungskraft | Team-Übersicht mit Schalter `shareWithEmployee` | Nach dem Teilen geänderte Beurteilung weicht still von der geteilten Fassung ab (F3 in §11) | Hinweis „Seit dem Teilen geändert“ mit „Erneut teilen“ (ruft die vorhandene Teilen-Funktion auf) | P2 | S |

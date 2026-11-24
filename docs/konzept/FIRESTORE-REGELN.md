@@ -1,8 +1,9 @@
 # Firestore-Regeln: Befund und Vorschlag (Stufe 1)
 
 Stand 23.11.2026. Grundlage: die in der Firebase-Konsole eingespielten Regeln, Kopie in `tests/rules/aktuell.rules`.
-Vorschlag: `tests/rules/vorschlag.rules`. **Eingespielt am 23.11.2026.** `tests/rules/aktuell.rules` enthält seitdem die
-alten Regeln (zum Zurückwechseln).
+**Was ist live?** Seit 23.11.2026 die Fassung `tests/rules/eingespielt-2026-11-23.rules` (Stufe 1).
+**Nächste Fassung:** `tests/rules/vorschlag.rules` (Stufe 1b, noch nicht eingespielt, Änderungen siehe Kopf der Datei).
+**Vor dem 23.11.2026:** `tests/rules/aktuell.rules` (alte Regeln, nur zum Vergleich).
 
 ## Befund der aktuellen Regeln
 

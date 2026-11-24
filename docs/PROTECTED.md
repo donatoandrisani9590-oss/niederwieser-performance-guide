@@ -87,7 +87,9 @@ Collections, Feldnamen und Typen (abgeleitet aus dem Datenbestand, **nur Struktu
 `goalMeetingDoneAt` string|null · `invitedAt` string|null · `lastReminderAt` null · `meetingCompleted` bool ·
 `meetingCompletedAt` null · `meetingDone` bool · `meetingDoneAt` string · `migratedAt` string ·
 `migratedFromLocal` bool · `name` string · `ownerEmail` string · `position` string · `scheduledAt` string ·
-`scheduledSource` (`form`|`manual`) · `sharedWith` array<string> · `userId` string
+`scheduledSource` (`form`|`manual`) · `scheduledByName` string · `meetingDoneByName` string ·
+`goalMeetingDoneByName` string (Vermerk, wer eingetragen hat; seit 23.11.2026, fehlt bei älteren Einträgen) ·
+`sharedWith` array<string> · `userId` string
 
 ### `teamAppraisals`
 - Typ `type`: `review`, `goals`, `goals_pdf`, `self`, `self_assessment`, `self_assessment_standalone`, `self_pdf`

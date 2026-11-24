@@ -1,6 +1,6 @@
 // Kritische Wege: Anmeldung, Daten laden, Datensatz anlegen/ändern/speichern, nach Neuladen wiederfinden.
 // Läuft nur gegen den Firebase-Emulator mit synthetischen Testdaten (siehe fixtures.mjs / seed.mjs).
-import { test, expect, openApp } from './fixtures.mjs';
+import { test, expect, openApp, manualDialogs } from './fixtures.mjs';
 import { seed, USERS, ACCESS_CODE, YEAR, PREV_YEAR, NEXT_YEAR, listDocs, getDoc, setDoc } from './seed.mjs';
 
 const field = (doc, name) => {
@@ -45,7 +45,7 @@ test('Führungskraft sieht nach Anmeldung genau ihre eigenen und geteilten Mitar
   await page.getByRole('radio', { name: 'Karten' }).click();
   await expect(page.getByText('Geteilt von: fk.bernd@test.local')).toBeVisible();
   await expect(page.getByText('GPS 3.9').first()).toBeVisible();
-  await expect(page.getByText('✎ Entwurf gespeichert')).toBeVisible();
+  await expect(page.getByText('Entwurf gespeichert').first()).toBeVisible(); // angepasst: ohne das Zeichen ✎ davor (Designsystem: keine Symbolzeichen)
 });
 
 test('Andere Führungskraft sieht keine fremden Mitarbeiter', async ({ page }) => {
@@ -58,7 +58,8 @@ test('Andere Führungskraft sieht keine fremden Mitarbeiter', async ({ page }) =
 test('Abmelden und erneut anmelden: alle Daten wieder da', async ({ page }) => {
   await gotoTeamAndLogin(page, USERS.managerA);
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
-  await page.getByText('Abmelden').first().click();
+  await page.getByTestId('user-card').click(); // angepasst (Shell 2.0): „Abmelden“ steht im Konto-Popover der Nutzerkarte
+  await page.getByRole('button', { name: 'Abmelden' }).click();
   await expect(page.getByText('Abmelden')).toHaveCount(0);
   await page.getByText('Team-Übersicht', { exact: true }).first().click();
   await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -145,8 +146,8 @@ test('Beurteilung anlegen, als Entwurf speichern, ändern, abschließen und nach
   page.on('dialog', (d) => { completionMsg = d.message(); d.accept().catch(() => {}); });
   await page.getByRole('button', { name: /Abschließen/ }).first().click();
   await expect.poll(() => completionMsg).toContain('2 von 2 Zielen ohne Zielerreichung');
-  const confirm = page.getByRole('button', { name: /Ja|Bestätigen|Abschließen/ }).last();
-  if (await confirm.isVisible().catch(() => false)) await confirm.click().catch(() => {});
+  // Angepasst: Hier stand ein Rest aus der Zeit vor dem Dialog („falls noch ein Bestätigen-Knopf sichtbar ist, klicken“).
+  // Die Rückfrage beantwortet der dialog-Listener oben. Der Rest traf nach U4 den gleichnamigen Knopf in der Leiste.
 
   await expect.poll(async () => {
     const d = (await listDocs('teamAppraisals')).filter((x) => field(x, 'employeeId') === 'tm-emil' && field(x, 'type') === 'review');
@@ -309,7 +310,8 @@ test('Ziel-Dashboard: Jahresfilter optional, Standard „Alle Jahre“ wie bishe
   await page.getByText('Ziel-Dashboard', { exact: true }).first().click();
   const picker = page.getByRole('radiogroup', { name: 'Jahr' });
   await expect(picker.getByRole('radio', { name: 'Alle Jahre' })).toHaveAttribute('aria-checked', 'true');
-  const kpi = page.locator('.text-2xl.font-semibold.text-nw-blue').first();
+  // Kennzahl über die Typo-Rolle des Designsystems (t-kpi), nicht über Einzelklassen
+  const kpi = page.locator('.t-kpi.text-nw-blue').first();
   const all = Number(await kpi.textContent());
   await picker.getByRole('radio', { name: PREV_YEAR }).click();
   await expect.poll(async () => Number(await kpi.textContent())).toBeLessThan(all);
@@ -367,11 +369,12 @@ test('Kalibrierung ohne 9-Box-Grid', async ({ page }) => {
   await expect(page.getByText(/9-Box Grid/)).toHaveCount(0);
 });
 
-test('Zurück und Home: auf jeder Seite, Schritt für Schritt zurück, Formular fragt vor dem Verlassen', async ({ page }) => {
+test('Zurück und Start: auf jeder Seite, Schritt für Schritt zurück, Formular fragt vor dem Verlassen', async ({ page }) => {
   await gotoTeamAndLogin(page, USERS.managerA);
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
   const back = page.getByRole('navigation', { name: 'Seitennavigation' }).getByRole('button', { name: 'Zurück' });
-  const home = page.getByRole('navigation', { name: 'Seitennavigation' }).getByRole('button', { name: 'Home' });
+  // angepasst (Shell 2.0): Zurück und Start sind die Pillen in der Seitenleiste; „Home“ heißt „Start“
+  const home = page.getByRole('navigation', { name: 'Seitennavigation' }).getByRole('button', { name: 'Start' });
   await page.getByText('Kalibrierung', { exact: true }).first().click();
   await expect(page.getByText(/Review-Periode/)).toBeVisible();
   await page.getByText('Kompetenzen', { exact: true }).first().click();
@@ -380,10 +383,10 @@ test('Zurück und Home: auf jeder Seite, Schritt für Schritt zurück, Formular 
   await expect(page.getByText(/Review-Periode/)).toBeVisible();
   await back.click();
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
-  // Home führt zum Dashboard, dort gibt es keinen Home-Knopf
+  // Start führt zum Dashboard, dort ist die Start-Pille gesperrt (sichtbar, aber ohne Wirkung)
   await home.click();
   await expect(page.getByText(`Wo ich stehe · ${YEAR}`)).toBeVisible();
-  await expect(home).toHaveCount(0);
+  await expect(home).toBeDisabled();
   // Formular: Rückfrage abgelehnt → bleibt im Formular, nichts gespeichert
   await back.click();
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
@@ -411,7 +414,7 @@ test('Bögen: Abschnittsleiste bleibt sichtbar und springt, keine Halo-Warnung v
   await expect(page.getByRole('heading', { name: /^Teil D/ })).toBeInViewport();
   // Leiste nach dem Sprung weiterhin sichtbar, Speichern erreichbar
   await expect(nav).toBeInViewport();
-  await expect(page.getByRole('button', { name: 'Speichern', exact: true })).toBeInViewport();
+  await expect(page.getByTestId('form-bar').getByRole('button', { name: 'Entwurf speichern' })).toBeInViewport(); // angepasst: hieß in der Leiste „Speichern“ (U4)
   // Vorbelegung „alle 3“ ist noch keine Bewertung
   await expect(page.getByText('Möglicher Halo-Effekt')).toHaveCount(0);
 });
@@ -424,7 +427,7 @@ test('Mitarbeiter-Link: Abschnittsleiste unter der Kopfzeile, Spaltenköpfe der 
   await expect(page.getByRole('heading', { name: /^Teil D/ })).toBeInViewport();
   await expect(nav).toBeInViewport();
   await expect(page.getByRole('columnheader', { name: 'Maßnahme' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Fertig & senden' })).toBeInViewport();
+  await expect(page.getByTestId('form-bar').getByRole('button', { name: 'Abschicken', exact: true })).toBeInViewport(); // angepasst: hieß „Fertig & senden“ (U4)
 });
 
 test('Nicht abgeschickte Selbstreflexion: als Entwurf sichtbar und ansehbar, im Dashboard als offener Punkt', async ({ page }) => {
@@ -442,7 +445,7 @@ test('Nicht abgeschickte Selbstreflexion: als Entwurf sichtbar und ansehbar, im 
 test('Mitarbeiter-Link: am Ende des Bogens ein klarer Abschicken-Schritt', async ({ page }) => {
   await openApp(page, '?accessCode=CODE-tm-emil');
   await page.getByRole('button', { name: /Selbstreflexion starten/ }).click();
-  const submit = page.getByRole('button', { name: 'Selbstreflexion abschicken' });
+  const submit = page.getByRole('button', { name: 'Selbstreflexion abschicken' }).last(); // der Knopf im Abschluss-Kasten (im Kopf heißt er jetzt gleich, U4)
   await submit.scrollIntoViewIfNeeded();
   await expect(submit).toBeVisible();
   await expect(page.getByText('Bisher ist deine Selbstreflexion nur als Entwurf gespeichert.')).toBeVisible();
@@ -487,9 +490,22 @@ test('Mitarbeiter löschen: nur mit eingetipptem Namen, vorher automatische Sich
     await memberRow(page, 'Emil Probe').getByRole('button', { name: /Weitere Aktionen/ }).click();
     await page.getByRole('menuitem', { name: 'Entfernen' }).click();
   };
-  // Falscher Name: nichts gelöscht
-  await remove('Emil');
-  await expect(page.getByText('Name stimmt nicht überein')).toBeVisible();
+  // Falscher Name: Der Knopf bleibt gesperrt, nichts gelöscht.
+  // (Angepasst: Früher kam nach dem Browser-Fenster die Meldung „Name stimmt nicht überein“. Der neue Dialog
+  // lässt „In den Papierkorb“ erst zu, wenn der Name stimmt.)
+  manualDialogs(page, true);
+  await memberRow(page, 'Emil Probe').getByRole('button', { name: /Weitere Aktionen/ }).click();
+  await page.getByRole('menuitem', { name: 'Entfernen' }).click();
+  const dlg = page.locator('[data-nw-dialog]');
+  await expect(dlg).toContainText('Emil Probe entfernen?');
+  await expect(dlg).toContainText('Papierkorb');
+  await dlg.locator('input').fill('Emil');
+  await expect(dlg.locator('[data-nw-ok]')).toBeDisabled();
+  await dlg.locator('input').press('Enter'); // Enter bestätigt nicht, solange der Name nicht stimmt
+  await expect(dlg).toBeVisible();
+  await dlg.locator('[data-nw-cancel]').click();
+  await expect(dlg).toHaveCount(0);
+  manualDialogs(page, false);
   expect((await listDocs('teamMembers')).some((d) => d.name.endsWith('/tm-emil'))).toBe(true);
   // Richtiger Name: Sicherungsdatei, dann gelöscht
   const [download] = await Promise.all([page.waitForEvent('download'), remove('Emil Probe')]);
@@ -515,7 +531,8 @@ test('Papierkorb: HR stellt einen entfernten Mitarbeiter mit allen Unterlagen un
   await expect(page.getByText('Emil Probe ist im Papierkorb')).toBeVisible();
   await expect.poll(async () => (await getDoc('teamMembers/tm-emil')) === null, { timeout: 10000 }).toBe(true);
   // HR: Papierkorb → Wiederherstellen
-  await page.getByText('Abmelden').first().click();
+  await page.getByTestId('user-card').click(); // angepasst (Shell 2.0): „Abmelden“ steht im Konto-Popover der Nutzerkarte
+  await page.getByRole('button', { name: 'Abmelden' }).click();
   await expect(page.getByText('Abmelden')).toHaveCount(0);
   await page.reload();
   await gotoTeamAndLogin(page, USERS.hr);
@@ -588,7 +605,8 @@ test('Phase 3 (Schalter an): HR-Benutzerverwaltung – Name ändern, Passwort-Re
   // Sperren, HR-Konto nicht sperrbar
   await menu('Bernd Neumann', 'Konto sperren');
   await expect(row('Bernd Neumann')).toContainText('Gesperrt');
-  expect(field(await getDoc(`registeredUsers/${uidB}`), 'disabled')).toBe(true);
+  // Auf das Schreiben warten: Die Zeile zeigt „Gesperrt“ schon, bevor die Datenbank bestätigt hat (einmal rot am 23.11.2026)
+  await expect.poll(async () => field(await getDoc(`registeredUsers/${uidB}`), 'disabled')).toBe(true);
   await menu(USERS.hr.name, 'Konto sperren');
   await expect(page.getByText('HR-Admin-Konten und dein eigenes Konto kannst du nicht sperren.')).toBeVisible();
   // Protokoll, Mitarbeiterdaten unverändert
@@ -612,7 +630,7 @@ test('Phase 3 (Schalter aus, Standard): Sperrfeld ohne Wirkung', async ({ page }
   const uidB = docB.name.split('/').pop();
   await setDoc(`registeredUsers/${uidB}`, { email: USERS.managerB.email, uid: uidB, fullName: USERS.managerB.name, createdAt: '2025-01-10T00:00:00.000Z', disabled: true });
   await gotoTeamAndLogin(page, USERS.managerB);
-  await expect(page.getByRole('button', { name: /Abmelden/ }).first()).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId('user-card')).toBeVisible({ timeout: 15000 }); // angepasst (Shell 2.0): „Abmelden“ steht im Konto-Popover der Nutzerkarte
   await page.waitForTimeout(1500);
   await expect(page.getByText('Dein Konto ist gesperrt.')).toHaveCount(0);
   await expect(page.locator('input[type="password"]')).toHaveCount(0);
@@ -662,7 +680,7 @@ test('Mitarbeiter-Link: vor dem Abschicken Übersicht der leeren Felder, Abbrech
   const before = await completedSelf();
   await openApp(page, '?accessCode=CODE-tm-emil');
   await page.getByRole('button', { name: /Selbstreflexion starten/ }).click();
-  const submit = page.getByRole('button', { name: 'Selbstreflexion abschicken' });
+  const submit = page.getByRole('button', { name: 'Selbstreflexion abschicken' }).last(); // der Knopf im Abschluss-Kasten (im Kopf heißt er jetzt gleich, U4)
   await submit.scrollIntoViewIfNeeded();
   let message = '';
   page.removeAllListeners('dialog');

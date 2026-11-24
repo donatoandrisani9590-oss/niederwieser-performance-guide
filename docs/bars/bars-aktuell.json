@@ -1,0 +1,1194 @@
+{
+  "quelle": "index.html",
+  "commit": "3461dbc",
+  "erzeugt": "2026-11-24",
+  "sprachen": {
+    "de": {
+      "kurzanker_im_bogen": {
+        "fach": {
+          "1": "Erfüllt nicht – Fehlerhaft, kein fachliches Fundament",
+          "2": "Verbesserungsbedarf – Standardprozesse okay, bei Abweichungen überfordert",
+          "3": "Baseline – Souverän, selbstständig, qualitativ hochwertig",
+          "4": "Übertrifft – Durchdringt komplexe Zusammenhänge, agiert präventiv",
+          "5": "Herausragend – Fachliche Autorität, standortübergreifend anerkannt"
+        },
+        "komm": {
+          "1": "Erfüllt nicht – Kapselt sich ab, Absicherungs-Mentalität",
+          "2": "Verbesserungsbedarf – Reaktiv, ineffiziente Kanäle",
+          "3": "Baseline – Proaktiv, wertschätzend, teilt Wissen bereitwillig",
+          "4": "Übertrifft – Schafft Verständnis, baut Silos ab, vermittelt bei Konflikten",
+          "5": "Herausragend – Etabliert neue Standards, Netzwerk des Vertrauens"
+        },
+        "prob": {
+          "1": "Erfüllt nicht – Blockiert, wartet passiv auf Lösung von außen",
+          "2": "Verbesserungsbedarf – Bearbeitet Symptome, eskaliert zu früh",
+          "3": "Baseline – Analysiert strukturiert, findet pragmatische Lösungen",
+          "4": "Übertrifft – Erkennt Muster, denkt in Lösungsalternativen",
+          "5": "Herausragend – Löst strategische Probleme, Vorbild bei Krisen"
+        },
+        "adapt": {
+          "1": "Erfüllt nicht – Sträubt sich gegen Veränderungen",
+          "2": "Verbesserungsbedarf – Wenig Eigeninitiative zur Weiterbildung",
+          "3": "Baseline – Neugierig, reflektiert, passt sich zügig an",
+          "4": "Übertrifft – Sucht aktiv Wissen, Katalysator für Neues",
+          "5": "Herausragend – Antizipiert Trends, bereitet Organisation vor"
+        },
+        "orga": {
+          "1": "Erfüllt nicht – Chaotisch, hält Fristen nicht ein",
+          "2": "Verbesserungsbedarf – Funktioniert unter Führung, bei Autonomie unsicher",
+          "3": "Baseline – Organisiert, priorisiert, hält Commitments ein",
+          "4": "Übertrifft – Vorausschauend, optimiert Prozesse, entlastet andere",
+          "5": "Herausragend – Koordiniert komplexe Vorhaben, setzt Maßstäbe"
+        },
+        "lead": {
+          "1": "Erfüllt nicht – Kein Commitment zum Team, Mikromanagement",
+          "2": "Verbesserungsbedarf – Führt nur 'gefällige' Gespräche",
+          "3": "Baseline – Gibt klare Richtung, fördert individuell, coacht",
+          "4": "Übertrifft – Strategisches Teamdesign, entwickelt High Performer",
+          "5": "Herausragend – Baut standortübergreifende Führungskultur auf"
+        },
+        "strat": {
+          "1": "Erfüllt nicht – Tunnelblick, keine Weitsicht",
+          "2": "Verbesserungsbedarf – Tagesgeschäft dominiert, wenig Bezug zur Strategie",
+          "3": "Baseline – Übersetzt Strategie in Bereichsziele, zeigt Zusammenhänge",
+          "4": "Übertrifft – Antizipiert Entwicklungen, fordert Status quo heraus",
+          "5": "Herausragend – Prägt strategische Ausrichtung, M&A-Kompetenz"
+        },
+        "decide": {
+          "1": "Erfüllt nicht – Vermeidet Entscheidungen, delegiert ständig nach oben",
+          "2": "Verbesserungsbedarf – Entscheidet nur bei perfekter Info-Lage",
+          "3": "Baseline – Entscheidet zügig, transparent, steht zu Entscheidungen",
+          "4": "Übertrifft – Trifft auch unbequeme Entscheidungen, dosiert Risiko klug",
+          "5": "Herausragend – Entscheidet strategisch mit Mut, bei Unsicherheit souverän"
+        },
+        "exec": {
+          "1": "Erfüllt nicht – Plant nicht, keine Verbindlichkeit",
+          "2": "Verbesserungsbedarf – Nachverfolgung inkonsistent, lässt nachsichtig durchgehen",
+          "3": "Baseline – Klare Ziele, nachvollziehbare Erwartungen, fordert ein",
+          "4": "Übertrifft – Stringent, balanciert Druck & Förderung, denkt in KPIs",
+          "5": "Herausragend – Performance-Kultur über Standorte hinweg"
+        },
+        "stake": {
+          "1": "Erfüllt nicht – Ignoriert Stakeholder, provoziert Konflikte",
+          "2": "Verbesserungsbedarf – Reagiert nur auf Eskalationen",
+          "3": "Baseline – Pflegt proaktiv Beziehungen, moderiert sachlich",
+          "4": "Übertrifft – Orchestriert Stakeholder, findet Win-Win-Lösungen",
+          "5": "Herausragend – Diplomatie auf Executive-Level, verhindert Eskalationen"
+        }
+      },
+      "kompetenzen": [
+        {
+          "id": "c1",
+          "titel": "Fachkompetenz & Anwendung",
+          "kategorie": "core",
+          "definition": "Bewertet spezifisches Fachwissen und dessen Anwendung. Es geht nicht nur um theoretisches Können, sondern den Beitrag zu Prozesssicherheit und Qualität.",
+          "stufen": {
+            "1": {
+              "text": "Der/die Mitarbeitende verfügt nicht über das für die Position zwingend erforderliche fachliche Fundament. Aufgaben werden häufig fehlerhaft oder unvollständig ausgeführt (z. B. falsche Dateneingaben, Fehlbedienung von Anlagen, Falschauskünfte an Kunden), was zu Nacharbeit, Beschwerden oder Risiken führt. Es fehlt das Verständnis für die fachlichen Standards und Regeln des eigenen Bereichs. Auch nach Einarbeitung oder Feedback treten dieselben inhaltlichen Fehler wiederholt auf. Der/die Mitarbeitende zeigt wenig Antrieb, diese Wissenslücken eigenständig zu schließen. Komplexe Zusammenhänge des eigenen Fachgebiets werden nicht durchdrungen; man verlässt sich darauf, dass andere die fachliche Richtigkeit prüfen.",
+              "example": "Admin: Pflegt Stammdaten wiederholt falsch ein, versteht die Auswirkung auf Rechnungen nicht. | Buchhaltung: Versteht USt-Systematik nicht, bucht wiederholt falsch (19% statt 7%), Steuerbescheide müssen korrigiert werden. | HR: Kennt Kündigungsfristen nicht, erstellt fehlerhafte Arbeitsverträge, die nachgebessert werden müssen. | Einkauf: Versteht Incoterms nicht, bestellt mit falschen Lieferbedingungen (DDP statt EXW), verursacht unerwartete Kosten."
+            },
+            "2": {
+              "text": "Der/die Mitarbeitende beherrscht die Standardprozesse und Routineaufgaben seines Fachgebiets sicher und liefert im Tagesgeschäft zuverlässige Ergebnisse. Bei Abweichungen, Spezialfällen oder neuen Anforderungen erkennt er/sie die eigenen Grenzen und holt sich gezielt Unterstützung von erfahrenen Kollegen oder der Führungskraft - ein dem aktuellen Erfahrungsstand angemessenes Vorgehen. Er/Sie beginnt, verfügbare Ressourcen (Dokumentation, Handbücher, System-Hilfen) eigenständig zu nutzen, bevor eskaliert wird. Das Verständnis für das „Warum\" hinter Prozessen entwickelt sich schrittweise. Die Basis für den nächsten Entwicklungsschritt - vollständige Selbstständigkeit auch bei komplexen Themen - ist gelegt.",
+              "example": "IT: Löst Standard-Anfragen (Passwort-Resets, Drucker-Probleme) kompetent und selbstständig. Bei komplexeren Netzwerkproblemen führt er/sie eine erste Diagnose durch (Logs prüfen, Symptome dokumentieren), bevor erfahrene Kollegen hinzugezogen werden. | Buchhaltung: Bucht Standardvorgänge korrekt und termingerecht. Bei Intercompany-Buchungen nutzt er/sie zunehmend die verfügbare Dokumentation und fragt gezielt nach. | HR: Erstellt Routinezeugnisse professionell. Bei Sonderfällen recherchiert er/sie Vorlagen und bespricht kritische Punkte mit der Führungskraft. | Controlling: Erstellt Standardreports zuverlässig. Bei komplexen Nachfragen holt er/sie sich Unterstützung."
+            },
+            "3": {
+              "text": "BASELINE: Der/die Mitarbeitende beherrscht sein Aufgabengebiet souverän und liefert konstant qualitativ hochwertige Ergebnisse (korrekte Auftragsabwicklung, stabile Systemverfügbarkeit, präzise Werkstücke). Er/Sie arbeitet im Tagesgeschäft vollkommen selbstständig. Auftretende fachliche Probleme löst er/sie zügig eigenständig oder holt gezielt und rechtzeitig Unterstützung ein. Er/Sie ist in der Lage, sein Wissen situativ an Kollegen weiterzugeben (kurze Einweisungen, Troubleshooting-Tipps) und trägt damit zur Stabilität des Teams bei. Fachliche Standards werden konsequent eingehalten.",
+              "example": "Produktion: Bedient Anlage fehlerfrei nach Spezifikation. | Buchhaltung: Führt Monatsabschluss selbstständig und termingerecht durch, klärt offene Posten eigeninitiativ. | HR: Bearbeitet Personalfälle von Einstellung bis Austritt rechtssicher und vollständig. | Einkauf: Verhandelt Konditionen im Rahmen der Vorgaben, hält Lieferantenstamm aktuell, eskaliert bei Engpässen rechtzeitig."
+            },
+            "4": {
+              "text": "Der/die Mitarbeitende durchdringt auch komplexe fachliche Zusammenhänge tiefgehend und erkennt Wechselwirkungen, die anderen entgehen (z.B. wie eine Änderung im Auftrag die Produktionsplanung beeinflusst). Er/Sie agiert präventiv: Risiken oder Fehlerquellen werden identifiziert und eliminiert, bevor sie zum Problem werden. Das Fachwissen wird genutzt, um bestehende Abläufe aktiv zu optimieren und effizienter zu gestalten. Kollegen wenden sich bei kniffligen fachlichen Fragen aktiv an diese Person („Go-to-Person“). Der/die Mitarbeitende gibt Wissen proaktiv weiter und sorgt für einen hohen Standard im Team. Er/Sie blickt über den eigenen Schreibtisch hinaus und versteht die Anforderungen der internen Schnittstellenpartner genau.",
+              "example": "Customer Service: Prüft bei spezifischer Frage proaktiv mit Labor die Machbarkeit und schlägt sicherere Alternative vor. | Buchhaltung: Erkennt steuerliche Optimierungspotenziale, schlägt Umstrukturierung der Intercompany-Beziehungen vor. | HR: Entwickelt neue Onboarding-Checkliste, die Einarbeitungszeit um 30% reduziert. | Controlling: Baut Dashboard, das Geschäftsführung frühzeitig auf Margenverfall hinweist."
+            },
+            "5": {
+              "text": "Der/die Mitarbeitende gilt als absolute fachliche Autorität auf seinem Gebiet, deren Expertise auch standortübergreifend (Sulzberg/Bozen/Campogalliano) geschätzt und angefragt wird. Er/Sie nutzt sein exzellentes Wissen, um signifikante Verbesserungen für die Gruppe zu erzielen (z. B. Einführung konzernweiter Standards im Customer Service, massive Effizienzsteigerung durch neue IT-Lösungen). Diese Person fungiert als Multiplikator. Sie bereitet komplexes Fachwissen so auf, dass es für die Organisation nutzbar wird (z.B. Schulungen, Best-Practice-Leitfäden). Er/Sie antizipiert zukünftige Entwicklungen im Fachbereich (z.B. Markttrends, neue Technologien) und bereitet das Unternehmen proaktiv darauf vor. Fachliche Exzellenz wird hier zum direkten Mehrwert für den Unternehmenserfolg.",
+              "example": "Group Function: Entwickelt einheitlichen Service-Standard für alle Standorte (DE/IT), schult Teams. | Buchhaltung: Führt gruppenweites Reporting nach IFRS ein, wird vom Wirtschaftsprüfer als Ansprechpartner geschätzt. | HR: Entwickelt Performance-Management-System für alle Standorte, wird zum internen Experten. | Controlling: Etabliert Rolling Forecast, der von GF als Steuerungsinstrument übernommen wird."
+            }
+          }
+        },
+        {
+          "id": "c2",
+          "titel": "Kommunikation & Zusammenarbeit",
+          "kategorie": "core",
+          "definition": "Qualität des Informationsaustauschs und das Miteinander. 'One Niederwieser' bedeutet: Zusammenarbeit endet nicht an der Bürotür oder Ländergrenze.",
+          "stufen": {
+            "1": {
+              "text": "Der/die Mitarbeitende behält arbeitskritische Informationen für sich oder gibt sie so unvollständig weiter, dass Kollegen oder Kunden nachfragen müssen und Fehler entstehen. Er/Sie kapselt sich ab und zeigt kein Interesse an gemeinsamer Zielerreichung. Bei Problemen wird Verantwortung abgeschoben („Nicht meine Zuständigkeit\") oder Unterstützung verweigert. Die Kommunikation ist geprägt von Absicherungsmentalität (CC-Schlachten) statt Lösungsorientierung. Konflikte werden ignoriert, hinter dem Rücken ausgetragen oder unsachlich eskaliert. Das Verhalten verletzt Grundwerte des Respekts und der Fairness.",
+              "example": "Produktion: Gibt bei Schichtübergabe trotz kritischer Maschinenstörung nur „Alles ok\" weiter. | Buchhaltung: Informiert Kollegen nicht über geänderte Kontierungsregeln, Fehlbuchungen häufen sich. | HR: Teilt Kündigungen nicht rechtzeitig mit, Vertretungsregelungen scheitern. | Einkauf: Verschweigt Lieferantenprobleme, Produktion steht überraschend still."
+            },
+            "2": {
+              "text": "Der/die Mitarbeitende kommuniziert primär reaktiv: Informationen fließen oft erst auf explizite Nachfrage („Holschuld“ statt „Bringschuld“). Er/Sie fokussiert sich stark auf den eigenen Aufgabenbereich und blendet die Bedürfnisse angrenzender Abteilungen oder Kollegen aus. In Meetings oder Projekten bringt er/sie sich kaum proaktiv ein. Der gewählte Kommunikationskanal ist häufig ineffizient (z. B. langes Hin-und-Her-Schreiben bei komplexen Themen statt eines kurzen, klärenden Anrufs – entgegen dem Prinzip „Phone before Email“). Feedback wird oft persönlich genommen oder defensiv abgewehrt. Die Zusammenarbeit funktioniert im Routinebetrieb, wird aber bei Stress, Unklarheit oder abteilungsübergreifenden Themen schnell holprig.",
+              "example": "Backoffice: Schreibt tagelang E-Mails hin und her statt den Fall telefonisch zu klären. | Buchhaltung: Antwortet auf Rückfragen erst nach Tagen, blockiert Freigabeprozesse. | HR: Informiert über neue Richtlinien nur per Rundmail ohne Erklärung, Nachfragen häufen sich. | Controlling: Liefert Zahlen ohne Kontext, Empfänger verstehen Aussage nicht."
+            },
+            "3": {
+              "text": "BASELINE: Der/die Mitarbeitende informiert Kollegen und Schnittstellenpartner proaktiv, vollständig und rechtzeitig über alles Relevante (z.B. Status-Updates, Verzögerungen, Abwesenheiten). Er/Sie wählt situationsbedingt den effizientesten Kanal (greift zum Hörer, wenn Dinge schnell geklärt werden müssen). Der Umgangston ist stets wertschätzend und auf Augenhöhe, unabhängig von Hierarchie oder Standort. Er/Sie bietet Kollegen Unterstützung an, wenn Not am Mann ist, und teilt Wissen bereitwillig. In Meetings ist er/sie präsent, gut vorbereitet und konstruktiv. Konflikte werden sachlich und direkt angesprochen. Er/Sie trägt stabil zu einer positiven, professionellen Arbeitsatmosphäre bei.",
+              "example": "Sales: Informiert bei Lieferverzug sofort Kunden und Außendienst proaktiv mit neuem Termin. | Buchhaltung: Kündigt Monatsabschluss-Termine frühzeitig an, stimmt Schnittstellen ab. | HR: Kommuniziert Änderungen im Arbeitsrecht verständlich an alle Führungskräfte. | Assistenz: Hält alle Beteiligten über Terminverschiebungen auf dem Laufenden."
+            },
+            "4": {
+              "text": "Der/die Mitarbeitende kommuniziert nicht nur Informationen, sondern schafft Verständnis. Er/Sie passt die Kommunikation gezielt an das Gegenüber an (z. B. übersetzt technische Details für Laien, bereitet Daten für Entscheider auf) und stellt sicher, dass die Botschaft korrekt ankommt. Er/Sie agiert aktiv als Bindeglied zwischen Abteilungen und baut Silos ab. Bei Konflikten oder Missverständnissen im Team übernimmt er/sie eine vermittelnde Rolle und sucht nach einer gemeinsamen Lösung („Win-Win“), anstatt Recht haben zu wollen. Er/Sie gibt konstruktives, entwicklungsorientiertes Feedback, das anderen hilft, besser zu werden. Die Zusammenarbeit mit dieser Person macht das gesamte Umfeld messbar effizienter und motivierter.",
+              "example": "Schnittstelle: Moderiert bei Konflikt zwischen Produktion und Service, schafft Regelung für Eilaufträge. | Buchhaltung: Erklärt Finance-Themen so, dass auch Nicht-Kaufleute verstehen und mitentscheiden können. | HR: Vermittelt bei Teamkonflikt, findet Lösung die beide Seiten akzeptieren. | Controlling: Bereitet Zahlen für GF so auf, dass Entscheidungen direkt möglich sind."
+            },
+            "5": {
+              "text": "Der/die Mitarbeitende etabliert neue Standards der Zusammenarbeit, die über das eigene Team hinauswirken (z. B. Initiierung regelmäßiger Austauschformate zwischen den Standorten Sulzberg und Campogalliano oder zwischen Sales und Technik). Er/Sie lebt die Werte Fast, Fair, Personal so vorbildlich, dass er/sie als Rollenmodell wirkt und andere mitreißt. Er/Sie schafft ein Netzwerk des Vertrauens im gesamten Unternehmen und nutzt dieses, um komplexe, abteilungsübergreifende Probleme schnell und unbürokratisch zu lösen. Er/Sie wird bei schwierigen Kommunikationssituationen (z. B. Change-Prozesse, Krisen) als Mentor oder Mediator hinzugezogen. Er/Sie sorgt aktiv dafür, dass wir intern und extern „mit einer Stimme“ sprechen.",
+              "example": "HR: Initiiert standortübergreifendes Sounding Board für kulturelle Unterschiede Bozen/Sulzberg. | Buchhaltung: Etabliert monatlichen Finance-Call mit allen Standorten, schafft Transparenz. | Assistenz: Führt einheitliches Kommunikationsprotokoll für GF-Bereich ein. | Controlling: Schafft Reporting-Standard, der gruppenweite Vergleichbarkeit ermöglicht."
+            }
+          }
+        },
+        {
+          "id": "c3",
+          "titel": "Problemlösekompetenz",
+          "kategorie": "core",
+          "definition": "Umgang mit Hindernissen. Wir unterscheiden Troubleshooting (Symptome) vs. Ursachenforschung (Wurzel).",
+          "stufen": {
+            "1": {
+              "text": "Der/die Mitarbeitende erkennt Probleme oft erst, wenn sie bereits eskaliert sind, oder ignoriert offensichtliche Warnsignale (z.B. Fehlermeldungen, Kundenbeschwerden, Qualitätsabweichungen). Er/Sie zeigt keine Eigeninitiative zur Lösung, sondern wartet passiv auf Anweisungen („Dienst nach Vorschrift“). Bei Schwierigkeiten wird schnell aufgegeben oder die Verantwortung auf andere (Kollegen, IT, Lieferanten) geschoben. Fehler werden vertuscht oder kleingeredet, statt sie offen anzusprechen. Es findet kein Lernen aus Fehlern statt: Das exakt gleiche Problem tritt immer wieder auf, ohne dass das Verhalten geändert wird.",
+              "example": "Admin: Klickt Fehlermeldung im ERP einfach weg, am Monatsende stimmen Zahlen nicht. | Buchhaltung: Ignoriert Mahnungen wochenlang, bis Inkasso droht. | HR: Übersieht Befristungsende, Mitarbeiter arbeitet illegal weiter. | Einkauf: Bemerkt Preisabweichung nicht, zahlt monatelang zu viel."
+            },
+            "2": {
+              "text": "Der/die Mitarbeitende erkennt Probleme im eigenen Aufgabenbereich und meldet sie zeitnah. Bei Standardproblemen wendet er/sie dokumentierte Lösungsschritte (Checklisten, Anleitungen) an - bei Abweichungen vom Standard holt er/sie Unterstützung. Die Problemanalyse erfolgt gemeinsam mit erfahrenen Kollegen oder der Führungskraft; er/sie liefert dabei eine präzise Fehlerbeschreibung als wichtige Grundlage. Der Unterschied zu Stufe 3: Er/sie löst Probleme MIT ANLEITUNG, nicht eigenständig.",
+              "example": "IT: Behebt bekannte Fehler nach Dokumentation (z.B. Passwort-Reset, Drucker-Neustart). Bei unbekannten Fehlern: sammelt Infos und eskaliert - löst diese NICHT eigenständig. | Buchhaltung: Klärt Standardfälle nach Prozessvorgabe, holt bei Sonderfällen Rücksprache. | Unterschied zu Stufe 3: Stufe-3-MA würde auch unbekannte Probleme selbst analysieren und mit Lösungsvorschlag kommen."
+            },
+            "3": {
+              "text": "BASELINE: Der/die Mitarbeitende erkennt Probleme im eigenen Aufgabenbereich frühzeitig und geht sie eigenständig an. Er/Sie nutzt verfügbare Informationen (Daten, Handbücher, Historie) und Werkzeuge, um pragmatische Lösungen zu finden, die funktionieren. Er/Sie unterscheidet sicher, was er/sie selbst lösen kann und wann eine Eskalation notwendig ist – informiert dann aber präzise und lösungsorientiert (kommt mit einem Vorschlag, nicht nur mit der Beschwerde). Die Lösungen sind solide und nachhaltig für den Arbeitsalltag. Er/Sie bleibt auch in stressigen Situationen handlungsfähig („Kühler Kopf“). Nach einem Fehler wird Verantwortung übernommen („Accountability“) und korrigiert, statt Ausreden zu suchen.",
+              "example": "Customer Service: Lokalisiert fehlende Ware, informiert Kunden ehrlich, löst Konflikt professionell. | Buchhaltung: Klärt offene Posten selbstständig mit Kunden, dokumentiert Lösung. | HR: Findet pragmatische Lösung für Urlaubskonflikt im Team. | Einkauf: Organisiert bei Lieferausfall schnell Alternative, informiert alle Betroffenen."
+            },
+            "4": {
+              "text": "Der/die Mitarbeitende löst nicht nur das akute Problem, sondern betreibt systematische Ursachenforschung (z.B. „5-Why“-Methode, Datenanalyse), um zu verstehen, warum es passiert ist. Er/Sie entwickelt Maßnahmen, die verhindern, dass der Fehler jemals wieder auftritt (Fehlervermeidung). Er/Sie denkt über den eigenen Bereich hinaus: Wenn ein Problem Schnittstellen betrifft (z. B. Übergabe Sales an Produktion), wird das aktiv adressiert und gelöst. Er/Sie unterstützt Kollegen bei schwierigen Herausforderungen und bringt kreative, unkonventionelle Ansätze ein, wenn Standardlösungen nicht greifen. Probleme werden als Chance zur Verbesserung begriffen.",
+              "example": "Logistik: Analysiert Verspätungs-Daten, passt Abholprozess dauerhaft an. | Buchhaltung: Analysiert wiederkehrende Buchungsfehler, schlägt Prozessänderung vor, die Fehlerquelle eliminiert. | HR: Untersucht hohe Fluktuation in Abteilung, identifiziert Führungsproblem, initiiert Maßnahmen. | Controlling: Findet Ursache für Margenverfall, entwickelt Gegensteuerungskonzept."
+            },
+            "5": {
+              "text": "Der/die Mitarbeitende identifiziert komplexe, strukturelle Probleme oder Risiken, die anderen noch gar nicht aufgefallen sind, und entwickelt dafür umfassende Konzepte. Die Lösungen haben oft positiven Einfluss auf mehrere Abteilungen oder Standorte der Gruppe (Sulzberg/Bozen/Campogalliano). Er/Sie etabliert neue Standards oder „Best Practices“ zur Problemlösung, die im Unternehmen übernommen werden. Er/Sie verwandelt Probleme in echte Innovationen oder Wettbewerbsvorteile für Niederwieser. Bei Krisen übernimmt er/sie informell die Führung („Troubleshooter“) und navigiert das Team sicher durch unsicheres Terrain.",
+              "example": "Quality: Initiiert Task-Force für Materialfehler über Standorte hinweg. | Buchhaltung: Deckt systematischen Abrechnungsfehler auf, der Gruppe 50k EUR/Jahr kostete, implementiert Kontrolle. | HR: Erkennt strukturelles Qualifizierungsdefizit, entwickelt Schulungsprogramm für alle Standorte. | Controlling: Identifiziert versteckte Kostentreiber, spart durch Prozessänderung 100k EUR/Jahr."
+            }
+          }
+        },
+        {
+          "id": "c4",
+          "titel": "Anpassungsfähigkeit & Lernbereitschaft",
+          "kategorie": "core",
+          "definition": "Wille, sich auf neue Rahmenbedingungen (IT, Markt, Prozesse) einzustellen. 'Growth Mindset' statt Status Quo.",
+          "stufen": {
+            "1": {
+              "text": "Der/die Mitarbeitende reagiert auf Neuerungen (z.B. neue Software, Umstrukturierungen) mit offener Ablehnung, Zynismus oder Blockadehaltung. Er/Sie hält starr an veralteten Methoden fest („Das haben wir schon immer so gemacht“) und weigert sich, neue Fähigkeiten zu erlernen. Veränderungen führen zu einem massiven Leistungseinbruch oder schlechter Laune, die das Team ansteckt. Er/Sie benötigt unverhältnismäßig viel Überzeugungsarbeit und Druck, um selbst kleinste Anpassungen im Arbeitsablauf umzusetzen. Feedback zur persönlichen Weiterentwicklung wird ignoriert oder als Angriff gewertet.",
+              "example": "Lager: Weigert sich, neue Scanner zu nutzen, führt private Handlisten weiter. | Buchhaltung: Blockiert ERP-Umstellung aktiv, beschwert sich lautstark über jeden Change. | HR: Lehnt digitale Personalakte kategorisch ab, besteht auf Papier. | Sekretariat: Weigert sich, neues Buchungssystem zu lernen, sabotiert Einführung."
+            },
+            "2": {
+              "text": "Der/die Mitarbeitende steht Veränderungen offen gegenüber und setzt neue Vorgaben um. Für die Einarbeitung in neue Systeme oder Prozesse benötigt er/sie BEGLEITUNG durch Schulung oder Kollegen - selbstständiges Einarbeiten nur nach Dokumentation ist noch herausfordernd. Bei Unsicherheiten fragt er/sie nach, was gut und richtig ist. In Stresssituationen greift er/sie manchmal auf vertraute Methoden zurück. Der Unterschied zu Stufe 3: Die Einarbeitung erfolgt MIT UNTERSTÜTZUNG, nicht selbstständig.",
+              "example": "Finance: Braucht Einzelschulung oder Kollegenbegleitung für neue Software - lernt nicht allein aus Handbuch. Nach Einarbeitung: zuverlässige Anwendung. | HR: Nutzt neue HR-Software nach Schulung korrekt; bei neuen Funktionen: wartet auf Erklärung statt selbst zu erkunden. | Unterschied zu Stufe 3: Stufe-3-MA arbeitet sich selbstständig ein und probiert neue Funktionen eigeninitiativ aus."
+            },
+            "3": {
+              "text": "BASELINE: Der/die Mitarbeitende geht konstruktiv mit Veränderungen um und passt seine Arbeitsweise an neue Gegebenheiten an. Er/Sie setzt neue Vorgaben (z. B. Nutzung eines neuen Tools, geänderter Schichtplan) verlässlich und ohne großes Klagen um. Die Einarbeitung in neue Themen erfolgt in angemessener Zeit. Er/Sie erkennt, wann Wissen fehlt, und nutzt die angebotenen Schulungen oder Hilfsmittel, um die Lücke zu schließen. Er/Sie blockiert Innovationen nicht, sondern trägt sie im Tagesgeschäft mit. Man kann sich darauf verlassen, dass er/sie auch in einem sich wandelnden Umfeld stabil seine Leistung bringt („Fair“ gegenüber dem Team).",
+              "example": "Sales: Nimmt an Schulung für nachhaltige Folien teil und berät Kunden ab Stichtag kompetent. | Buchhaltung: Arbeitet sich in D365 Business Central ein, nutzt Standardfunktionen zuverlässig. | HR: Setzt neue Datenschutz-Anforderungen (DSGVO) termingerecht um. | Assistenz: Übernimmt neue Aufgaben aus Umstrukturierung ohne Murren."
+            },
+            "4": {
+              "text": "Der/die Mitarbeitende sieht Veränderungen als Chance zur Verbesserung. Er/Sie wartet nicht auf Schulungen, sondern eignet sich neues Wissen (z. B. über neue Produkte, Markttrends oder Software-Kniffe) eigenständig an. Er/Sie experimentiert mit neuen Lösungsansätzen und teilt die Erkenntnisse mit dem Team. In Phasen des Umbruchs wirkt er/sie stabilisierend auf andere und hilft Kollegen, die sich mit der Veränderung schwerer tun (z.B. als „Buddy“ bei neuen Systemen). Er/Sie hinterfragt den Status quo konstruktiv und macht Vorschläge, wie man sich besser an neue Anforderungen anpassen kann.",
+              "example": "Service: Klickt sich schon vor Schulung durch neues CRM, hilft danach Kollegen beim Start. | Buchhaltung: Testet neue ERP-Features aktiv, gibt konstruktives Feedback an IT, wird Key-User. | HR: Probiert KI-Tools für Recruiting selbst aus, evaluiert Nutzen für Team. | Controlling: Baut sich selbst Power BI-Kenntnisse auf, erstellt erste Dashboards eigeninitiativ."
+            },
+            "5": {
+              "text": "Der/die Mitarbeitende antizipiert notwendige Veränderungen oft früher als andere und bereitet sich und das Umfeld proaktiv darauf vor (z.B. Erwerb von Zukunftskompetenzen, bevor sie akut gebraucht werden). Er/Sie treibt Innovationen voran, die das Unternehmen zukunftsfähig machen (z. B. Pilotierung komplett neuer Arbeitsweisen). Er/Sie etabliert eine Kultur des Lernens im eigenen Bereich, indem er/sie Fehler als Lernchance vorlebt und andere zum Ausprobieren ermutigt („Empowerment“). Er/Sie agiert als Leuchtturm bei strategischen Großprojekten (z.B. Harmonisierung der Standorte) und schafft Begeisterung für den neuen Weg, selbst bei anfänglichen Widerständen.",
+              "example": "IT: Initiiert eigenständig KI-Pilotprojekt (Copilot), klärt Datenschutz, schult andere Standorte. | Buchhaltung: Treibt E-Invoicing-Einführung für Gruppe voran, wird zum internen Experten. | HR: Führt Performance-Management-System ein, das Kulturwandel unterstützt. | Controlling: Implementiert Predictive Analytics, revolutioniert Forecasting für alle Standorte."
+            }
+          }
+        },
+        {
+          "id": "c5",
+          "titel": "Selbstorganisation & Zuverlässigkeit",
+          "kategorie": "core",
+          "definition": "Strukturierung der Arbeit, Priorisierung und Accountability. Kann man sich auf das Wort verlassen?",
+          "stufen": {
+            "1": {
+              "text": "Der/die Mitarbeitende arbeitet unsystematisch und ohne erkennbare Struktur. Aufgaben werden vergessen, Deadlines ohne Vorwarnung gerissen oder Termine versäumt. Er/Sie lässt sich leicht ablenken und verliert den Fokus auf das Wesentliche. Die Führungskraft oder Kollegen müssen ständig nachfassen („Babysitting“), damit Ergebnisse geliefert werden. Es fehlt der Überblick über offene Aufgaben; Zusagen werden leichtfertig gemacht und nicht eingehalten. Der Arbeitsplatz (physisch oder digital) ist unorganisiert, sodass wichtige Unterlagen oder Informationen nicht griffbereit sind. Die Unzuverlässigkeit belastet das Team massiv.",
+              "example": "Sales: Vergisst Besuchsberichte, verlegt Zettel mit Kundenanfragen. | Buchhaltung: Vergisst Zahlungsfristen, Mahnungen häufen sich. Belege verschwinden im Papierchaos. | HR: Verpasst Probezeit-Enden, vergisst Vertragsumstellungen. Personalakten unvollständig. | Sekretariat: Termine werden doppelt vergeben, wichtige E-Mails tagelang unbeantwortet."
+            },
+            "2": {
+              "text": "Der/die Mitarbeitende erledigt Routineaufgaben zuverlässig und termingerecht - auf sein/ihr Wort kann man sich verlassen. Der Arbeitsplatz (physisch und digital) ist grundsätzlich organisiert. Bei mehreren parallelen Aufgaben oder in Hochphasen arbeitet er/sie noch an einer systematischeren Priorisierung nach Dringlichkeit und Wichtigkeit. Die Planung erfolgt aktuell eher kurzfristig; eine vorausschauendere Planung entwickelt sich mit zunehmender Erfahrung. Er/Sie hält Zusagen ein und kommuniziert zunehmend frühzeitig wenn Engpässe absehbar werden. Bei hoher Belastung nimmt er/sie Unterstützung durch die Führungskraft an und setzt Empfehlungen um.",
+              "example": "Werkstatt: Erledigt die täglichen Aufgaben zuverlässig. Lernt bei konkurrierenden Anforderungen die Dringlichkeit zu prüfen - manchmal noch mit Unterstützung des Meisters. | Buchhaltung: Erledigt Standardaufgaben termingerecht. In Hochphasen braucht er/sie manchmal Unterstützung bei der Priorisierung, arbeitet aber daran Engpässe früher zu kommunizieren. | HR: Bearbeitet Bewerbungen strukturiert. Entwickelt zunehmend Gespür dafür welche Positionen besonders zeitkritisch sind. | Einkauf: Führt eine Übersicht über offene Bestellungen. Arbeitet daran diese proaktiver zu pflegen."
+            },
+            "3": {
+              "text": "BASELINE: Der/die Mitarbeitende organisiert seinen Arbeitsalltag selbstständig und priorisiert Aufgaben sinnvoll nach Dringlichkeit und Wichtigkeit. Zusagen und Termine werden verlässlich eingehalten. Sollte eine Deadline gefährdet sein, informiert er/sie mindestens 48 Stunden im Voraus proaktiv („Transparency\"). Sein Arbeitsplatz und seine Systeme sind so strukturiert, dass wichtige Informationen jederzeit in unter 2 Minuten auffindbar sind (saubere Ablage, gepflegte To-Do-Listen). Man kann sich auf sein Wort verlassen.",
+              "example": "Admin: Hat digitale Wiedervorlage im Griff (farbcodierte Prioritäten). Meldet am Dienstag, dass Monatsabschluss wegen Krankheitsausfall im Team 2 Tage später kommt – schlägt gleichzeitig Lösung vor (Unterstützung aus anderem Standort)."
+            },
+            "4": {
+              "text": "Der/die Mitarbeitende plant vorausschauend (2-3 Monate im Voraus) und erkennt Engpässe, bevor sie entstehen (Urlaubszeiten, Projekt-Deadlines, Ressourcenknappheit). Er/Sie optimiert aktiv die eigene Arbeitsweise (Nutzung digitaler Tools, Checklisten, Bündelung ähnlicher Aufgaben). Er/Sie bleibt auch bei 120% Auslastung strukturiert und liefert Ergebnisse pünktlich ab. Seine Zuverlässigkeit macht ihn/sie zu einer festen Säule im Team – Kollegen wissen: „Bei X ist es sicher aufgehoben.\"",
+              "example": "Projektmanagement: Erstellt 4 Wochen vor Urlaub detaillierte Übergabemappe mit Status aller Projekte, offenen Punkten und Ansprechpartnern. Bereitet kritische Aufgaben vor (Vorratsbriefings, vorgefertigte Entscheidungsvorlagen). Vertretung kann nahtlos übernehmen."
+            },
+            "5": {
+              "text": "Der/die Mitarbeitende entwickelt Organisationssysteme oder Workflows, die nicht nur ihm/ihr selbst, sondern dem ganzen Team oder der Abteilung helfen, effizienter zu arbeiten (z. B. Einführung eines Kanban-Boards, Standardisierung der Ablage für die Gruppe). Er/Sie managt hochkomplexe Aufgabenpakete mit vielen Abhängigkeiten (z. B. standortübergreifende Projekte) souverän und termingerecht. Er/Sie gilt als „sicherer Hafen“ für kritische Aufgaben: Wenn er/sie es übernimmt, ist der Erfolg garantiert. Er/Sie schafft durch exzellente Organisation Freiräume für strategische Themen und Innovationen.",
+              "example": "Marketing: Etabliert digitales Planungstool für alle Standorte (Sulzberg/Bozen/Campo), eliminiert Doppelarbeit."
+            }
+          }
+        },
+        {
+          "id": "l1",
+          "titel": "Mitarbeiterführung & -entwicklung",
+          "kategorie": "leadership",
+          "definition": "Steuerung, Motivation und Entwicklung des Teams. 'Leadership' statt nur 'Management'.",
+          "stufen": {
+            "1": {
+              "text": "Die Führungskraft vernachlässigt ihre Kernaufgaben: Mitarbeitergespräche (Jahresgespräch, Check-ins) finden nicht statt, sind extrem verspätet oder werden als lästige Pflichtübung abgehandelt. Es gibt kein konstruktives Feedback; Kritik erfolgt oft unsachlich oder vor anderen. Entwicklungswünsche der Mitarbeitenden werden ignoriert oder blockiert („Dafür haben wir keine Zeit“). Ziele werden unklar oder gar nicht kommuniziert, was zu Orientierungslosigkeit führt. Das Verhalten widerspricht unseren Werten massiv (z.B. Respektlosigkeit, „Divide and Conquer“). Im Team herrscht eine Atmosphäre der Angst oder Gleichgültigkeit, was zu hoher Fluktuation oder innerer Kündigung führt.",
+              "example": "Prod-Leiter: Sagt Jahresgespräch 3x ab, führt es dann in 15min zwischen Tür und Angel. | Leiter Buchhaltung: Gibt nie Feedback, Team erfährt Kritik nur über Dritte. | HR-Leiter: Blockiert Weiterbildungswünsche grundsätzlich ('kein Budget'), demotiviert Team. | Abteilungsleiter Verwaltung: Micromanagement bei jeder E-Mail, kein Vertrauen ins Team."
+            },
+            "2": {
+              "text": "Die Führungskraft führt die PFLICHTGESPRÄCHE (Jahresgespräch, Zielvereinbarung) pünktlich und dokumentiert die Ergebnisse. Feedback erfolgt primär anlassbezogen - ein systematisches, regelmäßiges Feedback im Alltag (positiv UND korrigierend) ist noch im Aufbau. Entwicklungsziele werden im Jahresgespräch vereinbart; die unterjährige Nachverfolgung könnte aktiver sein. Sie delegiert Aufgaben, behält aber oft die finale Kontrolle. Der Unterschied zu Stufe 3: Führt PFLICHTGESPRÄCHE zuverlässig, aber noch keine proaktiven Entwicklungsgespräche im Alltag.",
+              "example": "Teamleiter: Alle Pflichtgespräche termingerecht durchgeführt und dokumentiert. Feedback hauptsächlich wenn etwas schiefläuft - spontanes Lob kommt seltener. | Abteilungsleiter: Delegiert Aufgaben klar, prüft aber Ergebnisse detailliert nach. | Unterschied zu Stufe 3: Stufe-3-FK gibt auch im Alltag regelmäßig Feedback (positiv + korrigierend) und führt proaktive Entwicklungsgespräche außerhalb des Pflichtzyklus."
+            },
+            "3": {
+              "text": "BASELINE: Die Führungskraft führt alle verpflichtenden Gespräche (Review, Zielsetzung) pünktlich, gut vorbereitet und auf Augenhöhe durch. Sie sorgt für klare Ziele und Erwartungen, sodass jeder weiß, was zu tun ist. Feedback erfolgt regelmäßig und fair – sowohl positiv als auch korrigierend. Sie unterstützt die fachliche Weiterentwicklung (z.B. Genehmigung von Schulungen) und ist für die Mitarbeitenden bei Problemen ansprechbar. Sie lebt die Werte „Fast, Fair, Personal“ im Alltag vor und sorgt für ein stabiles, positives Arbeitsklima. Sie behandelt alle Teammitglieder gerecht und diskriminierungsfrei.",
+              "example": "Sales Director: Regelmäßige Check-ins, lobt Erfolge, spricht Defizite offen an. Team kennt Ziele. | Leiter Buchhaltung: Bespricht Jahresabschluss-Learnings im Team, plant gemeinsam Verbesserungen. | HR-Leiter: Führt strukturierte Entwicklungsgespräche, fördert Weiterbildung aktiv. | Abteilungsleiter: Gibt zeitnahes, konkretes Feedback, Team weiß wo es steht."
+            },
+            "4": {
+              "text": "Die Führungskraft nutzt Führung aktiv, um Mitarbeitende besser zu machen. Sie delegiert nicht nur Aufgaben, sondern Verantwortung, um Wachstum zu ermöglichen („Empowerment“). Sie führt regelmäßige, informelle Feedback-Gespräche (über den Standardprozess hinaus) und nutzt Coaching-Methoden, um Mitarbeitende zur eigenen Lösungsfindung anzuregen. Sie erkennt Potenziale proaktiv und schlägt individuelle Entwicklungsmaßnahmen vor (z. B. Projektleitung, Job Rotation). Sie schafft eine Teamkultur, in der Fehler offen besprochen werden, um daraus zu lernen. Die Zusammenarbeit mit dieser Person macht das gesamte Umfeld messbar effizienter und motivierter.",
+              "example": "IT-Leiter: Delegiert Projektleitung an Talent, gibt spezifisches Feedback, stärkt Selbstvertrauen. | Leiter Buchhaltung: Überträgt Bilanzverantwortung an Nachwuchskraft, coacht bei Bedarf. | HR-Leiter: Lässt MA eigenverantwortlich Recruiting-Projekt führen, gibt Coaching statt Anweisungen. | Controlling-Leiter: Entwickelt High-Potential systematisch durch Job-Enrichment und Mentoring."
+            },
+            "5": {
+              "text": "Die Führungskraft baut systematisch Nachfolger auf und entwickelt High-Potentials auch über den eigenen Bedarf hinaus (für die Gruppe). Sie gilt als Mentor im gesamten Unternehmen, dessen Rat auch von Mitarbeitenden anderer Bereiche gesucht wird. Sie schafft ein Umfeld der Exzellenz, in dem sich Talente entfalten können, und bindet Leistungsträger langfristig an Niederwieser. Sie steuert die Personalplanung strategisch vorausschauend (z.B. für die nächsten 2-3 Jahre) und sorgt dafür, dass das Team bereit für zukünftige Herausforderungen der Strategie 2035. Unter ihrer Führung entstehen Innovationen und überdurchschnittliche Ergebnisse durch Synergieeffekte.",
+              "example": "Manager: Empfiehlt Top-Mitarbeiter proaktiv für Stelle an anderem Standort, statt ihn zu 'horten'. | Leiter Buchhaltung: Hat zwei Nachfolger aufgebaut, einer bereits in anderer Abteilung erfolgreich. | HR-Leiter: Entwickelt Talente über eigenen Bedarf hinaus für Gruppe, gilt als Talentschmiede. | CFO: Führungskultur im Bereich ist Vorbild, niedrigste Fluktuation in der Gruppe."
+            }
+          }
+        },
+        {
+          "id": "l2",
+          "titel": "Strategisches Denken",
+          "kategorie": "leadership",
+          "definition": "Das 'große Ganze' sehen. Weg vom Silo-Denken hin zum Gruppen-Denken ('One Niederwieser').",
+          "stufen": {
+            "1": {
+              "text": "Die Führungskraft handelt fast ausschließlich reaktiv und verliert sich im Mikromanagement des Tagesgeschäfts („Firefighting“). Sie zeigt kein Interesse an der Unternehmensstrategie oder versteht sie nicht. Entscheidungen werden isoliert für die eigene Abteilung getroffen, oft sogar zum Nachteil anderer Bereiche oder der Gruppe (Suboptimierung). Sie plant Budget und Ressourcen nur für den momentanen Bedarf ohne Weitblick. Strategische Initiativen der Geschäftsleitung werden ignoriert, belächelt oder als „störend“ für den Betrieb empfunden. Das Team hat keine Orientierung, wohin die Reise langfristig geht.",
+              "example": "Prod-Leiter: Produziert auf Halde für 100% Auslastung, obwohl Vertrieb das Produkt nicht verkauft. | Leiter Buchhaltung: Optimiert nur eigene KPIs, ignoriert Auswirkungen auf Cashflow der Gruppe. | HR-Leiter: Rekrutiert ohne Abstimmung mit Strategie, falsche Profile werden eingestellt. | Controlling: Liefert nur historische Zahlen, keine zukunftsgerichtete Analyse."
+            },
+            "2": {
+              "text": "Die Führungskraft kennt die Unternehmensstrategie (Strategie 2035, Werte Fast Fair Personal) und erklärt dem Team das „Warum\" hinter Entscheidungen. Die Planung fokussiert auf das LAUFENDE GESCHÄFTSJAHR - ein Horizont von 12+ Monaten wird nur auf Anforderung der Geschäftsleitung berücksichtigt. Sie SETZT strategische Vorgaben um; eigene strategische Impulse sind noch selten. Externe Trends werden wahrgenommen, aber noch nicht systematisch in die Bereichsplanung integriert. Der Unterschied zu Stufe 3: Setzt Strategie um, ENTWICKELT aber noch keine eigenen strategischen Initiativen.",
+              "example": "Sales: Jahresplanung orientiert sich an Vorgaben der GL; eigene strategische Vorschläge (z.B. neue Marktsegmente) kommen noch selten. | Produktion: Plant Kapazität für laufendes Jahr solide; mittelfristige Investitionen werden erst auf Nachfrage der GL adressiert. | Unterschied zu Stufe 3: Stufe-3-FK bringt eigenständig strategische Vorschläge ein und plant proaktiv über das Geschäftsjahr hinaus."
+            },
+            "3": {
+              "text": "BASELINE: Die Führungskraft leitet die Ziele ihres Bereichs logisch aus der Unternehmensstrategie ab. Sie erklärt ihrem Team das „Warum“ hinter Entscheidungen und stellt sicher, dass alle an einem Strang ziehen. Sie berücksichtigt bei ihrer Planung (Budget, Personal, Kapazität) einen Horizont von 12-18 Monaten. Sie erkennt relevante Trends im eigenen Fachbereich (z. B. Digitalisierung in der Admin, neue Technologien in der Produktion) und passt die Ausrichtung ihres Teams rechtzeitig an. Sie denkt über Standortgrenzen hinweg und unterstützt die Harmonisierung der Gruppe („One Niederwieser“), indem sie Standards einhält und Kooperation fördert.",
+              "example": "IT-Leiter: Plant Budget proaktiv für Harmonisierung der ERP-Systeme (Bozen/Sulzberg). | Leiter Buchhaltung: Richtet Reporting an Strategie 2035 aus, macht Fortschritt messbar. | HR-Leiter: Plant Personalentwicklung entlang der strategischen Kompetenzbedarfe. | Controlling: Entwickelt KPIs, die strategische Ziele operationalisieren."
+            },
+            "4": {
+              "text": "Die Führungskraft erkennt Markt- oder interne Veränderungen, bevor sie offensichtlich werden, und bereitet ihren Bereich proaktiv darauf vor. Sie entwickelt eigeninitiativ strategische Vorschläge (z.B. neue Geschäftsfelder, strukturelle Anpassungen), die über das Tagesgeschäft hinausgehen. Sie sucht aktiv nach Synergien mit anderen Standorten (z.B. gemeinsame Nutzung von Ressourcen zwischen Sulzberg und Campogalliano) und bricht Silos auf. Sie denkt in Szenarien („Was wäre, wenn...“) und hat Plan B in der Tasche. Sie wird von Peers als strategischer Sparringspartner geschätzt.",
+              "example": "Marketing: Schichtet Budget auf 'Solution-Kampagnen' um, bevor Markt dreht. | Leiter Buchhaltung: Antizipiert Auswirkungen neuer Steuergesetzgebung, bereitet Gruppe vor. | HR-Leiter: Erkennt Fachkräftemangel früh, startet Employer-Branding-Initiative. | CFO: Identifiziert M&A-Ziel, das Technologielücke schließt, bereitet Due Diligence vor."
+            },
+            "5": {
+              "text": "Die Führungskraft entwickelt Konzepte, die das Geschäftsmodell oder die Arbeitsweise der gesamten Gruppe nachhaltig verändern (z.B. Erschließung eines neuen Marktes, Einführung einer bahnbrechenden Technologie). Ihre Ideen fließen direkt in die Weiterentwicklung der Unternehmensstrategie ein. Sie erkennt disruptive Risiken oder Chancen sehr früh und steuert das Unternehmen durch mutige Entscheidungen in eine erfolgreiche Richtung. Sie gilt intern und extern als Vordenker („Thought Leader“) und inspiriert nicht nur das eigene Team, sondern die ganze Organisation, größer zu denken.",
+              "example": "Standortleiter: Erarbeitet Business Case für Übernahme in Nische, ermöglicht Markteinstieg. | Leiter Buchhaltung: Entwickelt Shared-Service-Konzept für Finance-Funktionen aller Standorte. | HR-Leiter: Entwirft People-Strategie 2035, die GF überzeugt und Vorstandsbeschluss wird. | CFO: Restrukturiert Finanzierung der Gruppe, senkt Kapitalkosten signifikant."
+            }
+          }
+        },
+        {
+          "id": "l3",
+          "titel": "Entscheidungsfähigkeit",
+          "kategorie": "leadership",
+          "definition": "Zeitnah und verbindlich entscheiden, auch unter Unsicherheit. Balance zwischen Analyse und Speed.",
+          "stufen": {
+            "1": {
+              "text": "Die Führungskraft trifft Entscheidungen extrem zögerlich oder gar nicht („Aussitzen“). Dringende Themen bleiben liegen, wodurch Fristen verstreichen oder Chancen verloren gehen. Sie fordert für kleinste Entscheidungen immer wieder neue Daten an oder delegiert die Entscheidung an den Vorgesetzten („Rückdelegation“), um bloß keinen Fehler zu machen. Getroffene Entscheidungen werden bei leichtem Gegenwind sofort revidiert („Flip-Flopping“), was das Team verunsichert. Wenn eine Entscheidung falsch war, sucht sie die Schuld bei anderen oder den Umständen, statt Verantwortung zu übernehmen. Es fehlt der Mut zur Klarheit.",
+              "example": "Einkauf: Entscheidet wochenlang nicht über Preiserhöhung, Frist läuft ab, Konditionen verschlechtern sich. | Leiter Buchhaltung: Kann sich nicht für Buchungsmethode entscheiden, Jahresabschluss verzögert sich. | HR-Leiter: Schiebt Kündigungsentscheidung bei Low-Performer monatelang auf. | Abteilungsleiter: Delegiert jede Entscheidung nach oben, Team wartet ständig."
+            },
+            "2": {
+              "text": "Die Führungskraft trifft Entscheidungen im Tagesgeschäft in angemessener Zeit und nutzt dabei verfügbare Informationen und Daten. Bei komplexeren oder weitreichenden Entscheidungen holt sie sich Abstimmung mit Vorgesetzten oder Peers um Sicherheit zu gewinnen - ein verantwortungsvolles Vorgehen das die Qualität der Entscheidung sichert. Sie kommuniziert Entscheidungen zunehmend mit Begründung an das Team. Auch bei schwierigen Themen schiebt sie Entscheidungen nicht endlos auf, sondern findet einen angemessenen Zeitpunkt. Die Entscheidungssicherheit - wann eigenständig entscheiden, wann abstimmen - wächst mit zunehmender Erfahrung. Sie steht zu getroffenen Entscheidungen und korrigiert bei neuen Erkenntnissen transparent.",
+              "example": "Recruiting: Trifft Auswahlentscheidungen nach strukturierter Bewertung. Bei Grenzfällen holt sie eine zweite Meinung ein, was zu fundierten Entscheidungen führt. | Leiter Buchhaltung: Entscheidet Routinethemen eigenständig und zügig. Bei Grenzfällen holt sie Abstimmung mit dem CFO - ein angemessenes Vorgehen. | HR-Leiter: Trifft Entscheidungen und steht zu diesen. Bei berechtigter Kritik passt sie den Kurs transparent an. | Controlling: Gibt klare Empfehlungen auf Basis eigener Analysen. Bei strategisch relevanten Themen stimmt sie sich ab ohne Verantwortung abzugeben."
+            },
+            "3": {
+              "text": "BASELINE: Die Führungskraft trifft Entscheidungen im Tagesgeschäft zeitnah und sicher. Sie wägt Chancen und Risiken vernünftig ab und nutzt die vorhandenen Informationen effizient. Sie kommuniziert die Entscheidung und das „Warum“ dahinter klar an ihr Team und betroffene Schnittstellen. Sie steht auch dann zu ihrer Entscheidung, wenn es Kritik gibt, ist aber bereit, den Kurs zu korrigieren, wenn neue Fakten auf den Tisch kommen (keine Sturheit). Sie unterscheidet sicher, was sie selbst entscheiden darf und was eskaliert werden muss – und liefert bei Eskalationen eine klare Empfehlung mit.",
+              "example": "Schichtleiter: Entscheidet nachts selbstständig Umplanung bei Maschinenausfall, informiert Planung. | Leiter Buchhaltung: Entscheidet eigenständig über Zahlungsprioritäten bei Liquiditätsengpass. | HR-Leiter: Genehmigt dringende Einstellung ohne lange Abstimmungsschleifen. | Controlling: Gibt klare Empfehlung bei Investitionsentscheidung, steht dazu."
+            },
+            "4": {
+              "text": "Die Führungskraft bleibt auch in unübersichtlichen Situationen, unter Zeitdruck oder bei unvollständiger Informationslage handlungsfähig. Sie trifft mutige Entscheidungen („Courage“), um Stillstand zu vermeiden, und managt das Risiko aktiv. Sie bezieht relevante Stakeholder (z.B. andere Standorte) rechtzeitig ein, um die Qualität der Entscheidung zu sichern, verliert sich aber nicht in endlosen Abstimmungsschleifen. Sie erklärt auch unpopuläre Entscheidungen so transparent und wertschätzend („Fair“), dass das Team sie mittragen kann.",
+              "example": "Sales Dir: Lehnt unprofitablen Großauftrag mutig ab, erklärt Strategie 'Wert vor Volumen'. | Leiter Buchhaltung: Stoppt fragwürdige Transaktion trotz Druck aus Fachabteilung (Compliance). | HR-Leiter: Trennt sich von toxischem High-Performer, obwohl kurzfristig schmerzhaft. | CFO: Entscheidet unter Unsicherheit für Investition, managed Risiken aktiv."
+            },
+            "5": {
+              "text": "Die Führungskraft trifft wegweisende Entscheidungen, die positive Auswirkungen weit über den eigenen Bereich hinaus haben (z.B. für die gesamte Gruppe). In Krisensituationen übernimmt sie sofort das Steuer, schafft Ruhe und gibt durch klare Entscheidungen Sicherheit und Orientierung. Sie etabliert Prinzipien oder Rahmenbedingungen, die es ihren Mitarbeitenden ermöglichen, selbstständig bessere Entscheidungen zu treffen („Empowerment“). Sie hat den Mut, alte Zöpfe abzuschneiden (z. B. unrentable Projekte oder Produkte zu stoppen), um Ressourcen für Neues freizumachen.",
+              "example": "IT-Group: Kappt bei Cyber-Verdacht sofort alle Verbindungen der Gruppe, nimmt Prod-Ausfall in Kauf. | Leiter Buchhaltung: Stoppt in Krise alle nicht-kritischen Zahlungen, sichert Liquidität der Gruppe. | HR-Leiter: Entscheidet in Krisensituation schnell über Kurzarbeit, gibt Team Sicherheit. | CFO: Bricht gescheiterte Übernahme ab trotz hoher Sunk Costs, schützt Gruppe vor größerem Schaden."
+            }
+          }
+        },
+        {
+          "id": "l4",
+          "titel": "Execution & Performance",
+          "kategorie": "leadership",
+          "definition": "Ziele in Ergebnisse umsetzen. Daten nutzen ('Clarity'), Prozesse beherrschen und konsequent steuern.",
+          "stufen": {
+            "1": {
+              "text": "Die Führungskraft arbeitet ohne erkennbaren Plan oder Struktur. Projekte und Aufgaben werden begonnen, aber nicht konsequent zu Ende geführt. Es gibt keine klaren Meilensteine oder Verantwortlichkeiten. Die Leistung des Teams wird nicht gemessen oder gesteuert; Abweichungen (z.B. Budgetüberzug, Terminverzug) fallen erst auf, wenn es zu spät ist. Ziele werden regelmäßig und deutlich verfehlt, ohne dass die Führungskraft gegensteuert oder die Ursachen analysiert. Es herrscht eine Kultur der Ausreden statt der Ergebnisse.",
+              "example": "Projektleiter: Software-Rollout Monate überfällig, kein neuer Plan, keine Info an User. | Leiter Buchhaltung: Jahresabschluss jedes Jahr zu spät, keine Ursachenanalyse. | HR-Leiter: Recruiting-Prozess ohne Struktur, Time-to-Hire unbekannt. | Controlling: Reports kommen unzuverlässig, Qualität schwankt stark."
+            },
+            "2": {
+              "text": "Die Führungskraft plant Projekte und Aufgaben strukturiert, definiert Meilensteine und Verantwortlichkeiten. Sie nutzt regelmäßige Statusmeetings (Jour Fixes, Team-Meetings) zur Steuerung und behält den Überblick über offene Aufgaben und Termine. Bei Abweichungen vom Plan leitet sie Gegenmaßnahmen ein - die noch frühere Erkennung von Engpässen entwickelt sich mit zunehmender Erfahrung. Ziele werden erreicht, wobei in Hochphasen manchmal noch erhöhter Einsatz erforderlich ist. Sie kommuniziert den Status transparent an Vorgesetzte und Schnittstellen. Prozesse werden eingehalten; bei Bedarf werden Abweichungen begründet und dokumentiert.",
+              "example": "Sales: Trackt die Zielerreichung regelmäßig in Teammeetings. Bei Abweichungen leitet sie Maßnahmen ein - manchmal könnte das noch früher im Monat erfolgen. | Leiter Buchhaltung: Steuert den Monatsabschluss nach klarem Kalender. In Hochphasen ist manchmal erhöhter Einsatz nötig - arbeitet daran Spitzen besser zu verteilen. | HR-Leiter: Führt relevante KPIs (Time-to-Hire, Fluktuation) und nutzt sie zunehmend für die Steuerung. | Controlling: Liefert Zahlen pünktlich und mit Kommentierung. Baut die Handlungsempfehlungen sukzessive aus."
+            },
+            "3": {
+              "text": "BASELINE: Die Führungskraft plant Aufgaben und Projekte strukturiert mit realistischen Zeitplänen und Ressourcen. Sie definiert klare Erfolgskriterien (KPIs) und überprüft den Fortschritt regelmäßig (z.B. in Jour Fixes). Bei Abweichungen greift sie zeitnah ein und leitet Korrekturmaßnahmen ein, um das Ziel noch zu erreichen. Sie sorgt dafür, dass ihr Team die vereinbarten Ziele (Qualität, Kosten, Zeit) verlässlich erfüllt. Sie kommuniziert den Status transparent an Vorgesetzte und Schnittstellen. Man kann sich auf ihre Zusagen verlassen („Fair“).",
+              "example": "Resp. Prod: Organisiert sofort Samstagsschicht bei Ausfall, informiert Vertrieb proaktiv. | Leiter Buchhaltung: Steuert Team nach klarem Closing-Kalender, Fristen werden eingehalten. | HR-Leiter: Trackt Recruiting-KPIs, greift bei Abweichungen ein. | Controlling: Liefert Reports pünktlich mit Kommentierung und Empfehlungen."
+            },
+            "4": {
+              "text": "Die Führungskraft verwaltet nicht nur, sondern optimiert aktiv. Sie nutzt Daten und Kennzahlen systematisch, um Ineffizienzen oder Bottlenecks aufzudecken, bevor sie zum Problem werden. Sie etabliert Routinen, die eine konstant hohe Performance sicherstellen. Sie liefert Ergebnisse oft schneller („Fast“) oder kostengünstiger als geplant, ohne die Qualität zu gefährden. Sie schafft es, auch bei unvorhergesehenen Hindernissen (z.B. Krankheitswelle, Lieferausfall) den Betrieb stabil zu halten, weil sie Szenarien vorausgeplant hat.",
+              "example": "HR: Analysiert Prozess, führt digitales Tool ein, verkürzt Time-to-Hire drastisch. | Leiter Buchhaltung: Automatisiert Mahnwesen, reduziert DSO (Days Sales Outstanding) um 20%. | HR-Leiter: Optimiert Onboarding-Prozess, neue MA sind 2 Wochen früher produktiv. | Controlling: Etabliert Self-Service-Reporting, entlastet Team für Analysen."
+            },
+            "5": {
+              "text": "Die Führungskraft etabliert Best-Practice-Prozesse, die als Vorbild für die gesamte Gruppe dienen (z.B. ein neues Reporting-System, das später in Sulzberg und Bozen ausgerollt wird). Sie treibt kontinuierliche Verbesserung (KVP) so voran, dass Performance-Sprünge (z. B. signifikante Senkung der Ausschussquote oder Durchlaufzeit) erreicht werden. Sie schafft eine Hochleistungskultur, in der das Team sich selbstständig steuert und permanent übertrifft. Sie realisiert strategische Großprojekte in „Time, Budget & Quality“ und liefert damit einen direkten Beitrag zum Unternehmenserfolg („1 Result“).",
+              "example": "Logistik: Bündelt Transporte Sulzberg/Bozen, senkt Kosten um 15% durch neues Cross-Docking. | Leiter Buchhaltung: Führt Fast-Close ein, Monatsabschluss in 3 statt 10 Tagen, Vorbild für Gruppe. | HR-Leiter: Implementiert People-Analytics, Fluktuation sinkt um 25%. | CFO: Etabliert gruppenweites Performance-Management, alle Bereiche über Plan."
+            }
+          }
+        },
+        {
+          "id": "l5",
+          "titel": "Stakeholder & Konfliktlösung",
+          "kategorie": "leadership",
+          "definition": "Beziehungen pflegen, politische Interessen moderieren. Brückenbauer zwischen Silos.",
+          "stufen": {
+            "1": {
+              "text": "Die Führungskraft ignoriert die Interessen anderer Abteilungen oder Standorte komplett. Sie kommuniziert nicht mit wichtigen Stakeholdern, was zu Überraschungen und Widerständen führt. In Konflikten verhält sie sich destruktiv: Sie sucht Schuldige statt Lösungen, redet schlecht über andere Bereiche („Die da oben/unten“) oder trägt Konflikte aggressiv und unsachlich aus. Alternativ werden Konflikte ignoriert oder ausgesessen, bis sie eskalieren. Das Verhalten beschädigt das Vertrauen und die Zusammenarbeit in der Gruppe massiv.",
+              "example": "Prod-Leiter: Schimpft über 'unfähige Verkäufer' statt Machbarkeit direkt zu klären. | Leiter Buchhaltung: Eskaliert jeden Konflikt mit Fachabteilungen an GF statt Lösung zu suchen. | HR-Leiter: Redet schlecht über Betriebsrat, vergiftet Zusammenarbeit. | Controlling: Gibt anderen Abteilungen Schuld an Zahlen, statt gemeinsam Ursachen zu analysieren."
+            },
+            "2": {
+              "text": "Die Führungskraft pflegt die DIREKTEN Schnittstellenbeziehungen (unmittelbare Peers, eigene Führungskraft) und informiert diese bei konkretem Anlass. Das Stakeholder-Netzwerk beschränkt sich auf das operative Minimum; ein breiteres strategisches Netzwerk ist noch im Aufbau. Konflikte werden angesprochen, die Lösung erfolgt aber oft MIT UNTERSTÜTZUNG (HR, eigene FK). Bei Interessenkonflikten tendiert sie manchmal zu Kompromissen, die das eigene Team bevorzugen. Der Unterschied zu Stufe 3: Pflegt DIREKTES Netzwerk, baut aber noch kein strategisches Stakeholder-Netzwerk auf.",
+              "example": "Projektleiter: Informiert Betriebsrat bei Bedarf; Einbindung erfolgt manchmal erst spät im Prozess. Bei Eskalationen: holt HR zur Unterstützung. | Abteilungsleiter: Netzwerk = direkte Peers und eigene FK. Kontakte zu anderen Standorten oder zur GL nur bei konkretem Anlass. | Unterschied zu Stufe 3: Stufe-3-FK pflegt aktiv ein breites Netzwerk (auch standortübergreifend) und löst Konflikte eigenständig."
+            },
+            "3": {
+              "text": "BASELINE: Die Führungskraft kennt ihre wichtigsten Stakeholder und hält sie regelmäßig informiert. Sie stimmt sich proaktiv ab, um Missverständnisse zu vermeiden. Sie begegnet Partnern – egal ob intern oder extern – respektvoll und auf Augenhöhe. Konflikte werden zeitnah („Fast“) angesprochen und sachlich diskutiert. Sie vertritt die Interessen ihres Bereichs, ist aber bereit, Argumente der Gegenseite zu hören und faire Lösungen zu finden. Sie sorgt dafür, dass die Zusammenarbeit reibungslos funktioniert.",
+              "example": "Service/Supply: Legt Zahlen offen, einigt sich sachlich auf Mindestbestand (Kompromiss). | Leiter Buchhaltung: Stimmt sich regelmäßig mit Fachabteilungen ab, Prozesse laufen reibungslos. | HR-Leiter: Pflegt konstruktive Beziehung zum Betriebsrat, BV werden einvernehmlich geschlossen. | Controlling: Bespricht kritische Entwicklungen bilateral vor, keine Überraschungen im Meeting."
+            },
+            "4": {
+              "text": "Die Führungskraft baut aktiv ein belastbares Netzwerk über Abteilungsgrenzen hinweg auf. Sie antizipiert potenzielle Konflikte (z.B. Ressourcenengpässe zwischen Projekten) und moderiert diese präventiv, bevor sie eskalieren. Sie versteht die Zwänge und Ziele der anderen Seite und bietet Lösungen an, die beiden helfen („Win-Win“). Sie wird von anderen Abteilungen als verlässlicher Partner geschätzt, der nicht nur fordert, sondern auch unterstützt. Sie kann auch schwierige Botschaften diplomatisch und wertschätzend vermitteln.",
+              "example": "Quality: Reist an Standorte, moderiert Workshop für gemeinsamen Standard. | Leiter Buchhaltung: Moderiert bei Konflikt zwischen Einkauf und Produktion zu Zahlungszielen. | HR-Leiter: Vermittelt bei Konflikt zwischen Abteilungen, findet Win-Win-Lösung. | CFO: Baut Brücken zwischen deutschen und italienischen Teams, schafft Vertrauen."
+            },
+            "5": {
+              "text": "Die Führungskraft löst komplexe, verfahrene Konflikte (z. B. kulturelle Spannungen zwischen Standorten oder historische Grabenkämpfe), an denen andere gescheitert sind. Sie schafft es, unterschiedliche Interessen auf das gemeinsame strategische Ziel („One Niederwieser“) auszurichten. Sie etabliert Gremien oder Formate, die den Austausch und das Stakeholder-Management strukturell verbessern. Sie genießt höchstes Vertrauen bei der Geschäftsführung und den Belegschaftsvertretungen und nutzt dieses Kapital zum Wohle des Unternehmens. Sie macht aus Gegnern Partner.",
+              "example": "Manager: Löst historische Grabenkämpfe zwischen Abteilungen, schafft echte Zusammenarbeit. | Leiter Buchhaltung: Etabliert Finance-Netzwerk aller Standorte, das als Vorbild für andere Funktionen gilt. | HR-Leiter: Wird bei schwierigen Restrukturierungen als Mediator zwischen GF und BR hinzugezogen. | CFO: Genießt höchstes Vertrauen bei allen Stakeholdern, seine Vermittlung wird immer akzeptiert."
+            }
+          }
+        }
+      ]
+    },
+    "it": {
+      "kurzanker_im_bogen": {
+        "fach": {
+          "1": "Non soddisfa – Lacune evidenti, nessuna base tecnica",
+          "2": "Necessita miglioramento – Processi standard ok, in difficoltà con deviazioni",
+          "3": "Baseline – Autonomo, affidabile, alta qualità",
+          "4": "Supera – Padroneggia contesti complessi, agisce preventivamente",
+          "5": "Eccezionale – Autorità tecnica, riconosciuto tra sedi"
+        },
+        "komm": {
+          "1": "Non soddisfa – Si isola, mentalità difensiva",
+          "2": "Necessita miglioramento – Reattivo, canali inefficienti",
+          "3": "Baseline – Proattivo, rispettoso, condivide conoscenze",
+          "4": "Supera – Crea comprensione, abbatte silos, media conflitti",
+          "5": "Eccezionale – Stabilisce nuovi standard, rete di fiducia"
+        },
+        "prob": {
+          "1": "Non soddisfa – Blocca, attende passivamente soluzioni esterne",
+          "2": "Necessita miglioramento – Tratta sintomi, escalation prematura",
+          "3": "Baseline – Analizza strutturalmente, trova soluzioni pragmatiche",
+          "4": "Supera – Riconosce pattern, pensa in alternative",
+          "5": "Eccezionale – Risolve problemi strategici, modello nelle crisi"
+        },
+        "adapt": {
+          "1": "Non soddisfa – Resiste ai cambiamenti",
+          "2": "Necessita miglioramento – Poca iniziativa per formazione",
+          "3": "Baseline – Curioso, riflette, si adatta rapidamente",
+          "4": "Supera – Cerca attivamente conoscenza, catalizzatore per novità",
+          "5": "Eccezionale – Anticipa trend, prepara organizzazione"
+        },
+        "orga": {
+          "1": "Non soddisfa – Caotico, non rispetta scadenze",
+          "2": "Necessita miglioramento – Funziona sotto guida, insicuro in autonomia",
+          "3": "Baseline – Organizzato, prioritizza, mantiene impegni",
+          "4": "Supera – Previdente, ottimizza processi, alleggerisce altri",
+          "5": "Eccezionale – Coordina progetti complessi, stabilisce standard"
+        },
+        "lead": {
+          "1": "Non soddisfa – Nessun impegno per team, micromanagement",
+          "2": "Necessita miglioramento – Conduce solo conversazioni 'comode'",
+          "3": "Baseline – Direzione chiara, sviluppo individuale, coaching",
+          "4": "Supera – Design strategico team, sviluppa high performer",
+          "5": "Eccezionale – Costruisce cultura leadership cross-site"
+        },
+        "strat": {
+          "1": "Non soddisfa – Visione tunnel, nessuna lungimiranza",
+          "2": "Necessita miglioramento – Domina operatività, poco legame strategico",
+          "3": "Baseline – Traduce strategia in obiettivi, mostra connessioni",
+          "4": "Supera – Anticipa sviluppi, sfida status quo",
+          "5": "Eccezionale – Plasma direzione strategica, competenza M&A"
+        },
+        "decide": {
+          "1": "Non soddisfa – Evita decisioni, delega sempre verso l'alto",
+          "2": "Necessita miglioramento – Decide solo con informazioni perfette",
+          "3": "Baseline – Decide rapidamente, trasparente, sostiene decisioni",
+          "4": "Supera – Prende decisioni scomode, dosa rischio intelligentemente",
+          "5": "Eccezionale – Decide strategicamente con coraggio, sovrano nell'incertezza"
+        },
+        "exec": {
+          "1": "Non soddisfa – Non pianifica, nessuna affidabilità",
+          "2": "Necessita miglioramento – Follow-up incoerente, troppo indulgente",
+          "3": "Baseline – Obiettivi chiari, aspettative comprensibili, richiede risultati",
+          "4": "Supera – Rigoroso, bilancia pressione & supporto, pensa in KPI",
+          "5": "Eccezionale – Cultura performance cross-site"
+        },
+        "stake": {
+          "1": "Non soddisfa – Ignora stakeholder, provoca conflitti",
+          "2": "Necessita miglioramento – Reagisce solo a escalation",
+          "3": "Baseline – Coltiva relazioni proattivamente, modera oggettivamente",
+          "4": "Supera – Orchestra stakeholder, trova soluzioni win-win",
+          "5": "Eccezionale – Diplomazia executive-level, previene escalation"
+        }
+      },
+      "kompetenzen": [
+        {
+          "id": "c1",
+          "titel": "Competenza tecnica & Applicazione",
+          "kategorie": "core",
+          "definition": "Valuta le conoscenze tecniche specifiche e la loro applicazione. Non si tratta solo di abilità teoriche, ma del contributo alla sicurezza dei processi e alla qualità.",
+          "stufen": {
+            "1": {
+              "text": "Il collaboratore non possiede le basi tecniche essenziali richieste per la posizione. I compiti vengono eseguiti frequentemente in modo errato o incompleto (es. inserimento dati errati, uso scorretto degli impianti, informazioni errate ai clienti), portando a rilavorazioni, reclami o rischi. Manca la comprensione degli standard tecnici e delle regole del proprio settore. Anche dopo la formazione o il feedback, si verificano ripetutamente gli stessi errori di contenuto. Il collaboratore mostra poca iniziativa nel colmare autonomamente queste lacune. I contesti complessi del proprio campo non vengono compresi; si fa affidamento sugli altri per verificare la correttezza tecnica.",
+              "example": "Admin: Inserisce ripetutamente i dati anagrafici in modo errato, non comprende l'impatto sulle fatture. | Contabilità: Non comprende il sistema IVA, contabilizza ripetutamente in modo errato (22% invece di 10%), gli avvisi fiscali devono essere corretti. | HR: Non conosce i termini di preavviso, crea contratti di lavoro errati che devono essere corretti. | Acquisti: Non comprende gli Incoterms, ordina con condizioni di consegna sbagliate (DDP invece di EXW), causando costi imprevisti."
+            },
+            "2": {
+              "text": "Il collaboratore padroneggia i processi standard e i compiti di routine nel suo campo, ma raggiunge rapidamente i limiti in caso di deviazioni, casi speciali o nuove esigenze. La conoscenza viene applicata più secondo le \"prescrizioni\", senza comprendere il \"perché\" più profondo o gli effetti sulle aree adiacenti. Per risolvere problemi tecnici si attende principalmente un'istruzione o si scala immediatamente, invece di utilizzare le risorse disponibili (documentazione, ricerca, guide di sistema). La qualità dei risultati è altalenante, specialmente sotto stress. Le novità tecniche (es. nuove funzionalità software, richieste dei clienti modificate) vengono adottate con esitazione.",
+              "example": "IT: Risolve problemi di password standard, ma è subito sopraffatto da problemi di rete più complessi e scala senza diagnosi. | Contabilità: Contabilizza operazioni standard correttamente, ma è insicuro con registrazioni intercompany o valute estere. | HR: Crea referenze standard secondo modello, ma è impotente in casi speciali (accordo di risoluzione). | Controlling: Crea report standard, ma non sa spiegare i numeri in modo approfondito."
+            },
+            "3": {
+              "text": "BASELINE: Il collaboratore padroneggia con sicurezza la propria area e fornisce costantemente risultati di alta qualità (elaborazione ordini corretta, sistemi stabili, pezzi precisi). Lavora in completa autonomia nelle attività quotidiane. Risolve rapidamente problemi tecnici da solo o richiede supporto mirato e tempestivo. È in grado di trasmettere conoscenze ai colleghi situazionalmente (brevi istruzioni, suggerimenti troubleshooting) e contribuisce alla stabilità del team. Gli standard tecnici vengono rispettati costantemente.",
+              "example": "Produzione: Opera l'impianto senza errori secondo specifica. | Contabilità: Esegue la chiusura mensile autonomamente e puntualmente, chiarisce le partite aperte di propria iniziativa. | HR: Gestisce i casi del personale dall'assunzione al termine in modo legalmente corretto e completo. | Acquisti: Negozia le condizioni secondo le linee guida, mantiene aggiornato l'anagrafica fornitori, scala tempestivamente in caso di carenze."
+            },
+            "4": {
+              "text": "Il collaboratore comprende a fondo anche contesti tecnici complessi e riconosce interazioni che sfuggono ad altri (es. come una modifica nell'ordine influenza la pianificazione della produzione). Agisce preventivamente: rischi o fonti di errore vengono identificati ed eliminati prima che diventino un problema. La conoscenza tecnica viene utilizzata per ottimizzare attivamente i processi esistenti e renderli più efficienti. I colleghi si rivolgono attivamente a questa persona per domande tecniche difficili (\"Go-to-Person\"). Il collaboratore trasmette proattivamente le conoscenze e garantisce un alto standard nel team. Guarda oltre la propria scrivania e comprende esattamente le esigenze dei partner di interfaccia interni.",
+              "example": "Customer Service: Verifica proattivamente la fattibilità con il laboratorio su domande specifiche e propone alternative più sicure. | Contabilità: Riconosce potenziali di ottimizzazione fiscale, propone ristrutturazione delle relazioni intercompany. | HR: Sviluppa nuova checklist di onboarding che riduce il tempo di inserimento del 30%. | Controlling: Costruisce dashboard che avvisa la direzione in anticipo sul calo dei margini."
+            },
+            "5": {
+              "text": "Il collaboratore è considerato un'autorità tecnica assoluta nel suo campo, la cui competenza è apprezzata e richiesta anche tra le diverse sedi (Sulzberg/Bolzano/Campogalliano). Utilizza la sua eccellente conoscenza per ottenere miglioramenti significativi per il gruppo (es. introduzione di standard a livello di gruppo nel Customer Service, massiccio aumento dell'efficienza tramite nuove soluzioni IT). Questa persona funge da moltiplicatore. Elabora conoscenze complesse in modo che siano utilizzabili per l'organizzazione (es. corsi di formazione, linee guida best practice). Anticipa sviluppi futuri nel settore (es. trend di mercato, nuove tecnologie) e prepara l'azienda proattivamente. L'eccellenza tecnica diventa qui un valore aggiunto diretto per il successo aziendale.",
+              "example": "Group Function: Sviluppa standard di servizio uniformi per tutte le sedi (DE/IT), forma i team. | Contabilità: Introduce reporting di gruppo secondo IFRS, è apprezzato dal revisore come interlocutore. | HR: Sviluppa sistema di Performance Management per tutte le sedi, diventa esperto interno. | Controlling: Stabilisce Rolling Forecast, adottato dalla direzione come strumento di gestione."
+            }
+          }
+        },
+        {
+          "id": "c2",
+          "titel": "Comunicazione & Collaborazione",
+          "kategorie": "core",
+          "definition": "Qualità dello scambio di informazioni e della convivenza. 'One Niederwieser' significa: La collaborazione non finisce alla porta dell'ufficio o al confine nazionale.",
+          "stufen": {
+            "1": {
+              "text": "Il collaboratore trattiene informazioni critiche o le trasmette in modo incompleto, costringendo colleghi o clienti a chiedere chiarimenti e causando errori. Si isola e non mostra interesse per obiettivi comuni. In caso di problemi, scarica responsabilità (\"Non è mia competenza\") o rifiuta supporto. La comunicazione è caratterizzata da mentalità difensiva (battaglie in CC) anziché orientamento alla soluzione. I conflitti vengono ignorati, gestiti alle spalle o fatti escalare in modo non costruttivo. Il comportamento viola i valori fondamentali di rispetto e correttezza.",
+              "example": "Produzione: Al cambio turno comunica solo \"Tutto ok\" nonostante guasto critico. | Contabilità: Non informa i colleghi su regole di contabilizzazione modificate, errori si accumulano. | HR: Non comunica dimissioni tempestivamente, piani di sostituzione falliscono. | Acquisti: Nasconde problemi con fornitori, produzione si ferma inaspettatamente."
+            },
+            "2": {
+              "text": "Il collaboratore comunica principalmente in modo reattivo: le informazioni fluiscono solo su richiesta esplicita (\"Dovere di informarsi\" invece di \"Dovere di informare\"). Si concentra sulla propria area ignorando esigenze di reparti adiacenti o colleghi. In riunioni o progetti contribuisce raramente proattivamente. Il canale di comunicazione è spesso inefficiente (es. lunghi scambi email su temi complessi invece di breve chiamata chiarificatrice – contrariamente al principio \"Phone before Email\"). Il feedback viene preso personalmente o respinto difensivamente. La collaborazione funziona nella routine, ma diventa difficile con stress, incertezza o temi interfunzionali.",
+              "example": "Backoffice: Scrive email avanti e indietro per giorni invece di chiarire telefonicamente. | Contabilità: Risponde alle richieste solo dopo giorni, blocca processi di approvazione. | HR: Informa su nuove direttive solo via email circolare senza spiegazioni. | Controlling: Fornisce numeri senza contesto, destinatari non capiscono il messaggio."
+            },
+            "3": {
+              "text": "BASELINE: Il collaboratore informa colleghi e partner proattivamente, completamente e tempestivamente su tutto ciò che è rilevante (es. aggiornamenti stato, ritardi, assenze). Sceglie il canale più efficiente situazionalmente (prende il telefono se le cose devono essere chiarite rapidamente). Il tono è sempre rispettoso e alla pari, indipendentemente da gerarchia o sede. Offre supporto ai colleghi quando necessario e condivide volentieri conoscenze. Nelle riunioni è presente, preparato e costruttivo. I conflitti vengono affrontati oggettivamente e direttamente. Contribuisce stabilmente a un'atmosfera lavorativa positiva e professionale.",
+              "example": "Sales: In caso di ritardo consegna, informa subito cliente e agente con nuova data. | Contabilità: Annuncia scadenze chiusura mensile con anticipo, coordina interfacce. | HR: Comunica modifiche del diritto del lavoro in modo comprensibile a tutti i responsabili. | Assistenza: Tiene tutti informati su spostamenti di appuntamenti."
+            },
+            "4": {
+              "text": "Il collaboratore non comunica solo informazioni, ma crea comprensione. Adatta la comunicazione in modo mirato all'interlocutore (es. traduce dettagli tecnici per i non addetti ai lavori, prepara dati per i decisori) e assicura che il messaggio arrivi correttamente. Agisce attivamente come legame tra i reparti e abbatte i silos. In caso di conflitti o malintesi nel team, assume un ruolo di mediazione e cerca una soluzione comune (\"Win-Win\"), invece di voler avere ragione. Fornisce feedback costruttivi e orientati allo sviluppo che aiutano gli altri a migliorare. La collaborazione con questa persona rende l'intero ambiente misurabilmente più efficiente e motivato.",
+              "example": "Interfaccia: Modera in caso di conflitto tra produzione e servizio, crea regolamentazione. | Contabilità: Spiega temi finance in modo che anche non-commerciali capiscano e possano decidere. | HR: Media in conflitto di team, trova soluzione accettata da entrambe le parti. | Controlling: Prepara numeri per direzione in modo che decisioni siano possibili direttamente."
+            },
+            "5": {
+              "text": "Il collaboratore stabilisce nuovi standard di collaborazione che vanno oltre il proprio team (es. avvio di formati di scambio regolari tra le sedi di Sulzberg e Campogalliano o tra Sales e Tecnica). Vive i valori Fast, Fair, Personal in modo così esemplare da fungere da modello e trascinare gli altri. Crea una rete di fiducia nell'intera azienda e la utilizza per risolvere problemi complessi e interfunzionali in modo rapido e non burocratico. Viene coinvolto come mentore o mediatore in situazioni comunicative difficili (es. processi di cambiamento, crisi). Si assicura attivamente che parliamo internamente ed esternamente \"con una sola voce\".",
+              "example": "HR: Avvia Sounding Board inter-sede per differenze culturali Bolzano/Sulzberg. | Contabilità: Stabilisce Finance-Call mensile con tutte le sedi, crea trasparenza. | Assistenza: Introduce protocollo di comunicazione uniforme per area direzione. | Controlling: Crea standard di reporting che permette confrontabilità a livello di gruppo."
+            }
+          }
+        },
+        {
+          "id": "c3",
+          "titel": "Competenza nel Problem Solving",
+          "kategorie": "core",
+          "definition": "Gestione degli ostacoli. Distinguiamo tra Troubleshooting (sintomi) e ricerca delle cause (radice).",
+          "stufen": {
+            "1": {
+              "text": "Il collaboratore riconosce i problemi spesso solo quando sono già degenerati, o ignora segnali di avvertimento evidenti (es. messaggi di errore, reclami clienti, deviazioni di qualità). Non mostra iniziativa per la soluzione, ma attende passivamente istruzioni (\"Lavoro secondo prescrizione\"). Di fronte alle difficoltà si arrende rapidamente o scarica la responsabilità su altri (colleghi, IT, fornitori). Gli errori vengono nascosti o minimizzati invece di parlarne apertamente. Non c'è apprendimento dagli errori: lo stesso identico problema si verifica ancora e ancora senza che il comportamento venga modificato.",
+              "example": "Admin: Chiude messaggio errore nell'ERP, a fine mese i numeri non tornano. | Contabilità: Ignora solleciti per settimane, fino a minaccia di recupero crediti. | HR: Non vede scadenza contratto a termine, dipendente lavora illegalmente. | Acquisti: Non nota deviazione prezzo, paga troppo per mesi."
+            },
+            "2": {
+              "text": "Il collaboratore segnala i problemi (\"Qui c'è qualcosa che non va\"), ma contribuisce poco alla soluzione. Si affida molto al responsabile o a colleghi esperti per trovare la via d'uscita dalla crisi. I tentativi di soluzione rimangono spesso in superficie: si combattono i sintomi (es. riavviare semplicemente la macchina, temporeggiare col cliente), ma non le cause reali. Appena sorge un primo ostacolo nella ricerca della soluzione, il processo si ferma. Necessita di istruzioni dettagliate per risolvere anche problemi standard. Manca la visione delle conseguenze: una \"soluzione rapida\" crea spesso nuovi problemi altrove.",
+              "example": "Produzione: Riduce velocità macchina invece di cercare causa meccanica. | Contabilità: Registra differenza su conto transitorio invece di chiarire causa. | HR: Risolve sintomo (approvare straordinari) invece di affrontare causa (sottorganico). | Controlling: Corregge numeri manualmente invece di segnalare errore sistema."
+            },
+            "3": {
+              "text": "BASELINE: Il collaboratore riconosce tempestivamente i problemi nel proprio ambito di competenza e li affronta autonomamente. Utilizza le informazioni disponibili (dati, manuali, storico) e gli strumenti per trovare soluzioni pragmatiche che funzionano. Distingue con sicurezza cosa può risolvere da solo e quando è necessaria un'escalation – informando poi in modo preciso e orientato alla soluzione (arriva con una proposta, non solo con il lamento). Le soluzioni sono solide e sostenibili per il lavoro quotidiano. Rimane capace di agire anche in situazioni stressanti (\"Sangue freddo\"). Dopo un errore si assume la responsabilità (\"Accountability\") e corregge, invece di cercare scuse.",
+              "example": "Customer Service: Localizza merce mancante, informa cliente onestamente, risolve conflitto. | Contabilità: Chiarisce partite aperte autonomamente con clienti, documenta soluzione. | HR: Trova soluzione pragmatica per conflitto ferie nel team. | Acquisti: Organizza alternativa velocemente in caso di mancata consegna, informa tutti i coinvolti."
+            },
+            "4": {
+              "text": "Il collaboratore non risolve solo il problema acuto, ma conduce una ricerca sistematica delle cause (es. metodo \"5-Why\", analisi dati) per capire perché è successo. Sviluppa misure che impediscono che l'errore si verifichi di nuovo (prevenzione errori). Pensa oltre il proprio ambito: se un problema riguarda le interfacce (es. passaggio Sales a Produzione), questo viene indirizzato e risolto attivamente. Supporta i colleghi in sfide difficili e apporta approcci creativi e non convenzionali quando le soluzioni standard non funzionano. I problemi vengono concepiti come opportunità di miglioramento.",
+              "example": "Logistica: Analizza dati ritardi, adatta processo di ritiro permanentemente. | Contabilità: Analizza errori di registrazione ricorrenti, propone modifica processo che elimina fonte errore. | HR: Indaga alta fluttuazione in reparto, identifica problema di leadership, avvia misure. | Controlling: Trova causa calo margini, sviluppa concetto contromisure."
+            },
+            "5": {
+              "text": "Il collaboratore identifica problemi complessi e strutturali o rischi che altri non hanno ancora notato e sviluppa concetti completi per risolverli. Le soluzioni hanno spesso un impatto positivo su più reparti o sedi del gruppo (Sulzberg/Bolzano/Campogalliano). Stabilisce nuovi standard o \"Best Practices\" per la risoluzione dei problemi che vengono adottati in azienda. Trasforma i problemi in vere innovazioni o vantaggi competitivi per Niederwieser. Nelle crisi assume informalmente la guida (\"Troubleshooter\") e naviga il team con sicurezza attraverso terreni incerti.",
+              "example": "Quality: Avvia Task-Force per difetti materiali tra sedi. | Contabilità: Scopre errore sistematico di fatturazione che costava 50k EUR/anno al gruppo, implementa controllo. | HR: Riconosce deficit strutturale di qualificazione, sviluppa programma formazione per tutte le sedi. | Controlling: Identifica driver di costo nascosti, risparmia 100k EUR/anno con modifica processo."
+            }
+          }
+        },
+        {
+          "id": "c4",
+          "titel": "Adattabilità & Volontà di apprendere",
+          "kategorie": "core",
+          "definition": "Volontà di adattarsi a nuove condizioni quadro (IT, mercato, processi). 'Growth Mindset' invece di Status Quo.",
+          "stufen": {
+            "1": {
+              "text": "Il collaboratore reagisce alle novità (es. nuovo software, ristrutturazioni) con aperto rifiuto, cinismo o ostruzionismo. Si aggrappa rigidamente a metodi obsoleti (\"Abbiamo sempre fatto così\") e si rifiuta di apprendere nuove abilità. I cambiamenti portano a un massiccio calo delle prestazioni o a malumore che contagia il team. Necessita di una sproporzionata opera di convincimento e pressione per attuare anche i minimi adattamenti nel flusso di lavoro. Il feedback sullo sviluppo personale viene ignorato o valutato come un attacco.",
+              "example": "Magazzino: Si rifiuta di usare nuovi scanner, tiene liste manuali private. | Contabilità: Blocca attivamente passaggio ERP, si lamenta rumorosamente di ogni cambiamento. | HR: Rifiuta categoricamente fascicolo personale digitale, insiste sulla carta. | Segreteria: Si rifiuta di imparare nuovo sistema prenotazioni, sabota introduzione."
+            },
+            "2": {
+              "text": "Il collaboratore accetta i cambiamenti solo dopo lunga esitazione o mugugni. Aspetta di vedere se la novità \"rimane davvero\" prima di muoversi. L'apprendimento di nuovi compiti o sistemi dura molto più a lungo rispetto a colleghi comparabili, poiché manca la motivazione interna. Mostra poca iniziativa per l'aggiornamento; nuove conoscenze vengono acquisite solo se esplicitamente ordinate o \"pre-digerite\". In situazioni di stress o con nuove esigenze poco chiare, ricade rapidamente in vecchi modelli comportamentali inefficienti. L'adattabilità non è sufficiente per fasi dinamiche.",
+              "example": "Finance: Stampa email nonostante sistema paperless, impara nuovo processo lentamente. | Contabilità: Usa nuovo software solo controvoglia, torna subito al vecchio metodo in caso di problemi. | HR: Accetta nuova piattaforma recruiting solo dopo mesi e molto lavoro di convincimento. | Controlling: Crea report parallelamente nel vecchio e nuovo sistema, doppio lavoro."
+            },
+            "3": {
+              "text": "BASELINE: Il collaboratore gestisce i cambiamenti in modo costruttivo e adatta il suo modo di lavorare alle nuove condizioni. Attua le nuove direttive (es. uso di un nuovo strumento, piano turni modificato) in modo affidabile e senza grandi lamentele. L'inserimento in nuovi temi avviene in tempi adeguati. Riconosce quando mancano conoscenze e utilizza i corsi offerti o gli ausili per colmare la lacuna. Non blocca le innovazioni, ma le supporta nel lavoro quotidiano. Ci si può fidare che fornisca stabilmente la sua prestazione anche in un ambiente in evoluzione (\"Fair\" verso il team).",
+              "example": "Sales: Partecipa a corso su film sostenibili e consiglia clienti con competenza dalla data stabilita. | Contabilità: Si forma su D365 Business Central, utilizza funzioni standard in modo affidabile. | HR: Implementa nuovi requisiti privacy (GDPR) entro le scadenze. | Assistenza: Assume nuovi compiti da ristrutturazione senza lamentarsi."
+            },
+            "4": {
+              "text": "Il collaboratore vede i cambiamenti come opportunità di miglioramento. Non aspetta i corsi, ma acquisisce nuove conoscenze (es. su nuovi prodotti, trend di mercato o trucchi software) autonomamente. Sperimenta nuovi approcci risolutivi e condivide le scoperte con il team. Nelle fasi di transizione agisce in modo stabilizzante sugli altri e aiuta i colleghi che hanno più difficoltà con il cambiamento (es. come \"Buddy\" per nuovi sistemi). Mette in discussione lo status quo in modo costruttivo e fa proposte su come adattarsi meglio alle nuove esigenze.",
+              "example": "Service: Esplora nuovo CRM prima del corso, aiuta poi colleghi all'avvio. | Contabilità: Testa attivamente nuove funzionalità ERP, dà feedback costruttivo a IT, diventa Key-User. | HR: Prova strumenti AI per recruiting autonomamente, valuta utilità per team. | Controlling: Costruisce competenze Power BI autonomamente, crea primi dashboard di propria iniziativa."
+            },
+            "5": {
+              "text": "Il collaboratore anticipa i cambiamenti necessari spesso prima degli altri e prepara sé stesso e l'ambiente proattivamente (es. acquisizione di competenze future prima che servano acutamente). Spinge innovazioni che rendono l'azienda pronta per il futuro (es. pilotaggio di modalità di lavoro completamente nuove). Stabilisce una cultura dell'apprendimento nel proprio ambito, vivendo gli errori come opportunità di apprendimento e incoraggiando gli altri a provare (\"Empowerment\"). Agisce come faro in grandi progetti strategici (es. armonizzazione delle sedi) e crea entusiasmo per la nuova strada, anche in caso di resistenze iniziali.",
+              "example": "IT: Avvia autonomamente progetto pilota AI (Copilot), chiarisce privacy, forma altre sedi. | Contabilità: Guida introduzione E-Invoicing per il gruppo, diventa esperto interno. | HR: Introduce sistema Performance Management che supporta cambiamento culturale. | Controlling: Implementa Predictive Analytics, rivoluziona forecasting per tutte le sedi."
+            }
+          }
+        },
+        {
+          "id": "c5",
+          "titel": "Auto-organizzazione & Affidabilità",
+          "kategorie": "core",
+          "definition": "Strutturazione del lavoro, priorizzazione e Accountability. Ci si può fidare della parola data?",
+          "stufen": {
+            "1": {
+              "text": "Il collaboratore lavora in modo asistematico e senza struttura riconoscibile. I compiti vengono dimenticati, le scadenze mancate senza preavviso o gli appuntamenti persi. Si lascia distrarre facilmente e perde il focus sull'essenziale. Il responsabile o i colleghi devono costantemente controllare (\"Babysitting\") affinché i risultati vengano consegnati. Manca la panoramica sui compiti aperti; le promesse vengono fatte con leggerezza e non mantenute. Il posto di lavoro (fisico o digitale) è disorganizzato, cosicché documenti o informazioni importanti non sono a portata di mano. L'inaffidabilità pesa massicciamente sul team.",
+              "example": "Sales: Dimentica rapporti visita, smarrisce fogli con richieste clienti. | Contabilità: Dimentica scadenze di pagamento, i solleciti si accumulano. I documenti spariscono nel caos cartaceo. | HR: Manca fine periodo di prova, dimentica trasformazioni contrattuali. Fascicoli del personale incompleti. | Segreteria: Appuntamenti assegnati doppiamente, email importanti senza risposta per giorni."
+            },
+            "2": {
+              "text": "Il collaboratore sbriga compiti di routine semplici in modo affidabile, ma va rapidamente in difficoltà con più compiti paralleli o pressione temporale. Ha difficoltà a distinguere l'importante dal non importante (fa es. ciò che diverte prima, non ciò che urge). La pianificazione avviene solo a brevissimo termine (giorno per giorno). Quando i tempi si stringono, non lo comunica tempestivamente, ma solo quando il danno è già fatto. La qualità del lavoro soffre per mancanza di cura o gestione del tempo. Necessita di guida regolare e promemoria dal responsabile per rimanere in rotta.",
+              "example": "Officina: Riordina, anche se riparazione urgente blocca la produzione. | Contabilità: Svolge compiti standard, ma va in crisi con lo stress di bilancio, non comunica ritardi. | HR: Elabora candidature per ordine di arrivo invece che per urgenza, top candidato rinuncia. | Acquisti: Nessuna panoramica sugli ordini aperti, le date di consegna vengono controllate solo su richiesta."
+            },
+            "3": {
+              "text": "BASELINE: Il collaboratore organizza autonomamente la giornata lavorativa e stabilisce priorità sensate per urgenza e importanza. Rispetta impegni e scadenze in modo affidabile. Se una scadenza è a rischio, informa con almeno 48 ore di anticipo proattivamente (\"Transparency\"). Postazione e sistemi sono strutturati in modo che informazioni importanti siano reperibili in meno di 2 minuti (archiviazione ordinata, liste to-do curate). Si può fare affidamento sulla sua parola.",
+              "example": "Admin: Ha scadenziario digitale sotto controllo (priorità codificate per colore). Segnala martedì che chiusura mensile arriverà 2 giorni dopo per assenza malattia nel team – propone contestualmente soluzione (supporto da altra sede)."
+            },
+            "4": {
+              "text": "Il collaboratore pianifica con anticipo (2-3 mesi) e riconosce colli di bottiglia prima che si verifichino (ferie, scadenze progetti, carenza risorse). Ottimizza attivamente il proprio metodo di lavoro (strumenti digitali, checklist, raggruppamento attività simili). Rimane strutturato anche con carico di lavoro al 120% e consegna risultati puntuali. La sua affidabilità lo rende pilastro fisso del team – i colleghi sanno: \"Con X è al sicuro.\"",
+              "example": "Project Management: Prepara 4 settimane prima delle ferie dossier dettagliato con stato di tutti i progetti, punti aperti e referenti. Predispone attività critiche (briefing di scorta, template decisionali precompilati). Il sostituto può subentrare senza interruzioni."
+            },
+            "5": {
+              "text": "Il collaboratore sviluppa sistemi organizzativi o flussi di lavoro che aiutano non solo lui/lei, ma l'intero team o reparto a lavorare più efficientemente (es. introduzione di una Kanban-Board, standardizzazione dell'archiviazione per il gruppo). Gestisce pacchetti di compiti altamente complessi con molte dipendenze (es. progetti inter-sede) con sovranità e puntualità. È considerato un \"porto sicuro\" per compiti critici: se se ne occupa lui/lei, il successo è garantito. Crea spazi per temi strategici e innovazioni attraverso un'eccellente organizzazione.",
+              "example": "Marketing: Stabilisce tool di pianificazione digitale per tutte le sedi (Sulzberg/BZ/Campo), elimina doppi lavori."
+            }
+          }
+        },
+        {
+          "id": "l1",
+          "titel": "Gestione & Sviluppo dei collaboratori",
+          "kategorie": "leadership",
+          "definition": "Guida, motivazione e sviluppo del team. 'Leadership' invece di solo 'Management'.",
+          "stufen": {
+            "1": {
+              "text": "Il manager trascura i suoi compiti principali: i colloqui con i collaboratori (colloquio annuale, check-in) non hanno luogo, sono estremamente in ritardo o vengono sbrigati come fastidioso dovere. Non c'è feedback costruttivo; la critica avviene spesso in modo non oggettivo o davanti ad altri. I desideri di sviluppo dei collaboratori vengono ignorati o bloccati (\"Non abbiamo tempo per questo\"). Gli obiettivi vengono comunicati in modo poco chiaro o per nulla, portando a disorientamento. Il comportamento contraddice massicciamente i nostri valori (es. mancanza di rispetto, \"Divide and Conquer\"). Nel team regna un'atmosfera di paura o indifferenza, portando ad alto turnover o dimissioni interne.",
+              "example": "Resp. Prod: Annulla colloquio annuale 3 volte, lo fa poi in 15min in piedi. | Resp. Contabilità: Non dà mai feedback, team riceve critiche solo tramite terzi. | Resp. HR: Blocca richieste formazione per principio ('niente budget'), demotiva team. | Resp. Amministrazione: Micromanagement su ogni email, nessuna fiducia nel team."
+            },
+            "2": {
+              "text": "Il manager sbriga i doveri amministrativi (approvazione ferie, colloqui formali), ma senza profondità. Il feedback c'è per lo più solo se qualcosa è andato storto (reattivo), quasi nessuna lode o orientamento per il futuro. Il lavoro di leadership si limita all'assegnazione di compiti (\"Micromanagement\"), invece di delegare responsabilità. I piani di sviluppo (IDP) vengono sì compilati, ma spariscono poi nel cassetto e non vengono seguiti. Il manager si prende troppo poco tempo per il team (\"Porta chiusa\"). Manca chiarezza e ispirazione; il team lavora \"secondo prescrizione\", ma non oltre.",
+              "example": "Team Leader: Usa Copia-Incolla per obiettivi, risponde a desiderio sviluppo vago 'Vediamo'. | Resp. Contabilità: Fa colloqui per obbligo, ma senza vero interesse per sviluppo. | Resp. HR: Delega solo compiti di routine, tiene per sé i progetti interessanti. | Team Leader Admin: Mai loda, raramente critica, team senza orientamento."
+            },
+            "3": {
+              "text": "BASELINE: Il manager conduce tutti i colloqui obbligatori (Review, definizione obiettivi) puntualmente, ben preparato e alla pari. Assicura obiettivi e aspettative chiari, cosicché ognuno sappia cosa fare. Il feedback avviene regolarmente ed equamente – sia positivo che correttivo. Supporta lo sviluppo professionale (es. approvazione corsi) ed è disponibile per i collaboratori in caso di problemi. Vive i valori \"Fast, Fair, Personal\" nel quotidiano e garantisce un clima lavorativo stabile e positivo. Tratta tutti i membri del team equamente e senza discriminazioni.",
+              "example": "Sales Director: Check-in regolari, loda successi, parla apertamente dei deficit. Team conosce obiettivi. | Resp. Contabilità: Discute learnings chiusura annuale nel team, pianifica miglioramenti insieme. | Resp. HR: Conduce colloqui sviluppo strutturati, promuove formazione attivamente. | Resp. Reparto: Dà feedback tempestivo e concreto, team sa dove sta."
+            },
+            "4": {
+              "text": "Il manager usa la leadership attivamente per rendere i collaboratori migliori. Non delega solo compiti, ma responsabilità, per permettere la crescita (\"Empowerment\"). Conduce regolari colloqui di feedback informali (oltre il processo standard) e usa metodi di coaching per stimolare i collaboratori a trovare soluzioni proprie. Riconosce potenziali proattivamente e propone misure di sviluppo individuali (es. guida progetto, Job Rotation). Crea una cultura di team in cui gli errori vengono discussi apertamente per impararne. Il team si sente supportato e porta prestazioni misurabilmente più alte grazie all'alta motivazione.",
+              "example": "Resp. IT: Delega guida progetto a talento, dà feedback specifico, rafforza autostima. | Resp. Contabilità: Trasferisce responsabilità bilancio a giovane talento, fa coaching se necessario. | Resp. HR: Lascia collaboratore guidare progetto recruiting autonomamente, dà coaching invece di istruzioni. | Resp. Controlling: Sviluppa High-Potential sistematicamente tramite Job-Enrichment e Mentoring."
+            },
+            "5": {
+              "text": "Il manager costruisce sistematicamente successori e sviluppa High-Potentials auch über den eigenen Bedarf hinaus (per il gruppo). È considerato un mentore nell'intera azienda, il cui consiglio è cercato anche da collaboratori di altri settori. Crea un ambiente di eccellenza in cui i talenti possono svilupparsi e lega i top performer a lungo termine a Niederwieser. Gestisce la pianificazione del personale strategicamente in modo lungimirante (es. per i prossimi 2-3 anni) e assicura che il team sia pronto per le sfide future della Strategia 2035. Sotto la sua guida nascono innovazioni e risultati sopra la media grazie a effetti sinergici.",
+              "example": "Manager: Raccomanda proattivamente Top-Mitarbeiter per posizione in altra sede. | Resp. Contabilità: Ha sviluppato due successori, uno già di successo in altro reparto. | Resp. HR: Sviluppa talenti oltre il proprio fabbisogno per il gruppo, considerato fucina di talenti. | CFO: Cultura di leadership nell'area è modello, fluttuazione più bassa nel gruppo."
+            }
+          }
+        },
+        {
+          "id": "l2",
+          "titel": "Pensiero strategico",
+          "kategorie": "leadership",
+          "definition": "Vedere il 'quadro generale'. Via dal pensiero a silos verso il pensiero di gruppo ('One Niederwieser').",
+          "stufen": {
+            "1": {
+              "text": "Il manager agisce quasi esclusivamente in modo reattivo e si perde nel micromanagement del quotidiano (\"Firefighting\"). Non mostra interesse per la strategia aziendale o non la comprende. Le decisioni vengono prese isolatamente per il proprio reparto, spesso addirittura a svantaggio di altri settori o del gruppo (Subottimizzazione). Pianifica budget e risorse solo per il fabbisogno momentaneo senza lungimiranza. Le iniziative strategiche della direzione vengono ignorate, derise o percepite come \"disturbo\" per l'operatività. Il team non ha orientamento su dove vada il viaggio a lungo termine.",
+              "example": "Resp. Prod: Produce a magazzino per 100% utilizzo, anche se vendite non vendono il prodotto. | Resp. Contabilità: Ottimizza solo i propri KPI, ignora effetti su cashflow del gruppo. | Resp. HR: Recluta senza allineamento con strategia, profili sbagliati vengono assunti. | Controlling: Fornisce solo numeri storici, nessuna analisi orientata al futuro."
+            },
+            "2": {
+              "text": "Il manager conosce le parole chiave della strategia (es. sostenibilità, crescita), ma non riesce a integrarle nel quotidiano del suo team. La strategia rimane teoria (\"Slide sul muro\"), mentre operativamente si lavora \"come sempre\". La pianificazione avviene per lo più solo a breve termine (trimestre/anno). Le connessioni tra reparti o sedi vengono riconosciute solo se esplicitamente segnalate. Aspetta che la strategia venga data \"dall'alto\", invece di sviluppare proposte per il proprio ambito.",
+              "example": "Sales: Conosce obiettivo sostenibilità, ma guida team ancora solo su quantità/fatturato. | Resp. Contabilità: Conosce strategia digitalizzazione, ma lavora ancora con liste Excel. | Resp. HR: Sente di Employer Branding, ma non lo implementa nel recruiting. | Controlling: Crea report standard, senza collegarli a obiettivi strategici."
+            },
+            "3": {
+              "text": "BASELINE: Il manager deriva logicamente gli obiettivi del suo settore dalla strategia aziendale. Spiega al suo team il \"Perché\" dietro le decisioni e assicura che tutti tirino dalla stessa parte. Considera nella sua pianificazione (budget, personale, capacità) un orizzonte di 12-18 mesi. Riconosce trend rilevanti nel proprio ambito (es. digitalizzazione in amministrazione, nuove tecnologie in produzione) e adatta l'orientamento del suo team tempestivamente. Pensa oltre i confini della sede e supporta la harmonizzazione del gruppo (\"One Niederwieser\"), rispettando standard e promuovendo la cooperazione.",
+              "example": "Resp. IT: Pianifica budget proattivamente per armonizzazione sistemi ERP (Bolzano/Sulzberg). | Resp. Contabilità: Allinea reporting a Strategia 2035, rende progresso misurabile. | Resp. HR: Pianifica sviluppo personale lungo i fabbisogni di competenze strategiche. | Controlling: Sviluppa KPI che operazionalizzano obiettivi strategici."
+            },
+            "4": {
+              "text": "Il manager riconosce cambiamenti di mercato o interni prima che diventino ovvi e prepara il suo settore proattivamente. Sviluppa di propria iniziativa proposte strategiche (es. nuovi campi di business, adattamenti strutturali) che vanno oltre il quotidiano. Cerca attivamente sinergie con altre sedi (es. uso comune di risorse tra Sulzberg und Campogalliano) und rompe i silos. Pensa in scenari (\"Cosa succederebbe se...\") e ha un piano B in tasca. È apprezzato dai pari come sparring partner strategico.",
+              "example": "Marketing: Sposta budget su 'campagne soluzioni' prima che il mercato giri. | Resp. Contabilità: Anticipa effetti nuova legislazione fiscale, prepara il gruppo. | Resp. HR: Riconosce carenza manodopera specializzata presto, avvia iniziativa Employer Branding. | CFO: Identifica target M&A che chiude gap tecnologico, prepara Due Diligence."
+            },
+            "5": {
+              "text": "Il manager sviluppa concetti che cambiano il modello di business o il modo di lavorare dell'intero gruppo in modo sostenibile (es. apertura di un nuovo mercato, introduzione di una tecnologia rivoluzionaria). Le sue idee fluiscono direttamente nello sviluppo della strategia aziendale. Riconosce rischi o opportunità distruttivi molto presto e guida l'azienda attraverso decisioni coraggiose in una direzione di successo. È considerato internamente ed esternamente come precursore (\"Thought Leader\") e inspira non solo il proprio team, ma l'intera organizzazione a pensare più in grande.",
+              "example": "Resp. Sede: Elabora Business Case per acquisizione in nicchia, permette ingresso mercato. | Resp. Contabilità: Sviluppa concetto Shared-Service per funzioni Finance di tutte le sedi. | Resp. HR: Progetta People Strategy 2035 che convince direzione e diventa delibera CdA. | CFO: Ristruttura finanziamento del gruppo, riduce significativamente costo del capitale."
+            }
+          }
+        },
+        {
+          "id": "l3",
+          "titel": "Capacità decisionale",
+          "kategorie": "leadership",
+          "definition": "Decidere tempestivamente e in modo vincolante, anche nell'incertezza. Equilibrio tra analisi e velocità.",
+          "stufen": {
+            "1": {
+              "text": "Il manager prende decisioni con estrema esitazione o non le prende affatto (\"Temporeggiare\"). Temi urgenti rimangono fermi, facendo scadere termini o perdere opportunità. Richiede per le minime decisioni sempre nuovi dati o delega la decisione al superiore (\"Delega di ritorno\"), pur di non fare errori. Le decisioni prese vengono riviste immediatamente al minimo vento contrario (\"Flip-Flopping\"), cosa che disorienta il team. Se una decisione era sbagliata, cerca la colpa negli altri o nelle circostanze, invece di assumersi la responsabilità. Manca il coraggio della chiarezza.",
+              "example": "Acquisti: Non decide per settimane su aumento prezzi, scadenza passa, condizioni peggiorano. | Resp. Contabilità: Non riesce a decidere metodo contabile, chiusura annuale si ritarda. | Resp. HR: Rinvia decisione licenziamento low performer per mesi. | Resp. Reparto: Delega ogni decisione verso l'alto, team aspetta costantemente."
+            },
+            "2": {
+              "text": "Il manager decide spesso troppo tardi, cosicché il team rimane in posizione di attesa. Si affida troppo alla sensazione di pancia o a opinioni singole, invece di consultare fatti e dati disponibili (\"Data driven\"). Le decisioni vengono prese \"nel chiuso della stanza\" e presentate al team senza giustificazione. Decisioni difficili o impopolari (es. rifiuti a candidati, stop di progetti) vengono rimandate, nella speranza che il problema si risolva da solo. Il manager necessita di molta rassicurazione dall'alto per sentirsi sicuro.",
+              "example": "Recruiting: Non riesce a decidere tra candidati, entrambi rinunciano. | Resp. Contabilità: Per domande standard chiede sempre rassicurazione al CFO. | Resp. HR: Rivede decisioni al primo vento contrario, team insicuro. | Controlling: Non si fida delle proprie analisi, scala ogni raccomandazione."
+            },
+            "3": {
+              "text": "BASELINE: Il manager prende decisioni nel quotidiano tempestivamente e con sicurezza. Pesa opportunità e rischi ragionevolmente e utilizza le informazioni esistenti in modo efficiente. Comunica la decisione e il \"Perché\" dietro di essa chiaramente al suo team e alle interfacce interessate. Mantiene la sua decisione anche se c'è critica, ma è pronto a correggere la rotta se arrivano nuovi fatti sul tavolo (nessuna testardaggine). Distingue con sicurezza cosa può decidere lui stesso e cosa deve essere scalato – e fornisce in caso di escalation una chiara raccomandazione.",
+              "example": "Capoturno: Decide di notte autonomamente riprogrammazione per guasto macchina, informa pianificazione. | Resp. Contabilità: Decide autonomamente priorità pagamenti in caso di tensione liquidità. | Resp. HR: Approva assunzione urgente senza lunghi giri di approvazione. | Controlling: Dà raccomandazione chiara per decisione investimento, la sostiene."
+            },
+            "4": {
+              "text": "Il manager rimane capace di agire anche in situazioni confuse, sotto pressione temporale o con informazioni incomplete. Prende decisioni coraggiose (\"Courage\") per evitare lo stallo und gestisce il rischio attivamente. Coinvolge gli stakeholder rilevanti (es. altre sedi) tempestivamente per assicurare la qualità della decisione, ma non si perde in infiniti cicli di coordinamento. Spiega anche decisioni impopolari in modo così trasparente und wertschätzend (\"Fair\") che il team può sostenerle.",
+              "example": "Sales Dir: Rifiuta coraggiosamente grande ordine non profittevole, spiega strategia 'Valore prima di Volume'. | Resp. Contabilità: Ferma transazione discutibile nonostante pressione da reparto (Compliance). | Resp. HR: Si separa da High-Performer tossico, anche se doloroso a breve termine. | CFO: Decide in incertezza per investimento, gestisce rischi attivamente."
+            },
+            "5": {
+              "text": "Il manager prende decisioni pionieristiche che hanno effetti positivi ben oltre il proprio ambito (es. per l'intero gruppo). In situazioni di crisi prende immediatamente il timone, crea calma und dà sicurezza und orientamento tramite decisioni chiare. Stabilisce principi o condizioni quadro che permettono ai suoi collaboratori di prendere autonomamente decisioni migliori (\"Empowerment\"). Ha il coraggio di tagliare rami secchi (es. fermare progetti o prodotti non redditizi) per liberare risorse per il nuovo.",
+              "example": "IT-Group: In caso di sospetto Cyber taglia subito tutte le connessioni del gruppo, accetta stop produzione. | Resp. Contabilità: In crisi ferma tutti i pagamenti non critici, assicura liquidità del gruppo. | Resp. HR: Decide rapidamente su cassa integrazione in situazione di crisi, dà sicurezza al team. | CFO: Interrompe acquisizione fallita nonostante alti costi affondati, protegge gruppo da danni maggiori."
+            }
+          }
+        },
+        {
+          "id": "l4",
+          "titel": "Execution & Performance",
+          "kategorie": "leadership",
+          "definition": "Trasformare obiettivi in risultati. Usare i dati ('Clarity'), padroneggiare i processi e guidare coerentemente.",
+          "stufen": {
+            "1": {
+              "text": "Il manager lavora senza piano o struttura riconoscibile. Progetti e compiti vengono iniziati, ma non portati a termine coerentemente. Non ci sono chiare pietre miliari o responsabilità. La prestazione del team non viene misurata o controllata; deviazioni (es. sforamento budget, ritardo termini) si notano solo quando è troppo tardi. Gli obiettivi vengono mancati regolarmente e chiaramente, ohne dass die Führungskraft gegensteuert oder die Ursachen analysiert. Es herrscht eine Kultur der Ausreden statt der Ergebnisse.",
+              "example": "Projektleiter: Software-Rollout Monate überfällig. Kein neuer Plan, keine Info an User."
+            },
+            "2": {
+              "text": "Il manager si impegna, ma perde spesso il focus nel quotidiano. La pianificazione avviene in modo approssimativo (\"Andrà bene\"), rischi o colli di bottiglia non vengono anticipati. Il controllo avviene sporadicamente (es. solo quando il capo chiede), non sistematicamente. Gli obiettivi vengono parzialmente raggiunti, ma spesso solo tramite frenetiche \"azioni last-minute\" (spegnere incendi) a spese della qualità o delle risorse dei collaboratori. Manca trasparenza su dove si trovi veramente il team. I processi non vengono rispettati o costantemente aggirati per forzare risultati a breve termine.",
+              "example": "Sales: Nota mancato obiettivo solo il 25, fa pressione per deal a basso margine."
+            },
+            "3": {
+              "text": "BASELINE: Il manager pianifica compiti e progetti in modo strutturato con tempistiche e risorse realistiche. Definisce chiari criteri di successo (KPI) e controlla il progresso regolarmente (es. in Jour Fixes). In caso di deviazioni interviene tempestivamente e avvia misure correttive per raggiungere ancora l'obiettivo. Assicura che il suo team soddisfi gli obiettivi concordati (Qualità, Costi, Tempo) in modo affidabile. Comunica lo stato in modo trasparente ai superiori e alle interfacce. Ci si può fidare delle sue promesse (\"Fair\").",
+              "example": "Resp. Prod: Organizza subito turno sabato in caso di guasto, informa Vendite proattivamente."
+            },
+            "4": {
+              "text": "Il manager non solo amministra, ma ottimizza attivamente. Utilizza dati e indicatori sistematicamente per scoprire inefficienze o colli di bottiglia prima che diventino un problema. Stabilisce routine che assicurano una performance costantemente alta. Fornisce risultati spesso più velocemente (\"Fast\") o in modo più economico del previsto, senza mettere a rischio la qualità. Riesce a mantenere stabile l'operatività anche in caso di ostacoli imprevisti (es. ondata di malattia, mancata consegna), perché ha pianificato scenari in anticipo.",
+              "example": "HR: Analizza processo, introduce tool digitale, accorcia 'Time-to-Hire' drasticamente."
+            },
+            "5": {
+              "text": "Il manager stabilisce processi Best-Practice che servono da modello per l'intero gruppo (es. un nuovo sistema di reporting che viene poi implementato a Sulzberg e Bolzano). Spinge il miglioramento continuo (KVP) in modo tale da raggiungere salti di performance (es. significativa riduzione della quota scarti o tempo di attraversamento). Crea una cultura di alta prestazione in cui il team si autogestisce e si supera permanentemente. Realizza grandi progetti strategici in \"Time, Budget & Quality\" e fornisce così un contributo diretto al successo aziendale (\"1 Result\").",
+              "example": "Logistica: Raggruppa trasporti Sulzberg/Bolzano, riduce costi del 15% con nuovo Cross-Docking."
+            }
+          }
+        },
+        {
+          "id": "l5",
+          "titel": "Stakeholder & Risoluzione dei conflitti",
+          "kategorie": "leadership",
+          "definition": "Curare le relazioni, moderare interessi politici. Costruttore di ponti tra i silos.",
+          "stufen": {
+            "1": {
+              "text": "Il manager ignora completamente gli interessi di altri reparti o sedi. Non comunica con stakeholder importanti, portando a sorprese e resistenze. Nei conflitti si comporta in modo distruttivo: cerca colpevoli invece di soluzioni, parla male di altri settori (\"Quelli lassù/laggiù\") o porta avanti conflitti in modo aggressivo e non oggettivo. Alternativamente i conflitti vengono ignorati o attesi finché non degenerano. Il comportamento danneggia massicciamente la fiducia e la collaborazione nel gruppo.",
+              "example": "Resp. Prod: Impreca su 'venditori incapaci' invece di chiarire fattibilità direttamente."
+            },
+            "2": {
+              "text": "Il manager cura le relazioni solo quando ha acutamente bisogno di qualcosa (transazionale). Dimentica frequentemente di coinvolgere partner rilevanti (es. HR, IT, altre sedi) tempestivamente, ritardando i progetti. Riconosce gaffe politiche spesso troppo tardi. In caso di conflitti reagisce difensivamente o si ritira per \"mantenere la pace\", anche se sarebbe necessario un chiarimento. Le soluzioni sono spesso compromessi deboli che non soddisfano nessuno. Fa fatica ad assumere la prospettiva dell'interlocutore.",
+              "example": "Project Leader: Dimentica di informare il consiglio di fabbrica. Ritira progetto offeso in caso di veto."
+            },
+            "3": {
+              "text": "BASELINE: Il manager conosce i suoi stakeholder più importanti e li tiene regolarmente informati. Si coordina proattivamente per evitare malintesi. Incontra i partner – interni or esterni – con rispetto e alla pari. I conflitti vengono affrontati tempestivamente (\"Fast\") und diskutiert oggettivamente. Rappresenta gli interessi del suo settore, ma è pronto ad ascoltare argomenti della controparte e trovare soluzioni eque. Assicura che la collaborazione funzioni senza intoppi.",
+              "example": "Service/Supply: Mostra numeri, concorda oggettivamente scorta minima (Compromesso)."
+            },
+            "4": {
+              "text": "Il manager costruisce attivamente una rete resiliente oltre i confini del reparto. Anticipa potenziali conflitti (es. colli di bottiglia risorse tra progetti) und moderiert diese präventiv, bevor sie eskalieren. Comprende i vincoli e gli obiettivi dell'altra parte e offre soluzioni che aiutano entrambi (\"Win-Win\"). È apprezzato da altri reparti come partner affidabile che non solo chiede, ma supporta anche. Sa comunicare anche messaggi difficili in modo diplomatico e rispettoso.",
+              "example": "Quality: Viaggia nelle sedi, modera workshop per standard comune."
+            },
+            "5": {
+              "text": "Il manager risolve conflitti complessi e bloccati (es. tensioni culturali tra sedi o guerre di trincea storiche) dove altri hanno fallito. Riesce a orientare interessi diversi verso l'obiettivo strategico comune (\"One Niederwieser\"). Stabilisce comitati o formati che migliorano strutturalmente lo scambio e la gestione degli stakeholder. Gode della massima fiducia presso la direzione e le rappresentanze dei lavoratori e utilizza questo capitale per il bene dell'azienda. Trasforma avversari in partner.",
+              "example": "Manager: Rompe vecchi silos, integra team ostili in un'unità di successo."
+            }
+          }
+        }
+      ]
+    },
+    "en": {
+      "kurzanker_im_bogen": {
+        "fach": {
+          "1": "Does Not Meet – Faulty, no professional foundation",
+          "2": "Needs Improvement – Standard processes okay, overwhelmed with deviations",
+          "3": "Baseline – Confident, independent, high quality",
+          "4": "Exceeds – Masters complex contexts, acts preventively",
+          "5": "Outstanding – Professional authority, recognized across locations"
+        },
+        "komm": {
+          "1": "Does Not Meet – Isolates themselves, defensive mentality",
+          "2": "Needs Improvement – Reactive, inefficient channels",
+          "3": "Baseline – Proactive, respectful, shares knowledge willingly",
+          "4": "Exceeds – Creates understanding, breaks down silos, mediates conflicts",
+          "5": "Outstanding – Establishes new standards, network of trust"
+        },
+        "prob": {
+          "1": "Does Not Meet – Blocks, passively waits for external solutions",
+          "2": "Needs Improvement – Addresses symptoms, escalates too early",
+          "3": "Baseline – Analyzes structurally, finds pragmatic solutions",
+          "4": "Exceeds – Recognizes patterns, thinks in solution alternatives",
+          "5": "Outstanding – Solves strategic problems, role model in crises"
+        },
+        "adapt": {
+          "1": "Does Not Meet – Resists changes",
+          "2": "Needs Improvement – Little initiative for further training",
+          "3": "Baseline – Curious, reflective, adapts quickly",
+          "4": "Exceeds – Actively seeks knowledge, catalyst for new things",
+          "5": "Outstanding – Anticipates trends, prepares organization"
+        },
+        "orga": {
+          "1": "Does Not Meet – Chaotic, misses deadlines",
+          "2": "Needs Improvement – Functions under guidance, insecure with autonomy",
+          "3": "Baseline – Organized, prioritizes, keeps commitments",
+          "4": "Exceeds – Forward-thinking, optimizes processes, relieves others",
+          "5": "Outstanding – Coordinates complex projects, sets standards"
+        },
+        "lead": {
+          "1": "Does Not Meet – No team commitment, micromanagement",
+          "2": "Needs Improvement – Only conducts 'comfortable' conversations",
+          "3": "Baseline – Clear direction, individual development, coaching",
+          "4": "Exceeds – Strategic team design, develops high performers",
+          "5": "Outstanding – Builds cross-site leadership culture"
+        },
+        "strat": {
+          "1": "Does Not Meet – Tunnel vision, no foresight",
+          "2": "Needs Improvement – Dominated by operations, little strategic connection",
+          "3": "Baseline – Translates strategy into goals, shows connections",
+          "4": "Exceeds – Anticipates developments, challenges status quo",
+          "5": "Outstanding – Shapes strategic direction, M&A competence"
+        },
+        "decide": {
+          "1": "Does Not Meet – Avoids decisions, always delegates upward",
+          "2": "Needs Improvement – Only decides with perfect information",
+          "3": "Baseline – Decides quickly, transparent, stands by decisions",
+          "4": "Exceeds – Makes uncomfortable decisions, intelligently manages risk",
+          "5": "Outstanding – Decides strategically with courage, sovereign in uncertainty"
+        },
+        "exec": {
+          "1": "Does Not Meet – No planning, no reliability",
+          "2": "Needs Improvement – Inconsistent follow-up, too lenient",
+          "3": "Baseline – Clear goals, understandable expectations, demands results",
+          "4": "Exceeds – Rigorous, balances pressure & support, thinks in KPIs",
+          "5": "Outstanding – Cross-site performance culture"
+        },
+        "stake": {
+          "1": "Does Not Meet – Ignores stakeholders, provokes conflicts",
+          "2": "Needs Improvement – Only reacts to escalations",
+          "3": "Baseline – Proactively cultivates relationships, moderates objectively",
+          "4": "Exceeds – Orchestrates stakeholders, finds win-win solutions",
+          "5": "Outstanding – Executive-level diplomacy, prevents escalations"
+        }
+      },
+      "kompetenzen": [
+        {
+          "id": "c1",
+          "titel": "Technical Expertise & Application",
+          "kategorie": "core",
+          "definition": "Evaluates specific professional knowledge and its application. It's not just about theoretical ability, but the contribution to process safety and quality.",
+          "stufen": {
+            "1": {
+              "text": "The employee lacks the necessary knowledge to perform core tasks. Regular errors jeopardize quality or safety. Requires constant monitoring and correction. Does not independently recognize when to seek help, leading to hidden problems that later have expensive consequences. Instructions are often misunderstood or forgotten. Mistakes are repeated, learning curve remains flat.",
+              "example": "Machine operator: Repeatedly sets wrong parameters despite standard procedure. | Accounting: Doesn't understand VAT system, repeatedly books incorrectly (standard vs reduced rate), tax notices must be corrected. | HR: Doesn't know notice periods, creates faulty employment contracts requiring correction. | Procurement: Doesn't understand Incoterms, orders with wrong delivery terms (DDP instead of EXW), causing unexpected costs."
+            },
+            "2": {
+              "text": "The employee reliably handles standard tasks with established knowledge. When procedures deviate (new products, machine changes, special requests), insecurity arises and support is necessary. Recognizes own limits, but often too late. Learns slowly and needs time with new topics. Work can usually be used, but occasionally requires corrections.",
+              "example": "Shift worker: Routine runs; struggles with new recipes. | Accounting: Books standard transactions correctly but uncertain with intercompany or foreign currency. | HR: Creates standard references from template, helpless with special cases (termination agreement). | Controlling: Creates standard reports but cannot explain figures in depth."
+            },
+            "3": {
+              "text": "BASELINE: Solid and continuously current professional knowledge. Works independently and quality-consciously; delivers consistently reliable work. Proactively fills gaps and stays up-to-date in their field. Actively shares experience with colleagues and asks targeted questions when needed. Acts as a reliable element in daily operations. Contributes good ideas based on practical experience.",
+              "example": "Maintenance: Identifies cause for repeat failure – proposes preventive schedule. | Accounting: Performs month-end close independently and on time, proactively clarifies open items. | HR: Handles personnel cases from hiring to exit legally correct and complete. | Procurement: Negotiates terms within guidelines, keeps supplier master data current, escalates shortages timely."
+            },
+            "4": {
+              "text": "Deep specialist knowledge that goes beyond the role. Understands complex connections and draws preventive conclusions. Is frequently consulted by colleagues for support and is considered a mentor. Can translate new technical requirements (e.g., new materials, certifications) quickly into practice. Thinks in processes, not isolated tasks.",
+              "example": "Quality: Anticipates customer objection before audit by initiating corrective action proactively. | Accounting: Identifies tax optimization potential, proposes restructuring of intercompany relationships. | HR: Develops new onboarding checklist reducing induction time by 30%. | Controlling: Builds dashboard alerting management early to margin decline."
+            },
+            "5": {
+              "text": "Recognized across departments as expert and reference. Initiates and leads training measures; develops internal standards. Represents the company externally as technical authority (customer discussions, certifications, trade fairs). Drives innovations and improvements that demonstrably strengthen competitiveness or quality. Shapes the specialized knowledge of the entire area.",
+              "example": "Process Engineer: Develops recognized procedure for complex laminate; trains colleagues at all locations. | Accounting: Introduces group-wide IFRS reporting, valued by auditors as key contact. | HR: Develops Performance Management System for all locations, becomes internal expert. | Controlling: Establishes Rolling Forecast adopted by management as steering instrument."
+            }
+          }
+        },
+        {
+          "id": "c2",
+          "titel": "Communication & Collaboration",
+          "kategorie": "core",
+          "definition": "Covers information sharing, knowledge exchange, feedback culture, and cross-departmental cooperation. Essential for breaking down silos.",
+          "stufen": {
+            "1": {
+              "text": "Actively refuses to share information or works in a \"protective mentality.\" Colleagues are surprised by important developments because the person didn't inform them. In team situations, an oppressive or dismissive atmosphere arises. Uses language that excludes or attacks others. Ignores requests or gives delayed, incomplete answers. Own performance is prioritized while team needs are neglected.",
+              "example": "Production: Conceals machine problems, causes delays downstream. | Accounting: Doesn't inform colleagues about changed booking rules, errors accumulate. | HR: Doesn't communicate resignations timely, replacement plans fail. | Procurement: Hides supplier problems, production stops unexpectedly."
+            },
+            "2": {
+              "text": "Passes information only upon request or sporadically. Occasionally forgets to inform relevant parties. Uses inefficient channels (e.g., informal instead of written), leading to misunderstandings. May become defensive when receiving feedback or dismisses criticism as personal attacks. Team cooperation depends heavily on mood or is perceived as extra effort.",
+              "example": "Shift worker: Forgot shift handover entry. | Accounting: Responds to inquiries only after days, blocks approval processes. | HR: Informs about new policies only via circular email without explanation. | Controlling: Delivers numbers without context, recipients don't understand message."
+            },
+            "3": {
+              "text": "BASELINE: Proactively informs all relevant people – timely, in appropriate form. Gives and receives constructive feedback respectfully. Actively shares knowledge within the team. Uses existing channels (meetings, ticket systems, emails) reliably. Contributes actively in team situations and takes colleagues' perspectives into account. Cooperates appreciatively and smoothly within and outside own team.",
+              "example": "Maintenance: Emails shift leaders after repair, logs action. | Accounting: Announces month-end deadlines early, coordinates interfaces. | HR: Communicates labor law changes understandably to all managers. | Assistant: Keeps everyone informed about schedule changes."
+            },
+            "4": {
+              "text": "Creates understanding across departments and roles: explains backgrounds, invites dialogue, asks for input. Recognizes silos and actively works to break them down. Builds bridges in conflicts and finds constructive solutions. Is a valued sparring partner for ideas. Promotes transparent culture by sharing information broadly and voluntarily.",
+              "example": "Team Lead: Organizes weekly cross-department briefing. | Accounting: Explains finance topics so non-accountants understand and can decide. | HR: Mediates in team conflict, finds solution both sides accept. | Controlling: Prepares numbers for management enabling direct decisions."
+            },
+            "5": {
+              "text": "Establishes new standards for collaboration (processes, tools, meetings) that are adopted by other teams. Recognized mediator for complex interpersonal tensions. Builds a network of trust across all locations. Maintains a feedback culture that promotes continuous improvement and strengthens trust. Represents \"Fast, Fair, Personal\" in every interaction.",
+              "example": "Manager: Introduces cross-location video standup. | Accounting: Establishes monthly Finance Call with all locations, creates transparency. | Assistant: Introduces uniform communication protocol for executive area. | Controlling: Creates reporting standard enabling group-wide comparability."
+            }
+          }
+        },
+        {
+          "id": "c3",
+          "titel": "Problem-Solving Skills",
+          "kategorie": "core",
+          "definition": "Systematic analysis of problems, development of sustainable solutions, and self-responsible action. No passing the buck.",
+          "stufen": {
+            "1": {
+              "text": "The employee blocks at the first hurdle. Complains about problems but shows no initiative to solve them. Either does nothing or escalates everything immediately without own contribution. Reacts passively-aggressively when asked to contribute to solutions. Work remains unfinished. At best, fixes symptoms but not root causes. Appears overwhelmed by even minor changes or obstacles.",
+              "example": "Production: Stops work, waits hours instead of seeking solution. | Accounting: Ignores reminders for weeks until collection agency threatens. | HR: Overlooks fixed-term contract end, employee works illegally. | Procurement: Doesn't notice price deviation, pays too much for months."
+            },
+            "2": {
+              "text": "Addresses only symptoms, not root causes – problems recur. Escalates too early without own solution attempts or too late so that the situation worsens. Applies known patterns schematically even when inadequate. Does not transfer solutions to other contexts. Requires guidance to analyze situations. Ideas remain superficial.",
+              "example": "Operator: Replaces same part repeatedly, fails to recognize underlying defect. | Accounting: Books difference to clearing account instead of clarifying cause. | HR: Fixes symptom (approve overtime) instead of addressing cause (understaffing). | Controlling: Corrects numbers manually instead of reporting system error."
+            },
+            "3": {
+              "text": "BASELINE: Analyzes problems structurally, identifies causes. Develops independent, pragmatic solutions within own area. Uses existing escalation paths when necessary, but not prematurely. Documents problems and solutions so they remain traceable. Distinguishes urgent from important and acts accordingly. Accepts responsibility for failures and works on their improvement.",
+              "example": "Shift Lead: Reduces setup time through structured analysis. | Accounting: Clarifies open items independently with customers, documents solution. | HR: Finds pragmatic solution for vacation conflict in team. | Procurement: Quickly organizes alternative for delivery failure, informs all affected."
+            },
+            "4": {
+              "text": "Recognizes patterns across cases and derives improvements that go beyond a single incident. Develops alternative solutions and weighs them against each other. Leads team-wide problem analyses (root cause analysis, retrospectives). Makes complex technical or organizational problems understandable. Provides impulses for process optimization.",
+              "example": "Quality: Leads 5-Why workshop, closes systematic complaints. | Accounting: Analyzes recurring booking errors, proposes process change eliminating error source. | HR: Investigates high turnover in department, identifies leadership problem, initiates measures. | Controlling: Finds cause of margin decline, develops countermeasure concept."
+            },
+            "5": {
+              "text": "Solves strategically relevant problems (e.g., cross-location process, major customer complaints, investment decisions). Acts as a role model in crisis situations: remains calm, establishes structure, leads others out of chaos. Recognizes systemic weaknesses that others overlook and initiates structural changes that contribute to sustainable development.",
+              "example": "Ops Manager: Leads turnaround in failing project, becomes mentor. | Accounting: Uncovers systematic billing error costing group 50k EUR/year, implements control. | HR: Recognizes structural qualification deficit, develops training program for all locations. | Controlling: Identifies hidden cost drivers, saves 100k EUR/year through process change."
+            }
+          }
+        },
+        {
+          "id": "c4",
+          "titel": "Adaptability",
+          "kategorie": "core",
+          "definition": "Willingness to embrace new processes, technologies, responsibilities. Openness to feedback and personal development.",
+          "stufen": {
+            "1": {
+              "text": "Actively resists changes or new processes. Expresses openly negative attitudes: \"That's how we've always done it.\" Shows no interest in own development, ignores training offerings. Stays in comfort zone and avoids learning experiences. Refuses to transfer tasks and behaves in a way that makes change more difficult.",
+              "example": "Veteran: Refuses to learn new software, blocks colleagues. | Accounting: Actively blocks ERP transition, complains loudly about every change. | HR: Categorically rejects digital personnel file, insists on paper. | Office: Refuses to learn new booking system, sabotages introduction."
+            },
+            "2": {
+              "text": "Goes along with changes only under pressure and often half-heartedly. New knowledge is learned slowly; interest in further development is low. Uses training but shows little initiative for independent learning. Sometimes passive when priorities shift. Waits for instructions instead of adapting proactively.",
+              "example": "Technician: Uses new tool only when forced, needs repeated reminders. | Accounting: Uses new software reluctantly, reverts to old method at first problem. | HR: Accepts new recruiting platform only after months of persuasion. | Controlling: Creates reports in parallel in old and new system, double work."
+            },
+            "3": {
+              "text": "BASELINE: Is curious about new topics and approaches. Reflects on own work style and accepts constructive criticism. Responds flexibly to priority changes and adapts without loss of motivation. Uses offered training and implements what was learned. Contributes to continuous improvement, such as suggestions that make daily work easier.",
+              "example": "Warehouse: Proposes new labeling after logistics training. | Accounting: Trains on D365 Business Central, uses standard functions reliably. | HR: Implements new privacy requirements (GDPR) on schedule. | Assistant: Takes on new tasks from restructuring without complaint."
+            },
+            "4": {
+              "text": "Actively seeks new knowledge, recognizes trends, and brings them to the team. Acts as a catalyst for change: convinces skeptics and supports implementation. Creates learning opportunities for self and others. Adapts quickly to fundamental changes without drop in motivation.",
+              "example": "Team Lead: Introduces new production method from trade fair. | Accounting: Actively tests new ERP features, gives constructive IT feedback, becomes Key-User. | HR: Tries AI recruiting tools independently, evaluates usefulness for team. | Controlling: Builds Power BI skills independently, creates first dashboards on own initiative."
+            },
+            "5": {
+              "text": "Anticipates future trends or challenges and prepares the organization. Builds structures that increase adaptability (cross-training, modular processes). Shapes cultural change by embodying openness and learning orientation. Inspires others to embrace change.",
+              "example": "Plant Manager: Initiates Transformation Workshop, equips plant for Industry 4.0. | Accounting: Drives E-Invoicing introduction for group, becomes internal expert. | HR: Introduces Performance Management System supporting cultural change. | Controlling: Implements Predictive Analytics, revolutionizes forecasting for all locations."
+            }
+          }
+        },
+        {
+          "id": "c5",
+          "titel": "Self-Organization",
+          "kategorie": "core",
+          "definition": "Time management, prioritization, reliability, resource management. Ensures personal contribution is plannable and predictable.",
+          "stufen": {
+            "1": {
+              "text": "Is chaotic: deadlines are frequently missed, tasks are forgotten or handled only partially. Work can hardly be planned for others. No visible priorities – works on random items. Commits to things but doesn't keep commitments, causing domino effects. Meetings and work start late, materials are not found.",
+              "example": "Admin: Forgot important deadline – customer loses order. | Accounting: Forgets payment deadlines, reminders pile up. Documents disappear in paper chaos. | HR: Misses probation period ends, forgets contract conversions. Personnel files incomplete. | Office: Appointments double-booked, important emails unanswered for days."
+            },
+            "2": {
+              "text": "Requires external structure and guidance to stay organized. Works reasonably well with clear instructions but has difficulties managing own time when given more autonomy. Re-prioritizes only when pointed out. Occasionally shows reactivity in case of overload but no forward-looking capacity management.",
+              "example": "Assistant: Needs reminders for recurring tasks; forgets follow-ups. | Accounting: Handles standard tasks but struggles under year-end stress, doesn't communicate delays. | HR: Processes applications by arrival order instead of urgency, top candidate withdraws. | Procurement: No overview of open orders, delivery dates checked only when asked."
+            },
+            "3": {
+              "text": "BASELINE: Plans work reliably, keeps appointments and deadlines. Prioritizes sensibly and identifies time-critical tasks. Keeps commitments and communicates early when obstacles arise. Works with clear focus and avoids unnecessary distractions. Has a transparent overview of current projects and contributes personal share to team success.",
+              "example": "Controller: Prepares monthly closing on time, communicates bottleneck proactively."
+            },
+            "4": {
+              "text": "Plans ahead, anticipates bottlenecks, and reserves buffers. Relieves others by taking over coordination tasks. Continuously optimizes own ways of working (tools, routines) and shares improvements. Can successfully manage multiple work streams simultaneously without loss of quality.",
+              "example": "Planner: Synchronizes three parallel projects, avoids bottleneck through early resource coordination."
+            },
+            "5": {
+              "text": "Coordinates complex projects across departments or locations and brings them to a successful conclusion on schedule. Establishes standards for self-organization that others adopt (templates, checklists, work principles). Is trusted for particularly complex or ambiguous tasks. Acts as role model for organized and structured work.",
+              "example": "Project Lead: Coordinates major investment across all locations, delivers on time and under budget."
+            }
+          }
+        },
+        {
+          "id": "l1",
+          "titel": "Employee Management & Development",
+          "kategorie": "leadership",
+          "definition": "Leadership through development – motivation, coaching, feedback, personnel development in the team.",
+          "stufen": {
+            "1": {
+              "text": "The manager shows no interest in the professional or personal development of their team. Team discussions are avoided or only superficial; annual conversations (if held at all) are formalistic and without value. There's constant micromanagement, creating a climate of distrust and leading to high turnover. High performers leave. Conflicts in the team are ignored or made worse. No succession planning or talent development visible.",
+              "example": "Shift Lead: Criticizes only, never praises. Demotivates team, increases sick leave."
+            },
+            "2": {
+              "text": "The manager holds mandatory conversations but avoids clear, uncomfortable feedback (\"uncomfortable conversations\"). High performers are insufficiently challenged, low performers not addressed. Development is left to HR or chance. The manager tends to reward loyalty or personal sympathy rather than performance. Team dynamics are hardly shaped, impulses for development are lacking. Little structured follow-up on coaching discussions.",
+              "example": "Team Lead: Holds annual reviews superficially; forgets development agreements."
+            },
+            "3": {
+              "text": "BASELINE: Regular, prepared team discussions with specific feedback (strengths, development areas). Coaching approach: promotes independent solutions instead of just prescribing. Addresses performance differences early and follows up on agreements. Delegates consciously, transfers responsibility for development. Interested in individual career aspirations and promotes appropriate measures (training, projects, mentoring).",
+              "example": "Manager: Implements monthly feedback loops, prepares successors targeted."
+            },
+            "4": {
+              "text": "The manager has a strategic development plan for their team: knows potentials, identifies and develops high performers, supports lateral moves for stagnating employees. Holds difficult conversations (low performance, conflicts) with clear outcome. Creates a learning environment where mistakes are allowed. Attracts and retains talents. Engages personally in mentoring and is valued for it.",
+              "example": "Department Head: Promotes talent visibly, makes own team diverse and resilient."
+            },
+            "5": {
+              "text": "Creates a sustainable leadership culture: the manager develops successors who themselves become excellent leaders. Exports best practices for people development to other locations. Has an outstanding record for talent retention and employee satisfaction. Is internally and externally known as employer of choice advocate. Leaves behind a sustainably strong team.",
+              "example": "Director: Builds talent factory – team members develop into successful leaders."
+            }
+          }
+        },
+        {
+          "id": "l2",
+          "titel": "Strategic Thinking",
+          "kategorie": "leadership",
+          "definition": "Thinking ahead: understands competitive environment, develops foresight, initiates strategically.",
+          "stufen": {
+            "1": {
+              "text": "The manager is trapped in tunnel vision. Works purely reactively, always on the next acute fire without understanding context. Strategic topics (strategy 2035, market changes, competitive position) are ignored or not even understood. Sees neither risks nor opportunities at the horizon. Decisions are short-term and not aligned with the bigger picture. Doesn't communicate company goals to the team.",
+              "example": "Manager: Focuses only on delivery pressure; ignores changing customer requirements."
+            },
+            "2": {
+              "text": "The manager understands strategic guidelines but hardly translates them into own area. Operational day-to-day dominates thinking. Rarely links decisions to the strategic context or larger goals. Reacts to external changes (customer requirements, market shifts) only with delay. Rarely brings own ideas for strategic improvement.",
+              "example": "Sales Lead: Focuses on ongoing business; misses emerging product trend."
+            },
+            "3": {
+              "text": "BASELINE: The manager translates company strategy into tangible goals for their team. Shows connections to the bigger picture. Recognizes strategic developments (e.g., sustainability, automation) and aligns own planning accordingly. Actively informs themselves about customer, market, and industry trends. Makes strategic statements comprehensible for the team.",
+              "example": "Production: Aligns shift planning to known plant strategy, takes capacity reserves."
+            },
+            "4": {
+              "text": "The manager anticipates developments (technology, customer, competitive situation) and proactively builds competencies or capacities. Challenges the status quo (\"What if...?\") and brings substantiated proposals for improvement or innovation. Thinks in scenarios and prepares alternatives. Continuously brings external impulses (trade fairs, networks, publications) into the team.",
+              "example": "Operations: Initiates automation pilot before cost pressure occurs."
+            },
+            "5": {
+              "text": "The manager shapes strategic direction for their area or beyond – develops new business models, negotiates partnerships, or leads M&A projects. Is involved in strategic decision-making of the group. Has a broad overview of the competitive situation and contributes recognized impulses. Is a thought leader who influences direction inside and outside the organization.",
+              "example": "Division Lead: Develops new service offering, opens new revenue stream."
+            }
+          }
+        },
+        {
+          "id": "l3",
+          "titel": "Decision-Making",
+          "kategorie": "leadership",
+          "definition": "Deciding under uncertainty, courage for risky decisions, transparency about what and why.",
+          "stufen": {
+            "1": {
+              "text": "The manager chronically avoids decisions. Every somewhat significant question is escalated upward. Employees remain in limbo, initiative is blocked. If decisions are made, they are reversed at the smallest resistance. Taking responsibility is refused; in case of failures, blame is shifted to others. Decisions are not communicated transparently – the team doesn't know what applies and why.",
+              "example": "Manager: Keeps everything in limbo, escalates everything. Team frustrated."
+            },
+            "2": {
+              "text": "The manager makes decisions when information situation is almost perfect, but hesitates when data are ambiguous. Avoids politically sensitive decisions. Sticks too long to wrong decisions because of loss aversion or not to appear inconsistent. Doesn't always communicate decisions clearly or justifies them insufficiently. Risk considerations are superficial.",
+              "example": "Team Lead: Holds back project budget until last minute; misses deadline."
+            },
+            "3": {
+              "text": "BASELINE: The manager makes decisions within their mandate in a timely and transparent manner. Weighs risks and opportunities, documents considerations, and stands by results. Communicates decisions clearly – everyone knows what applies and why. Accepts that some decisions turn out wrong and draws learnings from this.",
+              "example": "Shift Lead: Decides on overtime with clear reasoning, stands by when questioned."
+            },
+            "4": {
+              "text": "The manager makes uncomfortable decisions (layoffs, reprioritization, investment stop) when necessary, even if these are unpopular. Intelligently manages risk: takes calculated risks for improvement without gambling. Shows courage to decide without full consensus when time is of the essence. Weighs costs of delaying decisions.",
+              "example": "Plant Manager: Decides on shift restructuring – communicates personally, accompanies change."
+            },
+            "5": {
+              "text": "The manager makes strategic, far-reaching decisions with courage and clarity – including in ambiguous situations or under high political pressure. Is known for principled decision-making that is later validated. Maintains decision quality even in crisis mode (no panic decisions). Actively seeks feedback on decision quality.",
+              "example": "Director: Decides on fundamental reorientation during market downturn – leads restructuring successfully."
+            }
+          }
+        },
+        {
+          "id": "l4",
+          "titel": "Execution & Performance Management",
+          "kategorie": "leadership",
+          "definition": "Achieving results, consistent follow-through, demanding and supporting. Getting things done.",
+          "stufen": {
+            "1": {
+              "text": "The manager neither sets clear goals nor follows up on them. Expectations are unclear, performance is neither measured nor addressed. Promises to customers, management, or other stakeholders are frequently broken or missed – without consequences. No prioritization recognizable. In the team, anything goes; low performers run with no response. Meetings end without clear actions.",
+              "example": "Manager: Tolerates delay after delay; customer loses trust."
+            },
+            "2": {
+              "text": "Goals are stated but not consistently followed up. The manager remembers agreements only when already off track. Feedback on performance gaps is superficial or avoided. Requires only under pressure, then too harshly; no balance. Responds to performance problems too late or not at all. Tracking in meetings is unstructured.",
+              "example": "Team Lead: Lets quota slip, only notices at month end."
+            },
+            "3": {
+              "text": "BASELINE: The manager sets clear, understandable goals for their team. Expectations are transparent, performance is regularly discussed. Requires adherence to agreements and addresses deviations early. Supports team in goal achievement but doesn't take over responsibility. Distinguishes conscious goal adjustment from failure. Establishes a reliable progress tracking.",
+              "example": "Production: Visualizes weekly targets, follows up on deviations, supports team."
+            },
+            "4": {
+              "text": "The manager is rigorously consistent but without demotivating. Balances pressure and support. Establishes a performance culture where everyone gives their best. Reduces KPI blind spots through targeted measurement concepts. Proactively identifies risks for goal achievement and initiates countermeasures. Can simultaneously track multiple important initiatives.",
+              "example": "Operations: Drives cost optimization, celebrates milestones, maintains team morale."
+            },
+            "5": {
+              "text": "The manager establishes a cross-site performance culture that sets standards for the group. Leads major initiatives with strategic significance and track record of success. Is known for delivering what is promised. Shapes improvement practices (OKR, KPIs, retros) that are adopted by other areas. Develops leaders who bring the same rigor.",
+              "example": "VP: Drives group-wide Lean initiative; measurable productivity gains."
+            }
+          }
+        },
+        {
+          "id": "l5",
+          "titel": "Stakeholder & Conflict Resolution",
+          "kategorie": "leadership",
+          "definition": "Cultivating relationships, moderating political interests. Bridge builder between silos.",
+          "stufen": {
+            "1": {
+              "text": "The manager completely ignores the interests of other departments or locations. Doesn't communicate with important stakeholders, leading to surprises and resistance. In conflicts behaves destructively: searches for culprits instead of solutions, speaks badly about other areas (\"Those up/down there\") or carries out conflicts aggressively and non-objectively. Alternatively, conflicts are ignored or waited out until they escalate. Behavior massively damages trust and cooperation in the group.",
+              "example": "Prod Manager: Curses about 'incompetent sales' instead of clarifying feasibility directly."
+            },
+            "2": {
+              "text": "The manager cultivates relationships only when acutely needing something (transactional). Frequently forgets to involve relevant partners (e.g., HR, IT, other locations) in time, delaying projects. Recognizes political faux pas often too late. In case of conflicts reacts defensively or withdraws to \"keep the peace\" even when clarification would be necessary. Solutions are often weak compromises that satisfy no one. Struggles to take the counterpart's perspective.",
+              "example": "Project Lead: Forgets to inform works council. Withdraws project offended at veto."
+            },
+            "3": {
+              "text": "BASELINE: The manager knows their most important stakeholders and keeps them regularly informed. Coordinates proactively to avoid misunderstandings. Meets partners – internal or external – with respect and on equal footing. Conflicts are addressed in a timely manner (\"Fast\") and discussed objectively. Represents the interests of their area, but is ready to listen to counterarguments and find fair solutions. Ensures cooperation runs smoothly.",
+              "example": "Service/Supply: Shows figures, agrees objectively on minimum stock (Compromise)."
+            },
+            "4": {
+              "text": "The manager actively builds a resilient network beyond department boundaries. Anticipates potential conflicts (e.g., resource bottlenecks between projects) and moderates them preventively before they escalate. Understands the constraints and goals of the other side and offers solutions that help both (\"Win-Win\"). Is appreciated by other departments as a reliable partner who not only asks but also supports. Can communicate even difficult messages diplomatically and respectfully.",
+              "example": "Quality: Travels to locations, moderates workshop for common standard."
+            },
+            "5": {
+              "text": "The manager resolves complex, stuck conflicts (e.g., cultural tensions between locations or historical turf wars) where others have failed. Succeeds in aligning diverse interests toward the common strategic goal (\"One Niederwieser\"). Establishes committees or formats that structurally improve exchange and stakeholder management. Enjoys highest trust with management and employee representatives and uses this capital for the company's good. Transforms adversaries into partners.",
+              "example": "Manager: Breaks old silos, integrates hostile teams into successful unit."
+            }
+          }
+        }
+      ]
+    }
+  },
+  "gewichte": {
+    "kern": [
+      {
+        "id": "fach",
+        "name": "Fachkompetenz & Anwendung",
+        "gewicht": 20
+      },
+      {
+        "id": "komm",
+        "name": "Kommunikation & Zusammenarbeit",
+        "gewicht": 20
+      },
+      {
+        "id": "prob",
+        "name": "Problemlösekompetenz",
+        "gewicht": 20
+      },
+      {
+        "id": "adapt",
+        "name": "Anpassungsfähigkeit",
+        "gewicht": 20
+      },
+      {
+        "id": "orga",
+        "name": "Selbstorganisation",
+        "gewicht": 20
+      }
+    ],
+    "leadership": [
+      {
+        "id": "lead",
+        "name": "Mitarbeiterführung & -entwicklung",
+        "gewicht": 20
+      },
+      {
+        "id": "strat",
+        "name": "Strategisches Denken",
+        "gewicht": 20
+      },
+      {
+        "id": "decide",
+        "name": "Entscheidungsfähigkeit",
+        "gewicht": 20
+      },
+      {
+        "id": "exec",
+        "name": "Execution & Performance Mgmt",
+        "gewicht": 20
+      },
+      {
+        "id": "stake",
+        "name": "Stakeholder-Mgmt & Konflikte",
+        "gewicht": 20
+      }
+    ]
+  },
+  "zielerreichung_in_bars_stufe": [
+    {
+      "min": 131,
+      "score": 5,
+      "label": "Herausragend (>130%)"
+    },
+    {
+      "min": 111,
+      "max": 130,
+      "score": 4,
+      "label": "Übertroffen (111-130%)"
+    },
+    {
+      "min": 90,
+      "max": 110,
+      "score": 3,
+      "label": "Baseline (90-110%)"
+    },
+    {
+      "min": 70,
+      "max": 89,
+      "score": 2,
+      "label": "Teilweise (70-89%)"
+    },
+    {
+      "min": 0,
+      "max": 69,
+      "score": 1,
+      "label": "Nicht erreicht (<70%)"
+    }
+  ],
+  "gps_einstufung": [
+    {
+      "min": 4.51,
+      "max": 5,
+      "label": "Outstanding (5)",
+      "desc": "Top Bonus / Gehaltssprung"
+    },
+    {
+      "min": 3.51,
+      "max": 4.5,
+      "label": "Exceeds Expectations (4)",
+      "desc": "Basis-Bonus / Gehaltserhöhung"
+    },
+    {
+      "min": 2.51,
+      "max": 3.5,
+      "label": "Meets Expectations (3)",
+      "desc": "Standard-Runde / Kein Bonus"
+    },
+    {
+      "min": 1.51,
+      "max": 2.5,
+      "label": "Needs Improvement (2)",
+      "desc": "Enge Führung / PIP"
+    },
+    {
+      "min": 0,
+      "max": 1.5,
+      "label": "Does Not Meet (1)",
+      "desc": "Sofortige Eskalation"
+    }
+  ]
+}

@@ -126,6 +126,22 @@ Screenshots: `docs/screenshots/before/` (Ausgangslage) und `docs/screenshots/aft
 | Suche ⌘K, Rückgängig-Verlauf, Start/Zurück-Pillen | vorhanden | nicht eingebaut | bräuchten neue Logik bzw. einen Verlauf/Router, also kein reines Design |
 | PDF-Vorlagen | – | Inhalt und Aufbau unverändert, nur Logo im Kopf | Export-Formate geschützt |
 
+## Nachtrag: Führungskraft-Sicht (Branch `feature/team-matrix-jahre`, PR #4)
+
+Auf dein Feedback „nicht alles auf einen Blick, Jahre, Ziele übernehmen“ hin:
+
+| Thema | Vorher | Jetzt |
+|---|---|---|
+| Team-Übersicht | Karten, viel Scrollen, Jahre vermischt | **Status-Matrix** als Standard: eine Zeile je Mitarbeiter, Spalten Selbstreflexion · Zielvereinbarung · Beurteilung · Gespräch, je Zelle Status und nächste Aktion. Karten weiter umschaltbar |
+| Jahre | alle Unterlagen aller Jahre zusammen | **Jahreswähler** (z. B. 2027 · 2026 · 2025); Status, Kennzahlen, Aktionen und Dashboard gelten für das gewählte Jahr. Unterlagen ohne Jahresangabe werden über ihr Datum zugeordnet (nur Anzeige) |
+| Ziele → Beurteilung | Ziele von Hand neu eintippen | Neue Beurteilung übernimmt die Ziele der **Zielvereinbarung desselben Jahres** automatisch (mit Hinweis), zu bewerten bleibt die Erreichung. Bei Entwürfen per Knopf mit Rückfrage. Gespeichert erst mit „Entwurf speichern“ |
+| Navigation | Wissen vor Arbeit | Arbeitsbereich und „Mein Team“ zuerst, „Für mich“ und „Wissen & Hilfe“ unten |
+| Rückmeldungen | 5 selbstgebaute Toasts mit Inline-Farben | einheitlicher Kit-Toast mit Screenreader-Ansage |
+| Handy | Kopfzeile lief seitlich über | Aktionen brechen um, Matrix scrollt im eigenen Rahmen |
+
+Datenschutz: keine neuen Abfragen, keine neuen Felder, Schutzbereich unverändert. Tests: 30/30 (neu: Jahreswechsel
+ohne Datenänderung, Ziel-Übernahme bei neuer Beurteilung und bei Entwurf, abgelehnte Rückfrage ersetzt nichts).
+
 ## Offene Punkte – brauchen deine Entscheidung
 
 1. ~~Registrierung schreibt `registeredUsers` nicht.~~ **Behoben am 08.11.2026 nach Freigabe.** `window.db` wird jetzt gesetzt.

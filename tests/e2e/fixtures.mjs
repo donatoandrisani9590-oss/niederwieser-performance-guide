@@ -49,11 +49,48 @@ const EMULATOR_PATCH = `
   });
 })();`;
 
+// App-eigene Dialoge (nwDialog in index.html, ersetzt confirm/prompt/alert des Browsers):
+// Ein kleines Skript in der Seite meldet jeden neuen Dialog an den Test. Der Test beantwortet ihn über dieselben
+// Listener wie einen Browser-Dialog: page.on('dialog', d => d.accept() / d.accept('Text') / d.dismiss()),
+// d.message() liefert Titel, Text und Liste, d.type() ist 'confirm' | 'prompt' | 'alert'.
+// So bleiben die bestehenden Tests unverändert. Mit manualDialogs(page, true) bedient der Test den Dialog selbst.
+const manual = new WeakSet();
+export function manualDialogs(page, on) { if (on) manual.add(page); else manual.delete(page); }
+const DIALOG_BRIDGE = `
+(() => {
+  const handle = async (node) => {
+    const body = node.querySelector('[data-nw-body]');
+    const input = node.querySelector('input');
+    const d = await window.__nwDialogDecide(node.getAttribute('data-nw-dialog'), body ? body.innerText : node.innerText, input ? input.value : '');
+    if (!d || d.manual) return;
+    if (input && d.value != null) { input.value = d.value; input.dispatchEvent(new Event('input', { bubbles: true })); }
+    const ok = node.querySelector('[data-nw-ok]'), cancel = node.querySelector('[data-nw-cancel]');
+    if (d.accept && ok && !ok.disabled) ok.click(); else (cancel || ok).click();
+  };
+  new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach((n) => {
+    if (n.nodeType === 1 && n.hasAttribute('data-nw-dialog')) handle(n);
+  }))).observe(document, { childList: true, subtree: true });
+})();`;
+
 export const test = base.extend({
   blockedRequests: async ({}, use) => { await use([]); },
   consoleErrors: async ({}, use) => { await use([]); },
   page: async ({ page, blockedRequests, consoleErrors }, use) => {
     await page.addInitScript(EMULATOR_PATCH);
+    await page.exposeFunction('__nwDialogDecide', (kind, text, defaultValue) => new Promise((resolve) => {
+      if (manual.has(page)) return resolve({ manual: true });
+      const listeners = page.listeners('dialog');
+      if (!listeners.length) return resolve({ accept: false }); // wie der Browser: ohne Listener abbrechen
+      let settled = false;
+      const settle = (v) => { if (!settled) { settled = true; resolve(v); } };
+      const fake = {
+        type: () => kind, message: () => text, defaultValue: () => defaultValue || '', page: () => page,
+        accept: async (value) => settle({ accept: true, value: value == null ? null : String(value) }),
+        dismiss: async () => settle({ accept: false }),
+      };
+      for (const l of listeners) { try { l(fake); } catch (e) { /* Listener-Fehler nicht in die Seite tragen */ } }
+    }));
+    await page.addInitScript(DIALOG_BRIDGE);
     await page.route('**/*', (route) => {
       const url = route.request().url();
       const u = new URL(url);

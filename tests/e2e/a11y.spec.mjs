@@ -20,7 +20,7 @@ async function login(page, user) {
   await page.locator('input[type="email"]').fill(user.email);
   await page.locator('input[type="password"]').first().fill(user.password);
   await page.locator('form button[type="submit"]').click();
-  await expect(page.getByText('Abmelden').first()).toBeVisible({ timeout: 15000 });
+  await expect(page.getByTestId('user-card')).toBeVisible({ timeout: 15000 }); // angepasst (Shell 2.0): „Abmelden“ steht im Konto-Popover der Nutzerkarte
 }
 
 test.beforeEach(async () => { await seed(); });
@@ -36,6 +36,8 @@ test('Team-Übersicht und Beurteilungsformular: keine WCAG-AA-Verstöße', async
   await login(page, USERS.managerA);
   await expect(page.getByText('4 Mitarbeiter')).toBeVisible();
   expect(await violations(page), 'Team-Übersicht').toEqual([]);
+  await page.getByRole('radio', { name: 'Karten' }).click();
+  expect(await violations(page), 'Team-Übersicht (Karten)').toEqual([]);
   await page.getByText('→ Bearbeiten').first().click();
   await expect(page.getByRole('button', { name: /Entwurf speichern/ }).first()).toBeVisible();
   expect(await violations(page), 'Beurteilungsformular').toEqual([]);

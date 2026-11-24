@@ -1,5 +1,9 @@
 rules_version = '2';
-// Stufe 1 (23.11.2026) – EINGESPIELT am 23.11.2026 (Firebase-Konsole, durch den Auftraggeber).
+// Stufe 1b – NOCH NICHT EINGESPIELT (Stand 24.11.2026). Eingespielt ist seit 23.11.2026 die Fassung in
+// tests/rules/eingespielt-2026-11-23.rules. Stufe 1b ergänzt (Premium-UX, PR #6): HR-Rechte nur für die Adresse aus
+// HR_ADMIN_EMAILS; Mitarbeiter ändern nur durch den bisherigen Besitzer, HR oder – nur Termin/Gesprächs-Haken – die
+// eingeladene Führungskraft; Vermerk „eingetragen von“ gegen Fälschung abgesichert.
+// Reihenfolge: erst die App (main) live, dann diese Regeln einspielen.
 // Grundlage: die aktuell eingespielten Regeln (tests/rules/aktuell.rules). Alles, was heute funktioniert, funktioniert
 // weiter (alle E2E-Tests laufen unter diesen Regeln). Neu:
 //  1. HR-Admin-Liste enthält auch die HR-Adresse der App (HR_ADMIN_EMAILS in index.html).

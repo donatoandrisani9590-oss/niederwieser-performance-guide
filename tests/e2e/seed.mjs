@@ -174,7 +174,7 @@ export async function seed() {
     budget: 10000, lastModifiedAt: iso('2025-12-01'), lastModifiedBy: USERS.hr.email,
     employees: [{ id: 1, name: 'Clara Beispiel', position: 'Sachbearbeiterin Einkauf', baseSalary: 42000, currentBonus: 1000, newBonus: 1200, increasePercent: 3, gpsScore: 3.9 }],
   });
-  await setDoc('salaryReviewAccess/acc-anna', {
+  await setDoc('salaryReviewAccess/fk_anna_test_local', { // Schlüssel wie in der App: E-Mail, Sonderzeichen → _
     email: USERS.managerA.email, role: 'manager', accessSalary: false, accessGoals: true, teamMemberIds: ['tm-clara', 'tm-david'],
     grantedAt: iso('2025-12-01'), grantedBy: USERS.hr.email,
   });

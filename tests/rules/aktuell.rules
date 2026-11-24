@@ -1,0 +1,116 @@
+// ALTE Regeln: bis 23.11.2026 eingespielt, seitdem ersetzt durch tests/rules/vorschlag.rules.
+// Nur noch zum Zurückwechseln (Text einfügen und veröffentlichen) und für den Vergleich (npm run rules:aktuell).
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    
+    // Prüft ob Benutzer eingeloggt ist
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Prüft ob Benutzer ein bestimmter User ist
+    function isUser(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    // HR Admin E-Mails (ANPASSEN!)
+    function isHRAdmin() {
+      return request.auth != null && 
+             request.auth.token.email != null &&
+             request.auth.token.email.lower() in [
+               'donato.andrisani@niederwiesergroup.com',
+               'hr@niederwiesergroup.com'
+               // Weitere HR-Admin E-Mails hier hinzufügen
+             ];
+    }
+    
+    // ============================================
+    // TEAM MEMBERS - Mitarbeiterdaten
+    // ============================================
+    match /teamMembers/{memberId} {
+      // Lesen: Eingeloggte Benutzer können ihre eigenen Team-Mitglieder sehen
+      allow read: if isAuthenticated();
+      
+      // Schreiben: Nur wenn Benutzer der Manager ist oder HR-Admin
+      allow create, update: if isAuthenticated() && 
+        (request.resource.data.userId == request.auth.uid || isHRAdmin());
+      
+      // Löschen: Nur HR-Admin oder eigener Manager
+      allow delete: if isAuthenticated() && 
+        (resource.data.userId == request.auth.uid || isHRAdmin());
+    }
+    
+    // ============================================
+    // TEAM APPRAISALS - Beurteilungen
+    // ============================================
+    match /teamAppraisals/{appraisalId} {
+      // Lesen: Eingeloggte Benutzer
+      allow read: if isAuthenticated();
+      
+      // Schreiben: Eingeloggte Benutzer (App prüft Berechtigung)
+      allow create, update, delete: if isAuthenticated();
+    }
+    
+    // ============================================
+    // SALARY REVIEW - Gehaltsdaten (SENSIBEL!)
+    // ============================================
+    match /salaryReviewData/{docId} {
+      // Lesen: Nur authentifizierte Benutzer (App prüft Rolle)
+      allow read: if isAuthenticated();
+      
+      // Schreiben: Nur authentifizierte Benutzer (App prüft Rolle)
+      allow create, update, delete: if isAuthenticated();
+    }
+    
+    // ============================================
+    // SALARY REVIEW ACCESS - Zugriffsrechte
+    // ============================================
+    match /salaryReviewAccess/{docId} {
+      // Lesen: Alle authentifizierten Benutzer (um eigene Rolle zu prüfen)
+      allow read: if isAuthenticated();
+      
+      // Schreiben: Nur HR-Admins
+      allow create, update, delete: if isAuthenticated();
+    }
+    
+    // ============================================
+    // SALARY REVIEW HISTORY - Änderungsprotokoll
+    // ============================================
+    match /salaryReviewHistory/{docId} {
+      // Lesen: Authentifizierte Benutzer
+      allow read: if isAuthenticated();
+      
+      // Schreiben: Authentifizierte Benutzer (automatisch durch App)
+      allow create: if isAuthenticated();
+      
+      // Keine Updates/Deletes erlaubt (Audit-Trail)
+      allow update, delete: if false;
+    }
+    
+    // ============================================
+    // REGISTERED USERS - Benutzerliste
+    // ============================================
+    match /registeredUsers/{userId} {
+      // Lesen: HR-Admins und der Benutzer selbst
+      allow read: if isAuthenticated();
+      
+      // Schreiben: Nur der Benutzer selbst kann seinen Eintrag erstellen
+      allow create, update: if isUser(userId);
+      
+      // Löschen: Nicht erlaubt
+      allow delete: if false;
+    }
+    
+    // ============================================
+    // LEGACY - Alte Appraisals Collection
+    // ============================================
+    match /appraisals/{appraisalId} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}
